@@ -1,0 +1,273 @@
+# Quality control
+
+- `r BiocStyle::Githubpkg("drighelli/SpaceTrooper")`
+- data are missing molecule coordinates and polygon boundaries to due more sophisticated things...
+
+## Dependencies
+
+```{r deps, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(patchwork)
+library(SpatialExperiment)
+```
+
+## Basic QC metrics
+
+For the majority of analyses demonstrated here, we will use 313-plex Xenium data (10x Genomics) on a human breast cancer biopsy section [@Janesick2023], available through the `r BiocStyle::Biocpkg("STexampleData")` package as part of Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")`:
+
+```{r load-data, message=FALSE, warning=FALSE}
+# TODO: with Bioc 3.20, load using 'STexampleData' 
+library(ExperimentHub)
+eh <- ExperimentHub()
+(spe <- eh[["EH9523"]])
+```
+
+```{r plot-xy, echo=FALSE, out.width="66%", fig.align="center"}
+par(mar=rep(0, 4))
+plot(spatialCoords(spe), cex=0.1, pch=16, asp=1, axes=FALSE, xlab="", ylab="")
+```
+
+### Exploratory
+
+```{r calc-qc}
+library(scater)
+spe <- addPerCellQCMetrics(spe, use.altexps=TRUE)
+df <- data.frame(colData(spe), spatialCoords(spe))
+```
+
+Imaging-based ST data relies on imaging a 2D tissue section.
+Cells thus represent a slice through a 3D system, and we expect a tight relationship between a cells' counts and area.
+When we inspect total counts and cell areas as separate (univariate) distributions, both appear to follow approximate log-normal distributions:
+
+```{r plot-qc-1d, fig.width=6, fig.height=2}
+#| code-fold: true
+fd <- pivot_longer(df, c("cell_area", "total_counts"))
+mu <- summarise_at(group_by(fd, name), "value", median)
+ggplot(fd, aes(value)) + facet_grid(~name) +
+    geom_histogram(bins=50, linewidth=0.1, fill="grey") +
+    geom_vline(data=mu, aes(xintercept=value), col="blue") +
+    geom_text(
+        hjust=-0.1, size=3, col="blue",
+        data=mu, aes(value, 0, label=round(value))) +
+    scale_x_continuous(NULL, trans="log10") + ylab("# cells") +
+    theme_minimal() + theme(panel.grid.minor=element_blank())
+```
+
+Similarly, we can few the distribution of these metrics in the tissue by plotting cell centroids colored by total counts and cell area, respectively:
+
+```{r plot-qc-xy, fig.width=9, fig.height=3}
+#| code-fold: true
+fd <- df |>
+    pivot_longer(c(cell_area, total_counts)) |>
+    arrange(desc(value)) |>
+    # crop low/high values for clearer visualization
+    mutate(value=case_when(value < 10 ~ 10, value > 1e3 ~ 1e3, TRUE ~ value)) 
+ggplot(fd, aes(x_centroid, y_centroid, col=value)) +
+    geom_point(shape=19, stroke=0, size=0.2) +
+    facet_grid(~name) +
+    scale_color_gradientn(
+        colors=hcl.colors(9, "Roma"),
+        limits=c(10, 1e3), trans="log10") +
+    coord_equal() + theme_void() 
+```
+
+In a bivariate setting, however, we observe a bimodal distribution with subsets of cells having more or less than 1 count per $\mu m^2$ (diagonal line):
+
+```{r plot-qc-2d-one, fig.width=3, fig.height=3}
+#| code-fold: true
+df <- data.frame(colData(spe), spatialCoords(spe))
+ggplot(df, aes(cell_area, total_counts)) + 
+    geom_point(shape=16, size=0.1, alpha=0.1) +
+    geom_abline(intercept=0, slope=1, col="blue") +
+    scale_x_continuous(trans="log10") +
+    scale_y_continuous(trans="log10") +
+    theme_minimal() + theme(
+        aspect.ratio=1,
+        panel.grid.minor=element_blank())
+```
+
+In some cases, a peculiar count-area distribution might be indicative of segmentation faults. 
+When groups of cells are merged together, for example, we might observe fewer counts than expected for a given area (when they are far apart, i.e., empty space is being segmented).
+Considering the spatial organization of cells falling above/below 1 count per $\mu m^2$ here, it is reasonable to assume that they represent distinct transcriptional states (not technical artefacts).
+
+```{r plot-qc-2d-two, fig.width=4, fig.height=3}
+#| code-fold: true
+hl <- df$total_counts/df$cell_area > 1
+df$hl <- c("grey", "blue")[hl + 1]
+ggplot(df, aes(x_centroid, y_centroid, col=hl)) +
+    geom_point(shape=19, stroke=0, size=0.2, show.legend=FALSE) +
+    scale_color_identity() + coord_equal(expand=FALSE) + theme_void() 
+```
+
+### Filtering
+
+For this demo, we will employ rather stringent filtering criteria to 
+
+- exclude cells with too few counts per area (thresholding on MADs)
+- exclude cells with *any* negative probe or system control counts
+
+```{r calc-ol, fig.width=4, fig.height=3}
+nc <- spe$total_counts/spe$cell_area
+ol <- isOutlier(nc, log=TRUE, type="lower", nmads=3)
+(th <- attr(ol, "threshold")[1])
+par(mar=c(4, 4, 0, 0)) 
+hist(log(nc), n=1e3, 
+    main=NULL, ylab="# cells",
+    xlab="log(total_counts/cell_area)")
+abline(v=log(th), col="blue")
+```
+
+```{r calc-ex}
+mean(ex <- ol |
+    spe$control_probe_counts > 0 |
+    spe$control_codeword_counts > 0)
+```
+
+Before finalizing to exclude any cells, it is recommendable to inspect where these fall in the tissue.
+We would expect low-quality cells to be distributed randomly, and otherwise to accumulate at the tissue borders or in regions were tissue was, for example, smudged, detached, necrotic etc.
+In general, **spatially organized clusters of excluded cells might indicate a bias towards exclude specific types of cells** (e.g., some cells tend to be smaller or might otherwise contain fewer contains due to the panel design).
+Whenever possible, we advice readers to cross-check visualizations like the following with a corresponding H&E stain of the tissue, considering possible experimental faults as well as their prior knowledge on tissue pathology.
+
+```{r plot-ex, echo=FALSE, out.width="66%", fig.align="center"}
+par(mar=rep(0, 4))
+plot(spatialCoords(spe), col=c("grey", "blue")[ex+1], 
+    cex=0.1, pch=16, asp=1, axes=FALSE, xlab="", ylab="")
+```
+
+```{r sace-data}
+saveRDS(spe[, !ex], "img-spe_qc.rds")
+```
+
+## CosMx-specific QC
+
+To not confuse RNA target with negative probe counts, we will move these from the main data into an `altExp`, and compute basic cell-level QC metrics for both RNA target and negative probes; for simplicity, we also relabel spatial coordinates:
+
+```{r cosmx-load, message=FALSE}
+library(ExperimentHub)
+eh <- ExperimentHub()
+spe <- eh[["EH9525"]]
+neg <- grep("NegPrb", rownames(spe))
+altExp(spe, "NegPrb") <- spe[neg, ]
+spatialCoordsNames(spe) <- c("x", "y")
+(spe <- addPerCellQC(spe[-neg, ], use_altexps=TRUE))
+```
+
+### FOV effects
+
+Imaging-based ST data are acquired through iterative imaging of predefined rectangular regions, so-called fields of view (FOVs):
+
+```{r cosmx-plot-xy, fig.width=3, fig.height=2}
+#| code-fold: true
+xy <- spatialCoordsNames(spe)
+df <- data.frame(colData(spe), spatialCoords(spe))
+fd <- df |> group_by(fov) |> summarise(across(xy, median))
+ggplot(df, aes(x, y, col=factor(fov))) +
+    geom_point(shape=16, stroke=0, size=0.2) +
+    geom_text(aes(label=fov), fd, col="black", size=2) +
+    coord_equal(expand=FALSE) + theme_void() + theme(legend.position="none")
+```
+
+Assuming FOV placement was done with the aim of capturing biologically interesting regions of the tissue, we would expect every FOV to capture a decent number of cells.
+Issues in image registration or IF staining, however, may affect spot calling and cell segmentation, and can yield FOVs with virtually no cells.
+We thus advice inspecting the number of cells across FOVs:
+
+```{r cosmx-plot-ns, fig.width=4, fig.height=2}
+#| code-fold: true
+ns <- as.data.frame(table(fov=spe$fov), responseName="n_cells")
+ggplot(ns, aes(fov, n_cells)) + geom_col() +
+    scale_x_discrete(breaks=c(1, seq(5, max(spe$fov), 5))) +
+    scale_y_continuous(limits=c(0, 6e3), n.breaks=4) +
+    labs(x="field of view (FOV)", y="# cells") +
+    coord_cartesian(expand=FALSE) + theme_minimal()
+```
+
+It is generally also worth checking that basic QC metrics do not vary across FOVs.
+Of course, such affects will also be driven by differences in subpopulation composition across FOVs.
+However, gross differences in detection efficacy, IF staining, spot calling, segmentation etc. often still manifest in FOV-level shifts in IF stains and/or RNA target, negative probe, system control counts.
+A simple spot-check is the following type of visualization, but more thorough investigation is advisable 'in the wild', especially so in challenging types of tissue:
+
+```{r cosmx-plot-qc, warning=FALSE, fig.width=12, fig.height=4}
+#| code-fold: true
+vs <- "Mean|sum|detected|percent"
+vs <- grep(vs, names(df), value=TRUE)
+fd <- pivot_longer(df, vs) |>
+    mutate(value=case_when(
+        grepl("Mean", name) ~ asinh(value),
+        grepl("^sum", name) ~ log10(value),
+        TRUE ~ value))
+ggplot(fd, aes(factor(fov), value)) + 
+    facet_wrap(~name, nrow=2, scales="free_y") +
+    geom_boxplot(linewidth=0.2, outlier.size=0.2) +
+    scale_x_discrete(breaks=c(1, seq(5, max(spe$fov), 5))) +
+    labs(x="field of view (FOV)", y=NULL) + theme_minimal()
+```
+
+In our example, DAPI stains and RNA target counts (`sum`) are fairly constant across FOVs.
+FOVs 1-4 have decreased signal for CD3 and CD45, however, this might be related to fewer immune cells being present in these regions rather than technical artefacts. 
+Taken together, we cannot deem any FOVs as being obviously problematic here.
+
+### Borders effects
+
+Particularly in CosMx, lack of FOV stitching during cell segmentation can result in fractured and possibly duplicated cells.
+To investigate potential artefacts related to this, we can estimate each cell's distance to every FOV border (precise distances would require considering the exact FOV placement coordinates):
+
+```{r cosmx-calc-ds}
+# compute distance to FOV borders
+x <- spe$CenterX_local_px
+y <- spe$CenterY_local_px
+d <- cbind(
+    bottom=y-min(y), top=max(y)-y,
+    left=x-min(x), right=max(x)-x)
+```
+
+We can *roughly* estimate cell radii as $A=\pi r^2$ $\leftrightarrow r=\sqrt{A/\pi}$, and use this as a threshold on FOV border distances.
+In other words: we exclude a cell when its centroid is closer to any FOV border than the radius of an average circular cell:
+
+```{r cosmx-est-r}
+(r <- sqrt(mean(spe$Area)/pi))
+```
+
+Next, let us visualize total RNA counts against distance to FOV borders, setting the above threshold on the latter; we also include rolling means to better highlight global trends:
+
+```{r comsmx-plot-ds, warning=FALSE, fig.width=10, fig.height=3}
+#| code-fold: true
+df <- data.frame(colData(spe), spatialCoords(spe), d)
+fd <- df |> pivot_longer(colnames(d), values_to="d")
+mu <- fd |>
+    group_by(name) |>
+    arrange(d) |>
+    mutate(
+        across(c(d, sum), 
+        zoo::rollmean, k=100, align="right", fill=NA))
+ggplot(fd, aes(d, sum)) + facet_grid(~name) +
+    geom_point(shape=16, size=0.4, alpha=0.2, col="navy") +
+    geom_line(data=mu, col="blue", linewidth=0.4) +
+    geom_vline(xintercept=r, col="gold") +
+    labs(x="distance to FOV border (px)", y="total counts (RNA)") +
+    scale_y_continuous(limits=c(10, 1e3), trans="log10") +
+    coord_cartesian(xlim=c(0, 200)) +
+    theme_bw() + theme(
+        aspect.ratio=1,
+        legend.position="none",
+        panel.grid.minor=element_blank())
+```
+
+As expected, we observe a decline in counts near FOV borders, with about `r round(100*mean(rowAnys(d < r)), 1)`% of cells falling below $r$.
+To mitigate potential artefacts in downstream analyses, we may choose to filter out these cells, or otherwise flag them as potentially problematic events to be kept a cautionary eye on.
+
+```{r cosmx-calc-ex}
+# drop cells too close to FOV borders 
+mean(ex <- rowAnys(d < r))
+```
+
+```{r cosmx-plot-ex, fig.width=3, fig.height=2, fig.cap="Tissue plot with cells that lie too close to FOV borders highlighted in color."}
+#| code-fold: true
+ggplot(df, aes(x, y, col=ex)) +
+    geom_point(shape=16, stroke=0, size=0.2) +
+    scale_color_manual(values=c("grey", "blue")) +
+    coord_equal(expand=FALSE) + theme_void() + theme(legend.position="none")
+```
+
+## References {.unnumbered}
