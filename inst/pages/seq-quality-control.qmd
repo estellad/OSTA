@@ -275,7 +275,7 @@ plotSpotQC(spe, plot_type = "spot",
 
 While there is a spatial pattern to the discarded spots, it does not appear to be correlated with the known biological features (cortical layers). The discarded spots are all on the edges of the tissue. It seems plausible that something has gone wrong with the cell segmentation on the edges of the images, so it makes sense to remove these spots.
 
-### Combine and remove low-quality spots
+### Remove low-quality spots
 
 Now that we have calculated several QC metrics and selected thresholds for each one, we can combine the sets of low-quality spots, and remove them from our object.
 
@@ -326,9 +326,9 @@ Only 6% of spots contain a single cell. If we restricted the analysis to these s
 
 Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In our paper [@Maynard2021], we explore the information contained in these neuropil spots.
 
-## SpotSweeper
+## Local outlier detection
 
-### Local outlier detection
+### Detect local outliers using SpotSweeper
 
 One of the key assumptions of outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For non-spatial single cell sequencing, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, this assumption is more commonly violated in sequencing-based spatial transcriptomics due to the heterogeneity in the biological tissue structure being sampled in each spot.
 
@@ -350,6 +350,8 @@ spe <- localOutliers(spe, metric = "subsets_mito_percent", direction = "higher",
 ```
 
 Similar to `scater`'s `addPerCellQC` function, the `localOutliers` function adds columns to the `colData` slot of the `SpatialExperiment` object. The column names are the input metric name followed by `_outlier`. The column contains a logical vector indicating whether the spot is an outlier for that metric.
+
+### Visualizing local outliers
 
 We can then visually confirm that the local outliers detected indeed appear as outliers in the Visium dataset. To do this, we'll visualize the output log2-transformation on the library size, `sum_log`, and visualize next to it the spots which were detected have having lower library size other spots in their local neighborhood, `sum_outliers` .
 
@@ -392,6 +394,8 @@ p1 | p2 | p3
 
 ```
 
+### Removing local outliers
+
 We can then combine all outliers into a single column called `local_outliers` in the `colData` of the `SpatialExperiment` object.
 
 ```{r}
@@ -401,6 +405,78 @@ spe$local_outliers <- as.logical(spe$sum_outliers) |
     as.logical(spe$subsets_mito_percent_outliers)
 ```
 
+## Artifact detection
+
+### Hangnail artifact detection with SpotSweeper
+
+When working with spatial transcriptomics datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how detect and remove hangnail artifacts from Visium datasets. Hangnails artifacts arise during tissue preparation, and most commonly occur when when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper.
+
+The use of high-power drills or other tools during dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** like mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
+
+### Loading Data and Adding QC metrics
+
+We start by loading an example Visium dataset from SpotSweeper containing a known "hangnail" artifact, and then calculat per-spot QC metrics, such as mitochondrial percentage, as shown above.
+
+```{r, message=FALSE, results='hide'}
+# load DLPFC artifact samples
+data(DLPFC_artifact)
+spe.hangnail <- DLPFC_artifact
+
+# identify mitochondrial genes
+is_mito <- grepl("(^MT-)|(^mt-)", rowData(spe.hangnail)$gene_name)
+table(is_mito)
+rowData(spe.hangnail)$gene_name[is_mito]
+
+# calculate per-spot QC metrics and store in colData
+spe.hangnail <- addPerCellQC(spe.hangnail, subsets = list(mito = is_mito))
+head(colData(spe.hangnail))
+```
+
+#### Visually Identifying Hangnail Artifacts
+
+Hangnail artifacts are best identified by plotting QC metrics for all samples, as they appear as regions with unusually smooth or low variance mitochondrial percentage. We can observe this in the example below as the oblong piece of tissue on the right side has an usually smooth or "smudged" appearance in the mitochondrial percentage (`subsets_mito_percent`) on the right, but not in the library size (`sum`) on the left.
+
+```{r, fig.height=3.75}
+
+p1 <- plotSpots(spe.hangnail, annotate="sum")
+p2 <- plotSpots(spe.hangnail, annotate="subsets_mito_percent")
+
+p1 | p2
+```
+
+#### Quantifying Local Variance in Mitochondrial Percentage
+
+One strategy to detect this artifacts for subsequent removal is to qunaity this loval variance in mitochondrial percentage. Here we will do this using the `localVariance` function in `SpotSweeper`, specifying the QC metric (`subsets_mito_percent`) and the number of neighbors to consider. The default neighbor size of `n_neighbors=36` works well in our hands.
+
+```{r, fig.height=3.75}
+spe.hangnail <- localVariance(spe.hangnail, metric = "subsets_mito_percent", 
+                              n_neighbors = 36, name = "local_mito_variance_k36"
+                              )
+
+plotSpots(spe.hangnail, annotate="local_mito_variance_k36", point_size=1)
+```
+
+Indeed, we can see that the hangnail artifact has a much lower local variance in mitochondrial percentage compared to the rest of the tissue section.
+
+### Classifying Artifacts Using Multiscale Local Variance
+
+After visualizing local variance in mitochondrial percentage, we can move on to classify potential artifact regions using the `findArtifacts` function. This function calculates the local variance (`subsets_mito_ratio`) at multiple scales (`n_order`) while adjusting for mean-variance relationships to reliably detect hangnail artifacts. Here we use `n_order=5` to calculate the local variance using 1st-5th order neighbors. Visium spots are shaped as hexagonal grids, so we specify `shape="hexagonal"` to ensure the correct number of neighbors are used for each order. Use `shape="sqaure"` for data sets with square grid arrangements, such as STEREO-seq or VisiumHD.
+
+```{r, fig.height=3.75}
+spe.hangnail <- findArtifacts(spe.hangnail, mito_percent = "expr_chrM_ratio", 
+                              mito_sum = "expr_chrM", n_order = 5, 
+                              shape = "hexagonal", name = "artifact"
+                              )
+
+plotSpotQC(spe.hangnail, plot_type='spot', annotate="artifact")
+```
+
+### Discarding detected artifacts
+
+```{r,}
+# removing hangnail artifacts prior to downstream analyses
+spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
+```
 
 ## Gene-level quality control
 
@@ -415,8 +491,8 @@ However, here we make a distinction between quality control and feature selectio
 Save object(s) in `.rds` format for re-use within later chapters to speed up the build time of the book.
 
 # save object(s)
-saveRDS(spe, file = "seq-spe_qc.rds")
-```
+
+saveRDS(spe, file = "seq-spe_qc.rds") \`\`\`
 
 ### Benchmarks {.unnumbered}
 
