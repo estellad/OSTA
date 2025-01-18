@@ -6,7 +6,7 @@ In this chapter we will use `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` w
 
 Again, we will use the human breast cancer Xenium data set [@Janesick2023] in a `SpatialFeatureExperiment` object available through `r BiocStyle::Biocpkg("SFEData")`. 
 
-We will use the `r BiocStyle::Biocpkg("Voyager")` package [@Moses2023] which provides convenient wrappers around classic geospatial R packages such as `r BiocStyle::CRANpkg("spdep")` [@Pebesma2023]. For more details, please consult the authors' comprehensive [vignettes](https://pachterlab.github.io/voyager/index.html). 
+We will use the `r BiocStyle::Biocpkg("Voyager")` package [@Moses2023-Voyager] which provides convenient wrappers around classic geospatial R packages such as `r BiocStyle::CRANpkg("spdep")` [@Pebesma2023]. For more details, please consult the authors' comprehensive [vignettes](https://pachterlab.github.io/voyager/index.html). 
 
 This part is based on the following vignette of the [*pasta* resource](https://robinsonlabuzh.github.io/pasta/00-overview-latSOD.html) [@Emons2024-pasta].
 

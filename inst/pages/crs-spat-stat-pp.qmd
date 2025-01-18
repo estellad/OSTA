@@ -85,7 +85,7 @@ It is characterized by two key properties:
 
 ##### Ripley's $K$
 
-Ripley's $K$ is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley's $K$ quantifies the average number of points that fall in a $r$-neighbourhood of a chosen mark [@ripleySecondOrderAnalysisStationary1976; @Baddeley2015 p. 132 ff.].
+Ripley's $K$ is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley's $K$ quantifies the average number of points that fall in a $r$-neighbourhood of a chosen mark [@Ripley1976; @Baddeley2015 p. 132 ff.].
 
 ```{r ripley, message = FALSE, warning = FALSE}
 #| fig-width: 15

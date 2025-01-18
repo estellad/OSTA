@@ -33,37 +33,48 @@ Depends:
     R (>= 4.3)
 Imports:
     Banksy,
-    dplyr, 
-    igraph, 
+    BayesSpace,
     BiocFileCache, 
+    BiocParallel,
+    dplyr, 
     ExperimentHub, 
     ggplot2, 
     ggspavis, 
     hoodscanR,
+    igraph, 
     imcRtools, 
     lobstr,
     nnSVG, 
+    openxlsx,
     patchwork, 
     pheatmap, 
     RANN,
     RColorBrewer,
     rtracklayer, 
     scater, 
-    scran, 
+    scran,
+    SFEData,
     SpatialExperiment, 
-    STexampleData, 
     spatialLIBD,
+    SpatialFeatureExperiment, 
+    spatialFDA,
+    spatstat,
+    spdep,
+    STexampleData, 
     tidyr,
+    Voyager,
     zoo
 Suggests: 
     BiocManager, 
     BiocVersion, 
     BiocStyle, 
-    glue, 
-    sessioninfo, 
-    knitr,
     downlit,
+    glue, 
+    knitr,
+    sessioninfo, 
     xml2
+remotes: 
+    mjemons/spatialFDA
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
