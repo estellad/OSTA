@@ -72,7 +72,7 @@ Many commonly QC methods currently applied to SRT were adapted from snRNA-seq wo
 
 Here, we use visualizations to select thresholds for several QC metrics in our human DLPFC dataset: (i) library size, (ii) number of expressed genes, (iii) proportion of mitochondrial reads, and (iv) number of cells per spot.
 
-```{r, fig.height=3.5}
+```{r, fig.height=3.5, fig.width=9}
 par(mfrow = c(1, 4))
 hist(colData(spe)$sum, xlab = "sum", main = "UMIs per spot")
 hist(colData(spe)$detected, xlab = "detected", main = "Genes per spot")
@@ -195,9 +195,9 @@ As shown above, the distribution for library and detected genes tend to follow a
 
 ```{r}
 # find 3 MADs outliers
-qc_lib_mads <- isOutlier(spe$sum, log=TRUE, type="lower")
-qc_detected_mads <- isOutlier(spe$detected, log=TRUE, type="lower")
-qc_mito_mads <- isOutlier(spe$subsets_mito_percent, log=FALSE, type="higher")
+qc_lib_mads <- isOutlier(spe$sum, nmads=3, log=TRUE, type="lower")
+qc_detected_mads <- isOutlier(spe$detected, nmads=3, log=TRUE, type="lower")
+qc_mito_mads <- isOutlier(spe$subsets_mito_percent, nmads=3, log=FALSE, type="higher")
 
 table(qc_lib_mads)
 table(qc_detected_mads)
@@ -251,29 +251,31 @@ p1 | p2 | p3
 
 ```
 
-The main advantage of using adaptive thresholds is that it relieves the user of iteratively searching and finding a reasonable fixed threshold (or worse, blindy pick a fixed threshold). However, looking at the spots plots, it appears that global outlier detection using a threshold of 3 MADs is beginning to show spatial patterning in this particular dataset. Users should always carefully inspect their QC results before moving to downstream analyses. Next, we'll look at methods developed to account for biology variability in QC metrics.
+The main advantage of using adaptive thresholds is that it relieves the user of manually searching for and finding a reasonable fixed threshold (or worse, blindly picking a fixed threshold). However, looking at the spots plots, it appears that global outlier detection using a threshold of 3 MADs is beginning to show spatial patterning in this particular dataset. Users should always carefully inspect their QC results before moving to downstream analyses. Next, we'll look at methods developed to account for biology confound in QC metrics by incorporating spatial information.
 
 ### Local outlier detection using fixed thresholds
 
-One of the key assumptions of outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For non-spatial single cell sequencing, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, this assumption is more commonly violated in sequencing-based spatial transcriptomics due to the heterogeneity in the biological tissue structure being sampled in each spot.
+One of the key assumptions of outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based SRT due to the biological heterogeneity in the tissue being sampled for each spot.
 
-One strategy to address this issue is to look for outliers within their local biological neighborhood. Here we will implement **local outlier detection** using the `localOutliers` function from the [SpotSweeper](https://www.bioconductor.org/packages/release/bioc/html/SpotSweeper.html) package (@Totty2024-SpotSweeper). This function detects local outliers based on the unique detected genes, total library size, and mitochondrial percentage. These methods assume a normal distribution, so we’ll use the log-transformed sum of the counts and the log-transformed number of detected genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
+One strategy to address this issue is to look for outliers within their local biological neighborhood. Here we will implement **local outlier detection** using the `localOutliers` function from the [SpotSweeper](https://www.bioconductor.org/packages/release/bioc/html/SpotSweeper.html) package (@Totty2024-SpotSweeper). This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of it's nearest neighbors. By default, `localOutliers` uses `k=36` nearest neighbors, which equates to third-order neighbors (i.e., three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g., STOmics), third-order neighbors would be `k=48`.
+
+The QC metrics for each spot undergo a modified local z-score transformation (two-tailed) based on the median and median absolute deviations of it's neighbors. Here we will use threshold of 3.3 z-scores (`cutoff=3.3`), motivated by the reasoning this corresponding to a p-value of .001. These methods assume a normal distribution, so we’ll use the log-transformed `sum` of the total counts and the log-transformed number of `detected` genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
 
 ```{r, message=FALSE}
 # library size
-spe <- localOutliers(spe, metric = "sum", direction = "lower", log = TRUE)
+spe <- localOutliers(spe, metric = "sum", cutoff=3.3, direction = "lower", log = TRUE)
 
 # unique genes
-spe <- localOutliers(spe, metric = "detected", direction = "lower", log = TRUE)
+spe <- localOutliers(spe, metric = "detected", cutoff=3.3, direction = "lower", log = TRUE)
 
 # mitochondrial percent
-spe <- localOutliers(spe, metric = "subsets_mito_percent", direction = "higher",
+spe <- localOutliers(spe, metric = "subsets_mito_percent", cutoff=3.3, direction = "higher",
                      log = FALSE)
 ```
 
-Similar to `scater`'s `addPerCellQC` function, the `localOutliers` function adds columns to the `colData` slot of the `SpatialExperiment` object. The column names are the input metric name followed by `_outlier`. The column contains a logical vector indicating whether the spot is an outlier for that metric.
+Similar to `scater`'s `addPerCellQC` function, the `localOutliers` function adds several columns to the `colData` slot of the `SpatialExperiment` object. The `_outlier` column contains a logical vector indicating whether the spot is an outlier for the respective metric and the `_z` column returns the local z-transformed QC metric. If `log=TRUE`, an additional `_log` column will return the log-transformed metric.
 
-We can then visually confirm that the local outliers detected indeed appear as outliers in the Visium dataset. To do this, we'll visualize the output log2-transformation on the library size, `sum_log`, and visualize next to it the spots which were detected have having lower library size other spots in their local neighborhood, `sum_outliers` .
+We can then visually confirm that the local outliers detected indeed appear to be outliers by using spot plots of the QC metrics. To do this, we'll visualize the output log2-transformed data (or un-transformed mitochondrial proportion), next to the detected local outliers.
 
 ```{r, fig.height=7, fig.width=11}
 # spot plot of log-transformed library size
@@ -307,7 +309,7 @@ p6 <- plotSpotQC(spe, plot_type="spot", in_tissue="in_tissue",
 
 ```
 
-Indeed, we can several spots in the left-hand plot that appear to have lower library size than their neighbors. This "eye test" is a good diagnostic for confirming that local outliers are being accurately detected. We can alternatively visualize the spots that were detected as outliers by visualizing the z-transformed metrics for each spot using violin plots.
+Indeed, it is particularly evident in the log-transformed library size and detected genes that there are clear outliers in the bottom right-hand corner of the sample. We can additionally see that these spots were successfully identified in the bottom row. This "eye test" is a good diagnostic for confirming that local outliers are being accurately detected. We can alternatively visualize the spots that were detected as outliers by visualizing the z-transformed metrics for each spot using violin plots.
 
 ```{r, fig.height=3.75}
 
@@ -332,15 +334,18 @@ p1 | p2 | p3
 
 ```
 
+The spots that were clearly local outliers in library size and number of genes detected display z-scores of up to -10. In other words, these spots deviate up to 10 standard deviations lower than their local mean.
+
 ### Local outlier detection using adaptive thresholds
 
-Similar to the global examples above, and as alternative to the fixed threshold of 3 z-scores, we can use the `isOutlier` function from `scuttle` to determine outliers based on 3 MADs from the median of the local z-transformed QC metrics. The z-transformed data here already follows a normal distribution, so we set `log=FALSE`.
+Similar to the global examples above, and as alternative to the fixed threshold of 3.3 z-scores, we can use the `isOutlier` function from `scuttle` to determine outliers based on 3 MADs from the median of the local z-transformed QC metrics. The z-transformed data here already follows a normal distribution, so we set `log=FALSE`.
 
 ```{r}
 # find 3 MADs outliers
-sum_z_mads <- isOutlier(spe$sum_z, log=FALSE, type="lower")
-detected_z_mads <- isOutlier(spe$detected_z, log=FALSE, type="lower")
-subsets_mito_percent_z_mads <- isOutlier(spe$subsets_mito_percent_z, log=FALSE, type="higher")
+sum_z_mads <- isOutlier(spe$sum_z, nmads=3, log=FALSE, type="lower")
+detected_z_mads <- isOutlier(spe$detected_z, nmads=3, log=FALSE, type="lower")
+subsets_mito_percent_z_mads <- isOutlier(spe$subsets_mito_percent_z, nmads=3, 
+                                         log=FALSE, type="higher")
 
 table(sum_z_mads)
 table(detected_z_mads)
@@ -404,6 +409,8 @@ p3 <- plotSpotQC(spe, plot_type="violin", x_metric="subsets_mito_percent_z",
 # plot with patchwork
 p1 | p2 | p3
 ```
+
+We can see that using an adaptive threshold also works well, though the thresholds determined here are slightly lower than 3 z-scores, so more spots are excluded.
 
 ### Number of cells per spot
 
