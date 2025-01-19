@@ -49,12 +49,14 @@ Imports:
     RColorBrewer,
     rtracklayer, 
     scater, 
-    scran, 
+    scran,
+    scuttle,
     SpatialExperiment, 
     STexampleData, 
     spatialLIBD,
     tidyr,
-    zoo
+    zoo,
+    SpotSweeper (>= 1.3.3)
 Suggests: 
     BiocManager, 
     BiocVersion, 

@@ -36,7 +36,8 @@ BiocManager::install(c("BiocParallel","SingleCellExperiment",
                      "hoodscanR","igraph","imcRtools","ExperimentHub",
                      "STexampleData","ggplot2","dplyr","nnSVG",
                      "patchwork","pheatmap","tidyr","ggspavis",
-                     "scran","scater","SpatialExperiment"))
+                     "scran","scater","SpatialExperiment",
+                     "SpotSweeper", "scuttle"))
 ```
 
 
