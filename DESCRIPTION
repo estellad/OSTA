@@ -37,6 +37,7 @@ Imports:
     BiocFileCache, 
     BiocParallel,
     dplyr, 
+    EBImage,
     ExperimentHub, 
     ggplot2, 
     ggspavis, 
@@ -67,12 +68,9 @@ Imports:
     spdep,
     STexampleData, 
     tidyr,
-    zoo,
     VisiumIO,
     Voyager,
-    zoo,
-    magick,
-    EBImage
+    zoo
 Suggests: 
     BiocManager, 
     BiocVersion, 
