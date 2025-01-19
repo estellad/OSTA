@@ -1,0 +1,34 @@
+# Datasets {#sec-bkg-datasets}
+
+Throughout this book, we will rely on a set of publicly available datasets that 
+cover different sequencing- and imaging-based spatial transcriptomics platforms, 
+namely: Visium, Visium HD, Xenium (10x Genomics) and CosMx (NanoString). 
+
+These have been deposited in an Open Storage Framework (OFS) repository 
+[here](https://osf.io/5n4q3), and are thereby easily retrievable from 
+within R using the `r BiocStyle::CRANpkg("osfr")` package.
+
+Below, we briefly summarize the characteristics of each dataset, 
+and note across which parts of the book each dataset is being used.
+
+## Human Breast Cancer
+
+- available at: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
+- published in: @Janesick2023
+- Visium: 18,085 genes x 4,992 cells
+- Xenium: 313 genes x 167,780 cells
+- scRNA-seq: TODO
+
+## Human Colon Cancer
+
+- available at: ?
+- published in: Oliveria?
+- Visium: 
+- Xenium: 
+- scRNA-seq: 
+
+## Mouse/Human Brain
+
+- CosMx: TBD
+
+## References {.unnumbered}
