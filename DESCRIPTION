@@ -80,7 +80,7 @@ Suggests:
     sessioninfo, 
     xml2
 Remotes:
-    drighelli/SpaceTrooper,
+    drisso/SpaceTrooper@devel_spatialBook,
     estellad/SpatialExperimentIO,
     mjemons/spatialFDA
 Encoding: UTF-8
