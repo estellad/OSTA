@@ -4,7 +4,7 @@
 
 ### Introduction
 
-The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and the 1k-plex CosMX data (Nanostring) of a human lung non-small cell lung cancer [@He2022-CosMx], both available through the `r BiocStyle::Biocpkg("STexampleData")` package as part of Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")`.
+The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and the 1k-plex CosMX data (Nanostring) of a mouse brain sample.
 
 For the remainder of this Chapter, we will show the two examples in parallel, highlighting when needed the differences between the platforms.
 
@@ -17,69 +17,64 @@ library(ggplot2)
 library(patchwork)
 library(SpatialExperiment)
 library(SpaceTrooper)
-library(STexampleData)
+library(SpatialExperimentIO)
+library(osfr)
 ```
 
 ## Data import
 
-Both `r BiocStyle::Biocpkg("SpaceTrooper")` and `r BiocStyle::Biocpkg("SpatialExperimentIO")` provide functions to import CosMX, Xenium, and MERSCOPE datasets in Bioconductor, starting from the output provided by the three platforms.
-
-***NOTE: This section will need to be rewritten when we make a final decision on datasets***
-
-This is a temporary section to integrate the datasets in `r BiocStyle::Biocpkg("STexampleData")` with
-polygon information, useful for the visualization plots presented in this chapter.
-Ideally, a new version of `r BiocStyle::Biocpkg("STexampleData")` will ship the
-polygons directly within the object.
+`r BiocStyle::Biocpkg("SpatialExperimentIO")` provides functions to import CosMX, Xenium, and MERSCOPE datasets in Bioconductor, starting from the output provided by the three platforms.
 
 ### CosMX
 
-First, we load the CosMX data from `r BiocStyle::Biocpkg("STexampleData")`:
+First, we load the CosMX dataset:
 
 ```{r load-cosmx, message=FALSE, warning=FALSE}
-cosmx <- CosMx_lungCancer()
+# retrieve CosMx dataset from OSF repo
+osf <- osfr::osf_retrieve_node("https://osf.io/5n4q3")
+tbl <- osfr::osf_ls_files(osf, "CosMx1k_MouseBrain1")
+tbl <- tbl[!grepl("tx_file", tbl$name), ] # skip molecules
+dir.create(dir <- tempfile())
+osfr::osf_download(tbl, dir, verbose=FALSE)
+
+## Load into SpatialExperiment
+## Note that we are using SpaceTrooper's version to add metadata info (TODO: PR to SpatialExperimentIO)
+cosmx <- readCosmxSPE(dir)
+
+# add cell boundary polygons
+fnm <- file.path(dir, "polygons.csv.gz")
+pol <- readPolygonsCosmx(fnm)
+idx <- sprintf("f%s_c%s", cosmx$fov, cosmx$cellID)
+cosmx$polygons <- pol[match(idx, pol$cell_id), ]
+
+# add info for 'SpaceTrooper'
+metadata(cosmx)$technology <- "Nanostring_CosMx"
+cosmx$sample_id <- "CosMx"
 cosmx
 ```
-
-Then, we use `r BiocStyle::Biocpkg("SpaceTrooper")` to add the polygon and FOV information:
-
-```{r load-cosmx-poly, message=FALSE, warning=FALSE}
-poly <- readPolygonsCosmx("../../Lung9_Rep1-polygons.csv")
-fov <- read.csv("../../Lung9_Rep1_fov_positions_file.csv")
-
-cd <- data.frame(colData(cosmx))
-poly <- left_join(poly, cd[,c("fov", "cell_ID")], 
-            by = c("fov", "cellID"="cell_ID"))
-cd <- left_join(cd, poly[,c("fov", "cellID")], 
-      by = c("fov", "cell_ID"="cellID"))
-cd <- dplyr::rename(cd, polygons = global)
-colData(cosmx) <- as(cd, "DataFrame")
-metadata(cosmx)$fov_positions <- fov
-metadata(cosmx)$fov_dim = c(xdim = 5472, ydim = 3648)
-colData(cosmx)$CenterX_global_px <- spatialCoords(cosmx)[,1]
-colData(cosmx)$CenterY_global_px <- spatialCoords(cosmx)[,2]
-metadata(cosmx)$technology <- "Nanostring_CosMx"
-cosmx$sample_id <- "CosMX"
-```
-
 ### Xenium
 
-We now load the Xenium data from `r BiocStyle::Biocpkg("STexampleData")`:
+We now read load Xenium data:
 
 ```{r load-xenium, message=FALSE, warning=FALSE}
-xenium <- Janesick_breastCancer_Xenium_rep1()
-# check object
-xenium
-metadata(xenium)$technology <- "10X_Xenium"
+# retrieve Xenium dataset from OSF repo
+tbl <- osfr::osf_ls_files(osf, "Xenium_HumanBreast_Janesick")
+tbl <- tbl[!grepl("transcripts", tbl$name), ] # skip molecules
+dir.create(dir <- tempfile())
+osfr::osf_download(tbl, dir, verbose=FALSE)
+
+# read into 'SpatialExperiment'
+xenium <- SpatialExperimentIO::readXeniumSXE(dir)
+
+# add cell boundary polygons
+fnm <- file.path(dir, "cell_boundaries.parquet")
+pol <- readPolygonsXenium(fnm)
+xenium <- addPolygonsToSPE(xenium, pol)
+
+# add info for 'SpaceTrooper'
+metadata(xenium)$technology <- "10x_Xenium"
 xenium$sample_id <- "Xenium"
-```
-
-Then, we use `r BiocStyle::Biocpkg("SpaceTrooper")` to add the polygon information:
-
-```{r load-xenium-poly, message=FALSE, warning=FALSE}
-poly <- readPolygonsXenium("../../cell_boundaries.parquet")
-
-xenium <- addPolygonsToSPE(xenium, poly)
-colData(xenium)
+xenium
 ```
 
 ## Visualization
@@ -108,16 +103,16 @@ Here, we show the distribution of DAPI across the CosMX sample.
 plotCentroids(cosmx, colour_by = "Mean.DAPI")
 ```
 
-While plotting centroids is good for a overview of the macro tissue structure, when zooming into a specific area, the centroids do not provide the full information. For instance, looking at the first FOV of the CosMX data it is hard to distinguish between areas with low cell densities and areas with large cells.
+While plotting centroids is good for a overview of the macro tissue structure, when zooming into a specific area, the centroids do not provide the full information. For instance, looking at one FOV of the CosMX data it is hard to distinguish between areas with low cell densities and areas with large cells.
 
 ```{r plot-cosmx-xy-fov1, out.width="66%", fig.align="center"}
-plotCentroids(cosmx[,cosmx$fov == 1], size = 1, colour_by = "Mean.DAPI")
+plotCentroids(cosmx[,cosmx$fov == 99], size = 1, colour_by = "Mean.DAPI")
 ```
 
 We can improve the visualization by leveraging the polygons stored in the object from the cell segmentation step.
 
 ```{r plot-cosmx-polu-fov1, out.width="66%", fig.align="center"}
-plotPolygons(cosmx[,cosmx$fov == 1], colour_by = "Mean.DAPI")
+plotPolygons(cosmx[,cosmx$fov == 99], colour_by = "Mean.DAPI")
 ```
 
 The same function can be applied to Xenium data, but here we do not have independent FOVs. Hence, we define a zoom area based on the slide's global coordinates.
@@ -125,7 +120,7 @@ The same function can be applied to Xenium data, but here we do not have indepen
 ```{r plot-xenium-poly, out.width="66%", fig.align="center"}
 box <- (spatialCoords(xenium)[,1] >= 4000 & spatialCoords(xenium)[,1] <= 6000) &
   (spatialCoords(xenium)[,2] >= 0 & spatialCoords(xenium)[,2] <= 2000)
-plotPolygons(xenium[,box], colour_by = "transcript_counts", poly_column = "polygons.global")
+plotPolygons(xenium[,box], colour_by = "transcript_counts")
 ```
 
 Note that while it is possible to use `plotPolygonsSPE` on the entire slide, this may be slow and require large amounts of RAM. Since the polygons at that zoom level will be very small and practically indistinguishable to points, we advise against generating a whole-slide polygons plot.
@@ -143,7 +138,7 @@ plotCellsFovs(cosmx)
 In addition, the `plotZoomFovsMap` provides a way to zoom on a subset of FOVs, while also visualizing the global structure of the tissue.
 
 ```{r plot-fov-zoom, out.width="100%", fig.align="center"}
-plotZoomFovsMap(cosmx, fovs=1, colour_by = "Mean.DAPI")
+plotZoomFovsMap(cosmx, fovs=99, colour_by = "Mean.DAPI")
 ```
 
 ## Simple QC Metrics
@@ -160,7 +155,7 @@ Finally, imaging-based platforms include, in addition to transcripts data, morph
 
 - `Area_um`: the area in microns;
 - `log2AspectRatio`: the log2 of the aspect ratio (x-axis/y-axis) of each cell;
-- `ctrl_total_raio`: the proportion of control probe counts over the total cell counts;
+- `ctrl_total_ratio`: the proportion of control probe counts over the total cell counts;
 - `log2CountArea`: the log2 of the count density, i.e., the number of transcripts divided by the cell area.
 
 
@@ -289,7 +284,7 @@ We thus advice inspecting the number of cells across FOVs:
 ns <- as.data.frame(table(fov=cosmx$fov), responseName="n_cells")
 ggplot(ns, aes(fov, n_cells)) + geom_col() +
     scale_x_discrete(breaks=c(1, seq(5, max(cosmx$fov), 5))) +
-    scale_y_continuous(limits=c(0, 6e3), n.breaks=4) +
+    scale_y_continuous(limits=c(0, 1e3), n.breaks=4) +
     labs(x="field of view (FOV)", y="# cells") +
     coord_cartesian(expand=FALSE) + theme_minimal()
 ```
@@ -318,8 +313,7 @@ ggplot(fd, aes(factor(fov), value)) +
     labs(x="field of view (FOV)", y=NULL) + theme_minimal()
 ```
 
-In our example, DAPI stains and RNA target counts (`total`) are fairly constant across FOVs.
-FOVs 1-4 have decreased signal for CD3 and CD45, however, this might be related to fewer immune cells being present in these regions rather than technical artefacts. 
+In our example, DAPI stains and RNA target counts (`total`) are fairly constant across FOVs, some systematic differences between FOVs seem to reflect morphological differences across FOVs.
 Taken together, we cannot deem any FOVs as being obviously problematic here.
 
 ### Border effects
@@ -457,7 +451,7 @@ Finally, we can compute an aggregated quality score, which combines a cell's tra
 
 ```{r score-cosmx}
 cosmx <- computeQCScore(cosmx)
-cosmx <- computeFilterFlags(cosmx, fs_threshold=0.5)
+cosmx <- computeFilterFlags(cosmx, fs_threshold=0.75)
 
 plotCentroids(cosmx, colour_by = "flag_score")
 plotCentroids(cosmx, colour_by = "is_fscore_outlier")
@@ -471,7 +465,7 @@ plotCentroids(xenium, colour_by = "flag_score")
 plotCentroids(xenium, colour_by = "is_fscore_outlier")
 ```
 
-We can see how the quality score flags several cells close to FOV borders in the CosMX data and cells in the bottom-center damaged area in the Xenium data.
+We can see how the quality score flags several cells close to the tissue borders in the CosMX data and cells in the bottom-center damaged area in the Xenium data.
 
 In a stringent analysis we may want to remove low-quality cells, but this has to be done with caution: before finalizing to exclude any cells, it is recommendable to inspect where these fall in the tissue.
 We would expect low-quality cells to be distributed randomly, and otherwise to accumulate at the tissue borders or in regions were tissue was, for example, smudged, detached, necrotic etc.
