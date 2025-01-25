@@ -1,0 +1,115 @@
+# Workflow: Visium CRC {#sec-seq-workflow-visium-crc}
+
+## Preamble
+
+### Introduction
+
+### Dependencies
+
+```{r load-libs, message=FALSE, warning=FALSE}
+library(osfr)
+library(scran)
+library(scater)
+library(igraph)
+library(scuttle)
+library(VisiumIO)
+library(ggspavis)
+library(patchwork)
+library(SpatialExperiment)
+```
+
+```{r load-data, message=FALSE, results="hide"}
+# retrieve dataset from OSF repo
+id <- "https://osf.io/5n4q3"
+df <- osf_retrieve_node(id)
+id <- "Visium_HumanColon_Oliveria"
+fd <- osf_ls_files(df, id)
+dir.create(td <- tempfile())
+osf_download(fd, td, recurse=TRUE)
+```
+
+```{r spe}
+# read into 'SpatialExperiment'
+obj <- TENxVisium(
+    spacerangerOut=td, 
+    format="h5", 
+    images="lowres")
+(spe <- import(obj))
+```
+
+```{r plt-hne, echo=FALSE, fig.width=12, fig.height=4.5}
+xy <- spatialCoords(spe)*scaleFactors(spe)
+xs <- range(xy[, 1]); ys <- nrow(imgRaster(spe))-range(xy[, 2])
+box <- geom_rect(
+    xmin=xs[1], xmax=xs[2], ymin=ys[1], ymax=ys[2],
+    col="black", fill=NA, linetype=2, linewidth=2/3)
+plotVisium(spe, spots=FALSE, point_size=.75) + box +
+plotVisium(spe, point_size=1.5, zoom=TRUE) +
+plot_layout(nrow=1) & facet_null()
+```
+
+## Quality control
+
+```{r add-qc}
+# use gene symbols as feature names
+rownames(spe) <- make.unique(rowData(spe)$Symbol)
+# add per-cell quality control metrics
+sub <- list(mt=grep("^MT-", rownames(spe)))
+spe <- addPerCellQCMetrics(spe, subsets=sub)
+```
+
+```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=7, fig.height=3}
+spe$log_sum <- log1p(spe$sum)
+plotSpots(spe, annotate="log_sum") + ggtitle("library size") +
+plotSpots(spe, annotate="subsets_mt_percent") + ggtitle("% mitochondrial") +
+plot_layout(nrow=1) & theme(
+    legend.key.width=unit(0.5, "lines"),
+    legend.key.height=unit(1, "lines")) &
+    scale_color_gradientn(colors=pals::jet())
+```
+
+## Processing
+
+```{r pro}
+# log-library size normalization
+spe <- logNormCounts(spe)
+# highly variable feature selection
+tbl <- modelGeneVar(spe)
+sel <- getTopHVGs(tbl, n=2e3)
+# principal component analysis
+spe <- runPCA(spe, subset_row=sel)
+# dimensionality reduction
+spe <- runUMAP(spe, dimred="PCA")
+```
+
+## Clustering
+
+```{r clu}
+# build shared nearest-neighbor (SNN) graph
+g <- buildSNNGraph(spe, use.dimred="PCA", type="jaccard")
+# cluster via Leiden community detection algorithm
+k <- cluster_leiden(g, objective_function="modularity", resolution=1)
+table(spe$Leiden <- factor(k$membership))
+```
+
+## Exploratory
+
+```{r plt-xy-Leiden, fig.width=3.5, fig.height=3}
+plotSpots(spe, annotate="Leiden") +
+    theme(legend.key.size=unit(0, "lines")) +
+    scale_color_manual(values=unname(pals::trubetskoy()))
+```
+
+## Signatures
+
+Rather than investigating single genes, we can also evaluate the expression of sets of genes (e.g., pathway signatures); e.g., malignant tissue may differ in metabolic activity such as glycolysis and fatty acid metabolism, or exhibit increased apoptosis (cell death) etc. 
+
+`r BiocStyle::Biocpkg("AUCell")`, 
+
+```{r}
+
+```
+
+## Appendix
+
+### References {.unnumbered}
