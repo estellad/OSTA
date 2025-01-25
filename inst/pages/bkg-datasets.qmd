@@ -1,31 +1,39 @@
 # Datasets {#sec-bkg-datasets}
 
-Throughout this book, we will rely on a set of publicly available datasets that 
-cover different sequencing- and imaging-based spatial transcriptomics platforms, 
-namely: Visium, Visium HD, Xenium (10x Genomics) and CosMx (NanoString). 
+Throughout this book, we will rely on a set of publicly available datasets that cover different sequencing- and imaging-based spatial transcriptomics platforms, namely: Visium, Visium HD, Xenium (10x Genomics) and CosMx (NanoString). 
 
-These have been deposited in an Open Storage Framework (OFS) repository 
-[here](https://osf.io/5n4q3), and are thereby easily retrievable from 
-within R using the `r BiocStyle::CRANpkg("osfr")` package.
+These have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and are thereby easily retrievable from within R using the `r BiocStyle::CRANpkg("osfr")` package:
 
-Below, we briefly summarize the characteristics of each dataset, 
-and note across which parts of the book each dataset is being used.
+```{r osf}
+# list datasets available at OSF repo
+id <- "https://osf.io/5n4q3"
+df <- osfr::osf_retrieve_node(id)
+osfr::osf_ls_files(df)$name
+```
+
+Below, we briefly summarize the characteristics of each dataset, and note across which parts of the book each dataset is being used.
 
 ## Human Breast Cancer
 
-- available at: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
-- published in: @Janesick2023
+Chromium scFFPE-seq data was acquired on two sections from one tissue block, adjacent sections of which were profiled with Visium and Xenium; specifically:
+
 - Visium: 18,085 genes x 4,992 cells
 - Xenium: 313 genes x 167,780 cells
-- scRNA-seq: TODO
+- Chromium: 37,143 genes x 708,252 cells
+- published in: @Janesick2023
+- available at: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
 
-## Human Colon Cancer
+## Human Colorectal Cancer
 
-- available at: ?
-- published in: Oliveria?
-- Visium: 
-- Xenium: 
-- scRNA-seq: 
+Subsets of tissue from $n=5$ colorectal adenocarcinoma (CRC) and $n=3$ normal adjacent tissue (NAT) FFPE blocks were profiled with single-cell (Chromium) and spatial (Visium, Visium HD and Xenium) assays; specifically:
+
+- Chromium: 18,082 genes x 279,609 cells
+- Visium: 18,085 genes x 4,269 spots
+- Visium HD:  
+18,085 genes x 8,731,400(2um) /  
+545,913(8um) / 137,051(16um) bins
+- published in: @Oliveira2024
+- available at: [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression/dataset-human-crc)
 
 ## Mouse/Human Brain
 
