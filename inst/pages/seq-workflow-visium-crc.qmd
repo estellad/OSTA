@@ -256,20 +256,26 @@ lapply(c("Leiden", "Domain", "RCDT"),
 ```
 
 To help characterize subpopulations from unsupervised clustering, we can view
-their distribution across deconvolution-based domains; e.g., cancerous regions
-are quite divers, while (normal) epithelia almost completely map to one cluster:
+their distribution across deconvolution-based clusters and broad domains; e.g., 
+tumor spots are quite divers, while smooth muscle spots and (normal) epithelia 
+map almost completely to a single cluster:
 
-```{r plt-clu-fq, fig.width=3, fig.height=2}
+```{r plt-clu-fq, fig.width=6, fig.height=2.5}
 #| code-fold: true
-cd <- data.frame(colData(spe))
-ns <- with(cd, table(Domain, Leiden))
-df <- as.data.frame(ns)
-ggplot(df, aes(Domain, Freq, fill=Leiden)) +
-    coord_fixed(4, expand=FALSE) + 
-    labs(x="Domain", y="Proportion") +
-    geom_col(width=1, col="white", position="fill") + 
-    scale_fill_manual(values=unname(pals::trubetskoy())) +
-    theme_minimal() + theme(legend.key.size=unit(2/3, "lines"))
+ggplot(
+    as.data.frame(with(cd, table(RCDT, Leiden))), 
+    aes(Freq, RCDT, fill=Leiden)) + ggtitle("RCDT") +
+ggplot(
+    as.data.frame(with(cd, table(Domain, Leiden))), 
+    aes(Freq, Domain, fill=Leiden)) + ggtitle("Domain") +
+plot_layout(nrow=1, guides="collect") &
+    labs(x="Proportion", y=NULL) &
+    coord_cartesian(expand=FALSE) &
+    geom_col(width=1, col="white", position="fill") &
+    scale_fill_manual(values=unname(pals::trubetskoy())) &
+    theme_minimal() & theme(aspect.ratio=1,
+        legend.key.size=unit(2/3, "lines"),
+        plot.title=element_text(hjust=0.5))
 ```
 
 Let's inspect the key drivers of (expression) variability in terms of PCs.
