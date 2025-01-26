@@ -259,17 +259,17 @@ To help characterize subpopulations from unsupervised clustering, we can view
 their distribution across deconvolution-based domains; e.g., cancerous regions
 are quite divers, while (normal) epithelia almost completely map to one cluster:
 
-```{r fig.width=3.5, fig.height=3}
+```{r plt-clu-fq, fig.width=3, fig.height=2}
 #| code-fold: true
 cd <- data.frame(colData(spe))
 ns <- with(cd, table(Domain, Leiden))
 df <- as.data.frame(ns)
 ggplot(df, aes(Domain, Freq, fill=Leiden)) +
     coord_fixed(4, expand=FALSE) + 
-    labs(x="Proportion", y="Domain") +
-    geom_col(width=1, col="white", position="fill") +
+    labs(x="Domain", y="Proportion") +
+    geom_col(width=1, col="white", position="fill") + 
     scale_fill_manual(values=unname(pals::trubetskoy())) +
-    theme_minimal() + theme(legend.key.size=unit(2/3, "lines")) 
+    theme_minimal() + theme(legend.key.size=unit(2/3, "lines"))
 ```
 
 Let's inspect the key drivers of (expression) variability in terms of PCs.
