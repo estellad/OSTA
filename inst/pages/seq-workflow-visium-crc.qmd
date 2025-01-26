@@ -283,7 +283,7 @@ Considering clustering and deconvolution results from above, we can see that
 - PC1 distinguishes stromal from both normal and malignant epithelia;
 - PC2 clearly separates (normal) intestinal epithelium from all else;
 - PC3 captures a fibroblast-rich region, and normal epithelia;
-- PC5 separates smooth muscle cells; etc.
+- PC5 separates fibroblasts and smooth muscle cells; etc.
 
 ```{r plt-pcs-xy, message=FALSE, fig.width=9, fig.height=5}
 #| code-fold: true
