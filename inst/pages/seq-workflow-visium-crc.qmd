@@ -280,18 +280,19 @@ plot_layout(nrow=1, guides="collect") &
 Let's inspect the key drivers of (expression) variability in terms of PCs.
 Considering clustering and deconvolution results from above, we can see that 
 
-- PC1 distinguishes stromal from both normal and malignant epithelial regions
-- PC2 clearly separates (normal) intestinal epithelium from all else
-- PC3 captures a fibroblast-rich region, and normal epithelia
+- PC1 distinguishes stromal from both normal and malignant epithelia;
+- PC2 clearly separates (normal) intestinal epithelium from all else;
+- PC3 captures a fibroblast-rich region, and normal epithelia;
+- PC5 separates smooth muscle cells; etc.
 
-```{r plt-pcs-xy, message=FALSE, fig.width=9, fig.height=2.5}
+```{r plt-pcs-xy, message=FALSE, fig.width=9, fig.height=5}
 #| code-fold: true
 pcs <- reducedDim(spe, "PCA")
 colData(spe)[colnames(pcs)] <- pcs
-lapply(colnames(pcs)[seq_len(3)], 
+lapply(colnames(pcs)[seq_len(6)], 
     \(.) plotSpots(spe, annotate=.) +
     scale_color_gradientn(., colors=pals::jet())) |>
-    wrap_plots(nrow=1) & theme(
+    wrap_plots(nrow=2) & theme(
         plot.title=element_blank(),
         legend.key.width=unit(0.5, "lines"),
         legend.key.height=unit(1, "lines"))
