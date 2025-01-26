@@ -1,5 +1,9 @@
 # Workflow: Visium CRC {#sec-seq-workflow-visium-crc}
 
+```{r include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
 ## Preamble
 
 ### Introduction
@@ -15,11 +19,13 @@ library(scater)
 library(igraph)
 library(AUCell)
 library(scuttle)
+library(spacexr)
 library(VisiumIO)
 library(jsonlite)
 library(ggspavis)
 library(patchwork)
 library(BiocParallel)
+library(DropletUtils)
 library(SpatialExperiment)
 # specify whether/how to 
 # do out parallelization
@@ -31,7 +37,7 @@ set.seed(194849)
 
 ## Data import
 
-```{r load-data, message=FALSE, results="hide"}
+```{r load-spe, message=FALSE, results="hide"}
 # retrieve dataset from OSF repo
 id <- "https://osf.io/5n4q3"
 df <- osf_retrieve_node(id)
@@ -71,9 +77,9 @@ sub <- list(mt=grep("^MT-", rownames(spe)))
 spe <- addPerCellQCMetrics(spe, subsets=sub)
 ```
 
-```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=7, fig.height=3}
+```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
 spe$log_sum <- log1p(spe$sum)
-plotSpots(spe, annotate="log_sum") + ggtitle("library size") +
+plotSpots(spe, annotate="log_sum") + ggtitle("log-library size") +
 plotSpots(spe, annotate="subsets_mt_percent") + ggtitle("% mitochondrial") +
 plot_layout(nrow=1) & theme(
     legend.key.width=unit(0.5, "lines"),
@@ -122,27 +128,127 @@ spe <- runPCA(spe, subset_row=sel)
 
 ## Clustering
 
+As an unsupervised approach, we perform shared nearest-neighbor (SNN) 
+graph-based clustering using the Leiden community detection algorithm.
+
 ```{r clu}
 # build shared nearest-neighbor (SNN) graph
 g <- buildSNNGraph(spe, use.dimred="PCA", type="jaccard")
 # cluster via Leiden community detection algorithm
-k <- cluster_leiden(g, objective_function="modularity", resolution=1)
+k <- cluster_leiden(g, objective_function="modularity", resolution=0.5)
 table(spe$Leiden <- factor(k$membership))
+```
+
+## Deconvolution
+
+In a complementary approach, we deconvolute spot measurements using (annotated)
+reference single-cell data provided by the authors. Let's first retrieve these
+data, alongside corresponding cell metadata, which includes low- (`Level1`) and
+high-resolution (`Level2`) annotations into 10 and 32 subpopulations, respectively.
+
+```{r load-sce, message=FALSE, results="hide"}
+# retrieve dataset from OSF repo
+id <- "https://osf.io/5n4q3"
+df <- osf_retrieve_node(id)
+id <- "Chromium_HumanColon_Oliveria"
+fd <- osf_ls_files(df, id)
+dir.create(td <- tempfile())
+osf_download(fd, td, recurse=TRUE)
+```
+
+```{r sce}
+# read into 'SingleCellExperiment'
+fs <- list.files(td, full.names=TRUE)
+h5 <- grep("h5$", fs, value=TRUE)
+sce <- read10xCounts(h5, col.names=TRUE)
+# add cell metadata
+csv <- grep("csv$", fs, value=TRUE)
+cd <- read.csv(csv, row.names=1)
+colData(sce)[names(cd)] <- cd[colnames(sce), ]
+# use gene symbols as feature names
+rownames(sce) <- make.unique(rowData(sce)$Symbol)
+# exclude cells deemed to be of low-quality
+table(sce$QCFilter)
+sce <- sce[, sce$QCFilter == "Keep"]
+# tabulate subpopulations by disease status
+sce$Group <- gsub("P[0-9]", "", sce$Patient)
+sce$Patient <- gsub("(P[0-9]).*", "\\1", sce$Patient)
+table(sce$Level1, sce$Group)
+```
+
+[Here, we filter the reference data to contain only cells from the same patient.
+This is not strictly necessary, assuming that clusters are transcriptionally
+stable across patients, but helps with speeding up computations here.]{.aside}
+Next, we perform deconvolution with `r BiocStyle::Githubpkg("dmcable/spacexr")`.
+By default, `run.RCTD()`'s `doublet_mode` argument is set to `"doublet"`, i.e., 
+at most two subpopulations are fit per pixel; here, we set `doublet_mode="full"` 
+in order to allow for an arbitrary number of subpopulations to be fit instead.
+
+```{r dec, message=FALSE}
+xy <- data.frame(spatialCoords(spe))
+.spe <- SpatialRNA(xy, counts(spe))
+.sce <- sce[, sce$Patient == "P1"]
+ids <- factor(.sce$Level1)
+names(ids) <- colnames(.sce)
+ref <- Reference(counts(.sce), ids)
+res <- create.RCTD(.spe, ref, max_cores=th)
+res <- run.RCTD(res, doublet_mode="full")
+```
+
+Weights inferred by `RCDT` should be normalized such 
+that proportions of cell types sum to 1 in each spot: 
+
+```{r dec-res}
+# normalize weights to obtain proportions
+ws <- normalize_weights(res@results$weights)
+# spot check with some tolerance in accuracy
+all(abs(rowSums(ws)-1) < 1e-12) 
+# add proportion estimates as spot metadata
+ws <- data.frame(as.matrix(ws))
+colData(spe)[names(ws)] <- ws
+```
+
+For comparison with unsupervised clustering (SNN-based Leiden), we also include 
+assignments we would obtain if we were to assign spots the most frequent label
+(in terms of deconvolution estimates):
+
+```{r}
+ids <- names(ws)[apply(ws, 1, which.max)]
+table(spe$RCDT <- factor(ids), spe$Leiden)
 ```
 
 ## Exploratory
 
-```{r plt-clu-xy, message=FALSE, fig.width=3.5, fig.height=3}
+Let's visualize deconvolution weights in space, i.e., coloring by the 
+proportion of a given cell type estimated to fall within a given spot:
+
+```{r plt-dec-xy, message=FALSE, fig.width=8.5, fig.height=7}
 #| code-fold: true
-#| fig-align: center
+lapply(names(ws), \(.) 
+    plotSpots(spe, annotate=.)) |>
+    wrap_plots(nrow=3) & theme(
+    legend.key.width=unit(0.5, "lines"),
+    legend.key.height=unit(1, "lines")) &
+    scale_color_gradientn(colors=pals::jet())
+```
+
+```{r plt-clu-xy, message=FALSE, fig.width=7, fig.height=2.5}
+#| code-fold: true
 plotSpots(spe, annotate="Leiden") +
-    theme(legend.key.size=unit(0, "lines")) +
+plotSpots(spe, annotate="RCDT") +
+plot_layout(nrow=1) &
+    theme(legend.key.size=unit(0, "lines")) &
     scale_color_manual(values=unname(pals::trubetskoy()))
 ```
 
-Let's inspect the key drivers of (expression) variability in terms of PCs:
+Let's inspect the key drivers of (expression) variability in terms of PCs.
+Considering clustering and deconvolution results from above, we can see that 
 
-```{r plt-pcs-xy, message=FALSE, fig.width=10, fig.height=3}
+- PC1 separate stromal from both normal and malignant epithelial regions
+- PC2 clearly separates (normal) intestinal epithelium from (malignant) tumor
+- PC3 captures a fibroblast-rich region surrounding a distinct tumor region
+
+```{r plt-pcs-xy, message=FALSE, fig.width=9, fig.height=2.5}
 #| code-fold: true
 pcs <- reducedDim(spe, "PCA")
 colData(spe)[colnames(pcs)] <- pcs
@@ -171,19 +277,13 @@ lapply(c("detected", "log_sum", "subsets_mt_percent"), \(.)
         legend.key.size=unit(0, "lines"))
 ```
 
-## Annotation
-
-```{r}
-
-```
-
 ## Signatures
 
 [Note that such gene lists like these may come from many different places - e.g., in-house analyses, other publications befitting the research question etc. As such, they may also be read into are from a *.csv* file, or stem from upstream analyses. In any case, they should be curated well and interpreted with caution.]{.aside}
-Rather than investigating single genes, we can also evaluate the expression of sets of genes (e.g., pathway signatures); e.g., malignant tissue may differ in metabolic activity such as glycolysis and fatty acid metabolism, or exhibit increased apoptosis (cell death) etc. 
-Here, we retrieve hallmark gene sets for said biological phenomena from [MSigDB](https://www.gsea-msigdb.org/gsea/msigdb):
+Rather than investigating single genes, we can also evaluate the expression of sets of genes (e.g., pathway signatures); e.g., malignant tissue may differ in metabolic activity such as glycolysis and fatty acid metabolism, or exhibit increased apoptosis (cell death) etc. Here, we retrieve hallmark gene sets for said biological phenomena from [MSigDB](https://www.gsea-msigdb.org/gsea/msigdb):
 
 ```{r MSigDB}
+#| code-fold: true
 url <- paste0(
     "https://www.gsea-msigdb.org/gsea/msigdb/human/",
     "download_geneset.jsp?geneSetName=%s&fileType=json")
@@ -200,6 +300,9 @@ set <- lapply(ids, \(id) {
     gs <- match(gs, rowData(spe)$Symbol, nomatch=0)
     rownames(spe)[gs]
 })
+```
+
+```{r set}
 # we now have a list of gene sets
 # (element is a character vector)
 head(set$FA_metab)
@@ -221,7 +324,11 @@ auc <- AUCell_calcAUC(geneSets=set, rankings=rnk, nCores=th, verbose=FALSE)
 colData(spe)[rownames(auc)] <- t(assay(auc)) 
 ```
 
-```{r plt-auc-xy, message=FALSE, fig.width=11, fig.height=3}
+To summarize, `FA_metabolism` absent in stromal regions; the fibroblast ring
+surrounding the cancerous patch exhibit a lot of `apoptosis` and `hypoxia`; 
+`glycolysis` is absent in stromal, and higher in malignant epithelial regions.
+
+```{r plt-auc-xy, message=FALSE, fig.width=10, fig.height=3}
 #| code-fold: true
 lapply(rownames(auc), \(.) {
     spe[[.]] <- scale(spe[[.]]) # scaling
@@ -238,17 +345,39 @@ lapply(rownames(auc), \(.) {
         legend.key.height=unit(1, "lines")) 
 ```
 
-We can also compare (average) signature scores between subpopulations:
+To ease interpretability, we can stratify `AUCell` scores by spot labels; 
+these may stem from an unsupervised or deconvolution-based approach:
 
-```{r plt-auc-hm, fig.width=6, fig.height=2}
+```{r plt-auc-hm, fig.width=2.5, fig.height=3}
+#| layout-ncol: 2
 #| code-fold: true
-# aggregate AUC values by cluster
-mu <- aggregateAcrossCells(auc, spe$Leiden, 
-    use.assay.type="AUC", statistics="mean")
-# visualize as (set x cluster) heatmap
-plotHeatmap(mu, color=pals::coolwarm(),
-    features=rownames(mu), exprs_values="AUC", 
-    center=TRUE, scale=TRUE, show_colnames=TRUE)
+for (. in c("Leiden", "RCDT")) {
+    # aggregate AUC values by cluster
+    mu <- aggregateAcrossCells(auc, spe[[.]], 
+        use.assay.type="AUC", statistics="mean")
+    # visualize as (cluster x set) heatmap
+    pheatmap::pheatmap(
+        mat=t(assay(mu)), scale="column", col=pals::coolwarm(), main=.,
+        cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
+}
+```
+
+For the latter, we may instead correlate set scores with proportion estimates
+(rather than discretizing labels according to the dominant subpopulation):
+
+```{r cor-auc-dec}
+# correlate 'AUCell' signature scores with subpopulation
+# proportion estimates from deconvolution with 'RCDT'
+cm <- cor(as.matrix(ws), t(assay(auc)))
+```
+
+```{r plt-cor, fig.width=2.5, fig.height=2.5}
+#| code-fold: true
+#| fig-align: center
+pheatmap::pheatmap(cm, 
+    col=pals::coolwarm(),
+    cellwidth=10, cellheight=10, 
+    treeheight_row=5, treeheight_col=5)
 ```
 
 ## Appendix

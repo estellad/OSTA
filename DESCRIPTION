@@ -32,11 +32,13 @@ biocViews:
 Depends: 
     R (>= 4.3)
 Imports:
+    AUCell,
     Banksy,
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
     dplyr, 
+    DropletUtils,
     EBImage,
     ExperimentHub, 
     ggplot2, 
@@ -45,20 +47,25 @@ Imports:
     hoodscanR,
     igraph, 
     imcRtools, 
+    jsonlite, 
     lobstr,
     nnSVG, 
     openxlsx,
     osfr,
+    pals, 
     patchwork, 
     pheatmap, 
     RANN,
     RColorBrewer,
     rtracklayer, 
+    scales, 
     scater, 
     scran,
     scuttle, 
     SFEData,
+    SingleR, 
     SpaceTrooper,
+    spacexr,
     SpatialExperiment, 
     SpatialExperimentIO, 
     spatialLIBD,
@@ -82,8 +89,10 @@ Suggests:
     xml2
 Remotes:
     drisso/SpaceTrooper@devel_spatialBook,
+    drisso/SpaceTrooper@devel_spatialBook,
     estellad/SpatialExperimentIO,
-    mjemons/spatialFDA
+    mjemons/spatialFDA,
+    dmcable/spacexr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
