@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.25">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>18&nbsp; Neighborhood analysis – Principles of Spatial (Transcript)omics Analysis with Bioconductor</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/img-cell-comm.html" rel="next">
+<link href="../pages/img-clustering.html" rel="prev">
+<link href="../assets/favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-fb94c86811498465fbd3895262a6d4d4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-e6e9418fb358d04eef0000e07d65fad5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/img-introduction.html">Imaging-based platforms</a></li><li class="breadcrumb-item"><a href="../pages/img-neighbors.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Neighborhood analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">PrinciplesSTA</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/preamble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preamble</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/bkg-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/bkg-spatial-omics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Spatial omics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/bkg-infrastructure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Infrastructure</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Sequencing-based platforms</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-load-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Load data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-quality-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Quality control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-normalize-featselect-dimred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Normalization, feature selection, and dimensionality reduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-spot-deconvolution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Spot deconvolution</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-spatial-co-localization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Spatial co-localization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-marker-genes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Marker genes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-workflow-human-dlpfc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Workflow: Human DLPFC</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/seq-workflow-spatialibd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Workflow: spatialLIBD</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Imaging-based platforms</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-quality-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Quality control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Dimensionality reduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-neighbors.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Neighborhood analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-cell-comm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Cell communication</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-sub-cellular.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Sub-cellular analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-workflow-xenium.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Xenium workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/img-workflow-cosmx.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">CosMx workflow</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Technology-agnostic/cross-platform/downstream analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-spatially-variable.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Spatially variable genes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-featureset-signatures.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Gene/feature-set signatures</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-spat-stat.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Spatial Statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-registration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Spatial registration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-multi-sample-de.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Multiple-sample differential expression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/crs-workflow-xenvis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Workflow: Xenium + Visium</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/apx-acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Acknowledgments</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/apx-related-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Related resources</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#dependencies" id="toc-dependencies" class="nav-link active" data-scroll-target="#dependencies"><span class="header-section-number">18.1</span> Dependencies</a></li>
+  <li><a href="#nearest-neighbors" id="toc-nearest-neighbors" class="nav-link" data-scroll-target="#nearest-neighbors"><span class="header-section-number">18.2</span> Nearest neighbors</a></li>
+  <li><a href="#spatial-contexts" id="toc-spatial-contexts" class="nav-link" data-scroll-target="#spatial-contexts"><span class="header-section-number">18.3</span> Spatial contexts</a></li>
+  <li><a href="#co-localization" id="toc-co-localization" class="nav-link" data-scroll-target="#co-localization"><span class="header-section-number">18.4</span> Co-localization</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/img-introduction.html">Imaging-based platforms</a></li><li class="breadcrumb-item"><a href="../pages/img-neighbors.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Neighborhood analysis</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-img-neighbors" class="quarto-section-identifier"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Neighborhood analysis</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="dependencies" class="level2" data-number="18.1"><h2 data-number="18.1" class="anchored" data-anchor-id="dependencies">
+<span class="header-section-number">18.1</span> Dependencies</h2>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">RColorBrewer</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/drighelli/SpatialExperiment">SpatialExperiment</a></span><span class="op">)</span></span>
+<span><span class="co"># load data from previous section</span></span>
+<span><span class="va">spe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"img-spe_cl.rds"</span><span class="op">)</span></span>
+<span><span class="co"># basic theme for spatial plots</span></span>
+<span><span class="va">theme_xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_equal</a></span><span class="op">(</span>expand<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>        plot.margin<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span>l<span class="op">=</span><span class="fl">5</span><span class="op">)</span>,</span>
+<span>        legend.key<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        panel.background<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill<span class="op">=</span><span class="st">"black"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="nearest-neighbors" class="level2" data-number="18.2"><h2 data-number="18.2" class="anchored" data-anchor-id="nearest-neighbors">
+<span class="header-section-number">18.2</span> Nearest neighbors</h2>
+<p>Custom spatial analyses may rely on identifying nearest neighbors (NNs) of cells. We recommend <em><a href="https://CRAN.R-project.org/package=RANN">RANN</a></em> for this purpose, which finds NNs in <strong><span class="math inline">\(O(N\log N)\)</span> time for <span class="math inline">\(N\)</span> cells</strong> (c.f., conventional approaches would take <span class="math inline">\(O(N^2)\)</span> time) by relying on a Approximate Near Neighbor (ANN) C++ library. Furthermore, there is support for <strong>exact, approximate, and fixed-radius searchers</strong>. The latter is of particular interest in biology; e.g., one might require <span class="math inline">\(k\)</span>NNs to lie within a biologically sensible distance as to avoid consideration of cells that are far-off, especially in sparse regions or at tissue borders.</p>
+<p>As a toy example, we here compute the <span class="math inline">\(k\)</span>NNs between a pair of subpopulations, with and without thresholding on NN distances (<code>searchtype="radius"</code>).</p>
+<ul>
+<li><p>For the first approach, each cell will receive <span class="math inline">\(k\)</span> neighbors exactly,<br>
+but these may lie within an arbitrary distance.</p></li>
+<li><p>For the second approach, cells will receive <span class="math inline">\(\leq k\)</span> neighbors,<br>
+depending on how many cells lie within a radius <span class="math inline">\(r\)</span>.</p></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jefferislab/RANN">RANN</a></span><span class="op">)</span></span>
+<span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fl">10</span> <span class="co"># num. neighbors</span></span>
+<span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fl">50</span> <span class="co"># dist. threshold</span></span>
+<span><span class="va">i</span> <span class="op">&lt;-</span> <span class="va">spe</span><span class="op">$</span><span class="va">k</span> <span class="op">==</span> <span class="fl">1</span> <span class="co"># source</span></span>
+<span><span class="va">j</span> <span class="op">&lt;-</span> <span class="va">spe</span><span class="op">$</span><span class="va">k</span> <span class="op">==</span> <span class="fl">4</span> <span class="co"># target</span></span>
+<span><span class="va">xy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html">spatialCoords</a></span><span class="op">(</span><span class="va">spe</span><span class="op">)</span></span>
+<span><span class="co"># k-NN search: all cells have k neighbors</span></span>
+<span><span class="va">ns_k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jefferislab.github.io/RANN/reference/nn2.html">nn2</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="op">]</span>, <span class="va">xy</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, k<span class="op">=</span><span class="va">k</span><span class="op">)</span></span>
+<span><span class="va">is_k</span> <span class="op">&lt;-</span> <span class="va">ns_k</span><span class="op">$</span><span class="va">nn.idx</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">is_k</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">==</span> <span class="va">k</span><span class="op">)</span> </span>
+<span><span class="co"># w/ fixed-radius: cells have 0-k neighbors</span></span>
+<span><span class="va">ns_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jefferislab.github.io/RANN/reference/nn2.html">nn2</a></span><span class="op">(</span><span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="op">]</span>, <span class="va">xy</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, k<span class="op">=</span><span class="va">k</span>, searchtype<span class="op">=</span><span class="st">"radius"</span>, r<span class="op">=</span><span class="va">r</span><span class="op">)</span></span>
+<span><span class="va">is_r</span> <span class="op">&lt;-</span> <span class="va">ns_r</span><span class="op">$</span><span class="va">nn.idx</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">is_r</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  [1] TRUE
+##  [1]  0 10</code></pre>
+</div>
+</div>
+<p>The neighbors obtained via fixed-radius search (right) are less scattered than those obtained for unlimited distances (left); the former are arguably more meaningful in a biological context:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">xy</span>, <span class="fu">colData</span><span class="op">(</span><span class="va">spe</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">x_centroid</span>, <span class="va">y_centroid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df</span>, col<span class="op">=</span><span class="st">"navy"</span>, shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, col<span class="op">=</span><span class="st">"magenta"</span>, shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> </span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">p0</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span></span>
+<span>    data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">j</span><span class="op">)</span><span class="op">[</span><span class="va">is_k</span><span class="op">]</span>, <span class="op">]</span>, </span>
+<span>    col<span class="op">=</span><span class="st">"gold"</span>, shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"k-nearest neighbors"</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="va">p0</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span></span>
+<span>    data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">j</span><span class="op">)</span><span class="op">[</span><span class="va">is_r</span><span class="op">]</span>, <span class="op">]</span>, </span>
+<span>    col<span class="op">=</span><span class="st">"gold"</span>, shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"fixed-radius search"</span><span class="op">)</span></span>
+<span><span class="op">(</span><span class="va">p1</span> <span class="op">|</span> <span class="va">p2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html">plot_layout</a></span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">theme_xy</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img-neighbors_files/figure-html/nns-plot-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption>Results of kNN searches. Left: basic kNN search, highlighting source (pink) and target cells (gold). Right: kNN search with same k, but thresholding on neighbor distances.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="exhaustive fixed-radius search">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+exhaustive fixed-radius search
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Note that, we could also set a very large <code>k</code> in order to identify <em>all</em> neighbors within a radius <code>r</code>. In order to prevent unnecessarily costly searches, it is sensible to estimate how many neighbors we would expect, and to set <code>k</code> accordingly. <code><a href="https://jefferislab.github.io/RANN/reference/nn2.html">nn2()</a></code> will otherwise find each cells’ <span class="math inline">\(k\)</span>NNs, and set the indices of those with a distance <span class="math inline">\(&gt;r\)</span> to 0.</p>
+<p>As an exemplary approach, we here sample 1,000 cells to estimate the highest number of NNs obtained, considering <em>half</em> of all target cells as potential NNs:</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># test search</span></span>
+<span><span class="va">.i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">i</span><span class="op">)</span>, <span class="fl">1e3</span><span class="op">)</span></span>
+<span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jefferislab.github.io/RANN/reference/nn2.html">nn2</a></span><span class="op">(</span></span>
+<span>    <span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="op">]</span>, <span class="va">xy</span><span class="op">[</span><span class="va">.i</span>, <span class="op">]</span>, </span>
+<span>    k<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">j</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>    searchtype<span class="op">=</span><span class="st">"radius"</span>, r<span class="op">=</span><span class="va">r</span><span class="op">)</span></span>
+<span><span class="op">(</span><span class="va">.k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">ns</span><span class="op">$</span><span class="va">nn.idx</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  [1] 49</code></pre>
+</div>
+</div>
+<p>For our actual search, we then set <code>k</code> to be twice our estimate. As a final spot-check, we make sure that all cells have fewer than <code>k</code> NNs, since we might otherwise be missing some.</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># real search</span></span>
+<span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jefferislab.github.io/RANN/reference/nn2.html">nn2</a></span><span class="op">(</span></span>
+<span>    <span class="va">xy</span><span class="op">[</span><span class="va">j</span>, <span class="op">]</span>, <span class="va">xy</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, </span>
+<span>    k<span class="op">=</span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">ceiling</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">.k</span><span class="op">)</span>, </span>
+<span>    searchtype<span class="op">=</span><span class="st">"radius"</span>, r<span class="op">=</span><span class="va">r</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">ns</span><span class="op">$</span><span class="va">nn.idx</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;</span> <span class="va">k</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  [1] TRUE</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="spatial-contexts" class="level2" data-number="18.3"><h2 data-number="18.3" class="anchored" data-anchor-id="spatial-contexts">
+<span class="header-section-number">18.3</span> Spatial contexts</h2>
+<p>Spatial niche analysis aims at identifying regions of homogeneous composition by grouping cells based on their microenvironment. To this end, methods such as <em><a href="https://bioconductor.org/packages/3.20/imcRtools">imcRtools</a></em> <span class="citation" data-cites="Windhager2023-imcRtools">(<a href="#ref-Windhager2023-imcRtools" role="doc-biblioref">Windhager et al. 2023</a>)</span> rely on a <span class="math inline">\(k\)</span>-nearest-neighbor (<span class="math inline">\(k\)</span>NN) graph (based on Euclidean cell-to-cell distances), and clustering cells using common clustering algorithms (according to their neighborhood’s subpopulation frequencies).</p>
+<p>Here, we demonstrate how to identify spatial contexts based on <span class="math inline">\(k\)</span>-means clustering on cluster frequencies among (Euclidean) <span class="math inline">\(k\)</span>NNs. We recommend readers consult <code>imcRtools</code>’ documentation for a much wider range of visualizations and downstream analyses in this context.</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/BodenmillerGroup/imcRtools">imcRtools</a></span><span class="op">)</span></span>
+<span><span class="co"># construct kNN-graph based on Euclidean distances</span></span>
+<span><span class="va">sqe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/imcRtools/man/buildSpatialGraph.html">buildSpatialGraph</a></span><span class="op">(</span><span class="va">spe</span>, </span>
+<span>    coords<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html">spatialCoordsNames</a></span><span class="op">(</span><span class="va">spe</span><span class="op">)</span>,</span>
+<span>    img_id<span class="op">=</span><span class="st">"sample_id"</span>, type<span class="op">=</span><span class="st">"knn"</span>, k<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co"># compute cluster frequencies among each cell's kNNs</span></span>
+<span><span class="va">sqe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/imcRtools/man/aggregateNeighbors.html">aggregateNeighbors</a></span><span class="op">(</span><span class="va">sqe</span>, </span>
+<span>    colPairName<span class="op">=</span><span class="st">"knn_interaction_graph"</span>, </span>
+<span>    aggregate_by<span class="op">=</span><span class="st">"metadata"</span>, count_by<span class="op">=</span><span class="st">"k"</span><span class="op">)</span></span>
+<span><span class="co"># view composition of 1st cell's kNNs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">sqe</span><span class="op">$</span><span class="va">aggregatedNeighbors</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  1 2 3 4 5 6 7 8 9 
+##  1 0 0 0 0 0 0 0 0</code></pre>
+</div>
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># cluster cells by neighborhood compositions</span></span>
+<span><span class="va">ctx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html">kmeans</a></span><span class="op">(</span><span class="va">sqe</span><span class="op">$</span><span class="va">aggregatedNeighbors</span>, centers<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">sqe</span><span class="op">$</span><span class="va">ctx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">ctx</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  
+##      1     2     3     4     5 
+##  13687 63496 13520 13536 36029</code></pre>
+</div>
+</div>
+<p>Let’s quickly view the subpopulation composition of each spatial context:</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html">spatialCoords</a></span><span class="op">(</span><span class="va">sqe</span><span class="op">)</span>, <span class="fu">colData</span><span class="op">(</span><span class="va">sqe</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">100</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://rdrr.io/r/base/proportions.html">prop.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">k</span>, <span class="va">ctx</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##     ctx
+##  k       1     2     3     4     5
+##    1 10.27  0.54  1.86 82.60  1.46
+##    2  8.34 16.39  2.88  2.29  4.27
+##    3  0.15  1.57  0.27  4.37 82.69
+##    4 42.16  0.51  9.02  6.54  0.00
+##    5  7.34 12.73  0.43  0.47  3.72
+##    6 10.15  0.14 83.51  1.93  0.07
+##    7  6.41 43.32  1.47  1.12  3.76
+##    8 14.57 19.06  0.56  0.66  3.77
+##    9  0.61  5.74  0.00  0.03  0.26</code></pre>
+</div>
+</div>
+<p>Secondly, let’s visualize the obtained spatial contexts in space:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pal_k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html">brewer.pal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html">nlevels</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">k</span><span class="op">)</span>, <span class="st">"Paired"</span><span class="op">)</span></span>
+<span><span class="va">pal_c</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"blue"</span>, <span class="st">"cyan"</span>, <span class="st">"gold"</span>, <span class="st">"magenta"</span>, <span class="st">"maroon"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">x_centroid</span>, <span class="va">y_centroid</span>, col<span class="op">=</span><span class="va">k</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_color_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="va">pal_k</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">x_centroid</span>, <span class="va">y_centroid</span>, col<span class="op">=</span><span class="va">ctx</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_color_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="va">pal_c</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html">plot_layout</a></span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>col<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>    <span class="va">theme_xy</span> <span class="op">&amp;</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.key.size<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="st">"lines"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img-neighbors_files/figure-html/imcRtools-plot-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption>Tissue plot with cells colored by cluster (left) and spatial context (right) based on <span class="math inline">\(k\)</span>-means clustering of cluster frequencies among each cell’s (Euclidean) <span class="math inline">\(k\)</span>NNs.</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="co-localization" class="level2" data-number="18.4"><h2 data-number="18.4" class="anchored" data-anchor-id="co-localization">
+<span class="header-section-number">18.4</span> Co-localization</h2>
+<p><em><a href="https://bioconductor.org/packages/3.20/hoodscanR">hoodscanR</a></em> <span class="citation" data-cites="Liu2024-hoodscanR">(<a href="#ref-Liu2024-hoodscanR" role="doc-biblioref">Liu et al. 2024</a>)</span> also relies on a (Euclidean) <span class="math inline">\(k\)</span>NN graph to estimate the probability of each cell associating with its NNs. The resulting probability matrix (rows=cells, columns=NNs) can, in turn, be used to assess co-occurrence of subpopulations.</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DavisLaboratory/hoodscanR">hoodscanR</a></span><span class="op">)</span></span>
+<span><span class="va">sqe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/readHoodData.html">readHoodData</a></span><span class="op">(</span><span class="va">spe</span>, anno_col<span class="op">=</span><span class="st">"k"</span><span class="op">)</span></span>
+<span><span class="va">nbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/findNearCells.html">findNearCells</a></span><span class="op">(</span><span class="va">sqe</span>, k<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">mtx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/scanHoods.html">scanHoods</a></span><span class="op">(</span><span class="va">nbs</span><span class="op">$</span><span class="va">distance</span><span class="op">)</span>      </span>
+<span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/mergeByGroup.html">mergeByGroup</a></span><span class="op">(</span><span class="va">mtx</span>, <span class="va">nbs</span><span class="op">$</span><span class="va">cells</span><span class="op">)</span> </span>
+<span><span class="va">sqe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/mergeHoodSpe.html">mergeHoodSpe</a></span><span class="op">(</span><span class="va">sqe</span>, <span class="va">grp</span><span class="op">)</span>       </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To perform neighborhood co-localization analysis, <code><a href="https://davislaboratory.github.io/hoodscanR/reference/plotColocal.html">plotColocal()</a></code> computes the Pearson correlation of probability distribution between cells. Here, <strong>high/low values indicate attraction/repulsion</strong> between clusters:</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
+<span><span class="va">cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/plotColocal.html">plotColocal</a></span><span class="op">(</span><span class="va">sqe</span>, pm_cols<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">grp</span><span class="op">)</span>, return_matrix<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">pal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">hcl.colors</a></span><span class="op">(</span><span class="fl">9</span>, <span class="st">"Roma"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">cor</span>, </span>
+<span>    cellwidth<span class="op">=</span><span class="fl">15</span>, cellheight<span class="op">=</span><span class="fl">15</span>, </span>
+<span>    treeheight_row<span class="op">=</span><span class="fl">5</span>, treeheight_col<span class="op">=</span><span class="fl">5</span>,</span>
+<span>    col<span class="op">=</span><span class="va">pal</span>, breaks<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, length<span class="op">=</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img-neighbors_files/figure-html/hoodscanR-plot-corr-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="measuring local mixing">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+measuring local mixing
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Downstream, <code><a href="https://davislaboratory.github.io/hoodscanR/reference/calcMetrics.html">calcMetrics()</a></code> can be used to calculate cell-level <a href="https://en.wikipedia.org/wiki/entropy_(information_theory)">entropy</a> and <a href="https://en.wikipedia.org/wiki/perplexity">perplexity</a>, which both measure the mixing of cellular neighborhoods. Here, <strong>low/high values indicate heterogeneity/homogeneity</strong> of a cell’s local neighborhood:</p>
+<div class="cell" data-layout-align="center">
+<details open="" class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sqe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://davislaboratory.github.io/hoodscanR/reference/calcMetrics.html">calcMetrics</a></span><span class="op">(</span><span class="va">sqe</span>, pm_cols<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">grp</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">sqe</span><span class="op">)</span>, k<span class="op">=</span><span class="va">spe</span><span class="op">$</span><span class="va">k</span>, <span class="fu"><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html">spatialCoords</a></span><span class="op">(</span><span class="va">spe</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">vs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"perplexity"</span>, <span class="st">"entropy"</span><span class="op">)</span></span>
+<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html">all_of</a></span><span class="op">(</span><span class="va">vs</span><span class="op">)</span>, <span class="va">scale</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html">all_of</a></span><span class="op">(</span><span class="va">vs</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># threshold at 2 SDs for clearer visualization</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>value<span class="op">=</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/sign.html">sign</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">*</span><span class="fl">2</span>, <span class="cn">TRUE</span> <span class="op">~</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">fd</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">x_centroid</span>, <span class="va">y_centroid</span>, col<span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>shape<span class="op">=</span><span class="fl">16</span>, size<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="va">theme_xy</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.key.size<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="st">"lines"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_color_gradient2</a></span><span class="op">(</span><span class="st">"z-scaled\nvalue"</span>, low<span class="op">=</span><span class="st">"cyan"</span>, mid<span class="op">=</span><span class="st">"navy"</span>, high<span class="op">=</span><span class="st">"magenta"</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img-neighbors_files/figure-html/hoodscanR-plot-mets-xy-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption>Tissue plots with cells colored by entropy and perplexity, z-scaled across cells (capped at 2 SDs).</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Stratifying these values by subpopulation, we can observe that clusters forming distinct aggregates in space are lowest in entropy/perplexity (i.e., the most homogeneous locally):</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">fd</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">k</span>, <span class="va">value</span>, fill<span class="op">=</span><span class="va">k</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_fill_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="va">pal_k</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span><span class="op">(</span>outlier.stroke<span class="op">=</span><span class="fl">0</span>, key_glyph<span class="op">=</span><span class="st">"point"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span><span class="st">"z-scaled value"</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>fill<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>shape<span class="op">=</span><span class="fl">21</span>, size<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>        axis.title.x<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        panel.grid.minor<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.key.size<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="st">"lines"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img-neighbors_files/figure-html/hoodscanR-plot-mets-k-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Boxplot of entropy and perplexity, stratified by cluster assignment and z-scaled across cells (capped at 2 SDs).</figcaption></figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="references" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Liu2024-hoodscanR" class="csl-entry" role="listitem">
+Liu, Ning, Jarryd Martin, Dharmesh D. Bhuva, Jinjin Chen, Mengbo Li, Samuel C. Lee, Malvika Kharbanda, et al. 2024. <span>“<span class="nocase">hoodscanR</span>: Profiling Single-Cell Neighborhoods in Spatial Transcriptomics Data.”</span> <em>bioRxiv</em>. <a href="https://doi.org/10.1101/2024.03.26.586902">https://doi.org/10.1101/2024.03.26.586902</a>.
+</div>
+<div id="ref-Windhager2023-imcRtools" class="csl-entry" role="listitem">
+Windhager, Jonas, Vito Riccardo Tomaso Zanotelli, Daniel Schulz, Lasse Meyer, Michelle Daniel, Bernd Bodenmiller, and Nils Eling. 2023. <span>“An End-to-End Workflow for Multiplexed Image Processing and Analysis.”</span> <em>Nature Protocols</em> 18 (11): 3565–3613.
+</div>
+</div>
+</section><a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../pages/img-clustering.html" class="pagination-link" aria-label="Clustering">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Clustering</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../pages/img-cell-comm.html" class="pagination-link" aria-label="Cell communication">
+        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Cell communication</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

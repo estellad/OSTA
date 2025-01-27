@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="quarto-1.6.25" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+
+<title>26  Spatial Statistics – Principles of Spatial (Transcript)omics Analysis with Bioconductor</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<!-- htmldependencies:E3FAD763 -->
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn"
+      data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" 
+      aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation"
+      onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <h1 class="quarto-secondary-nav-title no-breadcrumbs"></h1>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" role="link"
+        aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation"
+        onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="/">
+      PrinciplesSTA
+      </a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/preamble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preamble</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1"  role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/bkg-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/bkg-spatial-omics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>2</span>  <span class='chapter-title'>Spatial omics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/bkg-infrastructure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>3</span>  <span class='chapter-title'>Infrastructure</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2"  role="navigation" aria-expanded="true">
+ <span class="menu-text">Sequencing-based platforms</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>4</span>  <span class='chapter-title'>Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-load-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>5</span>  <span class='chapter-title'>Load data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-quality-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>6</span>  <span class='chapter-title'>Quality control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-normalize-featselect-dimred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>7</span>  <span class='chapter-title'>Normalization, feature selection, and dimensionality reduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>8</span>  <span class='chapter-title'>Clustering</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-spot-deconvolution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>9</span>  <span class='chapter-title'>Spot deconvolution</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-spatial-co-localization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>10</span>  <span class='chapter-title'>Spatial co-localization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-marker-genes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>11</span>  <span class='chapter-title'>Marker genes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-workflow-human-dlpfc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>12</span>  <span class='chapter-title'>Workflow: Human DLPFC</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/seq-workflow-spatialibd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>13</span>  <span class='chapter-title'>Workflow: spatialLIBD</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3"  role="navigation" aria-expanded="true">
+ <span class="menu-text">Imaging-based platforms</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>14</span>  <span class='chapter-title'>Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-quality-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>15</span>  <span class='chapter-title'>Quality control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>16</span>  <span class='chapter-title'>Dimensionality reduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>17</span>  <span class='chapter-title'>Clustering</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-neighbors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>18</span>  <span class='chapter-title'>Neighborhood analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-cell-comm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>19</span>  <span class='chapter-title'>Cell communication</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-sub-cellular.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>20</span>  <span class='chapter-title'>Sub-cellular analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-workflow-xenium.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>21</span>  <span class='chapter-title'>Xenium workflow</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/img-workflow-cosmx.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>22</span>  <span class='chapter-title'>CosMx workflow</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4"  role="navigation" aria-expanded="true">
+ <span class="menu-text">Technology-agnostic/cross-platform/downstream analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>23</span>  <span class='chapter-title'>Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-spatially-variable.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>24</span>  <span class='chapter-title'>Spatially variable genes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-featureset-signatures.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>25</span>  <span class='chapter-title'>Gene/feature-set signatures</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-spat-stat.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class='chapter-number'>26</span>  <span class='chapter-title'>Spatial Statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-registration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>27</span>  <span class='chapter-title'>Spatial registration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-multi-sample-de.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>28</span>  <span class='chapter-title'>Multiple-sample differential expression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/crs-workflow-xenvis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>29</span>  <span class='chapter-title'>Workflow: Xenium + Visium</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5"  role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/apx-acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>A</span>  <span class='chapter-title'>Acknowledgments</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="/pages/apx-related-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class='chapter-number'>B</span>  <span class='chapter-title'>Related resources</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" ></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <div id="quarto-toc-target"></div>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preamble" id="toc-preamble"><span class="header-section-number">26.1</span> Preamble</a>
+  <ul>
+  <li><a href="#introduction" id="toc-introduction"><span class="header-section-number">26.1.1</span> Introduction</a></li>
+  <li><a href="#dependencies" id="toc-dependencies"><span class="header-section-number">26.1.2</span> Dependencies</a></li>
+  </ul></li>
+  <li><a href="#lattice-data-analysis" id="toc-lattice-data-analysis"><span class="header-section-number">26.2</span> Lattice data analysis</a>
+  <ul>
+  <li><a href="#introduction-1" id="toc-introduction-1"><span class="header-section-number">26.2.1</span> Introduction</a></li>
+  <li><a href="#the-spatial-weight-matrix" id="toc-the-spatial-weight-matrix"><span class="header-section-number">26.2.2</span> The spatial weight matrix</a></li>
+  <li><a href="#spatial-autocorrelation" id="toc-spatial-autocorrelation"><span class="header-section-number">26.2.3</span> Spatial autocorrelation</a></li>
+  <li><a href="#join-count-statistics" id="toc-join-count-statistics"><span class="header-section-number">26.2.4</span> Join count statistics</a></li>
+  </ul></li>
+  <li><a href="#point-pattern-analysis" id="toc-point-pattern-analysis"><span class="header-section-number">26.3</span> Point Pattern Analysis</a>
+  <ul>
+  <li><a href="#intensity" id="toc-intensity"><span class="header-section-number">26.3.1</span> Intensity</a></li>
+  <li><a href="#global-analysis" id="toc-global-analysis"><span class="header-section-number">26.3.2</span> Global Analysis</a></li>
+  <li><a href="#local-analysis" id="toc-local-analysis"><span class="header-section-number">26.3.3</span> Local Analysis</a></li>
+  </ul></li>
+  <li><a href="#appendix" id="toc-appendix"><span class="header-section-number">26.4</span> Appendix</a>
+  <ul>
+  <li><a href="#references" id="toc-references">References</a></li>
+  </ul></li>
+  </ul>
+</nav>
+<section id="preamble" class="level2" data-number="26.1">
+<h2 data-number="26.1"><span class="header-section-number">26.1</span> Preamble</h2>
+<section id="introduction" class="level3" data-number="26.1.1">
+<h3 data-number="26.1.1"><span class="header-section-number">26.1.1</span> Introduction</h3>
+<p>Spatial statistics builds around the first law of geography of <span class="citation" data-cites="toblerComputerMovieSimulating1970">(<a href="#ref-toblerComputerMovieSimulating1970" role="doc-biblioref"><strong>toblerComputerMovieSimulating1970?</strong></a>)</span> that states “everything is related to everything else, but near things are more related than distant things”. This dependence of spatial observations has been studied in the field of (geo)spatial statistics. In general, spatial dependence is estimated by comparing the values at one location with the values at another location that is a given distance (called spatial lag) away <span class="citation" data-cites="daleSpatialAnalysisGuide2014 Baddeley2015">(<a href="#ref-daleSpatialAnalysisGuide2014" role="doc-biblioref"><strong>daleSpatialAnalysisGuide2014?</strong></a>; <a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015</a>)</span>.</p>
+<p>The two technological streams, imaging- and sequencing-based assays, are very different in terms of data modalities. In imaging-based assays (e.g. CosMx and Xenium) the observations of interest (e.g. mRNAs) are recorded where they occur natively. This means the locations of the observations are governed by a stochastic process and can be approximated as a point process. Sequencing-based assays (e.g. Visium) however, are recorded along defined grids which is called a lattice. This lattice is not created by a stochastic process and therefore can not be approximated as a point process. Here, lattice data analysis methods have to be used. There are methods however, where cells can be segmented from very fine bins (e.g. Visium HD and IMC). These technologies can be approximated as being generated by a point process after segmentation <span class="citation" data-cites="Emons2024-pasta Baddeley2015 Pebesma2023">(<a href="#ref-Emons2024-pasta" role="doc-biblioref">Emons et al. 2024</a>; <a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015</a>; <a href="#ref-Pebesma2023" role="doc-biblioref">Pebesma and Bivand 2023</a>)</span> In the following vignette, the two main exploratory spatial statistics streams, point pattern analysis and lattice data analysis will be introduced.</p>
+</section>
+<section id="dependencies" class="level3" data-number="26.1.2">
+<h3 data-number="26.1.2"><span class="header-section-number">26.1.2</span> Dependencies</h3>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SpatialFeatureExperiment)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SFEData)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Voyager)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scran)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BiocParallel)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spdep)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(openxlsx)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spatialFDA)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spatstat)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">MulticoreParam</span>(<span class="dv">10</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">77</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> <span class="fu">JanesickBreastData</span>()</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># load the official 10X annotations </span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">read.xlsx</span>(<span class="st">&quot;https://cdn.10xgenomics.com/raw/upload/v1695234604/Xenium%20Preview%20Data/Cell_Barcode_Type_Matrices.xlsx&quot;</span>, <span class="at">sheet =</span> <span class="dv">4</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># add cell id to label dataframe</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>labels<span class="sc">$</span>Barcode <span class="ot">&lt;-</span> <span class="fu">rownames</span>(labels)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># add the cell type labels to the spe</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>matchedDf <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sfe)) <span class="sc">|&gt;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">as.data.frame</span>(labels), <span class="at">by =</span> <span class="fu">join_by</span>(<span class="st">&quot;Barcode&quot;</span>))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(sfe) <span class="ot">&lt;-</span> <span class="fu">DataFrame</span>(matchedDf)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> sfe[, <span class="fu">colSums</span>(<span class="fu">counts</span>(sfe)) <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> sfe[, <span class="sc">!</span><span class="fu">is.na</span>(sfe<span class="sc">$</span>Cluster)]</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> <span class="fu">logNormCounts</span>(sfe)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>xy <span class="ot">&lt;-</span> <span class="fu">spatialCoords</span>(sfe)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># basic theme for spatial plots</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>theme_xy <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">expand=</span><span class="cn">FALSE</span>), </span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>(), <span class="fu">theme</span>(</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="at">l=</span><span class="dv">5</span>),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.background=</span><span class="fu">element_rect</span>(<span class="at">fill=</span><span class="st">&quot;black&quot;</span>)))</span></code></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="lattice-data-analysis" class="level2" data-number="26.2">
+<h2 data-number="26.2"><span class="header-section-number">26.2</span> Lattice data analysis</h2>
+<section id="introduction-1" class="level3" data-number="26.2.1">
+<h3 data-number="26.2.1"><span class="header-section-number">26.2.1</span> Introduction</h3>
+<p>In this chapter we will use <em><a href="https://bioconductor.org/packages/3.20/SpatialFeatureExperiment">SpatialFeatureExperiment</a></em> which is a Bioconductor package that integrates the <code>SpatialExperiment</code> with geometric annotations that are represented as Simple Features in the <em><a href="https://CRAN.R-project.org/package=sf">sf</a></em>.</p>
+<p>Again, we will use the human breast cancer Xenium data set <span class="citation" data-cites="Janesick2023">(<a href="#ref-Janesick2023" role="doc-biblioref">Janesick et al. 2023</a>)</span> in a <code>SpatialFeatureExperiment</code> object available through <em><a href="https://bioconductor.org/packages/3.20/SFEData">SFEData</a></em>.</p>
+<p>We will use the <em><a href="https://bioconductor.org/packages/3.20/Voyager">Voyager</a></em> package <span class="citation" data-cites="Moses2023-Voyager">(<a href="#ref-Moses2023-Voyager" role="doc-biblioref">Moses et al. 2023</a>)</span> which provides convenient wrappers around classic geospatial R packages such as <em><a href="https://CRAN.R-project.org/package=spdep">spdep</a></em> <span class="citation" data-cites="Pebesma2023">(<a href="#ref-Pebesma2023" role="doc-biblioref">Pebesma and Bivand 2023</a>)</span>. For more details, please consult the authors’ comprehensive <a href="https://pachterlab.github.io/voyager/index.html">vignettes</a>.</p>
+<p>This part is based on the following vignette of the <a href="https://robinsonlabuzh.github.io/pasta/00-overview-latSOD.html"><em>pasta</em> resource</a> <span class="citation" data-cites="Emons2024-pasta">(<a href="#ref-Emons2024-pasta" role="doc-biblioref">Emons et al. 2024</a>)</span>.</p>
+</section>
+<section id="the-spatial-weight-matrix" class="level3" data-number="26.2.2">
+<h3 data-number="26.2.2"><span class="header-section-number">26.2.2</span> The spatial weight matrix</h3>
+<p>Lattice based spatial methods rely on the concept of neighborhood. The neighborhood defines the spatial dependency between locations. Therefore, the first step of lattice based spatial analysis is the construction of a spatial weight matrix. Here we will use a nearest neighbor-based approach.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Spatial weight matrix">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Spatial weight matrix
+</div>
+<div class='callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end'><i class='callout-toggle'></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Different methods for the construction of the weight matrix exist, such as</p>
+<ul>
+<li>contiguity-based neighbors (neighbors in direct contact),</li>
+<li>graph-based neighbours (e.g., k-nearest neighbours),</li>
+<li>distance-based neighbours,</li>
+<li>higher order neighbours.</li>
+</ul>
+<p>A detailed overview can be found in the <a href="https://r-spatial.github.io/spdep/articles/nb.html">documentation</a> of the <em><a href="https://CRAN.R-project.org/package=spdep">spdep</a></em> package.</p>
+<p>As different weight matrices influence downstream results, analysts should justify their choice of the weight matrix. A more detailed overview can be found in <span class="citation" data-cites="Pebesma2023">Pebesma and Bivand (<a href="#ref-Pebesma2023" role="doc-biblioref">2023</a>)</span>.</p>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colGraph</span>(sfe, <span class="st">&quot;knn6&quot;</span>) <span class="ot">&lt;-</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">findSpatialNeighbors</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    sfe,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">&quot;cellSeg&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">&quot;knearneigh&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">6</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plotColGraph</span>(sfe,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGraphName =</span> <span class="st">&quot;knn6&quot;</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGeometryName =</span> <span class="st">&quot;cellSeg&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> <span class="fu">theme_void</span>()</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/weight%20matrix-1.png" class="img-fluid quarto-figure quarto-figure-center" width="2400" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="spatial-autocorrelation" class="level3" data-number="26.2.3">
+<h3 data-number="26.2.3"><span class="header-section-number">26.2.3</span> Spatial autocorrelation</h3>
+<p>Spatial autocorrelation measures similarity between spatial units (e.g., cells) while recognize that the units are not independent due to their spatial context. Spatial autocorrelation metrics can be global (summarizing the entire study area) of view or local (provide statistic for each unit). In addition, there exist methods for univariate and multivariate comparisons of continuous and categorical data <span class="citation" data-cites="Pebesma2023">Pebesma and Bivand (<a href="#ref-Pebesma2023" role="doc-biblioref">2023</a>)</span>.</p>
+<section id="univariate-measures---morans-i" class="level4" data-number="26.2.3.1">
+<h4 data-number="26.2.3.1"><span class="header-section-number">26.2.3.1</span> Univariate measures - Moran’s <span class="math inline">\(I\)</span></h4>
+<p>Moran’s <span class="math inline">\(I\)</span> can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neigbours. The global value is a weighted average of the respective local values <span class="citation" data-cites="Moran1950">Moran (<a href="#ref-Moran1950" role="doc-biblioref">1950</a>)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get all gene probes</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>geneProbes <span class="ot">&lt;-</span> <span class="fu">rowData</span>(sfe)[<span class="fu">rowData</span>(sfe)<span class="sc">$</span>Type <span class="sc">==</span> <span class="st">&quot;Gene Expression&quot;</span>, <span class="st">&quot;Symbol&quot;</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> <span class="fu">runUnivariate</span>(sfe,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;moran&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> geneProbes,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGraphName =</span> <span class="st">&quot;knn6&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">BPPARAM =</span> <span class="fu">MulticoreParam</span>(<span class="dv">2</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+</div>
+<p>We can output and plot the three genes with highest Moran’s <span class="math inline">\(I\)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>topGenes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(sfe)[<span class="fu">order</span>(<span class="fu">rowData</span>(sfe)<span class="sc">$</span>moran_sample01, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotSpatialFeature</span>(sfe, topGenes, <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/plot%20moran%20genes-1.png" class="img-fluid quarto-figure quarto-figure-center" width="2400" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can further visualize this using when calculating and plotting local Moran’s <span class="math inline">\(I\)</span> values <span class="citation" data-cites="Anselin1995">Anselin (<a href="#ref-Anselin1995" role="doc-biblioref">1995</a>)</span>. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell’s neighbors. Negative values indicate local dissimilarity in expression.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> <span class="fu">runUnivariate</span>(sfe,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;localmoran&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> topGenes,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGraphName =</span> <span class="st">&quot;knn6&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">BPPARAM =</span> <span class="fu">MulticoreParam</span>(<span class="dv">2</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plotLocalResult</span>(sfe,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">name =</span> <span class="st">&quot;localmoran&quot;</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">features =</span> topGenes,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">colGeometryName =</span> <span class="st">&quot;centroids&quot;</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">divergent =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">diverge_center =</span> <span class="dv">0</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/local%20moran-1.png" class="img-fluid quarto-figure quarto-figure-center" width="2400" /></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Statistical interpretation of autocorrelation">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Statistical interpretation of autocorrelation
+</div>
+<div class='callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end'><i class='callout-toggle'></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>During the interpretation of local autocorrelation measures, both the effect size (the value of the statistic) and the siginifiance level should be considered. Because we calculate significance on each spot individually, values should be corrected for multiple testing.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotLocalResult</span>(sfe,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">name =</span> <span class="st">&quot;localmoran&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">features =</span> topGenes,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">attribute =</span> <span class="st">&quot;-log10p_adj&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">colGeometryName =</span> <span class="st">&quot;centroids&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">divergent =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">diverge_center =</span> <span class="dv">0</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/local%20moran%20pvals-1.png" class="img-fluid quarto-figure quarto-figure-center" width="2400" /></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Multivariate measures – Lee’s L</p>
+<p>Lee’s <span class="math inline">\(L\)</span> combines the Pearson correlation coefficient and Moran’s <span class="math inline">\(I\)</span> <span class="citation" data-cites="Lee2001">Lee (<a href="#ref-Lee2001" role="doc-biblioref">2001</a>)</span> This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial) variable features.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>hvgs <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(sfe, <span class="at">n =</span> <span class="dv">20</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">calculateBivariate</span>(sfe,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">type =</span> <span class="st">&quot;lee&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">feature1 =</span> geneProbes,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">colGraphName =</span>  <span class="st">&quot;knn6&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+</div>
+<p>We will identify the gene pairs with highest Lee’s <span class="math inline">\(L\)</span> value and then calculate and visualize the respective local measure.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select the 20 highest values in the res matrix</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>genePairs <span class="ot">&lt;-</span> <span class="fu">which</span>(res <span class="sc">&gt;=</span> <span class="fu">tail</span>(<span class="fu">sort</span>(res), <span class="at">n=</span><span class="dv">20</span>)[<span class="dv">1</span>], <span class="at">arr.ind=</span><span class="cn">TRUE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># take only pair of two genes</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>genePairs <span class="ot">&lt;-</span> genePairs[genePairs[,<span class="dv">1</span>] <span class="sc">!=</span> genePairs[,<span class="dv">2</span>],]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">i =</span> <span class="fu">rownames</span>(res)[genePairs[,<span class="dv">1</span>]], <span class="at">j =</span> <span class="fu">colnames</span>(res)[genePairs[,<span class="dv">2</span>]],</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">val =</span> res[genePairs])</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##        i     j       val
+##  1 FOXA1 EPCAM 0.6453008
+##  2  KRT7 EPCAM 0.6665447
+##  3 EPCAM FOXA1 0.6453008
+##  4  FASN FOXA1 0.6343032
+##  5  KRT7 FOXA1 0.6400049
+##  6 EPCAM  KRT7 0.6665447
+##  7 FOXA1  KRT7 0.6400049
+##  8  KRT8  KRT7 0.6498543
+##  9  KRT7  KRT8 0.6498543</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sfe <span class="ot">&lt;-</span> <span class="fu">runBivariate</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  sfe,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;locallee&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGraphName =</span>  <span class="st">&quot;knn6&quot;</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">feature1 =</span> <span class="fu">c</span>(<span class="st">&quot;EPCAM&quot;</span>, <span class="st">&quot;KRT7&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plotLocalResult</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  sfe,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">&quot;locallee&quot;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> <span class="st">&quot;KRT7__EPCAM&quot;</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">colGeometryName =</span> <span class="st">&quot;centroids&quot;</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">divergent =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">diverge_center =</span> <span class="dv">0</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/local%20lees%20l-1.png" class="img-fluid quarto-figure quarto-figure-center" width="1920" /></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="join-count-statistics" class="level3" data-number="26.2.4">
+<h3 data-number="26.2.4"><span class="header-section-number">26.2.4</span> Join count statistics</h3>
+<blockquote>
+<p>TODO with cluster labels</p>
+</blockquote>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>resJc <span class="ot">&lt;-</span> <span class="fu">joincount.multi</span>(<span class="fu">as.factor</span>(sfe<span class="sc">$</span>Cluster), <span class="fu">colGraph</span>(sfe, <span class="st">&quot;knn6&quot;</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>resJc <span class="ot">&lt;-</span> resJc[<span class="fu">order</span>(resJc[, <span class="st">&quot;z-value&quot;</span>], <span class="at">decreasing=</span><span class="cn">TRUE</span>), ]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>resJc[<span class="fu">head</span>(<span class="fu">grep</span>(<span class="st">&quot;Invasive&quot;</span>, <span class="fu">rownames</span>(resJc)), <span class="dv">10</span>), ]</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##                                                   Joincount    Expected
+##  Invasive_Tumor:Invasive_Tumor                 1.047167e+04 3501.509981
+##  Prolif_Invasive_Tumor:Invasive_Tumor          2.313583e+03  770.133147
+##  Prolif_Invasive_Tumor:Prolif_Invasive_Tumor   1.813333e+02   42.333854
+##  T_Cell_&amp;_Tumor_Hybrid:Invasive_Tumor          2.447500e+02  120.455145
+##  T_Cell_&amp;_Tumor_Hybrid:Prolif_Invasive_Tumor   2.833333e+01   13.246254
+##  Prolif_Invasive_Tumor:Mast_Cells              8.333333e-01    3.723393
+##  Prolif_Invasive_Tumor:LAMP3+_DCs              1.666667e+00    6.724674
+##  Prolif_Invasive_Tumor:Perivascular-Like       9.750000e+00   19.045721
+##  Prolif_Invasive_Tumor:IRF7+_DCs               2.916667e+00   11.079916
+##  Stromal_&amp;_T_Cell_Hybrid:Prolif_Invasive_Tumor 4.166667e+00   13.607310
+##                                                   Variance    z-value
+##  Invasive_Tumor:Invasive_Tumor                 357.2961209 368.746911
+##  Prolif_Invasive_Tumor:Invasive_Tumor           95.2151465 158.175639
+##  Prolif_Invasive_Tumor:Prolif_Invasive_Tumor     6.2786450  55.472815
+##  T_Cell_&amp;_Tumor_Hybrid:Invasive_Tumor           15.0959721  31.990617
+##  T_Cell_&amp;_Tumor_Hybrid:Prolif_Invasive_Tumor     1.9995863  10.669279
+##  Prolif_Invasive_Tumor:Mast_Cells                0.5633442  -3.850525
+##  Prolif_Invasive_Tumor:LAMP3+_DCs                1.0167052  -5.016282
+##  Prolif_Invasive_Tumor:Perivascular-Like         2.8710572  -5.486080
+##  Prolif_Invasive_Tumor:IRF7+_DCs                 1.6734335  -6.310428
+##  Stromal_&amp;_T_Cell_Hybrid:Prolif_Invasive_Tumor   2.0539122  -6.587349</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="point-pattern-analysis" class="level2" data-number="26.3">
+<h2 data-number="26.3"><span class="header-section-number">26.3</span> Point Pattern Analysis</h2>
+<p>Point pattern analysis is a subfield of spatial statistics that focuses on the representation of spatial locations of events or objects as points <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 3</a>)</span>. There are two main ways how to summarize cells as points <span class="citation" data-cites="Emons2024-pasta">(<a href="#ref-Emons2024-pasta" role="doc-biblioref">Emons et al. 2024</a>)</span>:</p>
+<ul>
+<li>approximate the features (mRNAs) as points.</li>
+<li>segment the cells and represent the centroids as points.</li>
+</ul>
+<p>The central <code>R</code> package to perform point pattern analysis is called <em><a href="https://CRAN.R-project.org/package=spatstat">spatstat</a></em> <span class="citation" data-cites="Baddeley2005-spatstat">(<a href="#ref-Baddeley2005-spatstat" role="doc-biblioref">Baddeley and Turner 2005</a>)</span>. The package <code>spatialFDA</code> creates an interface between <code>SpatialExperiment</code> objects and the <em><a href="https://CRAN.R-project.org/package=spatstat">spatstat</a></em> library for easy integration into analysis workflows.</p>
+<p>Part of this vignette is based on the <a href="https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html">pasta overview vignette</a> and <a href="https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html">another vignette</a> <span class="citation" data-cites="Emons2024-pasta">Emons et al. (<a href="#ref-Emons2024-pasta" role="doc-biblioref">2024</a>)</span></p>
+<div class="callout callout-style-default callout-note callout-titled" title="`ppp` object">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+<code>ppp</code> object
+</div>
+<div class='callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end'><i class='callout-toggle'></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The central object in <em><a href="https://CRAN.R-project.org/package=spatstat">spatstat</a></em> is called <code>ppp</code>. This object contains three attributes:</p>
+<ul>
+<li>the <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> coordinates of the points</li>
+<li>the observation window of the pattern</li>
+<li>marks which are associated with each point; this can be, e.g., a discrete cell type mark or a continuous gene expression mark</li>
+</ul>
+<p><span class="citation" data-cites="Baddeley2005-spatstat">(<a href="#ref-Baddeley2005-spatstat" role="doc-biblioref">Baddeley and Turner 2005</a>)</span></p>
+</div>
+</div>
+</div>
+<p>In the following we will work with a Xenium dataset of breast cancer <span class="citation" data-cites="Janesick2023">(<a href="#ref-Janesick2023" role="doc-biblioref">Janesick et al. 2023</a>)</span>. The representation of cells as points is done via cell centroids.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spe <span class="ot">&lt;-</span> sfe</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(sfe)</span></code></pre></div>
+</details>
+</div>
+<p>In the plot below, the centroids of the cells are attributed with a discrete cell type mark.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(xy, <span class="fu">colData</span>(spe))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(x_centroid, y_centroid, <span class="at">col=</span>Cluster)) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">col=</span><span class="fu">guide_legend</span>(<span class="at">override.aes=</span><span class="fu">list</span>(<span class="at">size=</span><span class="dv">2</span>))) <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    theme_xy <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.key.size=</span><span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">&quot;pt&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size=</span><span class="fl">0.05</span>) </span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/plot%20object-1.png" class="img-fluid quarto-figure quarto-figure-center" width="1152" /></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="intensity" class="level3" data-number="26.3.1">
+<h3 data-number="26.3.1"><span class="header-section-number">26.3.1</span> Intensity</h3>
+<p>The first property to assess in a point pattern is the intensity. For a window <span class="math inline">\(W\)</span> and points <span class="math inline">\(x\)</span>, the average intensity <span class="math inline">\(\bar{\lambda}\)</span> is defined as the number of points <span class="math inline">\(n(x)\)</span> divided by the area of the window <span class="math inline">\(|W|\)</span>:</p>
+<p><span class="math display">\[
+\bar{\lambda}=\frac{n(x)}{|W|}
+\]</span></p>
+<p>The intensity of the points can be uniform in space which is called homogeneous. If the intensity is not uniform in space, it is called inhomogeneous. This distinction has important implications for the choice of the spatial metrics. Most metrics have a correction for inhomogeneous intensity of points <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 157</a> ff.)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Estimating intensity">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Estimating intensity
+</div>
+<div class='callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end'><i class='callout-toggle'></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dfSpe <span class="ot">&lt;-</span> <span class="fu">.speToDf</span>(spe)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>pp <span class="ot">&lt;-</span> <span class="fu">.dfToppp</span>(dfSpe, <span class="at">marks =</span> <span class="st">&quot;Cluster&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">density</span>(<span class="at">x=</span>pp, <span class="at">sigma =</span> bw.diggle) <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/estimating%20intensity-1.png" class="img-fluid quarto-figure quarto-figure-center" width="672" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the plot above we see that the intensity of all points is not uniform. This inhomogeneity of points has to be taken into accounts when interpreting spatial statistics metrics. For example, an indication of clustering in a point pattern can be due solely to an inhomogeneity of points. This is called the confounding between intensity and interaction <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 151</a> ff.)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="global-analysis" class="level3" data-number="26.3.2">
+<h3 data-number="26.3.2"><span class="header-section-number">26.3.2</span> Global Analysis</h3>
+<p>Global analyses summarize a statistic across the entire field of view. This means it reflects an average statistic and might not be reflective of local heterogeneities <span class="citation" data-cites="Emons2024-pasta">(<a href="#ref-Emons2024-pasta" role="doc-biblioref">Emons et al. 2024</a>)</span>.</p>
+<section id="correlation" class="level4" data-number="26.3.2.1">
+<h4 data-number="26.3.2.1"><span class="header-section-number">26.3.2.1</span> Correlation</h4>
+<p>One option in point pattern analysis is to analyse the correlation of marks. Like this, e.g., a clustering or spacing of cells can be determined relative to a completely spatially random (CSR) process.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Complete spatial randomness">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class='callout-icon'></i>
+</div>
+<div class="callout-title-container flex-fill">
+Complete spatial randomness
+</div>
+<div class='callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end'><i class='callout-toggle'></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Complete spatial randomness is the null scenario for a point pattern. It is characterized by two key properties:</p>
+<ul>
+<li>Homogeneity: The intensity of points is homogeneous in space.</li>
+<li>Independence: The points in one region do not influence the distribution of points in another region.</li>
+</ul>
+<p><span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 199</a> ff.)</span></p>
+</div>
+</div>
+</div>
+<section id="ripleys-k" class="level5" data-number="26.3.2.1.1">
+<h5 data-number="26.3.2.1.1"><span class="header-section-number">26.3.2.1.1</span> Ripley’s <span class="math inline">\(K\)</span></h5>
+<p>Ripley’s <span class="math inline">\(K\)</span> is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley’s <span class="math inline">\(K\)</span> quantifies the average number of points that fall in a <span class="math inline">\(r\)</span>-neighbourhood of a chosen mark <span class="citation" data-cites="Ripley1976 Baddeley2015">(<a href="#ref-Ripley1976" role="doc-biblioref">Ripley 1976</a>; <a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 132</a> ff.)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>resCross <span class="ot">&lt;-</span> <span class="fu">calcCrossMetricPerFov</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  spe,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">selection =</span> <span class="fu">c</span>(<span class="st">&quot;DCIS_1&quot;</span>, <span class="st">&quot;DCIS_2&quot;</span>, <span class="st">&quot;Invasive_Tumor&quot;</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">subsetby =</span> <span class="st">&#39;sample_id&#39;</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fun =</span> <span class="st">&#39;Kcross&#39;</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">marks =</span> <span class="st">&#39;Cluster&#39;</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">rSeq =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">500</span>, <span class="at">length.out =</span> <span class="dv">100</span>),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;sample_id&quot;</span>, <span class="st">&quot;Sample&quot;</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plotCrossMetricPerFov</span>(</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  resCross,</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">theo =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">correction =</span> <span class="st">&quot;border&quot;</span>,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="st">&quot;r&quot;</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageId =</span> <span class="st">&#39;sample_id&#39;</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  [[1]]</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/ripley-1.png" class="img-fluid quarto-figure quarto-figure-center" width="1440" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This plot shows Ripley’s <span class="math inline">\(K\)</span> function corrected for inhomogeneities of the chosen marks. The diagonal is Ripley’s <span class="math inline">\(K\)</span> function among the three cell types themselves and the off diagonal plots show the cross type combinations. We note that all cell types, ductal carcinoma in situ 1 (DCIS 1), ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves, even when correcting for the inhomogeneity. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a <span class="math inline">\(500 µm\)</span> <span class="math inline">\(r\)</span>-neighbourhood.</p>
+</section>
+</section>
+<section id="spacing" class="level4" data-number="26.3.2.2">
+<h4 data-number="26.3.2.2"><span class="header-section-number">26.3.2.2</span> Spacing</h4>
+<p>A complementary approach to correlation analysis is spacing. There are three main distance types <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 255</a>)</span>:</p>
+<ul>
+<li>pairwise distances: distances between all pairs of points</li>
+<li>nearest-neighbor distances: distance to the nearest point of the query point</li>
+<li>empty-space distances: distance from a reference location to the nearest point</li>
+</ul>
+<section id="nearest-neighbour-distance-function-g" class="level5" data-number="26.3.2.2.1">
+<h5 data-number="26.3.2.2.1"><span class="header-section-number">26.3.2.2.1</span> Nearest-neighbour distance function <span class="math inline">\(G\)</span></h5>
+<p>The nearest neighbor function <span class="math inline">\(G\)</span> quantifies the average nearest-neighbor distance over a radius range <span class="math inline">\(r\)</span> <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 262</a>)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>resCross <span class="ot">&lt;-</span> <span class="fu">calcCrossMetricPerFov</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  spe,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">selection =</span> <span class="fu">c</span>(<span class="st">&quot;DCIS_1&quot;</span>, <span class="st">&quot;DCIS_2&quot;</span>, <span class="st">&quot;Invasive_Tumor&quot;</span>),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">subsetby =</span> <span class="st">&#39;sample_id&#39;</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fun =</span> <span class="st">&#39;Gcross&#39;</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">marks =</span> <span class="st">&#39;Cluster&#39;</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">rSeq =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">100</span>, <span class="at">length.out =</span> <span class="dv">100</span>),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;sample_id&quot;</span>, <span class="st">&quot;Sample&quot;</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plotCrossMetricPerFov</span>(</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  resCross,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">theo =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">correction =</span> <span class="st">&quot;km&quot;</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="st">&quot;r&quot;</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageId =</span> <span class="st">&#39;sample_id&#39;</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre class="code_output"><code>##  [[1]]</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/nndist-1.png" class="img-fluid quarto-figure quarto-figure-center" width="1440" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In terms of spacing, the interpretation is a bit different. Still, the diagonal shows that all cell types are more clustered than expected if the patterns were completely spatially random. Comparing now DCIS 1 and DCIS 2 with invasive tumor cells, we see that both are more spaced than expect at random. However, the spacing is stronger for DCIS 1 and invasive tumor cells. At small radii, DCIS 2 and invasive tumor are distributed close to random.</p>
+<p>The analysis with Ripley’s <span class="math inline">\(K\)</span> and the <span class="math inline">\(G\)</span> function are not contradictory. <span class="math inline">\(G\)</span> functions summarize shorter scale interactions than <span class="math inline">\(K\)</span> functions <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 295</a>)</span>.</p>
+</section>
+</section>
+</section>
+<section id="local-analysis" class="level3" data-number="26.3.3">
+<h3 data-number="26.3.3"><span class="header-section-number">26.3.3</span> Local Analysis</h3>
+<section id="local-indicators-of-spatial-association" class="level4" data-number="26.3.3.1">
+<h4 data-number="26.3.3.1"><span class="header-section-number">26.3.3.1</span> Local indicators of spatial association</h4>
+<p>The metrics shown before are an average over the entire window <span class="math inline">\(W\)</span>. <span class="citation" data-cites="Anselin1995">Anselin (<a href="#ref-Anselin1995" role="doc-biblioref">1995</a>)</span> proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric <span class="citation" data-cites="Baddeley2015">(<a href="#ref-Baddeley2015" role="doc-biblioref">Baddeley, Rubak, and Turner 2015, 247</a>)</span>. This is a general concept not only for point pattern analysis but for lattice data analysis as well <span class="citation" data-cites="Anselin1995 anselinLocalIndicatorMultivariate2019">(<a href="#ref-Anselin1995" role="doc-biblioref">Anselin 1995</a>; <a href="#ref-anselinLocalIndicatorMultivariate2019" role="doc-biblioref"><strong>anselinLocalIndicatorMultivariate2019?</strong></a>)</span>.</p>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># subset to only Invasive tumor cells </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ppSub <span class="ot">&lt;-</span> <span class="fu">subset</span>(pp, marks <span class="sc">%in%</span> <span class="st">&quot;Invasive_Tumor&quot;</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># restrict to a smaller window for computational reasons</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">Window</span>(ppSub) <span class="ot">&lt;-</span> <span class="fu">owin</span>(<span class="fu">c</span>(<span class="dv">3500</span>, <span class="fl">7524.087</span>), <span class="fu">c</span>(<span class="dv">1200</span>, <span class="fl">5475.691</span>))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the point pattern</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ppSub)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/localK-1-1.png" class="img-fluid quarto-figure quarto-figure-center" width="576" /></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details open class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r cell-code"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate LISA K curves</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>resLocal <span class="ot">&lt;-</span> <span class="fu">localK</span>(ppSub, <span class="at">verbose=</span><span class="cn">FALSE</span>) </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># code adapted from </span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># https://robinsonlabuzh.github.io/</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># pasta/01-imaging-univar-ppSOD.html</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> resLocal <span class="sc">|&gt;</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        iso0001<span class="sc">:</span>iso1408, </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">names_to=</span><span class="st">&quot;curve&quot;</span>) </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(r <span class="sc">&gt;</span> <span class="fl">700.5630</span> <span class="sc">&amp;</span> r <span class="sc">&lt;</span> <span class="fl">702.4388</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sel=</span>value) <span class="sc">%&gt;%</span> <span class="fu">select</span>(curve, sel)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">left_join</span>(sel)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>thm <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_light</span>(),</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">&quot;none&quot;</span>),</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_c</span>())</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(r, value, <span class="at">group=</span>curve, <span class="at">col=</span>sel)) <span class="sc">+</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>theo), <span class="at">linetype=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">&quot;darkgrey&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">700</span>) <span class="sc">+</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    thm</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">x=</span>ppSub<span class="sc">$</span>x, <span class="at">y=</span>ppSub<span class="sc">$</span>y, </span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">sel=</span><span class="fu">unique</span>(sel)<span class="sc">$</span>sel)</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(x, y, <span class="at">col =</span> sel)) <span class="sc">+</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">expand=</span><span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>    thm</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>p <span class="sc">|</span> q</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img src="crs-spat-stat_files/figure-html/localK-2-1.png" class="img-fluid quarto-figure quarto-figure-center" width="768" /></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The LISA Ripley’s <span class="math inline">\(K\)</span> are colored by their value at <span class="math inline">\(r = 700\)</span>. We note that the LISA Ripley’s <span class="math inline">\(K\)</span> gives two populations of curves. Those curves that increase at radii <span class="math inline">\(r&lt;500 µm\)</span> above the CSR line indicated in grey and the other curves that remain either below the grey CSR line or increase after <span class="math inline">\(r&gt;500µm\)</span>.</p>
+<p>If the values at <span class="math inline">\(r=700\)</span> of the curves are projected back into the physical space, we note that the curves above the grey CSR line are the highly clustered cells in the bottom left. The other curves are the more spaced cells.</p>
+</section>
+</section>
+</section>
+<section id="appendix" class="level2" data-number="26.4">
+<h2 data-number="26.4"><span class="header-section-number">26.4</span> Appendix</h2>
+<section id="references" class="level3 unnumbered">
+<h3 class="unnumbered">References</h3>
+<div id="quarto-navigation-envelope" class="hidden">
+<p><span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar-title">PrinciplesSTA</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-navbar-title">Principles of Spatial (Transcript)omics Analysis with Bioconductor</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-next"><span class="chapter-number">27</span>  <span class="chapter-title">Spatial registration</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-prev"><span class="chapter-number">25</span>  <span class="chapter-title">Gene/feature-set signatures</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/index.htmlWelcome">Welcome</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/preamble.htmlPreamble">Preamble</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:quarto-sidebar-section-1">Introduction</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/bkg-introduction.html&lt;span-class=&#39;chapter-number&#39;&gt;1&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Introduction&lt;/span&gt;"><span class="chapter-number">1</span>  <span class="chapter-title">Introduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/bkg-spatial-omics.html&lt;span-class=&#39;chapter-number&#39;&gt;2&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatial-omics&lt;/span&gt;"><span class="chapter-number">2</span>  <span class="chapter-title">Spatial omics</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/bkg-infrastructure.html&lt;span-class=&#39;chapter-number&#39;&gt;3&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Infrastructure&lt;/span&gt;"><span class="chapter-number">3</span>  <span class="chapter-title">Infrastructure</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:quarto-sidebar-section-2">Sequencing-based platforms</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-introduction.html&lt;span-class=&#39;chapter-number&#39;&gt;4&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Introduction&lt;/span&gt;"><span class="chapter-number">4</span>  <span class="chapter-title">Introduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-load-data.html&lt;span-class=&#39;chapter-number&#39;&gt;5&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Load-data&lt;/span&gt;"><span class="chapter-number">5</span>  <span class="chapter-title">Load data</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-quality-control.html&lt;span-class=&#39;chapter-number&#39;&gt;6&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Quality-control&lt;/span&gt;"><span class="chapter-number">6</span>  <span class="chapter-title">Quality control</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-normalize-featselect-dimred.html&lt;span-class=&#39;chapter-number&#39;&gt;7&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Normalization,-feature-selection,-and-dimensionality-reduction&lt;/span&gt;"><span class="chapter-number">7</span>  <span class="chapter-title">Normalization, feature selection, and dimensionality reduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-clustering.html&lt;span-class=&#39;chapter-number&#39;&gt;8&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Clustering&lt;/span&gt;"><span class="chapter-number">8</span>  <span class="chapter-title">Clustering</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-spot-deconvolution.html&lt;span-class=&#39;chapter-number&#39;&gt;9&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spot-deconvolution&lt;/span&gt;"><span class="chapter-number">9</span>  <span class="chapter-title">Spot deconvolution</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-spatial-co-localization.html&lt;span-class=&#39;chapter-number&#39;&gt;10&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatial-co-localization&lt;/span&gt;"><span class="chapter-number">10</span>  <span class="chapter-title">Spatial co-localization</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-marker-genes.html&lt;span-class=&#39;chapter-number&#39;&gt;11&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Marker-genes&lt;/span&gt;"><span class="chapter-number">11</span>  <span class="chapter-title">Marker genes</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-workflow-human-dlpfc.html&lt;span-class=&#39;chapter-number&#39;&gt;12&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Workflow:-Human-DLPFC&lt;/span&gt;"><span class="chapter-number">12</span>  <span class="chapter-title">Workflow: Human DLPFC</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/seq-workflow-spatialibd.html&lt;span-class=&#39;chapter-number&#39;&gt;13&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Workflow:-spatialLIBD&lt;/span&gt;"><span class="chapter-number">13</span>  <span class="chapter-title">Workflow: spatialLIBD</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:quarto-sidebar-section-3">Imaging-based platforms</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-introduction.html&lt;span-class=&#39;chapter-number&#39;&gt;14&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Introduction&lt;/span&gt;"><span class="chapter-number">14</span>  <span class="chapter-title">Introduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-quality-control.html&lt;span-class=&#39;chapter-number&#39;&gt;15&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Quality-control&lt;/span&gt;"><span class="chapter-number">15</span>  <span class="chapter-title">Quality control</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-dimensionality-reduction.html&lt;span-class=&#39;chapter-number&#39;&gt;16&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Dimensionality-reduction&lt;/span&gt;"><span class="chapter-number">16</span>  <span class="chapter-title">Dimensionality reduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-clustering.html&lt;span-class=&#39;chapter-number&#39;&gt;17&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Clustering&lt;/span&gt;"><span class="chapter-number">17</span>  <span class="chapter-title">Clustering</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-neighbors.html&lt;span-class=&#39;chapter-number&#39;&gt;18&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Neighborhood-analysis&lt;/span&gt;"><span class="chapter-number">18</span>  <span class="chapter-title">Neighborhood analysis</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-cell-comm.html&lt;span-class=&#39;chapter-number&#39;&gt;19&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Cell-communication&lt;/span&gt;"><span class="chapter-number">19</span>  <span class="chapter-title">Cell communication</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-sub-cellular.html&lt;span-class=&#39;chapter-number&#39;&gt;20&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Sub-cellular-analysis&lt;/span&gt;"><span class="chapter-number">20</span>  <span class="chapter-title">Sub-cellular analysis</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-workflow-xenium.html&lt;span-class=&#39;chapter-number&#39;&gt;21&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Xenium-workflow&lt;/span&gt;"><span class="chapter-number">21</span>  <span class="chapter-title">Xenium workflow</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/img-workflow-cosmx.html&lt;span-class=&#39;chapter-number&#39;&gt;22&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;CosMx-workflow&lt;/span&gt;"><span class="chapter-number">22</span>  <span class="chapter-title">CosMx workflow</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:quarto-sidebar-section-4">Technology-agnostic/cross-platform/downstream analyses</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-introduction.html&lt;span-class=&#39;chapter-number&#39;&gt;23&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Introduction&lt;/span&gt;"><span class="chapter-number">23</span>  <span class="chapter-title">Introduction</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-spatially-variable.html&lt;span-class=&#39;chapter-number&#39;&gt;24&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatially-variable-genes&lt;/span&gt;"><span class="chapter-number">24</span>  <span class="chapter-title">Spatially variable genes</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-featureset-signatures.html&lt;span-class=&#39;chapter-number&#39;&gt;25&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Gene/feature-set-signatures&lt;/span&gt;"><span class="chapter-number">25</span>  <span class="chapter-title">Gene/feature-set signatures</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-spat-stat.html&lt;span-class=&#39;chapter-number&#39;&gt;26&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatial-Statistics&lt;/span&gt;"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-registration.html&lt;span-class=&#39;chapter-number&#39;&gt;27&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatial-registration&lt;/span&gt;"><span class="chapter-number">27</span>  <span class="chapter-title">Spatial registration</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-multi-sample-de.html&lt;span-class=&#39;chapter-number&#39;&gt;28&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Multiple-sample-differential-expression&lt;/span&gt;"><span class="chapter-number">28</span>  <span class="chapter-title">Multiple-sample differential expression</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/crs-workflow-xenvis.html&lt;span-class=&#39;chapter-number&#39;&gt;29&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Workflow:-Xenium-+-Visium&lt;/span&gt;"><span class="chapter-number">29</span>  <span class="chapter-title">Workflow: Xenium + Visium</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:quarto-sidebar-section-5">Appendices</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/apx-acknowledgments.html&lt;span-class=&#39;chapter-number&#39;&gt;A&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Acknowledgments&lt;/span&gt;"><span class="chapter-number">A</span>  <span class="chapter-title">Acknowledgments</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-int-sidebar:/pages/apx-related-resources.html&lt;span-class=&#39;chapter-number&#39;&gt;B&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Related-resources&lt;/span&gt;"><span class="chapter-number">B</span>  <span class="chapter-title">Related resources</span></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-breadcrumbs-Technology-agnostic/cross-platform/downstream-analyses">Technology-agnostic/cross-platform/downstream analyses</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-breadcrumbs-&lt;span-class=&#39;chapter-number&#39;&gt;26&lt;/span&gt;--&lt;span-class=&#39;chapter-title&#39;&gt;Spatial-Statistics&lt;/span&gt;"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span></span></p>
+</div>
+<div id="quarto-meta-markdown" class="hidden">
+<p><span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-metatitle"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span> – Principles of Spatial (Transcript)omics Analysis with Bioconductor</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-twittercardtitle"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span> – Principles of Spatial (Transcript)omics Analysis with Bioconductor</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-ogcardtitle"><span class="chapter-number">26</span>  <span class="chapter-title">Spatial Statistics</span> – Principles of Spatial (Transcript)omics Analysis with Bioconductor</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-metasitename">Principles of Spatial (Transcript)omics Analysis with Bioconductor</span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-twittercarddesc"></span> <span class="hidden quarto-markdown-envelope-contents" data-render-id="quarto-ogcardddesc"></span></p>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Anselin1995" class="csl-entry" role="listitem">
+Anselin, Luc. 1995. <span>“Local <span>Indicators</span> of <span>Spatial Association</span>—<span>LISA</span>.”</span> <em>Geographical Analysis</em> 27 (2): 93–115. <a href="https://doi.org/10.1111/j.1538-4632.1995.tb00338.x">https://doi.org/10.1111/j.1538-4632.1995.tb00338.x</a>.
+</div>
+<div id="ref-Baddeley2015" class="csl-entry" role="listitem">
+Baddeley, Adrian, Ege Rubak, and Rolf Turner. 2015. <em>Spatial <span>Point Patterns</span></em>. 1st ed. <span>CRC Interdisciplinary Statistics Series</span>. CRC Press, Taylor &amp; Francis Group.
+</div>
+<div id="ref-Baddeley2005-spatstat" class="csl-entry" role="listitem">
+Baddeley, Adrian, and Rolf Turner. 2005. <span>“Spatstat: <span>An R Package</span> for <span>Analyzing Spatial Point Patterns</span>.”</span> <em>Journal of Statistical Software</em> 12 (January): 1–42. <a href="https://doi.org/10.18637/jss.v012.i06">https://doi.org/10.18637/jss.v012.i06</a>.
+</div>
+<div id="ref-Emons2024-pasta" class="csl-entry" role="listitem">
+Emons, Martin, Samuel Gunz, Helena L Crowell, Izaskun Mallona, Reinhard Furrer, and Mark D Robinson. 2024. <span>“Pasta: Pattern Analysis for Spatial Omics Data.”</span> <em>arXiv Preprint arXiv:2412.01561</em>.
+</div>
+<div id="ref-Janesick2023" class="csl-entry" role="listitem">
+Janesick, Amanda, Robert Shelansky, Andrew D. Gottscho, Florian Wagner, Stephen R. Williams, Morgane Rouault, Ghezal Beliakoff, et al. 2023. <span>“High Resolution Mapping of the Tumor Microenvironment Using Integrated Single-Cell, Spatial and in Situ Analysis.”</span> <em>Nature Communications</em> 14 (1): 8353.
+</div>
+<div id="ref-Lee2001" class="csl-entry" role="listitem">
+Lee, Sang-Il. 2001. <span>“Developing a Bivariate Spatial Association Measure: <span>An</span> Integration of <span>Pearson</span>’s r and <span>Moran</span>’s <span>I</span>.”</span> <em>Journal of Geographical Systems</em> 3 (4): 369–85. <a href="https://doi.org/10.1007/s101090100064">https://doi.org/10.1007/s101090100064</a>.
+</div>
+<div id="ref-Moran1950" class="csl-entry" role="listitem">
+Moran, P. A. P. 1950. <span>“Notes on <span>Continuous Stochastic Phenomena</span>.”</span> <em>Biometrika</em> 37 (1/2): 17–23. <a href="https://doi.org/10.2307/2332142">https://doi.org/10.2307/2332142</a>.
+</div>
+<div id="ref-Moses2023-Voyager" class="csl-entry" role="listitem">
+Moses, Lambda, Pétur Helgi Einarsson, Kayla Jackson, Laura Luebbert, A. Sina Booeshaghi, Sindri Antonsson, Nicolas Bray, Páll Melsted, and Lior Pachter. 2023. <span>“<span>Voyager</span>: Exploratory Single-Cell Genomics Data Analysis with Geospatial Statistics.”</span> <em>bioRxiv</em>. <a href="https://doi.org/10.1101/2023.07.20.549945">https://doi.org/10.1101/2023.07.20.549945</a>.
+</div>
+<div id="ref-Pebesma2023" class="csl-entry" role="listitem">
+Pebesma, Edzer, and Roger Bivand. 2023. <em>Spatial <span>Data Science</span>: <span>With Applications</span> in <span>R</span></em>. 1st ed. New York: <span>Chapman and Hall/CRC</span>. <a href="https://doi.org/10.1201/9780429459016">https://doi.org/10.1201/9780429459016</a>.
+</div>
+<div id="ref-Ripley1976" class="csl-entry" role="listitem">
+Ripley, Brian D. 1976. <span>“The <span>Second-Order Analysis</span> of <span>Stationary Point Processes</span>.”</span> <em>Journal of Applied Probability</em> 13 (2): 255–66. <a href="https://doi.org/10.2307/3212829">https://doi.org/10.2307/3212829</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id = "quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a  href="/pages/crs-featureset-signatures.html" class="pagination-link" aria-label="Gene/feature-set signatures">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class='chapter-number'>25</span>  <span class='chapter-title'>Gene/feature-set signatures</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a  href="/pages/crs-registration.html" class="pagination-link" aria-label="Spatial registration">
+        <span class="nav-page-text"><span class='chapter-number'>27</span>  <span class='chapter-title'>Spatial registration</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+</body>
+
+</html>
