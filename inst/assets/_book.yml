@@ -38,7 +38,7 @@ book:
       chapters:
         - pages/crs-introduction.qmd
         - pages/crs-spatially-variable.qmd
-        - pages/crs-featureset-signatures.qmd
+        - pages/crs-signatures.qmd
         - pages/crs-spat-stat.qmd
         - pages/crs-registration.qmd
         - pages/crs-multi-sample-de.qmd

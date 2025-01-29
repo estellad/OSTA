@@ -34,6 +34,7 @@ library(ggspavis)
 library(pheatmap)
 library(patchwork)
 library(BiocParallel)
+library(SpatialExperiment)
 bp <- MulticoreParam(th <- 10)
 ```
 
@@ -88,7 +89,7 @@ colData(spe)[rownames(auc)] <- t(assay(auc))
 
 Let's inspect the percentage of cells with non-zero score across signatures:
 
-```{r}
+```{r fq}
 fq <- rowMeans(assay(auc) > 0)
 fq <- sort(round(100*fq, 2))
 head(fq) # rarely detected
@@ -99,7 +100,7 @@ We might also view how signature scores correlated with one another. Besides the
 underlying biology, this will be influenced by the number of genes overlapping 
 between sets (here, we are only capturing a little over 300 RNA targets!).
 
-```{r fig.width=8, fig.height=7}
+```{r plt-cm, fig.width=8, fig.height=7}
 #| code-fold: true
 cm <- cor(t(assay(auc)), method="spearman")
 pheatmap(cm, 
@@ -113,13 +114,17 @@ some examples; here, hypoxia and myogenesis are spatially exclusive (they are
 negatively correlated and occupy separated 'blocks' in the correlation matrix
 displayed above), while apoptosis is ubiquitous (detected in >90% of cells).
 
-```{r message=FALSE, fig.width=11, fig.height=3}
+```{r plt-xy, message=FALSE, fig.width=11, fig.height=3}
 #| code-fold: true
 spe$in_tissue <- 1
 lapply(c("hypoxia", "apoptosis", "myogenesis"), \(.) {
     q <- quantile(x <- spe[[.]], c(0.01, 0.99))
     x <- (x-q[1])/diff(q) # 01-quantile scaling
     x[x < 0] <- 0; x[x > 1] <- 1; spe[[.]] <- x
+    # TODO: fix, cuz 'ggspaviz' is messing sth up...
+    xy <- spatialCoordsNames(spe)
+    xy <- match(xy, names(colData(spe)), nomatch=0)
+    if (any(xy != 0)) colData(spe) <- colData(spe)[-xy]
     plt <- plotSpots(spe, annotate=.) 
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
@@ -139,7 +144,7 @@ Lastly, we can aggregate signature scores by cell subpopulations. This can help
 us functionally characterize subpopulations that stem from, e.g., unsupervised 
 approaches or in cases where the cells under study are poorly characterized.
 
-```{r fig.width=6, fig.height=5}
+```{r plt-hm, fig.width=6, fig.height=5}
 #| code-fold: true
 # aggregate AUC values by cluster
 mu <- aggregateAcrossCells(auc, spe$k, use.assay.type="AUC", statistics="mean")
