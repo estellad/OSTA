@@ -37,8 +37,8 @@ Imports:
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
-    dplyr, 
     doMC,
+    dplyr, 
     DropletUtils,
     EBImage,
     ExperimentHub, 
@@ -71,9 +71,9 @@ Imports:
     spacexr,
     SpatialExperiment, 
     SpatialExperimentIO, 
-    spatialLIBD,
-    SpatialFeatureExperiment, 
     spatialFDA,
+    SpatialFeatureExperiment, 
+    spatialLIBD,
     spatstat,
     spdep,
     STexampleData, 
@@ -83,15 +83,14 @@ Imports:
     zoo
 Suggests: 
     BiocManager, 
-    BiocVersion, 
     BiocStyle, 
+    BiocVersion, 
     downlit,
     glue, 
     knitr,
     sessioninfo, 
     xml2
 Remotes:
-    drisso/SpaceTrooper@devel_spatialBook,
     drisso/SpaceTrooper@devel_spatialBook,
     estellad/SpatialExperimentIO,
     mjemons/spatialFDA,
