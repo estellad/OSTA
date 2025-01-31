@@ -1,17 +1,14 @@
 name: biocbook
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - gha
-  #     - devel
-  #     - RELEASE_**
-  # pull_request:
-  #   branches:
-  #     - sandbox
-
-env:
-  ver: devel
+      - devel
+      - devel-*
+      - RELEASE_**
+    paths-ignore:
+      - 'deps.Dockerfile'
 
 jobs:
   build-push:
@@ -28,15 +25,27 @@ jobs:
           verbose: true
       
       - name: 🧾 Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: 🏷 Set Bioc version
+        run: |
+          branch="${{ github.ref_name }}"
+          if [[ "$branch" == "devel" || "$branch" =~ ^RELEASE_ ]]; then
+            # Remove everything after and including '-' if present
+            version=${branch%%-*}
+            echo "BIOC_VERSION=${version}" >> "${GITHUB_ENV}"
+          else
+            echo "BIOC_VERSION=devel" >> "${GITHUB_ENV}"
+          fi
 
       - name: ⏳ Collect Workflow Telemetry
-        uses: runforesight/workflow-telemetry-action@v1
+        uses: catchpoint/workflow-telemetry-action@v2
 
       - name: 🐳 Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
+
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
   
       - name: 📝 Get book info
         id: info
@@ -52,15 +61,15 @@ jobs:
           echo pkgversion=$(grep -m1 -E '^Version: +' DESCRIPTION | sed -E 's/.*: +//') >> "${GITHUB_ENV}"
 
       - name: 🔐 Log in to the Github Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏷 Get metadata for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ env.owner }}/${{ env.pkgname }}
           tags: |
@@ -68,24 +77,26 @@ jobs:
             ${{ env.pkgversion }}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'devel') }}
 
-      - name: 📦 Install, build and check package in local Docker image
+      - name: 📦 Build and push book image
         id: docker
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
+          file: biocbook.Dockerfile
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            BIOC_VERSION=${{ env.ver }}
+            BIOC_VERSION=${{ env.BIOC_VERSION }}
+            OWNER=${{ env.owner }}
 
       - name: 🚀 Push local Docker image to ghcr.io
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            BIOC_VERSION=${{ env.ver }}
+            BIOC_VERSION=${{ env.BIOC_VERSION }}
 
       - name: 📚 Recover pkg artifacts generated during build in local Docker container (pkg bundle and book) 
         env:
@@ -110,13 +121,13 @@ jobs:
           clean: false 
 
       - name: 💾 Upload package bundle artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bundle
           path: ${{ env.bundle_path }}
 
       - name: 💾 Upload book artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: book
           path: ${{ env.book_path }}
