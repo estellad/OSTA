@@ -34,8 +34,18 @@ id <- "CosMx1k_MouseBrain1"
 pa <- OSTA.data::.load_data(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
+
 # TODO: should use 'SpaExpIO' here...
 cos <- SpaceTrooper::readCosmxSPE(td)
+
+# add cell boundary polygons
+fnm <- file.path(td, "polygons.csv.gz")
+pol <- readPolygonsCosmx(fnm)
+idx <- sprintf("f%s_c%s", cos$fov, cos$cellID)
+cos$polygons <- pol[match(idx, pol$cell_id), ]
+
+# add info for 'SpaceTrooper'
+metadata(cos)$technology <- "Nanostring_CosMx"
 cos$sample_id <- "CosMx"
 cos
 ```
