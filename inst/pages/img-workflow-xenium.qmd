@@ -131,6 +131,9 @@ p + geom_point(aes(col=i), stroke=0, size=0.1) |
 p + geom_point(data=df[i, ], stroke=0, size=0.2)
 ```
 
+Next, we'll log-normalize counts by area, and perform principal 
+component analysis (PCA) on all `r nrow(spe)` RNA targets:
+
 ```{r pro}
 # cell area-based normalization
 logcounts(sub) <- sweep(assay(sub), 2, sub$cell_area, `/`)
