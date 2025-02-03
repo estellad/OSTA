@@ -9,7 +9,7 @@ book:
         - pages/bkg-spatial-omics.qmd
         - pages/bkg-interoperability.qmd
         - pages/bkg-infrastructure.qmd
-        - pages/bkg-datasets.qmd
+        #- pages/bkg-datasets.qmd
     - part: "Sequencing-based platforms"
       chapters:
         - pages/seq-introduction.qmd
