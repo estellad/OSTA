@@ -17,7 +17,7 @@ book:
         - pages/seq-quality-control.qmd
         - pages/seq-processing.qmd
         - pages/seq-clustering.qmd
-        - pages/seq-spot-deconvolution.qmd
+        - pages/seq-deconvolution.qmd
         - pages/seq-spatial-co-localization.qmd
         - pages/seq-marker-genes.qmd
         - pages/seq-workflow-visium-crc.qmd
