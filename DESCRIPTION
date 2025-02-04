@@ -1,6 +1,6 @@
 Package: OSTA
 Title: Orchestrating Spatial Transcriptomics Analysis with Bioconductor
-Description: This package contains source files for the "Principles of Spatial 
+Description: This package contains source files for the "Orchestrating Spatial 
     Transcriptomics Analysis with Bioconductor" online book. This book provides 
     interactive examples and discussion on key principles of computational 
     analysis workflows for spatial transcriptomics data using Bioconductor in 
@@ -9,18 +9,18 @@ Description: This package contains source files for the "Principles of Spatial
 Version: 0.99.0
 Date: `r date()`
 Authors@R: 
-    c(person("Lukas M.", "Weber", 
+    c(person("Helena L.", "Crowell", 
+             role=c("aut", "cre"), 
+             email = "helena@crowell.eu", 
+             comment = c(ORCID="0000-0002-4801-1767")), 
+      person("Stephanie C.", "Hicks", 
+             role = c("aut", "cre"), 
+             email = "shicks19@jhu.edu", 
+             comment = c(ORCID = "0000-0002-7858-0231")), 
+      person("Lukas M.", "Weber", 
              role = c("aut", "cre"), 
              email = "lmweberedu@gmail.com", 
-             comment = c(ORCID = "0000-0002-3282-1730")), 
-      person("Leonardo", "Collado-Torres", 
-             role = c("aut"), 
-             email = "lcolladotor@gmail.com", 
-             comment = c(ORCID = "0000-0003-2140-308X")), 
-      person("Stephanie C.", "Hicks", 
-             role = c("aut"), 
-             email = "shicks19@jhu.edu", 
-             comment = c(ORCID = "0000-0002-7858-0231")))
+             comment = c(ORCID = "0000-0002-3282-1730")))
 URL: https://github.com/lmweber/PrinciplesSTA
 BugReports: https://github.com/lmweber/PrinciplesSTA
 biocViews: 
