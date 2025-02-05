@@ -92,15 +92,6 @@ jobs:
             BRANCH=${{ steps.extract_branch.outputs.branch }}
             OWNER=${{ env.owner }}
 
-      - name: 🚀 Push local Docker image to ghcr.io
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            BRANCH=${{ env.BIOC_VERSION }}
-
       - name: 📚 Recover pkg artifacts generated during build in local Docker container (pkg bundle and book) 
         env:
           IMG: ${{ steps.docker.outputs.ImageID }}
