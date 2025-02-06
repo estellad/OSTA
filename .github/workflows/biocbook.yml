@@ -93,10 +93,9 @@ jobs:
             OWNER=${{ env.owner }}
 
       - name: 📚 Recover pkg artifacts generated during build in local Docker container (pkg bundle and book) 
-        env:
-          IMG: ${{ steps.docker.outputs.ImageID }}
         run: |
-          SHA=$(docker container create ${{ env.IMG }})
+          echo "IMAGE_REF=$(echo ${{ steps.meta.outputs.tags }} | cut -d':' -f1)@$(echo ${{ steps.docker.outputs.ImageID }})" >> $GITHUB_ENV
+          SHA=$(docker container create ${{ env.IMAGE_REF }})
           docker container cp ${SHA}:/opt/pkg/${{ env.Pkgname }}_${{ env.pkgversion }}.tar.gz .
           tar --extract --gzip --file ${{ env.Pkgname }}_${{ env.pkgversion }}.tar.gz
           echo bundle_path=${{ env.Pkgname }}_${{ env.pkgversion }}.tar.gz >> "${GITHUB_ENV}"
