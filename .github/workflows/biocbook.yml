@@ -11,7 +11,7 @@ on:
       - 'deps.Dockerfile'
 
 jobs:
-  build-push:
+  build:
     runs-on: ubuntu-latest
     name: build-book (${{ github.ref_name }})
     permissions:
@@ -104,15 +104,13 @@ jobs:
 
       - name: 🏷 Get gh-branch directory to deploy to
         run: |
-          echo target_folder=$(echo ${{ github.ref_name }} | sed 's,RELEASE_,,' | tr '_' '.') >> "${GITHUB_ENV}"
+          echo target_folder=$(echo ${{ env.BIOC_VERSION }} | sed 's,RELEASE_,,' | tr '_' '.') >> "${GITHUB_ENV}"
 
-      - name: 🚀 Deploy book to Github Pages on versioned branch
-        uses: JamesIves/github-pages-deploy-action@v4.4.3
+      - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: ${{ env.book_path }}/ 
-          target-folder: docs/${{ env.target_folder }}/ 
-          branch: gh-pages
-          clean: false 
+          path: ${{ env.book_path }}/
 
       - name: 💾 Upload package bundle artifact
         uses: actions/upload-artifact@v4
@@ -120,8 +118,20 @@ jobs:
           name: bundle
           path: ${{ env.bundle_path }}
 
-      - name: 💾 Upload book artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: book
-          path: ${{ env.book_path }}
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
