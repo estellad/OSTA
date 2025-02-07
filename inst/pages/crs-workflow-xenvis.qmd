@@ -5,14 +5,17 @@
 ### Dependencies
 
 ```{r dep, message=FALSE, warning=FALSE}
+library(osfr)
 library(RANN)
 library(scater)
 library(scuttle)
 library(harmony)
 library(ggspavis)
+library(VisiumIO)
 library(patchwork)
 library(BayesSpace)
-library(STexampleData)
+library(SpatialExperiment)
+library(SpatialExperimentIO)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(194849)
@@ -20,11 +23,18 @@ set.seed(194849)
 
 ### Introduction
 
-![](../images/xenvis-visium.png){height=300px}
-![](../images/xenvis-xenium.png){height=300px}
+In this demo, we will rely on a dataset from @Janesick2023, which includes
+same-section Visium and Xenium measurements on human breast cancer tissue.
+
+![H&E staining](../images/xenvis-visium.png){height=300px}
+![Xenium IF](../images/xenvis-xenium.png){height=300px}
+
+## Setup
+
+We start out by retrieving these datasets from the OSF repository, and reading them into R as separate `r BiocStyle::Biocpkg("SpatialExperiment")` objects using functions from the `r BiocStyle::Biocpkg("VisiumIO")` and `r BiocStyle::Biocpkg("SpatialExperimentIO")` packages.
 
 ```{r osf}
-library(osfr)
+# list OSF repo datasets that match 'Janesick'
 osf <- osf_retrieve_node("https://osf.io/5n4q3")
 (dir <- osf_ls_files(osf, pattern="Janesick")$name)
 ```
@@ -36,7 +46,6 @@ sub <- osf_ls_files(osf, ids)
 dir.create(tmp <- tempfile())
 osf_download(sub, tmp, recurse=TRUE)
 # read into 'SpatialExperiment'
-library(VisiumIO)
 obj <- TENxVisium(
     spacerangerOut=tmp, 
     images="lowres", 
@@ -51,7 +60,6 @@ sub <- osf_ls_files(osf, ids)
 dir.create(tmp <- tempfile())
 osf_download(sub, tmp, recurse=TRUE)
 # read into 'SpatialExperiment'
-library(SpatialExperimentIO)
 (xen <- readXeniumSXE(tmp))
 ```
 
@@ -65,25 +73,40 @@ library(SpatialExperimentIO)
 
 There are many ways of registering images in R and Python, or using external plug-ins. 
 
-* `SpatialData` [@Marconato2025-SpatialData] is a Python package that requires user-selected landmarks to align images; here we show the registration of Visium onto Xenium in *napari* interface:
+`SpatialData` [@Marconato2025-SpatialData] is a Python package that requires 
+user-selected landmarks to align images; here we show the registration of 
+Visium onto Xenium in *napari* interface:
 
 ![](../images/xenvis-napari.png){width=50%}
 
-* R packages `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] can be combined with `r BiocStyle::CRANpkg("mmand")` for automated image registration.
+R packages `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] can be 
+combined with `r BiocStyle::CRANpkg("mmand")` for automated image registration.
 After alignment, we will obtain the registered images with a transformation matrix. 
 Here is a demonstration with external data, before and after registration of the two slices.
-However, the automation does not work well on images with very different orientation, scale, and intensity, such as in this use case of Xenium and Visium.
+However, the automation does not work well on images with very different orientation, 
+scale, and intensity, such as in this use case of Xenium and Visium.
 
 <center>
 ![](../images/xenvis-RNiftyReg1){width=66%}
 ![](../images/xenvis-RNiftyReg2){width=33%}
 </center>
 
-* Therefore, we use the transformation matrix provided by 10x, which was obtained by registration Xenium onto Visium in Python with the Fiji [@10xGenomics2023-Fiji] Java plug-in:
+Therefore, we use the affine transformation matrix provided by 10x Genomics, 
+which was obtained by registration of Xenium onto Visium in Python with the 
+Fiji [@10xGenomics2023-Fiji] Java plug-in.
+
+An affine map is generally composed of a linear map (scaling and rotation) 
+and a translation, and can be apply using basic matrix multiplication and 
+vector addition, specifically:
+
+$$\mathbf{y}=A\mathbf{x}+\mathbf{b}$$
+
+where $A$ denotes the linear map, $b$ the translation, and $\mathbf{x}$ and 
+$\mathbf{y}$ correspond to original and transformed coordinates, respectively.
+
+In R, this translates to the following operations:
 
 ```{r mtx}
-# simplify spatial coordinate names for visualization
-spatialCoordsNames(vis) <- spatialCoordsNames(xen) <- c("x", "y")
 # affine matrix for aligning Xenium onto Visium
 mtx <- matrix(nrow=2, byrow=TRUE, c(
     8.82797498e-02, -1.91831377e+00, 1.63476055e+04,
@@ -92,6 +115,8 @@ mtx <- matrix(nrow=2, byrow=TRUE, c(
 ```
   
 ```{r new-xy}
+# simplify spatial coordinate names for visualization
+spatialCoordsNames(vis) <- spatialCoordsNames(xen) <- c("x", "y")
 # stash original coordinates
 old <- spatialCoords(xen)
 colData(xen)[c(".x", ".y")] <- old
@@ -111,11 +136,16 @@ ggplot() + coord_equal() + theme_void() +
 
 ## Aggregation
 
-Binning single-cell resolution spatial data into spots can be useful for checking correlations between technical replicates of the same technology, identify artifacts across technologies, and checking cell density (number of cells per spot). 
-The user can choose to bin from transcript-level (sub-cellular) or cell-level. 
-Our package bin2spot will soon be available to the public after some optimization with the speed in the backend.
+Binning single-cell resolution spatial data into spots can be useful for checking 
+correlations between technical replicates of the same technology, identifying 
+artifacts across technologies, and checking cell density (number of cells per spot). 
+In general, it is possible to bin at the transcript-level (sub-cellular) or cell-level.
 
-To aggregate single cell-level data from Xenium at the spot level, we first do a fixed-radius neighborhood search using `r BiocStyle::CRANpkg("RANN")` (c.f. @sec-img-neighbors) to identify, for ever spot, cells whose centroid lies within a 27.5um distance (given a Visium spot diameter of 55um):
+To aggregate single cell-level data from Xenium at the spot level, we first 
+carry out a fixed-radius neighborhood search using `r BiocStyle::CRANpkg("RANN")` 
+(c.f. @sec-img-neighbors) to identify, for ever spot, cells whose centroid lies 
+within a $\sim130$um distance (Visium spot diameter of 55um, divided by two 2, 
+divided by 0.2115 = Xenium px size in um):
 
 ```{r nns, message=FALSE, fig.width=3.5, fig.height=3}
 # do a fixed-radius search to get cell 
@@ -125,6 +155,8 @@ nns <- nn2(
     data=spatialCoords(xen), query=spatialCoords(vis))
 ```
 
+Let's count and visualize the number of cells that overlap each spot:
+
 ```{r plt-ncs, message=FALSE, fig.width=3.5, fig.height=3}
 # get cell indices and number of cells per spot
 vis$n_cells <- rowSums((idx <- nns$nn.idx) > 0)
@@ -132,7 +164,8 @@ plotSpots(vis, annotate="n_cells")
 ```
 
 Next, we can aggregate single cell-level Xenium data into pseudo-spots. 
-In addition, we propagate the Visium data's spatial coordinates, excluding locations of spots without any overlapping cells:
+In addition, we propagate the Visium data's spatial coordinates, 
+excluding spots without any overlapping cells:
 
 ```{r pbs, message=FALSE, fig.width=3, fig.height=3}
 # aggregate Xenium data into pseudo-spots
@@ -143,14 +176,18 @@ colnames(xem) <- colnames(vis)[vis$n_cells > 0]
 xem$in_tissue <- 1
 ```
 
-Because we've aligned the Xenium to the Visium data, we can propagate the Visium data's `imgData` (low resolution H&E staining) to the object containing pseudo-spot Xenium data:
+Because we've aligned the Xenium to the Visium data, we can also 
+propagate the Visium data's `imgData` (low resolution H&E staining) 
+to the object containing pseudo-spot Xenium data:
 
 ```{r img}
 imgData(xem) <- imgData(vis)
 ```
 
-Next, let's compute some standard quality control metrics on both, the Visium and pseudo-spot Xenium data.
-Besides dataset-specific metrics, we also specify the subset of genes that are shared between both datasets in order to obtain comparable metrics:
+Next, let's compute some standard quality control metrics on both, 
+the Visium and pseudo-spot Xenium data. Besides dataset-specific metrics, 
+we also specify the subset of genes that are shared between both datasets 
+in order to obtain comparable metrics:
 
 ```{r qcs}
 sub <- list(gs=intersect(rownames(vis), rownames(xen)))
@@ -172,7 +209,8 @@ plotVisium(xem,
 plot_layout(nrow=1) 
 ```
 
-We can also use a scatter plot - where points = (pseudo-)spots - to directly compare total counts between both technologies:
+We can also use a scatter plot - where points = (pseudo-)spots - 
+to directly compare total counts between both technologies:
 
 ```{r plt-pts, collapse=TRUE, fig.width=4.5, fig.height=4}
 df <- data.frame(
@@ -185,6 +223,11 @@ ggplot(df, aes(Xenium, Visium, col=n_cells)) +
 ```
 
 ## Integration
+
+Besides physically aligning both datasets, we can integrate them on 
+a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")`.
+
+To this end, we first consolidate the Visium and Xenium data into one object:
 
 ```{r obj}
 # pool datasets together
@@ -205,12 +248,19 @@ assay(.vis) <- as(assay(.vis), "dgCMatrix")
 dim(obj <- cbind(.vis, .xem))
 ```
 
+Next, we run a standard pipeline to perform log-library size normalization 
+(using `r BiocStyle::Biocpkg("scater")`), principal component analysis (PCA), 
+`harmony` integration, and dimension reduction (UMAP). Notably, the feature 
+selection step that typically precedes PCA is skipped here, as the Xenium 
+experiment includes only a curated selection of $\sim300$ targets by design.
+
 ```{r int}
 # minimal filtering
 obj <- obj[, obj$subsets_gs_sum > 0]
 # library size normalization 
 obj <- logNormCounts(obj)
 # principal component analysis
+# (w/o additional feature selection)
 obj <- runPCA(obj)
 # 'harmony' integration
 pcs <- RunHarmony(
@@ -231,7 +281,10 @@ plotUMAP(obj, colour_by="sample_id", point_size=0.1) +
 
 ## Clustering
 
-The `spatialCluster()` function clusters the spots, and adds the predicted cluster labels to the SingleCellExperiment. Typically, as we did for the analyses in the paper, we suggest running with at least 10,000 iterations (`nrep=10000`), but we use 1,000 iteration in this demonstration for the sake of runtime. (Note that a random seed must be set (`set.seed()`) in order for the results to be reproducible.)
+The `spatialCluster()` function clusters the spots, and adds the predicted cluster 
+labels to the object. The authors recommend running with at least 10,000 iterations 
+(`nrep=1e4`); we use fewer iterations in this demo for the sake of runtime. (Note 
+that a random seed must be set (`set.seed()`) for the results to be reproducible.)
 
 ```{r clu, message=FALSE}
 xy <- c("array_row", "array_col")
@@ -250,7 +303,8 @@ plotVisium(res,
     theme(legend.key.size=unit(0, "pt"))
 ```
 
-From here on out, both datasets could be analyzed together and/or independently, e.g., in order to identify cluster markers, annotate cell subpopulations etc.
+From here on out, both datasets could be analyzed together and/or independently, 
+e.g., in order to identify cluster markers, annotate cell subpopulations etc.
 
 ## Appendix
 

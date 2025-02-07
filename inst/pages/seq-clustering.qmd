@@ -21,9 +21,7 @@ Once we have identified spatial domains, these can then be further investigated 
 
 ### Dependencies
 
-#### Load packages
-
-```{r load-libs, message=FALSE, warning=FALSE}
+```{r deps, message=FALSE, warning=FALSE}
 library(scran)
 library(scater)
 library(igraph)
@@ -38,45 +36,9 @@ set.seed(seed <- 123)
 n_top <- 1000
 n_PCs <- 15
 n_clusters <- 18
+# load data
+(spe <- readRDS("seq-spe_dr.rds"))
 ```
-
-#### Load previously saved data
-
-We start by loading the previously saved data object(s) (see @sec-seq-normalization-save-objects and @sec-seq-dimensionality-reduction-save-objects).
-
-```{r load-data, message=FALSE}
-spe <- readRDS("seq-spe_reduceddims.rds")
-```
-
-<!--
-
-We first identify highly variable genes (HVGs) to model the mean-variance relationship for each gene, followed by applying PCA on the selected top variable genes. 
-Alternatively, to incorporate spatial information, spatially-aware feature selection can identify top spatially variable genes (SVGs) (see @crs-spatially-variable for details). 
-The resulting set of top SVGs can then be used as input for clustering. 
-Here, we demonstrate examples using HVGs, but the approach is also compatible with other SVG methods.
-
-```{r eval=FALSE}
-# Example data:
-# identify mitochondrial genes
-is_mito <- grepl("(^MT-)|(^mt-)", rowData(spe)$Symbol)
-table(is_mito)
-
-# remove mitochondrial genes
-spe <- spe[!is_mito, ]
-
-spe <- logNormCounts(spe, transform = "log")
-spe <- logNormCounts(spe, transform = "none")
-dec <- modelGeneVar(spe)
-top <- getTopHVGs(dec, n = n_top)
-
-# dimensionality reduction
-# compute PCA
-
-spe <- runPCA(spe, ncomponents = n_PCs, 
-              subset_row = top)
-```
-
---> 
 
 ## Analysis
 

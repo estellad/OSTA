@@ -29,6 +29,9 @@ For lack of a better approach, we here use standard log-library size normalizati
 We caution readers, however, to keep an eye out in the literature for attempts to provide a better strategy.
 
 ```{r calc-norm}
+# remove zeros
+spe <- spe[, colSums(counts(spe)) > 0]
+
 spe <- logNormCounts(spe)
 ```
 

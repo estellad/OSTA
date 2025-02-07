@@ -1,0 +1,80 @@
+# Datasets {#sec-bkg-datasets}
+
+Throughout this book, we will rely on a set of publicly available datasets 
+that cover different sequencing- and imaging-based platforms, namely: 
+Visium, Visium HD, Xenium (10x Genomics) and CosMx (NanoString). 
+
+## Reading
+
+These have been deposited in an Open Storage Framework (OSF) repository
+[here](https://osf.io/5n4q3), and can be easily queried and downloaded 
+using functions from the `r BiocStyle::CRANpkg("osfr")` package.
+
+For convenience, we have implemented `OSTA.data` to:
+
+- retrieve a dataset from our OSF node
+- cache it as a *.zip* archive using `r BiocStyle::Biocpkg("BiocFileCache")`
+- unpack and read it into a `SpatialExperiment`
+
+```{r osta-data, eval=FALSE}
+if (!require("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("estellad/OSTA.data")
+```
+
+The following datasets are currently available:
+
+```{r list-data, message=FALSE, warning=FALSE}
+OSTA.data::.list_data()
+```
+
+[Note that this might take a while, as data needs to be downloaded and zipped; 
+it will go much quicker the second time (for a given dataset identifier).]{.aside}
+Any of the above can be retrieved via:
+
+```{r read-data, message=FALSE, warning=FALSE}
+(spe <- OSTA.data::.read_data("Xenium_HumanColon_Oliveria"))
+```
+
+## Details
+
+Below, we briefly summarize the characteristics of each dataset,
+and note across which parts of the book each dataset is being used. <!--TODO-->
+
+**HumanBreast1/2_Janesick**
+
+- @Janesick2023
+- **Visium**
+  - source: [GSM7782699](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7782699)
+  - 4,992 spots x 18,085 genes
+- **Xenium**
+  - source: [GSM7780153](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7780153), [GSM7780154](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7780154)
+- **Chromium**
+  - source: [GSM7782698](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7782698)
+  - 37,143 genes x 708,252 cells
+
+**HumanColon_Oliveira**
+
+- @Oliveira2024
+- source: [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression/dataset-human-crc)
+- **Visium**
+  - 18,085 genes x 4,269 spots
+- **VisiumHD**
+  - 18,085 genes x
+    - 545,913 bins (8um)
+    - 137,051 bins (16um)
+- **Chromium**
+  - 18,082 genes x 279,609 cells
+  - 8 samples across 5 patients (P1-5)
+    - normal adjacent tissue (NAT):<br>32,801 cells (P2,3,5)
+    - colorectal carcinoma (CRC):<br>41,933 cells (P1-5)
+
+**CosMx1k_MouseBrain1/2**
+
+- source: [nanostring.com](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/cosmx-smi-mouse-brain-ffpe-dataset/)
+
+**CosMx6k_MouseBrain**
+
+- source: [nanostring.com](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-frontal-cortex-ffpe-dataset/)
+
+## References {.unnumbered}

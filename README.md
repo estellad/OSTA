@@ -1,17 +1,17 @@
-# Principles of Spatial (Transcript)omics Analysis with Bioconductor
+# Orchestrating Spatial (Transcript)omics Analysis with Bioconductor
 
-📖 [Book](https://lmweber.github.io/PrinciplesSTA/devel) [![deployment](https://img.shields.io/github/actions/workflow/status/lmweber/PrinciplesSTA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/lmweber/PrinciplesSTA/actions/workflows/pages/pages-build-deployment)  
-🐳 [Docker](https://github.com/lmweber/PrinciplesSTA/pkgs/container/PrinciplesSTA) [![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/PrinciplesSTA/biocbook.yml?label=Docker%20image)](https://github.com/lmweber/PrinciplesSTA/actions/workflows/biocbook.yml)
+📖 [Book](https://lmweber.github.io/OSTA/devel) [![deployment](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/lmweber/OSTA/actions/workflows/pages/pages-build-deployment)  
+🐳 [Docker](https://github.com/lmweber/OSTA/pkgs/container/OSTA) [![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/biocbook.yml?label=Docker%20image)](https://github.com/lmweber/OSTA/actions/workflows/biocbook.yml)
 
 
 ## Overview
 
-This repository contains source files for the "Principles of Spatial (Transcript)omics Analysis with Bioconductor" book.
+This repository contains source files for the "Orchestrating Spatial (Transcript)omics Analysis with Bioconductor" book.
 
 
 ## Link to book
 
-The development version of the book is available at: https://lmweber.org/PrinciplesSTA/
+The development version of the book is available at: https://lmweber.org/OSTA/
 
 
 ## For developers

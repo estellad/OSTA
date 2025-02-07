@@ -155,7 +155,7 @@ The analysis with Ripley's $K$ and the $G$ function are not contradictory. $G$ f
 
 #### Local indicators of spatial association
 
-The metrics shown before are an average over the entire window $W$. @Anselin1995 proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric [@Baddeley2015 p. 247].  This is a general concept not only for point pattern analysis but for lattice data analysis as well [@Anselin1995; @anselinLocalIndicatorMultivariate2019].
+The metrics shown before are an average over the entire window $W$. @Anselin1995 proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric [@Baddeley2015 p. 247].  This is a general concept not only for point pattern analysis but for lattice data analysis as well [@Anselin1995; @Anselin2019].
 
 ```{r localK-1, warning=FALSE, fig.width=6, fig.height=4}
 # subset to only Invasive tumor cells 

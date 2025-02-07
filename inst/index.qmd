@@ -14,7 +14,7 @@ welcome <- tryCatch(
 
 # Welcome {-}
 
-This is the website for the online book **Principles of Spatial (Transcript)omics Analysis with Bioconductor**.
+This is the website for the online book **Orchestrating Spatial (Transcript)omics Analysis with Bioconductor**.
 
 This book provides interactive examples and discussion on key principles of computational analysis workflows for spatial omics data using [Bioconductor](http://bioconductor.org/) in R. The book contains chapters describing individual analysis steps as well as extended workflows, each with examples including R code and datasets. In a few cases, R code is integrated with Python tools.
 

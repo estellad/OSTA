@@ -52,7 +52,7 @@ For readers who are new to R and/or Bioconductor, additional useful resources in
 
 ## Feedback and contributions {#sec-bkg-introduction-feedback}
 
-We welcome feedback, suggestions, and contributions from readers in the research community. These may be provided as [GitHub](https://github.com/lmweber/PrinciplesSTA) issues for further discussion with the developers.
+We welcome feedback, suggestions, and contributions from readers in the research community. These may be provided as [GitHub](https://github.com/lmweber/OSTA) issues for further discussion with the developers.
 
 Note that all methods used within code examples should be available as packages from either Bioconductor or CRAN (in R) or PyPI (in Python) to ensure long-term stability and maintainability (see @sec-bkg-introduction-scope).
 
