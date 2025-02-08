@@ -17,9 +17,9 @@ book:
         - pages/seq-quality-control.qmd
         - pages/seq-norm-feat-dimred.qmd
         - pages/seq-clustering.qmd
+        - pages/seq-marker-genes.qmd
         - pages/seq-deconvolution.qmd
         - pages/seq-spatial-co-localization.qmd
-        - pages/seq-marker-genes.qmd
         - pages/seq-workflow-human-dlpfc.qmd
         - pages/seq-workflow-visium-crc.qmd
         - pages/seq-workflow-spatialibd.qmd
