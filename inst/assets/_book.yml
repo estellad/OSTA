@@ -37,7 +37,7 @@ book:
     - part: "Technology-agnostic/cross-platform/downstream analyses"
       chapters:
         - pages/crs-introduction.qmd
-        #- pages/crs-spatially-variable.qmd
+        - pages/crs-spatially-variable.qmd
         - pages/crs-signatures.qmd
         - pages/crs-spat-stat.qmd
         - pages/crs-registration.qmd
