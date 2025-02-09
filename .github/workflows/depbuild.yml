@@ -5,9 +5,9 @@ on:
   push:
     branches:
       - devel
-      - devel-*
-      - RELEASE_**
-      - sandbox
+      # - devel-*
+      # - RELEASE_**
+      # - sandbox
     paths:
       - 'DESCRIPTION'
       - 'deps.Dockerfile'
