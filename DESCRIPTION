@@ -34,6 +34,7 @@ Depends:
 Imports:
     AUCell,
     Banksy,
+    basilisk,
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
@@ -60,6 +61,7 @@ Imports:
     pheatmap, 
     RANN,
     RColorBrewer,
+    reticulate,
     rtracklayer, 
     scales, 
     scater, 
@@ -80,6 +82,7 @@ Imports:
     tidyr,
     VisiumIO,
     Voyager,
+    zellkonverter,
     zoo
 Suggests: 
     BiocManager, 
