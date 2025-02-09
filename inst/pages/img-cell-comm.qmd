@@ -77,7 +77,7 @@ We first setup a corresponding Python environment using `basilisk`:
 ```{r env}
 # initialize 'basilisk' environment
 env <- BasiliskEnvironment(
-    envname="commot", pkgname="PrinciplesSTA", 
+    envname="commot", pkgname="OSTA", 
     packages=c("anndata", "pandas"), pip="commot")
 pro <- basiliskStart(env)
 on.exit(basiliskStop(pro))
