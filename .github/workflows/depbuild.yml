@@ -11,6 +11,12 @@ on:
     paths:
       - 'DESCRIPTION'
       - 'deps.Dockerfile'
+  pull_request:
+    branches:
+      - sandbox
+    paths:
+      - 'DESCRIPTION'
+      - 'deps.Dockerfile'
 
 jobs:
   build-push:
