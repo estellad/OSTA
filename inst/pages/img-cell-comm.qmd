@@ -78,7 +78,7 @@ We first setup a corresponding Python environment using `basilisk`:
 # initialize 'basilisk' environment
 env <- BasiliskEnvironment(
     envname="commot", pkgname="OSTA", channels="conda-forge",
-    packages=c("python=3.7", "anndata==0.7.6"), pip="commot")
+    packages=c("python=3.7", "anndata==0.7.6"), pip="commot==0.0.3")
 pro <- basiliskStart(env)
 on.exit(basiliskStop(pro))
 ```
