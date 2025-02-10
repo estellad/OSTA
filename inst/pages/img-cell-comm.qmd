@@ -121,8 +121,8 @@ xy <- spatialCoords(sub)
 reducedDim(sub, "spatial") <- xy
 # subset (4mm)x(4mm) window
 idx <-
-    xy[, 1] >= 1e3 & xy[, 1] <= 5e3 &
-    xy[, 2] >= 1e3 & xy[, 2] <= 5e3
+    xy[, 1] >= 1500 & xy[, 1] <= 3500 &
+    xy[, 2] >= 2000 & xy[, 2] <= 4000
 # number of features x cells left
 dim(sub <- sub[, idx]) 
 ```
@@ -136,7 +136,7 @@ sr <- basiliskRun(pro, spe=sub, db=db, \(spe, db) {
     ct <- import("commot")
     ct$tl$spatial_communication(ad,
         database_name="CellChatDB",
-        dis_thr=20,  
+        dis_thr=10,  
         df_ligrec=db,
         heteromeric=TRUE,
         pathway_sum=TRUE,
@@ -167,7 +167,7 @@ Alternatively, we can arrive at a data-driven estimate by inspecting the
 distribution of $k$th-NN distances for a sensible $k$ that, in this context, 
 determines the number of cells to consider as potential communication partners:
 
-```{r note-d, fig.width=4, fig.height=2.5}
+```{r note-d, fig.width=4, fig.height=3}
 #| code-fold: true
 xy <- spatialCoords(spe)
 ns <- RANN::nn2(xy, xy, 11)
@@ -175,7 +175,7 @@ ds <- ns$nn.dists[, 11]
 par(mar=c(4,4,2,0))
 hist(ds, n=200,
     xlim=c(0, 60), ylim=c(0, 12e3),
-    xlab="10th-NN distance (um)", 
+    xlab="10th-NN distance", 
     ylab="# cells", main="")
 abline(v=d <- median(ds), lw=2, col="red")
 text(d+1, 12e3, adj=c(0,1), round(d, 2), col="red")
