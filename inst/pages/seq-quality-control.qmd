@@ -2,10 +2,6 @@
 
 ## Preamble
 
-### Introduction
-
-### Unique challenges
-
 Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification. These spots are usually removed prior to further analysis, since otherwise they tend to create problems during downstream analyses such as clustering. For example, problematic spots that are not removed could show up as separate clusters, which may be misidentified as distinct cell types.
 
 Low-quality spots can be identified according to several characteristics, including:
@@ -20,19 +16,20 @@ Low-quality spots can be identified according to several characteristics, includ
 
 Low library size or low number of expressed features can indicate poor mRNA capture rates, e.g. due to cell damage and missing mRNAs, or low reaction efficiency. A high proportion of mitochondrial reads can be indicative of cell damage, e.g. partial cell lysis leading to leakage and missing cytoplasmic mRNAs, with the resulting reads therefore concentrated on the remaining mitochondrial mRNAs that are relatively protected inside the mitochondrial membrane. Unusually high numbers of cells per spot can indicate problems during cell segmentation.
 
-The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for spatial transcriptions as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based SRTs** [@Bhuva2024, @Totty2024-SpotSweeper]. For example, in the brain, neuronal cell bodies reside in grey matter, whereas white matter is made up almost entirely neuronal processes. This naturally leads to regions of grey matter containing much higher number of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than grey matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
 
+
+### QC challenges to sequencing-based SRT data 
+The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for spatial transcriptions as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based SRTs** [@Bhuva2024, @Totty2024-SpotSweeper]. For example, in the brain, neuronal cell bodies reside in grey matter, whereas white matter is made up almost entirely neuronal processes. This naturally leads to regions of grey matter containing much higher number of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than grey matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
 
 ### Structure of the Chapter
 
-In this chapter, we'll discuss how to perform spot-level QC using standard methods developed for snRNA-seq, as well as newer methods that control for confounding biology. We will discuss approaches for identifying and removing large regional artifacts that may arise.
+In this chapter, we'll start with introducing some methods to idenitfy low-quality spots using various strategies, inclduing 1) standard methods developed for snRNA-seq via global thresholding, 2) more recent methods that aim to mediates bias in quality control attributed to the spatial confounding. Some diagnositic visualization and strategies are further introduced in [QC Diagnositc](#qc-diagnosis).
 
+In the[advanced topics section](#advanced-topics), we'll visit some novel and unique challenges the quality control of SRT data, including idenitfying novel artefacts, i.e. regnional artifacts and quality control based on number of cells idenitfied in each spot. While these knowledges are every useful, the procedures are not necessarily necessary for every SRT samples, depending on the needs. 
 
-#### Gene-level quality control
+For readers have minimium experience with scRNA-seq data analysis, we recommond to read the remaining of the chapters. For experienced readers, one can start from @spotsweeper_local_outlier section. 
 
-The sections above consider quality control at the spot level. In some datasets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses.
-
-However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
+To note, the current Chapter focuses on the quality control at the spot level. In some datasets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
 
 
 ### Dependencies and prerequisite
@@ -268,7 +265,7 @@ The main advantage of using adaptive thresholds is that it relieves the user of 
 
 -->
 
-### Local outlier detection using fixed thresholds
+### Local outlier detection using SpotSweeper {#spotsweeper_local_outlier}
 
 One of the key assumptions of outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based SRT due to the biological heterogeneity in the tissue being sampled for each spot.
 
@@ -469,7 +466,7 @@ spe$local_outliers <- as.logical(spe$sum_outliers) |
     as.logical(spe$subsets_mito_percent_outliers)
 ```
 
-## QC Diagnosis
+## QC Diagnostic
 
 ### Bivariate QC plot
 
@@ -507,7 +504,7 @@ p1 | p2
 ```
 
 
-## Advanced Topics
+## Advanced Topics {#spot-qc-adv-topic}
 ### Artifact detection
 #### Hangnail artifact detection with SpotSweeper
 
