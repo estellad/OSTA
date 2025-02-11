@@ -220,6 +220,45 @@ lapply(levels(spe$Banksy), \(k) {
 
 ## Downstream
 
+::: {.callout-note title="PC regression" collapse="true"}
+
+For any single-cell analysis where downstream tasks rely on PCs, it is useful to perform linear regression of (continuous or categorical) covariates of interest onto PCs. 
+This quantifies the variance explained by the covariate and can help assess the extend of unwanted variation (due to, e.g., cell area) as opposed to subpopulations driving transcriptional differences. 
+Here, we regress total counts, cell area, and cluster assignments against PCs:
+
+```{r pcr}
+pcs <- reducedDim(spe, "PCA_tx")
+ids <- c("total_counts", "cell_area", "Leiden", "Banksy")
+pcr <- lapply(ids, \(id) {
+    fit <- summary(lm(pcs ~ spe[[id]]))
+    r2 <- sapply(fit, \(.) .$adj.r.squared)
+    data.frame(id, pc=seq_along(r2), r2)
+}) |> do.call(what=rbind)
+```
+
+Here, `Leiden` (transcription-only) and `Banksy` (spatially aware) clusterings perform similar in terms of capturing (spatially unaware) PCs; as to be expected, `Leiden` clusters do slightly better.
+Had we set a higher value for $\lambda$ when running `Banksy`, results would diverge more; vice versa, using spatial PCs for regression would have `Leiden` clusters perform worse.
+Also, note that we would expect results to converge for $\lambda=0$.
+
+```{r plt-pcr, fig.width=5, fig.height=2.5}
+#| code-fold: true
+pcr$id <- factor(pcr$id, ids)
+pal <- c("magenta", "gold", "cyan", "blue")
+ggplot(pcr, aes(pc, r2, col=id)) +
+    geom_line(show.legend=FALSE) + geom_point() +
+    scale_color_manual("predictor", values=pal) +
+    scale_x_continuous(breaks=c(1, seq(5, 20, 5))) +
+    scale_y_continuous(limits=c(0, 1), breaks=seq(0, 1, 0.2)) +
+    labs(x="principal component", y="coeff. of determination") +
+    guides(col=guide_legend(override.aes=list(size=2))) +
+    coord_cartesian(xlim=c(1, 20)) +
+    theme_minimal() + theme(
+        panel.grid.minor=element_blank(),
+        legend.key.size=unit(0, "lines"))
+```
+
+:::
+
 ### DGE analysis
 
 For details on identifying genes that are differentially expressed (DE) between groups of cells, we refer readers to [OSCA](https://bioconductor.org/books/3.19/OSCA.basic/marker-detection.html); a standard approach is given below, visualizing the average expression of exemplary markers across clusters:
