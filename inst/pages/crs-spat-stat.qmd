@@ -1,4 +1,4 @@
-# Spatial Statistics
+# Spatial statistics {#sec-crs-spat-stat}
 
 ## Preamble
 

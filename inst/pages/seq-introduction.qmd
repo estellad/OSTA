@@ -45,3 +45,8 @@ The Curio Seeker platform captures mRNA molecules at a set of randomly placed sp
 - Commercially available datasets
   - [Visium HD datasets](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression)
   - [10x Genomics datasets (includes Visium, Visium HD)](https://www.10xgenomics.com/datasets)
+
+
+## Appendix
+
+### References {.unnumbered}

@@ -10,16 +10,16 @@ Version: 0.99.0
 Date: `r date()`
 Authors@R: 
     c(person("Helena L.", "Crowell", 
-             role=c("aut", "cre"), 
+             role=c("aut"), 
              email = "helena@crowell.eu", 
              comment = c(ORCID="0000-0002-4801-1767")), 
       person("Stephanie C.", "Hicks", 
-             role = c("aut", "cre"), 
+             role = c("aut"), 
              email = "shicks19@jhu.edu", 
              comment = c(ORCID = "0000-0002-7858-0231")), 
       person("Lukas M.", "Weber", 
              role = c("aut", "cre"), 
-             email = "lmweberedu@gmail.com", 
+             email = "lmweb012@gmail.com", 
              comment = c(ORCID = "0000-0002-3282-1730")))
 URL: https://github.com/lmweber/OSTA
 BugReports: https://github.com/lmweber/OSTA
@@ -27,13 +27,14 @@ biocViews:
     Book, 
     Spatial, 
     SingleCell, 
-    Transcriptomics, 
-    GeneExpression
+    GeneExpression, 
+    Transcriptomics
 Depends: 
     R (>= 4.3)
 Imports:
     AUCell,
     Banksy,
+    basilisk,
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
@@ -60,6 +61,7 @@ Imports:
     pheatmap, 
     RANN,
     RColorBrewer,
+    reticulate,
     rtracklayer, 
     scales, 
     scater, 
@@ -80,20 +82,23 @@ Imports:
     tidyr,
     VisiumIO,
     Voyager,
+    zellkonverter,
     zoo
 Suggests: 
     BiocManager, 
     BiocStyle, 
+    doMC,
     BiocVersion, 
     downlit,
     glue, 
     knitr,
+    scrapper,
     sessioninfo, 
     xml2
 Remotes:
     drisso/SpaceTrooper@devel_spatialBook,
     estellad/SpatialExperimentIO,
-    mjemons/spatialFDA,
+    estellad/OSTA.data,
     dmcable/spacexr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

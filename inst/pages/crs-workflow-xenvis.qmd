@@ -5,7 +5,6 @@
 ### Dependencies
 
 ```{r dep, message=FALSE, warning=FALSE}
-library(osfr)
 library(RANN)
 library(scater)
 library(scuttle)
@@ -15,7 +14,6 @@ library(VisiumIO)
 library(patchwork)
 library(BayesSpace)
 library(SpatialExperiment)
-library(SpatialExperimentIO)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(194849)
@@ -31,42 +29,23 @@ same-section Visium and Xenium measurements on human breast cancer tissue.
 
 ## Setup
 
-We start out by retrieving these datasets from the OSF repository, and reading them into R as separate `r BiocStyle::Biocpkg("SpatialExperiment")` objects using functions from the `r BiocStyle::Biocpkg("VisiumIO")` and `r BiocStyle::Biocpkg("SpatialExperimentIO")` packages.
+We start out by retrieving these datasets from the OSF repository, and reading 
+them into R as separate `r BiocStyle::Biocpkg("SpatialExperiment")` objects:
 
-```{r osf}
-# list OSF repo datasets that match 'Janesick'
-osf <- osf_retrieve_node("https://osf.io/5n4q3")
-(dir <- osf_ls_files(osf, pattern="Janesick")$name)
+```{r load-data, message=FALSE, warning=FALSE}
+(vis <- OSTA.data::.read_data("Visium_HumanBreast_Janesick"))
+(xen <- OSTA.data::.read_data("Xenium_HumanBreast1_Janesick"))
 ```
 
-```{r vis, message=FALSE, results="hide"}
-# retrieve Visium dataset
-ids <- grep("Vis", dir, value=TRUE)
-sub <- osf_ls_files(osf, ids)
-dir.create(tmp <- tempfile())
-osf_download(sub, tmp, recurse=TRUE)
-# read into 'SpatialExperiment'
-obj <- TENxVisium(
-    spacerangerOut=tmp, 
-    images="lowres", 
-    format="h5")
-(vis <- import(obj))
-```
+We'll also do some data wrangling to simplify spatial coordinate names, and use
+gene symbols (rather than ensembl identifiers) as feature names for both data:
 
-```{r xen, message=FALSE, results="hide"}
-# retrieve Xenium dataset
-ids <- grep("Xen", dir, value=TRUE)
-sub <- osf_ls_files(osf, ids)
-dir.create(tmp <- tempfile())
-osf_download(sub, tmp, recurse=TRUE)
-# read into 'SpatialExperiment'
-(xen <- readXeniumSXE(tmp))
-```
-
-```{r include=FALSE}
-#vis <- readRDS("~/downloads/janesick_vis_raw (1).rds")
-#vis <- Janesick_breastCancer_Visium() #broken
-#xen <- Janesick_breastCancer_Xenium_rep1()
+```{r prep-data}
+# simplify spatial coordinate names
+spatialCoordsNames(vis) <- spatialCoordsNames(xen) <- c("x", "y")
+# use gene symbols as feature names
+rownames(vis) <- make.unique(rowData(vis)$Symbol)
+rownames(xen) <- make.unique(rowData(xen)$Symbol)
 ```
 
 ## Alignment
@@ -87,8 +66,8 @@ However, the automation does not work well on images with very different orienta
 scale, and intensity, such as in this use case of Xenium and Visium.
 
 <center>
-![](../images/xenvis-RNiftyReg1){width=66%}
-![](../images/xenvis-RNiftyReg2){width=33%}
+![](../images/xenvis-RNiftyReg1.png){width=66%}
+![](../images/xenvis-RNiftyReg2.png){width=33%}
 </center>
 
 Therefore, we use the affine transformation matrix provided by 10x Genomics, 
@@ -115,8 +94,6 @@ mtx <- matrix(nrow=2, byrow=TRUE, c(
 ```
   
 ```{r new-xy}
-# simplify spatial coordinate names for visualization
-spatialCoordsNames(vis) <- spatialCoordsNames(xen) <- c("x", "y")
 # stash original coordinates
 old <- spatialCoords(xen)
 colData(xen)[c(".x", ".y")] <- old

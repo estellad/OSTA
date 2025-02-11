@@ -11,7 +11,7 @@ In this section, we will demonstrate methods to deconvolve cell types per spot.
 
 ## Load previously saved data
 
-We start by loading the previously saved data object(s) (see @sec-seq-clustering-save-objects).
+We start by loading the previously saved data object(s).
 
 ```{r, message=FALSE, results='hide'}
 library(SpatialExperiment)

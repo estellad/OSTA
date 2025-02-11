@@ -57,4 +57,6 @@ We welcome feedback, suggestions, and contributions from readers in the research
 Note that all methods used within code examples should be available as packages from either Bioconductor or CRAN (in R) or PyPI (in Python) to ensure long-term stability and maintainability (see @sec-bkg-introduction-scope).
 
 
-## References {.unnumbered}
+## Appendix
+
+### References {.unnumbered}

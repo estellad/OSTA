@@ -11,7 +11,6 @@ For the remainder of this Chapter, we will show the two examples in parallel, hi
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
-library(osfr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -31,18 +30,16 @@ First, we load the CosMx dataset:
 
 ```{r load-cos, message=FALSE, warning=FALSE}
 # retrieve CosMx dataset from OSF repo
-osf <- osf_retrieve_node("https://osf.io/5n4q3")
-tbl <- osf_ls_files(osf, "CosMx1k_MouseBrain1")
-tbl <- tbl[!grepl("tx_file", tbl$name), ] # skip molecules
-dir.create(dir <- tempfile())
-osf_download(tbl, dir, verbose=FALSE)
+id <- "CosMx1k_MouseBrain1"
+pa <- OSTA.data::.load_data(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
 
-## Load into SpatialExperiment
-## Note that we are using SpaceTrooper's version to add metadata info (TODO: PR to SpatialExperimentIO)
-cos <- readCosmxSPE(dir)
+# TODO: should use 'SpaExpIO' here...
+cos <- SpaceTrooper::readCosmxSPE(td)
 
 # add cell boundary polygons
-fnm <- file.path(dir, "polygons.csv.gz")
+fnm <- file.path(td, "polygons.csv.gz")
 pol <- readPolygonsCosmx(fnm)
 idx <- sprintf("f%s_c%s", cos$fov, cos$cellID)
 cos$polygons <- pol[match(idx, pol$cell_id), ]
@@ -52,23 +49,19 @@ metadata(cos)$technology <- "Nanostring_CosMx"
 cos$sample_id <- "CosMx"
 cos
 ```
+
 ### Xenium
 
 We now load Xenium data:
 
 ```{r load-xen, message=FALSE, warning=FALSE}
 # retrieve Xenium dataset from OSF repo
-tbl <- osf_ls_files(osf, "Xenium_HumanBreast1_Janesick")
-tbl <- tbl[!grepl("transcripts", tbl$name), ] # skip molecules
-dir.create(dir <- tempfile())
-osf_download(tbl, dir, verbose=FALSE)
-
-# read into 'SpatialExperiment'
-xen <- readXeniumSXE(dir)
+id <- "Xenium_HumanBreast1_Janesick"
+xen <- OSTA.data::.read_data(id)
 
 # add cell boundary polygons
-fnm <- file.path(dir, "cell_boundaries.parquet")
-pol <- readPolygonsXenium(fnm)
+fnm <- metadata(xen)$cell_boundaries
+pol <- readPolygonsXenium(fnm, type="parquet")
 xen <- addPolygonsToSPE(xen, pol)
 
 # add info for 'SpaceTrooper'
@@ -150,7 +143,6 @@ Finally, imaging-based platforms include, in addition to transcripts data, morph
 - `log2AspectRatio`: the log2 of the aspect ratio (x-axis/y-axis) of each cell;
 - `ctrl_total_ratio`: the proportion of control probe counts over the total cell counts;
 - `log2CountArea`: the log2 of the count density, i.e., the number of transcripts divided by the cell area.
-
 
 ```{r qc-metrics-xen}
 ## These lines are needed temporarily because we are working with a STexampleData object
@@ -410,6 +402,11 @@ Whenever possible, we advice readers to cross-check visualizations like the foll
 ### Saving
 
 ```{r save-data}
+# exclude low-quality cells
+ol <- xen$is_fscore_outlier
+xen <- xen[, -which(ol)]
+# drop polygons
+xen$polygons <- NULL
 saveRDS(xen, "img-spe_qc.rds")
 ```
 

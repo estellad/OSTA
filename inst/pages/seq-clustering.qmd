@@ -4,7 +4,7 @@
 
 ### Introduction
 
-In ST data, we can apply clustering algorithms to identify spatial domains, which represent spatially defined regions consisting of relatively consistent gene expression profiles. 
+In spatial transcriptomics data, we can apply clustering algorithms to identify spatial domains, which represent spatially defined regions consisting of relatively consistent gene expression profiles. 
 For example, spatial domains may consist of regions containing cells from a single cell type or a consistent mixture of cell types.
 
 Several alternative approaches exist for identifying spatial domains. One strategy involves applying standard clustering algorithms from single-cell workflows without incorporating spatial information. 
