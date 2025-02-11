@@ -2,15 +2,29 @@
 
 ## Introduction
 
-## Single Cell vs ST integration
+**Spatial Registation** is defined as the task of mapping features or localization of omic profiles from a **query** assay to a **reference** assay. Here, the reference is a spatially-resolved omic dataset whereas the query could be a dataset of single cell and/or spatial resolution. In this chapter, we demonstrate methods that are available within/for BioConductor infrastructure for registering spatially aware datasets where utility and function of the method depend on the modality of the query dataset. 
 
-Spatial registration methods use gene expression profiles for cell populations of interest from single-cell RNA sequencing data as a reference, and use these single-cell expression profiles to 'spatially register' the spatial coordinates of observations corresponding to these cell populations in spatial transcriptomics data.
+We first start with the case **(1)** where both reference and query datasets are composed of spatially resolved profiles, then case **(2)** review methods that allows transfering/registering information from non-spatially resolved single cell datasets. 
 
-## ST vs ST integration (Alignment)
+## Spatial vs Spatial Omic Registration (Alignment)
 
-Spatial omic technologies provide capabilities to capture omic profiles of cells and spots over tissue sections as well as the morphological features of these tissues. Multiple data modalities and microscopy images could be generated with numerous spatial omic instruments where the data generated from these modalities may capture observations (cells, spots, images etc.) in different units and perspectives (i.e. coordinate systems). These could be datasets generated from the same section, adjacent sections or tissue sections with similar morphology and structure. 
+<!-- Spatial omic technologies provide capabilities to capture omic profiles of cells and spots over tissue sections as well as the morphological features of these tissues. Multiple data modalities and microscopy images could be generated with numerous spatial omic instruments where the data generated from these modalities may capture observations (cells, spots, images etc.) in different units and perspectives (i.e. coordinate systems). These could be datasets generated from the same section, adjacent sections or tissue sections with similar morphology and structure.  -->
 
-Image registration and alignment methods provide transformation functions to map spatial localization of observations from one coordinate system to the other. In this section, we cover R packages and Python modules that store, manipulate and transform the coordinate of such spatial data modalities.   
+Spatial omic technologies often generate data modalities that capture morphological features of tissue sections as well as omic profiles of cells and spots. Localization of these profiles can also be defined in different units and even in different perspectives (i.e. coordinate systems). Image registration and alignment methods provide transformation functions to map spatial localization of observations from one coordinate system to the other, which allows transfering features and information across observations of (i) identical tissue section, (ii) adjacent sections as well as (iii) tissue sections with similar morphology and structure.
+
+In this section, we cover R packages and Python modules that store, manipulate and transform the coordinate of observations (cells, spots etc) across multiple spatially aware omic datasets.   
+
+### Spatial Alignment Methods
+
+Alternatively, we can use other R/Python frameworks to automatically or manually align spatial omic datasets across tissue sections. Some of these methods could be used through R using BiocManager packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`
+
+- **NiftyReg**: available using the R wrapper package `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] in CRAN. The tool performs image registration using both rigid and non-rigid approaches where users can extract and apply the resulting transformation matrix on spatial coordinates of a `SpatialExperiment` object.  
+
+- **VoltRon**: is an R package [@Manukyan2023-VoltRon] that allows alignment between multiple spatially aware datasets of distinct modalities. A Shiny application is provided to enable both automated and manual alignment across adjacent/same tissue sections where users can interactively manipulate microscopy images and choose landmarks points for co-registeration.
+
+- **STAlign**: available as a Python module from [GitHub](https://github.com/JEFworks-Lab/STalign) [@clifton2023-stalign]. The tool performs optimal transport across two sets of spatial coordinates with or without associated microscopy images.
+
+- **SpatialData**: maintained by the [scverse](https://scverse.org/) consortium and available as a Python module from [GitHub](https://github.com/scverse/spatialdata) [@Marconato2025-SpatialData]. Combined with the [napari](https://napari.org/stable/) platform, SpatialData allows users to manually select landmark points before performing rigid alignment between two SpatialData objects. 
 
 ### Dependencies
 
@@ -181,15 +195,11 @@ p + geom_point(
     col="red", inherit.aes=FALSE)
 ```
 
-### Spatial Alignment Algorithms
+## Single Cell vs Spatial Omic Registration
 
-Alternatively, we can use other R/Python frameworks to automatically or manually align spatial omic datasets across tissue sections. Some of these methods could be used through R using BiocManager packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`
+Spatial registration methods use gene expression profiles for cell populations of interest from single-cell RNA sequencing data as a reference, and map or 'spatially register' these single-cell expression profiles onto omic profiles whose spatially localizations are provided over tissue sections, thus spatially resolving features that may only be available in the single-cell RNA sequencing data. 
 
-- **NiftyReg**: available from the R wrapper package `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] in CRAN. The tool performs image registration using both rigid and non-rigid approaches where users can extract and apply the resulting transformation matrix on spatial coordinates of a `SpatialExperiment` object.  
 
-- **STAlign**: available as a Python module from [GitHub](https://github.com/JEFworks-Lab/STalign) [@clifton2023-stalign]. The tool performs optimal transport across two sets of spatial coordinates with or without associated microscopy images.
-
-- **SpatialData**: maintained by the [scverse](https://scverse.org/) consortium and available as a Python module from [GitHub](https://github.com/scverse/spatialdata) [@Marconato2025-SpatialData]. Combined with the [napari](https://napari.org/stable/) platform, SpatialData allows users to manually select landmark points before performing rigid alignment between two SpatialData objects. 
 
 ### References {.unnumbered}
 
