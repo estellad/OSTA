@@ -9,6 +9,7 @@ on:
       - RELEASE_**
       - sandbox
     paths-ignore:
+      - 'README.md' 
       - 'deps.Dockerfile'
 
 jobs:
