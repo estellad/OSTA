@@ -235,4 +235,54 @@ ggplot(pcr, aes(pc, r2, col=id)) +
 spe$k <- spe$k_tx; saveRDS(spe, "img-spe_cl.rds")
 ```
 
+
+## Transfer
+
+### InSituType
+`r BiocStyle::Biocpkg("InSituType")` [@Danaher2022-InSituType] has been developed for CosMx data, specifically, but should be applicable to other types of imaging-based ST data.
+It relies on a probabilistic model, can incorporate non-transcriptional information (e.g., immunofluorescence, cell area and aspect ratio), and can be run in an un-, semi- or fully supervised setting (based on bulk references profiles for the latter two).
+
+Reference profiles may be acquired from custom reference data, e.g., from matching scRNA-seq data, or snPATHO-seq data on adjacent sections.
+Some profiles are available through `r BiocStyle::Biocpkg("SpatialDecon")` [@Danaher2022-SpatialDecon].
+
+```{r SpatialDecon, eval=FALSE}
+library(SpatialDecon)
+ref <- download_profile_matrix(
+    species="Human", 
+    age_group="Adult", 
+    matrixname="ImmuneTumor_safeTME")
+ref[1:5, 1:5]
+colnames(ref)
+```
+
+```{r InSituType, message=FALSE, eval=FALSE}
+library(InSituType)
+library(STexampleData)
+spe <- CosMx_lungCancer()
+# cohorting based on IF data
+j <- names(cd <- colData(spe))
+i <- grep("^Mean", j, value=TRUE)
+i <- setdiff(i, "Mean.G")
+i <- c("Area", "AspectRatio", i)
+coh <- fastCohorting(as.matrix(cd[i]))
+# estimate per-cell background
+rna <- spe$nCount_RNA
+neg <- spe$nCount_negprobes/20
+bkg <- rna*mean(neg)/mean(rna) 
+# updating reference profiles 
+# to account for platform effects
+ref <- updateReferenceProfiles(
+    reference_profiles=pbs, reference_sds=NULL, 
+    counts=mtx, neg=neg, bg=bkg)$updated_profiles
+# run 'InSituType' clustering
+# in fully supervised mode
+ist <- insitutype(mtx, 
+    reference_profiles=ref, 
+    update_reference_profiles=FALSE,
+    neg=neg, cohort=coh, n_clusts=0)
+table(ist$clust)
+```
+
+### 
+
 ## References {.unnumbered}
