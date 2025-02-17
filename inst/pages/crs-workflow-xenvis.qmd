@@ -12,6 +12,7 @@ library(harmony)
 library(ggspavis)
 library(VisiumIO)
 library(patchwork)
+library(OSTA.data)
 library(BayesSpace)
 library(SpatialExperiment)
 # set seed for random number generation
@@ -33,8 +34,22 @@ We start out by retrieving these datasets from the OSF repository, and reading
 them into R as separate `r BiocStyle::Biocpkg("SpatialExperiment")` objects:
 
 ```{r load-data, message=FALSE, warning=FALSE}
-(vis <- OSTA.data::.read_data("Visium_HumanBreast_Janesick"))
-(xen <- OSTA.data::.read_data("Xenium_HumanBreast1_Janesick"))
+# Visium
+id <- "Visium_HumanBreast_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+obj <- TENxVisium(
+    spacerangerOut=td, 
+    images="lowres", 
+    format="h5")
+(vis <- import(obj))
+# Xenium
+id <- "Xenium_HumanBreast1_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+(xen <- readXeniumSXE(td))
 ```
 
 We'll also do some data wrangling to simplify spatial coordinate names, and use

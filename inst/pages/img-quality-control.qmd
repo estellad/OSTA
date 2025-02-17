@@ -15,6 +15,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(patchwork)
+library(OSTA.data)
 library(SpaceTrooper)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
@@ -31,7 +32,7 @@ First, we load the CosMx dataset:
 ```{r load-cos, message=FALSE, warning=FALSE}
 # retrieve CosMx dataset from OSF repo
 id <- "CosMx1k_MouseBrain1"
-pa <- OSTA.data::.load_data(id)
+pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 
@@ -57,7 +58,10 @@ We now load Xenium data:
 ```{r load-xen, message=FALSE, warning=FALSE}
 # retrieve Xenium dataset from OSF repo
 id <- "Xenium_HumanBreast1_Janesick"
-xen <- OSTA.data::.read_data(id)
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+xen <- readXeniumSXE(td)
 
 # add cell boundary polygons
 fnm <- metadata(xen)$cell_boundaries
