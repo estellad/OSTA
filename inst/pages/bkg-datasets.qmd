@@ -29,7 +29,7 @@ BiocManager::install("estellad/OSTA.data")
 The following datasets are currently available:
 
 ```{r list-data, message=FALSE, warning=FALSE}
-OSTA.data::.list_data()
+OSTA.data_list()
 ```
 
 [Note that this might take a while, as data needs to be downloaded and zipped; 
@@ -37,7 +37,15 @@ it will go much quicker the second time (for a given dataset identifier).]{.asid
 Any of the above can be retrieved via:
 
 ```{r read-data, message=FALSE, warning=FALSE}
-(spe <- OSTA.data::.read_data("Xenium_HumanColon_Oliveria"))
+# retrieval
+id <- "Xenium_HumanColon_Oliveira"
+pa <- OSTA.data_load("Xenium_HumanColon_Oliveira")
+# unpacking
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+# importing
+library(SpatialExperimentIO)
+(spe <- readXeniumSXE(td))
 ```
 
 ## Details
