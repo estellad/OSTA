@@ -13,4 +13,3 @@ format:
     editor: visual
     bibliography: assets/bibliography.bib
     from: markdown+emoji
-  pdf: default

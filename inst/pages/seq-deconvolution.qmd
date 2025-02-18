@@ -63,7 +63,7 @@ In this example of consecutive slices of breast cancer data (TODO: Janesick), we
 
 ## Load previously saved data
 
-We start by loading the previously saved data object(s) (see @sec-seq-clustering-save-objects).
+We start by loading the previously saved data object(s).
 
 ```{r, message=FALSE, results='hide'}
 vis_dlpfc <- STexampleData::Visium_humanDLPFC()
