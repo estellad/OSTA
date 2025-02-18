@@ -31,7 +31,7 @@ First, we load the CosMx dataset:
 
 ```{r load-cos, message=FALSE, warning=FALSE}
 # retrieve CosMx dataset from OSF repo
-id <- "CosMx1k_MouseBrain1"
+id <- "CosMx1k_MouseBrain2"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
