@@ -8,10 +8,6 @@
 
 ## Preamble
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
-```
-
 ### Introduction
 
 TODO 
@@ -34,6 +30,7 @@ library(ggspavis)
 library(pheatmap)
 library(basilisk)
 library(patchwork)
+library(OSTA.data)
 library(reticulate)
 library(zellkonverter)
 library(SpatialExperiment)
@@ -46,7 +43,23 @@ set.seed(2025)
 
 ## Clustering
 
-<!-- HLC: In a practical I ran, we did spatial dimension reduction (e.g., 'spatialPCA') plus Leiden, and compared that with 'normal' Leiden and spatially aware clustering. Perhaps something like that would be nice conceptually? Ideally, reduced dimensions are already available from an earlier chapter, including transcription-only and spatial PCs. Some of these comparisons could go in collapsed boxes (see also comment below), as to not over-clutter the chapter. -->
+Before getting started, we will retrieve the authors' cell type labels, 
+which were obtained by transferring scFFPE-seq annotations (supervised); 
+these comprise 20 subpopulations.
+
+```{r load-anno}
+# get annotations from 'BiocFileCache'
+# (data has been retrieved already)
+id <- "Xenium_HumanBreast1_Janesick"
+pa <- .load_data(id)
+dir.create(tf <- tempfile())
+unzip(pa, exdir=tf)
+nm <- list.files(tf, full.names=TRUE)
+df <- read.csv(grep("anno", nm, value=TRUE))
+# add annotations as cell metadata
+cs <- match(spe$cell_id, df$Barcode)
+spe$Label <- df$Annotation[cs]
+```
 
 ### Non-spatial
 
@@ -57,7 +70,7 @@ Specifically, we construct a shared nearest neighbor (SNN) graph based on non-sp
 # build cellular shared nearest-neighbor (SNN) graph
 g <- buildSNNGraph(spe, use.dimred="PCA_tx", type="jaccard", k=20)
 # cluster using Leiden community detection algorithm
-k <- cluster_leiden(g, objective_function="modularity", resolution=0.6)
+k <- cluster_leiden(g, objective_function="modularity", resolution=0.8)
 table(spe$Leiden <- factor(k$membership))
 ```
 
@@ -78,7 +91,7 @@ Here, the mixing parameter $\lambda\in[0,1]$ (argument `lambda` in `runBanksyPCA
 # retrieve 'lambda' used for dimension reduction
 l <- metadata(spe)$BANKSY_params$lambda 
 # perform 'Banksy' clustering
-spe <- clusterBanksy(spe, dimred="PCA_sp", resolution=0.2)
+spe <- clusterBanksy(spe, dimred="PCA_sp", resolution=0.4)
 # reformat cluster assignments
 k <- grep("^clust", names(colData(spe)))
 names(colData(spe))[k] <- "Banksy"
@@ -88,7 +101,6 @@ table(spe$Banksy <- factor(spe$Banksy))
 <!--HLC: In principle, Python here works but 'SCVI' is way too slow...
 
 #### Encoder-based
-
 
 1. Introduction of encoder-based methods
 2. Introduction of CellCharter methods specifically
@@ -169,14 +181,11 @@ table(spe$CellCharter_clusters <- as.factor(cc_labels))
 
 Let's visualize the assignment obtains from non-spatial and spatially aware clustering:
 
-```{r plot-xy-k-joint, message=FALSE, fig.width=8, fig.height=2.5}
+```{r plot-xy-k-joint, message=FALSE, fig.width=12, fig.height=3}
 #| code-fold: true
 # TODO: 'ggspavis' is being a bit pedantic...
-# 'in_tissue' missing and duplicated names
-spe$in_tissue <- 1
-spe$x_centroid <- NULL
-spe$y_centroid <- NULL
-lapply(c("Leiden", "Banksy"), \(.) {
+spe$in_tissue <- 1; spe$x_centroid <- spe$y_centroid <- NULL
+lapply(c("Label", "Leiden", "Banksy"), \(.) {
     plt <- plotSpots(spe, annotate=.)
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
@@ -184,7 +193,7 @@ lapply(c("Leiden", "Banksy"), \(.) {
 }) |>
     wrap_plots(nrow=1) &
     theme(legend.key.size=unit(0, "lines")) &
-    scale_color_manual(values=unname(pals::trubetskoy())) 
+    scale_color_manual(values=unname(pals::trubetskoy()))
 ```
 
 Especially in large tissues, the above type of plot makes it difficult to spot rare subpopulations, and might cause cells to overlap in regions with high cellular density.
@@ -197,6 +206,7 @@ To better distinguish between different subpopulations, we can instead generate 
 lapply(levels(spe$Banksy), \(k) {
     # highlight cells assigned to cluster 'k'
     spe$foo <- spe$Banksy == k
+    spe <- spe[, order(spe$foo)]
     plt <- plotSpots(spe, annotate="foo")
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
@@ -228,7 +238,7 @@ Here, we regress total counts, cell area, and cluster assignments against PCs:
 
 ```{r pcr}
 pcs <- reducedDim(spe, "PCA_tx")
-ids <- c("total_counts", "cell_area", "Leiden", "Banksy")
+ids <- c("total_counts", "cell_area", "Banksy", "Leiden", "Label")
 pcr <- lapply(ids, \(id) {
     fit <- summary(lm(pcs ~ spe[[id]]))
     r2 <- sapply(fit, \(.) .$adj.r.squared)
@@ -243,7 +253,7 @@ Also, note that we would expect results to converge for $\lambda=0$.
 ```{r plt-pcr, fig.width=5, fig.height=2.5}
 #| code-fold: true
 pcr$id <- factor(pcr$id, ids)
-pal <- c("magenta", "gold", "cyan", "blue")
+pal <- c("magenta", "gold", "cyan", "blue", "black")
 ggplot(pcr, aes(pc, r2, col=id)) +
     geom_line(show.legend=FALSE) + geom_point() +
     scale_color_manual("predictor", values=pal) +

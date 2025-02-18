@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # Workflow: Visium CRC {#sec-seq-workflow-visium-crc}
 
 ```{r include=FALSE}
@@ -24,6 +29,7 @@ library(msigdbr)
 library(VisiumIO)
 library(jsonlite)
 library(ggspavis)
+library(pheatmap)
 library(patchwork)
 library(BiocParallel)
 library(DropletUtils)
@@ -348,18 +354,16 @@ auc <- AUCell_calcAUC(geneSets=gs, rankings=rnk, nCores=th, verbose=FALSE)
 colData(spe)[rownames(auc)] <- res <- t(assay(auc)) 
 ```
 
-For simplicity, we'll continue investigating only those
-signatures with the highest score variability across spots:
+For simplicity, we’ll continue investigating only those signatures with the highest score variability across spots:
 
 ```{r top}
 var <- colVars(res) # variance across spots
-top <- names(tail(sort(var), 8)) # top sets
+top <- names(tail(sort(var), 8)) # top sets)
 ```
 
-
-To summarize, `fatty_acid_metabolism` absent in stromal regions; the fibroblast ring
-surrounding the cancerous patch exhibit a lot of `apoptosis` and `hypoxia`; 
-`glycolysis` is absent in stromal, and higher in malignant epithelial regions.
+To summarize, MYC signalling is absent in stromal regions; the fibroblast ring
+surrounding a cancerous patch exhibits EMT, angiogenesis, etc.; INFa response 
+and TNFa signalling is patch-like in both stroma and malignant epithelia.
 
 ```{r plt-auc-xy, message=FALSE, fig.width=11, fig.height=6}
 #| code-fold: true
@@ -389,7 +393,7 @@ for (. in c("Leiden", "RCDT")) {
     mu <- aggregateAcrossCells(auc[top, ], spe[[.]], 
         use.assay.type="AUC", statistics="mean")
     # visualize as (cluster x set) heatmap
-    pheatmap::pheatmap(
+    pheatmap(
         mat=t(assay(mu)), scale="column", col=pals::coolwarm(), main=.,
         cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 }
@@ -401,14 +405,15 @@ For the latter, we may instead correlate set scores with proportion estimates
 ```{r cor-auc-dec}
 # correlate 'AUCell' signature scores with subpopulation
 # proportion estimates from deconvolution with 'RCDT'
-cm <- cor(as.matrix(ws), t(assay(auc)))
+cm <- cor(as.matrix(ws), t(assay(auc[top, ])))
 ```
 
-```{r plt-cor, fig.width=2.5, fig.height=2.5}
+```{r plt-cor, fig.width=3, fig.height=4}
 #| code-fold: true
 #| fig-align: center
-pheatmap::pheatmap(cm, 
+pheatmap(cm, 
     col=pals::coolwarm(),
+    breaks=seq(-1, 1, length=25),
     cellwidth=10, cellheight=10, 
     treeheight_row=5, treeheight_col=5)
 ```
