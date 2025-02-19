@@ -53,6 +53,8 @@ The intensity of the points can be uniform in space which is called homogeneous.
 ::: {.callout-note collapse="true" title="Estimating intensity"}
 
 ```{r estimating intensity, message=FALSE, warning=FALSE}
+# TODO: temporary fix
+spatialCoordsNames(spe) <- c("x", "y")
 dfSpe <- .speToDf(spe)
 pp <- .dfToppp(dfSpe, marks = "Cluster")
 
