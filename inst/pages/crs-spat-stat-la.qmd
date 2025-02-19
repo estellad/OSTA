@@ -93,7 +93,7 @@ plotLocalResult(sfe,
 
 ::: {.callout-note collapse="true" title="Statistical interpretation of autocorrelation"}
 
-During the interpretation of local autocorrelation measures, both the effect size (the value of the statistic) and the siginifiance level should be considered. Because we calculate significance on each spot individually, values should be corrected for multiple testing.
+During the interpretation of local autocorrelation measures, both the effect size (the value of the statistic) and the significance level should be considered. Because we calculate significance on each spot individually, values should be corrected for multiple testing.
 
 ```{r local moran pvals, fig.width=25, fig.height=10}
 plotLocalResult(sfe,
