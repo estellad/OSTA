@@ -18,6 +18,7 @@ library(scuttle)
 library(SingleR)
 library(ggplot2)
 library(patchwork)
+library(OSTA.data)
 library(BayesSpace)
 library(BiocParallel)
 library(DropletUtils)
@@ -32,8 +33,11 @@ set.seed(112358)
 
 ```{r load-spe}
 # retrieve dataset from OSF repository
-id <- "Xenium_HumanColon_Oliveria"
-(spe <- OSTA.data::.read_data(id))
+id <- "Xenium_HumanColon_Oliveira"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+(spe <- readXeniumSXE(td))
 ```
 
 ```{r utils}
@@ -187,8 +191,8 @@ subpopulations, respectively:
 
 ```{r load-sce, results="hold", message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repository
-id <- "Chromium_HumanColon_Oliveria"
-pa <- OSTA.data::.load_data(id)
+id <- "Chromium_HumanColon_Oliveira"
+pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 # read into 'SingleCellExperiment'

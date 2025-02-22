@@ -1,12 +1,12 @@
-# Orchestrating Spatial (Transcript)omics Analysis with Bioconductor
+# Orchestrating Spatial Transcriptomics Analysis with Bioconductor
 
-📖 [Book](https://lmweber.github.io/OSTA) [![deployment](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/lmweber/OSTA/actions/workflows/pages/pages-build-deployment)  
-🐳 [Docker](https://github.com/lmweber/OSTA/pkgs/container/OSTA) [![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/biocbook.yml?label=Docker%20image)](https://github.com/lmweber/OSTA/actions/workflows/biocbook.yml)
+[![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/biocbook.yml?label=Book%20build)](https://github.com/lmweber/OSTA/actions/workflows/biocbook.yml)  
+[![depbuild](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/depbuild.yml?label=Dependencies%20build)](https://github.com/lmweber/OSTA/actions/workflows/depbuild.yml)
 
 
 ## Overview
 
-This repository contains source files for the "Orchestrating Spatial (Transcript)omics Analysis with Bioconductor" book.
+This repository contains source files for the "Orchestrating Spatial Transcriptomics Analysis with Bioconductor" book.
 
 
 ## Link to book
@@ -16,14 +16,20 @@ The development version of the book is available at: https://lmweber.org/OSTA/
 
 ## For developers
 
-The online version of the book is built by the GitHub Actions workflows in `.github/workflows/` after merging into the `devel` branch.
+The book is built by the GitHub Actions workflows in `.github/workflows/`.
 
-Please send pull requests into `sandbox` branch (instead of `devel`).
+The GitHub Actions workflows are split into two files:
+- `depbuild.yml` installs dependencies and stores these in a Docker image (triggered only if there are changes to `DESCRIPTION` or `deps.Dockerfile`)
+- `biocbook.yml` builds the book and runs checks (triggered by changes to any other files)
 
-To build a local rendered version of the book (e.g. for checking), run the following in the `inst/` directory:
+A new public version of the book is deployed if changes are pushed to `devel` branch.
+
+Please send pull requests into `sandbox` branch. This will trigger GitHub Actions to build the book and run checks, but will not deploy a new version of the book. The maintainers will then merge into `devel` to deploy a new version of the book after reviewing and accepting the pull request.
+
+To build a local version of the book, run the following in an R session in the `inst/` directory (after installing all dependencies):
 
 ```
-quarto::quarto_render(cache = TRUE, output_format = "html")
+quarto::quarto_render(cache = TRUE)
 ```
 
 In each analysis / method chapter, we aim to include the following:
