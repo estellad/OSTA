@@ -28,7 +28,7 @@ For each cell, segmentation results are then obtain in one of three ways (in ord
 (iii) nuclear expansion by a fixed distance (5um since v2.0, previously 15um), or until another boundary is encountered.
 
 <center>
-![](../images/img-seg_xenium.jpeg){width=100%}
+![](../images/img-seg_Xenium.jpeg){width=100%}
 </center>
 
 ## Spatial bleeding
