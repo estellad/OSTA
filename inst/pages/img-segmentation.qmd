@@ -1,0 +1,17 @@
+# Segmentation {#sec-img-segmentation}
+
+## Introduction
+
+## Spatial bleeding
+
+Standard imaging-based ST data analysis pipelines rely on microscopy stains to estimate cellular boundaries, and assign molecular readouts (e.g., transcripts) to their cell origin.
+
+[@Mitchel2025]
+
+By now, a few methods have been proposed to refine segmentation boundaries and/or per-cell counts post hoc, e.g.:
+
+- `r BiocStyle::Githubpkg("Nanostring-Biostats/FastReseg")` @Wu2024-FastReseg is an R package to detect and correct segmentation errors based on transcript locations by (i) scoring cells in terms of segmentation inaccuracies, (ii) scoring transcripts in terms of misassignments, and (iii) reassigning mislocated transcripts
+
+## Appendix
+
+## References {.unnumbered}
