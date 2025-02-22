@@ -26,6 +26,7 @@ book:
     - part: "Imaging-based platforms"
       chapters:
         - pages/img-introduction.qmd
+        - pages/img-segmentation.qmd
         - pages/img-quality-control.qmd
         - pages/img-dimensionality-reduction.qmd
         - pages/img-clustering.qmd
