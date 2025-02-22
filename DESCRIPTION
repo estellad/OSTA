@@ -83,7 +83,10 @@ Imports:
     VisiumIO,
     Voyager,
     zellkonverter,
-    zoo
+    zoo,
+    SpotSweeper,
+    flexmix,
+    miQC
 Suggests: 
     BiocManager, 
     BiocStyle, 

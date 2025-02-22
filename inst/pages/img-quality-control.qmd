@@ -31,17 +31,23 @@ First, we load the CosMx dataset:
 ```{r load-cos, message=FALSE, warning=FALSE}
 # retrieve CosMx dataset from OSF repo
 id <- "CosMx1k_MouseBrain1"
-pa <- OSTA.data::.load_data(id)
+pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 
 # TODO: should use 'SpaExpIO' here...
-cos <- SpaceTrooper::readCosmxSPE(td)
+# cos1 <- SpaceTrooper::readCosmxSPE(td)
+cos <- readCosmxSXE(td)
+
+# TODO: needed for `plotCellsFovs()`
+metadata(cos)$fov_dim <- c(xdim = 4256, ydim = 4256)
 
 # add cell boundary polygons
-fnm <- file.path(td, "polygons.csv.gz")
-pol <- readPolygonsCosmx(fnm)
-idx <- sprintf("f%s_c%s", cos$fov, cos$cellID)
+# fnm <- file.path(td, "polygons.csv.gz")
+# pol1 <- readPolygonsCosmx(fnm)
+
+pol <- readPolygonsCosmx(metadata(cos)$polygons, type = "parquet")
+idx <- sprintf("f%s_c%s", cos$fov, cos$cell_ID)
 cos$polygons <- pol[match(idx, pol$cell_id), ]
 
 # add info for 'SpaceTrooper'
@@ -57,7 +63,11 @@ We now load Xenium data:
 ```{r load-xen, message=FALSE, warning=FALSE}
 # retrieve Xenium dataset from OSF repo
 id <- "Xenium_HumanBreast1_Janesick"
-xen <- OSTA.data::.read_data(id)
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+
+xen <- readXeniumSXE(td)
 
 # add cell boundary polygons
 fnm <- metadata(xen)$cell_boundaries
@@ -118,7 +128,7 @@ Unlike, Xenium and MERSCOPE, CosMx does not stitch fields of view (FOVs) in a si
 The `plotCellsFovs` function provides an easy way to map the FOV within the slide.
 
 ```{r plot-fov-map, out.width="66%", fig.align="center"}
-plotCellsFovs(cos)
+plotCellsFovs(cos1)
 ```
 
 In addition, the `plotZoomFovsMap` provides a way to zoom on a subset of FOVs, while also visualizing the global structure of the tissue.
@@ -269,8 +279,10 @@ Of course, such effects will also be driven by differences in subpopulation comp
 However, gross differences in detection efficacy, IF staining, spot calling, segmentation etc. often still manifest in FOV-level shifts in IF stains and/or RNA target, negative probe, system control counts.
 A simple spot-check is the following type of visualization, but more thorough investigation is advisable 'in the wild', especially so in challenging types of tissue:
 
-```{r cos-plot-qc, warning=FALSE, fig.width=12, fig.height=4}
+```{r cos-plot-qc, warning=FALSE, fig.width=12, fig.height=9}
 #| code-fold: true
+# TODO: compute ctrl_total_ratio
+# TODO: scuttle::addPerCellQC(, use_altexp = TRUE) -> when QC
 df <- data.frame(colData(cos))
 vs <- "Mean"
 vs <- grep(vs, names(df), value=TRUE)
@@ -282,7 +294,7 @@ fd <- pivot_longer(df, vs) |>
         grepl("^Area", name) ~ log10(value),
         TRUE ~ value))
 ggplot(fd, aes(factor(fov), value)) + 
-    facet_wrap(~name, nrow=2, scales="free_y") +
+    facet_wrap(~name, ncol=2, scales="free_y") +
     geom_boxplot(linewidth=0.2, outlier.size=0.2) +
     scale_x_discrete(breaks=c(1, seq(5, max(cos$fov), 5))) +
     labs(x="field of view (FOV)", y=NULL) + theme_minimal()

@@ -1,4 +1,4 @@
-# Workflow: Xenium + Visium
+# Workflow: Xenium + Visium {#sec-crs-workflow-xenvis}
 
 ## Preamble
 

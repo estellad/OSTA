@@ -1,7 +1,16 @@
-# Visium HD workflow
+# Visium HD workflow {#sec-img-workflow-visiumhd}
 
+## Preamble
+
+### Introduction
+<!-- TODO -->
+
+### Dependencies
+```{r load-libs}
 ## QC 
 library(SpotSweeper)
+library(VisiumIO)
+
 library(RANN)
 library(here)
 library(SpatialExperiment)
@@ -12,14 +21,27 @@ library(scran)
 library(scater)
 library(tidyr)
 library(dplyr)
+```
 
+We retrieve VisiumHD dataset at two different resolutions of bin size with square of 8um and 16um. 
+```{r cache-vhd, results="hold", message=FALSE, warning=FALSE}
+id <- "VisiumHD_HumanColon_Oliveira"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+```
 
-plot_dir <- here("plots","VisiumHD","human_breast", "016")
+```{r load-obj8um}
+# importing
+obj8 <- TENxVisiumHD(
+    spacerangerOut=td, 
+    bin_size = "016", 
+    images="lowres", 
+    format="h5")
+(spe8 <- import(obj8))
+```
 
-
-spe <- readRDS(here("processed-data", "VisiumHD","human_breast", "VisiumHD_HumanBreast_016_bayesspace.rds"))
-spe
-
+```{r check-coldata}
 colnames(colData(spe))
 #  [1] "barcode"                       "in_tissue"                    
 #  [3] "array_row"                     "array_col"                    
@@ -32,15 +54,17 @@ colnames(colData(spe))
 # [17] "detected_outliers"             "detected_z"                   
 # [19] "subsets_mito_percent_log"      "subsets_mito_percent_outliers"
 # [21] "subsets_mito_percent_z"        "BS_k10" 
+```
 
-
+```{r fixed-QC}
 # ====== Add discards by fixed thresholds ========
 spe$detected_threshold <- spe$detected < 500
 spe$sum_threshold <- spe$sum < 500
 spe$subsets_mito_percent_threshold <- spe$subsets_mito_percent >10
+```
 
 
-
+```{r miQC-flags}
 # ====== Add discards by miQC ======
 library(miQC)
 
@@ -53,8 +77,9 @@ dev.off()
 png(here(plot_dir, "miQC_mixtureModelFiltering.png"), width=4, height=4, units="in", res=300)
 plotFiltering(spe, model) + ggtitle("HD Breast Cancer")
 dev.off()
+```
 
-
+```{r miQC-manual-flags}
 # NOTE: miQC does not offer a way to simply flag spots, so I'm importing part of the filter function here to do so manually
 library(flexmix)
 
@@ -109,7 +134,10 @@ metrics <- as.data.frame(colData(spe))
 # add "outliers" to SPE
 spe$miQC_keep <- !metrics$keep
 
+```
 
+
+```{r spotsweeper}
 # ======= SpotSweeper =========
 spe <- localOutliers(spe,  n_neighbors = 48, metric = "sum", direction = "lower", log = TRUE)
 spe <- localOutliers(spe,  n_neighbors = 48, metric = "detected", direction = "lower", log = TRUE)
@@ -117,12 +145,39 @@ spe <- localOutliers(spe,  n_neighbors = 48, metric = "subsets_mito_percent", di
 
 # save
 saveRDS(spe, here("processed-data", "VisiumHD", "human_breast", "VisiumHD_HumanBreast_016_spotsweeper.rds"))
+```
 
 
 Visualization with Loupe browswer, can select a region and subset & download. 
 # same for Xenium chapter, mention Xenium explorer
 
 bin2cell's package has ploting functions. 
+
+### Supervised
+
+For comparison, we annotate the Xenium data using a label transfer approach, 
+`r BiocStyle::Biocpkg("SingleR")`, which relies on labeled scRNA-seq data to 
+compute references profiles and transfers labels based on the rank correlation 
+between observed (here, Xenium) and reference (scRNA-seq) expression profiles.
+
+First, we retrieve a matching (Chromium) scRNA-seq dataset, which includes low- 
+(`Level1`) and high-resolution (`Level2`) annotations of cells into 9 and 31 
+subpopulations, respectively:
+
+```{r load-sce, results="hold", message=FALSE, warning=FALSE}
+# retrieve dataset from OSF repository
+id <- "Chromium_HumanColon_Oliveria"
+pa <- OSTA.data::.load_data(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+# read into 'SingleCellExperiment'
+sce <- read10xCounts(list.files(td, "h5$", full.names=TRUE))
+cd <- read.csv(list.files(td, "cell_meta", full.names=TRUE))
+colData(sce) <- cbind(colData(sce), cd[, -1])
+table(sce$Level1) # tabulate low-res. labels
+ncol(sce) # overall number of cells
+```
+
 
 ## References {.unnumbered}
 
