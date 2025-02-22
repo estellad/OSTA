@@ -1,4 +1,4 @@
-# Workflow: Xenium + Visium
+# Workflow: Xenium + Visium {#sec-crs-workflow-xenvis}
 
 ## Preamble
 
@@ -69,29 +69,9 @@ rownames(xen) <- make.unique(rowData(xen)$Symbol)
 
 ## Alignment
 
-There are many ways of registering images in R and Python, or using external plug-ins. 
-
-`SpatialData` [@Marconato2025-SpatialData] is a Python package that requires 
-user-selected landmarks to align images; here we show the registration of 
-Visium onto Xenium in *napari* interface:
-
-![](../images/xenvis-napari.png){width=50%}
-
-R packages `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] can be 
-combined with `r BiocStyle::CRANpkg("mmand")` for automated image registration.
-After alignment, we will obtain the registered images with a transformation matrix. 
-Here is a demonstration with external data, before and after registration of the two slices.
-However, the automation does not work well on images with very different orientation, 
-scale, and intensity, such as in this use case of Xenium and Visium.
-
-<center>
-![](../images/xenvis-RNiftyReg1.png){width=66%}
-![](../images/xenvis-RNiftyReg2.png){width=33%}
-</center>
-
-Therefore, we use the affine transformation matrix provided by 10x Genomics, 
-which was obtained by registration of Xenium onto Visium in Python with the 
-Fiji [@10xGenomics2023-Fiji] Java plug-in.
+To align Xenium and Visium sections, we use the affine transformation matrix 
+provided by 10x Genomics, which was obtained by registration of Xenium onto 
+Visium in Python with the Fiji [@10xGenomics2023-Fiji] Java plug-in.
 
 An affine map is generally composed of a linear map (scaling and rotation) 
 and a translation, and can be apply using basic matrix multiplication and 
@@ -123,6 +103,7 @@ spatialCoords(xen) <- new
 ```
 
 ```{r plt-xy, fig.width=3, fig.height=3}
+#| code-fold: true
 df <- data.frame(spatialCoords(vis))
 fd <- data.frame(spatialCoords(xen))
 ggplot() + coord_equal() + theme_void() +
@@ -230,8 +211,6 @@ To this end, we first consolidate the Visium and Xenium data into one object:
 gs <- intersect(rownames(vis), rownames(xem))
 cs <- intersect(colnames(vis), colnames(xem))
 cd <- intersect(names(colData(vis)), names(colData(xem)))
-# .vis <- vis[gs, cs]
-# .xem <- xem[gs, cs]
 lys <- list(Visium=vis, Xenium=xem)
 lys <- mapply(spe=lys, sid=names(lys), \(spe, sid) {
     spe <- spe[gs, cs]
