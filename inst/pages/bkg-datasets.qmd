@@ -63,8 +63,8 @@ and note across which parts of the book each dataset is being used. <!--TODO-->
 - **Xenium**
   - source: [GSM7780153](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7780153), [GSM7780154](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7780154)
 - **Chromium**
-  - source: [GSM7782698](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7782698)
-  - 37,143 genes x 708,252 cells
+  - source: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
+  - 18,082 genes x 30,365 cells
 
 **HumanColon_Oliveira**
 
