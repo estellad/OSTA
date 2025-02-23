@@ -29,6 +29,7 @@ BiocManager::install("estellad/OSTA.data")
 The following datasets are currently available:
 
 ```{r list-data, message=FALSE, warning=FALSE}
+library(OSTA.data)
 OSTA.data_list()
 ```
 
