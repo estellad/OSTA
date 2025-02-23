@@ -4,20 +4,7 @@
 
 ### Introduction
 
-In spatial transcriptomics data, we can apply clustering algorithms to identify spatial domains, which represent spatially defined regions consisting of relatively consistent gene expression profiles. 
-For example, spatial domains may consist of regions containing cells from a single cell type or a consistent mixture of cell types.
 
-Several alternative approaches exist for identifying spatial domains. One strategy involves applying standard clustering algorithms from single-cell workflows without incorporating spatial information. 
-Alternatively, spatial information can be integrated at various stages of the workflow. 
-For example, spatial data can inform preprocessing steps, such as selecting spatially variable genes (SVGs), followed by the application of either non-spatial or spatial clustering algorithms. 
-Another widely used strategy involves generating a latent space that incorporates spatial coordinates, often leveraging Bayesian framework or neural networks.
-
-As advancements in spatial transcriptomics techniques enhance tissue resolution, computational tradeoffs between various approaches and parameters become increasingly relevant.
-
-It is also important to keep in mind that when we use clustering to define cell types and/or states, these can be defined at various resolutions (or even on a continuum). 
-The optimal number of clusters depends on the biological context -- in particular, there is no "true" number of clusters, since this depends on the biological context (e.g. if we are comparing major cell populations vs. comparing rare subtypes), so the choice of the optimal number of clusters or resolutions requires some judgment and biological interpretation.
-
-Once we have identified spatial domains, these can then be further investigated in additional downstream analyses.
 
 ### Dependencies
 
@@ -42,19 +29,6 @@ n_clusters <- 18
 
 ## Analysis
 
-### Non-spatial
-
-Here, we perform clustering by applying standard clustering methods developed for single-cell RNA sequencing data, using molecular features (gene expression) only. 
-We apply graph-based clustering using the Leiden method.
-
-In the context of spatial data, this is the same as applying clustering to identify cell types in single-cell data (although each spot may contain one or more cells, depending on the platform and tissue cell density), and means that we are assuming that biologically informative spatial distribution patterns of cell types can be detected from the molecular features (gene expression).
-
-```{r Leiden}
-g <- buildSNNGraph(spe, use.dimred="PCA", type="jaccard", k=10)
-k <- cluster_leiden(g, objective_function="modularity", resolution=1)
-table(spe$Leiden <- factor(k$membership))
-```
-
 ### Spatially-aware
 
 The example above shows that non-spatial clustering can capture some spatial relationships in ST data, primarily if these are due to spatially distributed cell types and where the cell types can be identified from their gene expression profiles alone. 
@@ -62,11 +36,6 @@ However, this does not directly make use of the spatial information contained in
 
 In many ST datasets, we can uncover further structure by performing analyses that directly take spatial information into account. 
 Below, we demonstrate examples of two types of analyses, which we refer to as "spatially-aware clustering".
-
-Several methods to identify spatial domains in ST data have recently been developed, which each have various methodological and computational tradeoffs. 
-A few example include `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], `r BiocStyle::Biocpkg("Banksy")` [@Singhal2024-BANKSY] and `r BiocStyle::CRANpkg("PRECAST")` [@Liu2023-PRECAST] in R, as well as `r BiocStyle::Githubpkg("CellCharter")` [@Varrone2024-CellCharter] and `r BiocStyle::Githubpkg("SpaceFlow")` [@Ren2022-SpaceFlow] in Python.
-
-Here, we demonstrate two exemplary methods (`r BiocStyle::Biocpkg("BayesSpace")` and `r BiocStyle::Biocpkg("Banksy")`) using the same Visium data.
 
 #### Probability statistics-based 
 
