@@ -41,13 +41,11 @@ Note that some alternative non-spatial methods from single-cell workflows (e.g. 
 ```{r log, message=FALSE, fig.height=3.5}
 # calculate library size factors
 spe <- computeLibraryFactors(spe)
-
 summary(sizeFactors(spe))
-hist(sizeFactors(spe), breaks = 20)
-
-# calculate 'logcounts'; these will be added as an additional 'assay'
+hist(sizeFactors(spe), breaks=20)
+# calculate 'logcounts'; these will
+# be added as an additional 'assay'
 spe <- logNormCounts(spe)
-
 assayNames(spe)
 ```
 
@@ -114,13 +112,6 @@ For more details and examples, see @sec-crs-spatially-variable.
 ## Dimension reduction {#sec-seq-dimension-reduction}
 
 ### Principal component analysis (PCA)
-
-A standard approach is to apply principal component analysis (PCA) to the set of top HVGs, and retain a subset of PCs (default 50) for subsequent steps.
-
-This is done for two main reasons: (i) to reduce noise due to random variation in expression of biologically uninformative genes, which are assumed to have expression patterns independent of each other, and (ii) to improve computational efficiency.
-
-Here, we use the implementation of PCA provided in the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017]:
-[For large-scale datasets (100,000s of cells), argument `BSPARAM=RandomParam()` to decrease runtime by approximating the singular value decomposition (SVD). Because this implementation uses randomization, and seed for random number generation should be set in order to make results reproducible.]{.aside}
 
 ```{r pca}
 spe <- runPCA(spe, subset_row=sel)
