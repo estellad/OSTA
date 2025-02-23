@@ -15,9 +15,9 @@ book:
       chapters:
         - pages/seq-introduction.qmd
         - pages/seq-quality-control.qmd
-        - pages/seq-norm-feat-dimred.qmd
+        - pages/seq-processing.qmd
         - pages/seq-clustering.qmd
-        - pages/seq-marker-genes.qmd
+        #- pages/seq-marker-genes.qmd
         - pages/seq-deconvolution.qmd
         - pages/seq-spatial-co-localization.qmd
         - pages/seq-workflow-dlpfc.qmd
