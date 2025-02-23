@@ -1,4 +1,4 @@
-# Spatial registration
+# Registration {#sec-crs-registration}
 
 ## Introduction
 
@@ -6,7 +6,7 @@
 
 We first start with the case **(1)** where both reference and query datasets are composed of spatially resolved profiles, then case **(2)** review methods that allows transfering/registering information from non-spatially resolved single cell datasets. 
 
-## Spatial vs Spatial Omic Registration (Alignment)
+## Spatial vs Spatial Registration (Alignment)
 
 <!-- Spatial omic technologies provide capabilities to capture omic profiles of cells and spots over tissue sections as well as the morphological features of these tissues. Multiple data modalities and microscopy images could be generated with numerous spatial omic instruments where the data generated from these modalities may capture observations (cells, spots, images etc.) in different units and perspectives (i.e. coordinate systems). These could be datasets generated from the same section, adjacent sections or tissue sections with similar morphology and structure.  -->
 
@@ -206,11 +206,9 @@ p + geom_point(
     col="red", inherit.aes=FALSE)
 ```
 
-## Single Cell vs Spatial Omic Registration
+## Single Cell vs Spatial Registration (Reconstruction)
 
 Spatial registration methods use gene expression profiles for cell populations of interest from single-cell RNA sequencing data as a reference, and map or 'spatially register' these single-cell expression profiles onto omic profiles whose spatially localizations are provided over tissue sections, thus spatially resolving features that may only be available in the single-cell RNA sequencing data. 
-
-
 
 ### References {.unnumbered}
 

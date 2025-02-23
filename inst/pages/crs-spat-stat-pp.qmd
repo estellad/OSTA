@@ -36,7 +36,7 @@ In the plot below, the centroids of the cells are attributed with a discrete cel
 df <- data.frame(xy, colData(spe))
 ggplot(df, aes(x_centroid, y_centroid, col=Cluster)) +
     guides(col=guide_legend(override.aes=list(size=2))) +
-    theme_xy + theme(legend.key.size=unit(0, "pt")) +
+    theme_xy + theme(legend.key.size=ggplot2::unit(0, "pt")) +
     geom_point(size=0.05) 
 ```
 
@@ -53,6 +53,8 @@ The intensity of the points can be uniform in space which is called homogeneous.
 ::: {.callout-note collapse="true" title="Estimating intensity"}
 
 ```{r estimating intensity, message=FALSE, warning=FALSE}
+# TODO: temporary fix
+spatialCoordsNames(spe) <- c("x", "y")
 dfSpe <- .speToDf(spe)
 pp <- .dfToppp(dfSpe, marks = "Cluster")
 
