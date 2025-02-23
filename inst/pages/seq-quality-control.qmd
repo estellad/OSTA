@@ -25,18 +25,21 @@ The first three characteristics listed above are also used for QC in scRNA-seq d
 
 ### Dependencies
 
-Load packages for this chapter:
+In this chapter, we will rely on the following packages:
 
-```{r, message=FALSE}
-library(SpatialExperiment)
+```{r load-libs, message=FALSE}
 library(ggspavis)
 library(scater)
+library(STexampleData)
+library(SpatialExperiment)
 ```
 
-Load previously saved data object (see @sec-seq-load-data-save-objects).
+Next, we import a 10x Genomics Visium dataset that will be used in several of the following chapters. This dataset has previously been preprocessed using data preprocessing procedures with tools outside R and saved in `SpatialExperiment` format, and is available for download from the `r BiocStyle::Biocpkg("STexampleData")` package.
 
-```{r, message=FALSE, results='hide'}
-spe <- readRDS("seq-spe_load.rds")
+The dataset consists of one sample (Visium capture area) from one donor, consisting of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region; it is described in @Maynard2021.
+
+```{r load-data, message=FALSE}
+(spe <- Visium_humanDLPFC())
 ```
 
 
