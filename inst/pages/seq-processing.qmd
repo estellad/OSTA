@@ -11,7 +11,9 @@ We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r 
 ### Dependencies
 
 ```{r load-libs, message=FALSE, warning=FALSE}
+library(BayesSpace)
 library(ggspavis)
+library(patchwork)
 library(scater)
 library(scran)
 library(SpatialExperiment)
@@ -35,7 +37,6 @@ spe
 The simplest approach is to calculate log-transformed normalized counts ("logcounts") using library size factors, treating each spot as equivalent to a single cell. This approach is simple and fast, and generally provides a good baseline. However, in some datasets, the (over)-simplified assumption of each spot being equivalent to a single cell will not be appropriate. This example uses the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages.
 
 Note that some alternative non-spatial methods from single-cell workflows (e.g. normalization by deconvolution) are less appropriate for spot-based spatial transcriptomics data, since spots can contain multiple cells from multiple cell types, and datasets can contain multiple samples (e.g. multiple tissue sections, resulting in sample-specific clustering).
-
 [Library size-based normalization was originally developed for scRNA-seq data, and makes the assumption that spots are equivalent to single cells; this has been shown to be problematic because *"library size confounds [spatial] biology"* [@Bhuva2024].]{.aside}
 
 ```{r log, message=FALSE, fig.height=3.5}
@@ -59,11 +60,10 @@ assayNames(spe)
 
 Here, we re-use feature selection methods from scRNA-seq workflows to identify a set of 'highly variable' genes (HVGs). These will be used as the input for subsequent steps, such as dimensionality reduction and clustering. In this example, we use the `r BiocStyle::Biocpkg("scran")` package [@Lun2016] to identify HVGs. As above, this makes the simplified assumption that spots can be treated as equivalent to single cells.
 
+To identify HVGs, we first remove mitochondrial genes, since these are very highly expressed in this dataset and are not of main biological interest.
 [Note that HVGs are defined based only on molecular features (i.e. gene expression), and do not take any spatial information into account.
 If the biologically meaningful spatial information in this dataset mainly reflects spatial distributions of cell types (defined by gene expression), then relying on HVGs for downstream analyses may be sufficient.
 However, many datasets contain further spatial structure that is not captured in this way, which may be investigated using spatially-aware methods such as identifying spatially variable genes (SVGs).]{.aside}
-
-To identify HVGs, we first remove mitochondrial genes, since these are very highly expressed in this dataset and are not of main biological interest.
 
 ```{r mt}
 # identify mitochondrial genes
@@ -92,13 +92,11 @@ length(sel)
 ```{r plt-hvg, fig.width=5, fig.height=4}
 #| code-fold: true
 # visualize mean-variance relationship
-par(mar = c(4, 4, 0, 0))
+par(mar=c(4, 4, 0, 0))
 fit <- metadata(dec)
-plot(fit$mean, fit$var, cex = 0.5, 
-     xlab = "mean expression", ylab = "variance")
-points(dec[sel, "mean"], dec[sel, "total"], 
-       cex = 0.5, col = "dodgerblue")
-curve(fit$trend(x), add = TRUE, lwd = 2, col = "tomato")
+plot(fit$mean, fit$var, cex=0.5, xlab="mean expression", ylab="variance")
+points(dec[sel, "mean"], dec[sel, "total"], cex=0.5, col="dodgerblue")
+curve(fit$trend(x), add=TRUE, lwd=2, col="tomato")
 ```
 
 ### Spatially-aware: Spatially variable genes (SVGs)
@@ -109,43 +107,56 @@ A number of methods have been developed to identify SVGs. These methods take the
 
 For more details and examples, see @sec-crs-spatially-variable.
 
-## Dimension reduction {#sec-seq-dimension-reduction}
+## Dimension reduction (DR) {#sec-seq-dimension-reduction}
 
-### Principal component analysis (PCA)
+A standard next step is to perform PCA to the set of top HVGs; see @sec-crs-dimension-reduction. In addition, we'll perform non-linear DR technique, UMAP, on a subset of PCs (default 50).
+[Note that, the algorithm underlying UMAP is stochastic, so that UMAP 'shapes' will change from one run to the next. Thus, a random seed should be set in order to make the visualization reproducible.]{.aside}
 
 ```{r pca}
 spe <- runPCA(spe, subset_row=sel)
-reducedDimNames(spe)
-dim(reducedDim(spe, "PCA"))
+spe <- runUMAP(spe, dimred="PCA")
 ```
 
-### Uniform Manifold Approximation and Projection (UMAP)
+## Clustering {#sec-seq-clustering}
 
-The UMAP algorithm is often used for visualization purposes (although interpretation of the UMAP dimensions is difficult and can sometimes be misleading).
+Next we'll run a spatially aware clustering, `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], developed specifically for seq-based ST data; see also @sec-crs-clustering.
 
-Here, we run UMAP on the set of top 50 PCs, retaining the first two UMAP components to be used for visualization purposes:
-
-```{r umap}
-# compute UMAP (by default, on top 50 PCs)
-set.seed(123)
-spe <- runUMAP(spe, dimred="PCA")
-
-reducedDimNames(spe)
-dim(reducedDim(spe, "UMAP"))
-
-# update column names for easier plotting
-colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
+```{r clu, message=FALSE}
+.spe <- spatialPreprocess(spe, skip.PCA=TRUE)
+.spe <- spatialCluster(.spe, nrep=1e3, burn.in=100, q=10, d=20)
+table(spe$BayesSpace <- factor(.spe$spatial.cluster))
 ```
 
 ## Visualizations
 
-Generate a PCA plot using plotting functions from the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017]:
+Let's visualize cluster predictions in space, here alongside `ground_truth` spot labels from manual annotation:
 
-```{r plt-pcs, fig.height=4}
-# temporary until QC chapter updated
-spe <- addPerCellQC(spe)
+```{r plt-clu-xy, fig.width=7, fig.height=2.5, message=FALSE}
+plotSpots(spe, annotate="ground_truth") +
+plotSpots(spe, annotate="BayesSpace") +
+    plot_layout() &
+    theme(legend.key.size=unit(0, "lines")) &
+    scale_color_manual(values=unname(pals::trubetskoy())) 
+```
 
-plotReducedDim(spe, "PCA", color_by = "sum") + coord_equal() + theme_minimal()
+Inspecting the spatial distribution of the top PCs, we can observe that the main driver of expression variability is the distinction between white matter (WM) and non-WM brain layers:
+
+```{r plot-xy-pcs, collapse=TRUE, fig.width=8, fig.height=3}
+#| code-fold: true
+pcs <- reducedDim(spe, "PCA")
+pcs <- pcs[, seq_len(4)]
+lapply(colnames(pcs), \(.) {
+    spe[[.]] <- pcs[, .]
+    plotSpots(spe, annotate=.)
+}) |>
+    wrap_plots(nrow=1) &
+    geom_point(shape=16, stroke=0, size=0.2) &
+    scale_color_gradientn(colors=pals::jet()) &
+    coord_equal() & theme_void() & theme(
+        legend.position="bottom",
+        plot.title=element_text(hjust=0.5),
+        legend.key.width=unit(0.8, "lines"),
+        legend.key.height=unit(0.4, "lines"))
 ```
 
 ## Appendix

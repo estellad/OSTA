@@ -17,17 +17,33 @@ We will try and demonstrate as much here.
 library(dplyr)
 library(Banksy)
 library(scater)
+library(ggplot2)
+library(OSTA.data)
 library(patchwork)
 library(SpatialExperiment)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(20000229)
-# load data from preceeding 
-# chapter (post quality control)
-(spe <- readRDS("img-spe_qc.rds"))
+# load Xenium data post quality control
+spe <- readRDS("img-spe_qc.rds")
 ```
 
-## Non-spatial
+```{r load-anno}
+# get annotations from 'BiocFileCache'
+# (data has been retrieved already)
+id <- "Xenium_HumanBreast1_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, "annotation.csv", exdir=td)
+df <- read.csv(list.files(td, full.names=TRUE))
+# add annotations as cell metadata
+cs <- match(spe$cell_id, df$Barcode)
+spe$Label <- df$Annotation[cs]
+```
+
+## Principal component analysis (PCA)
+
+### Non-spatial
 
 As a baseline, we will perform principal component analysis (PCA), which underlies many standard scRNA-seq analysis pipelines, such as (spatially unaware) graph-based clustering based on a shared nearest neighbor (SNN) graph and the Leiden or Louvain algorithm for community detection.
 
@@ -39,26 +55,40 @@ Here, we use the implementation of PCA provided in the `r BiocStyle::Biocpkg("sc
 [For large-scale datasets (100,000s of cells), argument `BSPARAM=RandomParam()` can be used to decrease runtime by approximating the singular value decomposition (SVD). Because this implementation uses randomization, and seed for random number generation should be set in order to make results reproducible.]{.aside}
 
 ```{r dr-tx}
+spe <- logNormCounts(spe)
 spe <- runPCA(spe, ncomponents=20)
 ```
 
-## Spatially aware
+### Spatially aware
 
-`r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] essentially computes PCs that are weighted by embeds cells in a product space of their own and the local neighborhood transcriptome, representing cell state and microenvironment.
-A key parameter for this method is $\lambda\in[0,1]$ (argument `lambda` in `runBanksyPCA()`), which controls the amount of spatial information to incorporate; specifically, **when $\lambda=0$, `BANKSY` reduces to non-spatial clustering**.
+`r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] computes PCs on a spatial-neighborhood augmented matrix, thereby embedding cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment.
+A key parameter for this method is $\lambda\in[0,1]$ (argument `lambda` in `runBanksyPCA()`), which controls the spatial component's weight; notably, **when $\lambda=0$, `BANKSY` reduces to non-spatial clustering**.
+Secondly, `k_geom` determines the number of neighbors to use for computing local transcriptomic neighborhoods.
+[In Visium, $k=6$ would correspond to first-order, $k=18$ to first- and second-order neighbors.]{.aside}
 
 ```{r dr-sp, message=FALSE}
-spe <- computeBanksy(spe, assay_name="logcounts")
-spe <- runBanksyPCA(spe, npcs=20, lambda=0.2)
+spe <- computeBanksy(spe, assay_name="logcounts", k_geom=20)
+spe <- runBanksyPCA(spe, npcs=20, lambda=0.4)
 ```
 
-## Exploratory
-
-To not confuse different types of PCs, we rename `reducedDims` to end in `_sp` and `_tx` for spatially aware and unaware results, respectively.
+To not confuse different types of PCs, we rename the corresponding `reducedDims` to end in `_sp` and `_tx` for spatially aware and unaware results, respectively.
 
 ```{r prep-data}
 reducedDimNames(spe) <- c("PCA_tx", "PCA_sp")
 ```
+
+## Uniform manifold approximation and projection (UMAP)
+
+The UMAP algorithm is often used for visualization purposes (although interpretation of the UMAP dimensions is difficult and can be misleading).
+
+Here, we run UMAP on both non-spatial and spatially aware PCs, retaining the first two UMAP components to be used for visualization:
+
+```{r umap}
+spe <- runUMAP(spe, dimred="PCA_tx", name="UMAP_tx")
+spe <- runUMAP(spe, dimred="PCA_sp", name="UMAP_sp")
+```
+
+## Exploratory
 
 A useful visualization is to color cells by their PCs in physical space. 
 This will help highlight key drivers of transcriptional variability, e.g., between major biological compartments such as epithelia, immune and stromal cells.
@@ -104,14 +134,19 @@ ggplot(df, aes(x_centroid, y_centroid, col=rgb)) +
 
 :::
 
-## Appendix
-
-### Saving {.unnumbered}
-
-```{r save-data}
-saveRDS(spe, "img-spe_dr.rds")
+```{r plt-umap, fig.width=8, fig.height=3.5}
+.plot_umap <- \(dr) plotReducedDim(
+    object=spe, dimred=dr, colour_by="Label", 
+    point_shape=16, point_size=0) + ggtitle(dr)
+.plot_umap("UMAP_tx") +
+.plot_umap("UMAP_sp") +
+    plot_layout(guides="collect") &
+    guides(col=guide_legend(override.aes=list(alpha=1, size=2))) &
+    theme_void() & theme(aspect.ratio=1, 
+        legend.key.size=unit(0, "lines"),
+        plot.title=element_text(hjust=0.5))
 ```
 
-### Benchmarks {.unnumbered}
+## Appendix
 
 ### References {.unnumbered}

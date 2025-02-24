@@ -33,33 +33,15 @@ library(patchwork)
 library(OSTA.data)
 library(BayesSpace)
 library(reticulate)
-library(zellkonverter)
 library(SpatialExperiment)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(2025)
-# load data from previous section
-(spe <- readRDS("img-spe_dr.rds"))
+# load processed Xenium datasets
+spe <- readRDS("img-spe_dr.rds")
 ```
 
 ## Clustering
-
-Before getting started, we will retrieve the authors' cell type labels, 
-which were obtained by transferring scFFPE-seq annotations (supervised); 
-these comprise 20 subpopulations.
-
-```{r load-anno}
-# get annotations from 'BiocFileCache'
-# (data has been retrieved already)
-id <- "Xenium_HumanBreast1_Janesick"
-pa <- OSTA.data_load(id)
-dir.create(td <- tempfile())
-unzip(pa, "annotation.csv", exdir=td)
-df <- read.csv(list.files(td, full.names=TRUE))
-# add annotations as cell metadata
-cs <- match(spe$cell_id, df$Barcode)
-spe$Label <- df$Annotation[cs]
-```
 
 ### Non-spatial
 
@@ -79,26 +61,31 @@ table(spe$Leiden <- factor(k$membership))
 Several methods to identify spatial domains in ST data have recently been developed, which each have various methodological and computational tradeoffs. 
 A few example include `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], `r BiocStyle::Biocpkg("Banksy")` [@Singhal2024-BANKSY] and `r BiocStyle::CRANpkg("PRECAST")` [@Liu2023-PRECAST] in R, as well as `r BiocStyle::Githubpkg("CellCharter")` [@Varrone2024-CellCharter] and `r BiocStyle::Githubpkg("SpaceFlow")` [@Ren2022-SpaceFlow] in Python.
 
-Here, we demonstrate two exemplary methods (`r BiocStyle::Biocpkg("BayesSpace")` and `r BiocStyle::Biocpkg("Banksy")`)
+Here, we demonstrate tools representative of different methodologies, namely, (probabilistic) `BayesSpace` for seq-based Visium, as well as (neighborhood-based) `Banksy` and (encoder-based) `CellCharter` for img-based Xenium data.
 
 #### Probabilistic
 
 Underlying `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace] is a Bayesian model that encourages neighboring spots to belong to the same cluster, and utilizes Markov Chain Monte Carlo (MCMC) for estimating model parameters.
+[Default parameters are `nrep=50,000` MCMC iterations and a burn-in period of `burn.in=1,000`; the authors recommend running with at least 10,000 iterations. Here, we use fewer iterations for the sake of runtime, which will arguably compromise performance. Note that, since MCMC is stochastic, a seed for random number generation should be set in order to make results reproducible.]{.aside}
+
+```{r BayesSpace, message=FALSE}
+# load processed Visium dataset
+vis <- readRDS("seq-spe_dr.rds")
+# prepare data for 'BayesSpace'
+# skipping PCA (already computed)
+.vis <- spatialPreprocess(vis, skip.PCA=TRUE)
+# perform spatial clustering with 'BayesSpace'
+# using 'd=20' PCs and targeting 'q=10' clusters
+.vis <- spatialCluster(.vis, q=10, d=20, nrep=1e3, burn.in=100) 
+table(vis$BayesSpace <- factor(.vis$spatial.cluster))
+```
 
 #### Neighborhood-based
-
-<!-- Jieran:
-1. Brief introduction of BANKSY principle
-2. Introduction of the type of methods that are embedding the spatial information
-3. Suggest also other methods with similar line of logic (embedding-based)
--->
 
 `r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] embeds cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment. 
 Here, the mixing parameter $\lambda\in[0,1]$ (argument `lambda` in `runBanksyPCA()`), controls the spatial component's weight; e.g., **when $\lambda=0$, `BANKSY` reduces to non-spatial clustering**.
 
 ```{r clu-Banksy, message=FALSE}
-# retrieve 'lambda' used for dimension reduction
-l <- metadata(spe)$BANKSY_params$lambda 
 # perform 'Banksy' clustering
 spe <- clusterBanksy(spe, dimred="PCA_sp", resolution=0.4)
 # reformat cluster assignments
@@ -107,13 +94,16 @@ names(colData(spe))[k] <- "Banksy"
 table(spe$Banksy <- factor(spe$Banksy))
 ```
 
-<!--HLC: In principle, Python here works but 'SCVI' is way too slow...
-
 #### Encoder-based
 
-1. Introduction of encoder-based methods
-2. Introduction of CellCharter methods specifically
-3. Other methods: STAGATE PROST SpaceFlow
+Another category of spatially-aware clustering method uses encoder architectures to generate a latent embedding incorporating both spatial and transcriptomics information, which is then clustered using standard algorithms. 
+One typical example is `r BiocStyle::Githubpkg("CSOgroup/cellcharter")` [@Varrone2024-CellCharter], which uses a variational auto-encoder to generate a latental feature space and aggregate the features of each spot across its neighbors to preserve their spatial context. 
+
+::: {.callout-note title="Other methods" collapse="true"}
+Several other published methods have also adopted encoder architectures in different ways to perform spatially-aware clustering. 
+`r BiocStyle::Githubpkg("zhanglabtools/STAGATE")` [@Dong2022-STAGATE] uses a graph attention autoencoder to integrate spatial and transcriptional data by modeling spatial neighborhoods as graphs, whereas `r BiocStyle::Githubpkg("Tang-Lab-super/PROST")` [@Liang2024-PROST] employs a self-attention transformer-based encoder to learn spatial patterns by jointly modeling gene expression and spatial coordinates. 
+Graph-based encoder methods, such as `STAGATE`, may be particularly well-suited for imaging-based ST data, as their ability to model spatial neighborhoods as graphs aligns naturally with the continuous and fine-grained tissue spatial organization captured by different imaging platforms.
+:::
 
 ```{r env, warning=FALSE, eval=FALSE}
 # initialize 'basilisk' environment
@@ -128,13 +118,15 @@ env <- BasiliskEnvironment(
   pip=c(
     "scvi-tools==0.20.3",
     "cellcharter==0.2.0",
-    "anndata==0.10.9"))
+    "anndata==0.10.9",
+    "scanpy==1.10.4"))
 # activate underlying conda environment
 use_condaenv(obtainEnvironmentPath(env))
-ad <- zellkonverter::SCE2AnnData(spe)
+counts <- r_to_py(t(counts(spe)))
+coords <- r_to_py(spatialCoords(spe))
 ```
 
-```{python CellCharter, eval=FALSE}
+```{python CellCharter}
 import cellcharter as cc
 import anndata as ad
 import squidpy as sq
@@ -143,37 +135,42 @@ import numpy as np
 import random
 import scvi
 
-obj = r.ad
-obj.layers["counts"] = obj.X
+adata = ad.AnnData(X = r.counts,
+                   obsm = {"spatial":r.coords},
+                   layers = {"counts": r.counts})
+
 seed = 2025
 random.seed(seed)
 scvi.settings.seed = seed
 
 # variational autoencoder for feature extraction
-scvi.model.SCVI.setup_anndata(obj, layer="counts")
-mod = scvi.model.SCVI(obj)
-mod.train(enable_progress_bar=True, early_stopping=True, early_stopping_patience=10)
-obj.obsm["X_scVI"] = modl.get_latent_representation(obj).astype(np.float32)
+scvi.model.SCVI.setup_anndata(adata, layer="counts")
+model = scvi.model.SCVI(adata, n_hidden=64)
+model.train(early_stopping=True,
+    # the parameters below aim to reduce runtime; 
+    # in reality, it'd be better to use defaults
+    max_epochs=70, batch_size=512, train_size=0.5, validation_size=0.2)
 
-# getting neighborhood aggregation
-sq.gr.spatial_neighbors(obj, library_key="sample", coord_type="generic", 
-                        delaunay=True, spatial_key="spatial_fov", percentile=99)
-cc.gr.aggregate_neighbors(obj, n_layers=3, use_rep="X_scVI", 
-                          out_key="X_cellcharter", sample_key="sample")
+adata.obsm["X_scVI"] = model.get_latent_representation(adata).astype(np.float32)
+
+# Getting neighborhood aggregation
+sq.gr.spatial_neighbors(adata, coord_type="generic", delaunay=True, spatial_key="spatial", percentile=99)
+cc.gr.aggregate_neighbors(adata, n_layers=3, use_rep="X_scVI", out_key="X_cellcharter")
 
 # clustering by scanning a range of data number
 mod = cc.tl.Cluster(n_clusters=14, random_state=seed)
-mod.fit(obj, use_rep="X_cellcharter")
+mod.fit(adata, use_rep="X_cellcharter")
 
 label_df = pd.DataFrame({"label": mod.predict(adata, use_rep="X_cellcharter")}) 
 label_df[["label"]].value_counts()
 ```
 
-```{r load cellcharter results, eval=FALSE}
-cc_labels <- read.csv("label_cellcharter.csv")[["label"]]
-table(spe$CellCharter_clusters <- as.factor(cc_labels))
+```{r py2r}
+# pull 'CellCharter' assignments from Python into R
+spe$CellCharter <- unlist(py$label_df)
 ```
 
+<!--
 #### Other methods: Probability statistics-based methods 
 
 * See more example in @sec-seq-clustering-de
@@ -181,7 +178,9 @@ table(spe$CellCharter_clusters <- as.factor(cc_labels))
 * DR.SC
 -->
 
-## Visualization
+## Downstream
+
+### Visualization
 
 <!--Jieran:
 * Visualization (Align the cluster labels before running it)
@@ -190,19 +189,20 @@ table(spe$CellCharter_clusters <- as.factor(cc_labels))
 
 Let's visualize the assignment obtains from non-spatial and spatially aware clustering:
 
-```{r plot-xy-k-joint, message=FALSE, fig.width=12, fig.height=3}
+```{r plot-xy-k-joint, message=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
 # TODO: 'ggspavis' is being a bit pedantic...
+ks <- c("Label", "Leiden", "Banksy", "CellCharter")
 spe$in_tissue <- 1; spe$x_centroid <- spe$y_centroid <- NULL
-lapply(c("Label", "Leiden", "Banksy"), \(.) {
+lapply(ks, \(.) {
     plt <- plotSpots(spe, annotate=.)
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
     plt
 }) |>
-    wrap_plots(nrow=1) &
-    theme(legend.key.size=unit(0, "lines")) &
-    scale_color_manual(values=unname(pals::trubetskoy()))
+    wrap_plots(nrow=2) &
+    scale_color_manual(values=unname(pals::trubetskoy())) &
+    theme(legend.key.size=unit(0, "lines"), legend.justification="left")
 ```
 
 Especially in large tissues, the above type of plot makes it difficult to spot rare subpopulations, and might cause cells to overlap in regions with high cellular density.
@@ -237,17 +237,17 @@ lapply(levels(spe$Banksy), \(k) {
 * Refer to benchmarking studies for potential scability issue
 -->
 
-## Downstream
-
 ::: {.callout-note title="PC regression" collapse="true"}
+
+### PC regression
 
 For any single-cell analysis where downstream tasks rely on PCs, it is useful to perform linear regression of (continuous or categorical) covariates of interest onto PCs. 
 This quantifies the variance explained by the covariate and can help assess the extend of unwanted variation (due to, e.g., cell area) as opposed to subpopulations driving transcriptional differences. 
-Here, we regress total counts, cell area, and cluster assignments against PCs:
+Here, we regress total counts, cell area, and cluster assignments from different methods against PCs:
 
 ```{r pcr}
 pcs <- reducedDim(spe, "PCA_tx")
-ids <- c("total_counts", "cell_area", "Banksy", "Leiden", "Label")
+ids <- c("total_counts", "cell_area", ks)
 pcr <- lapply(ids, \(id) {
     fit <- summary(lm(pcs ~ spe[[id]]))
     r2 <- sapply(fit, \(.) .$adj.r.squared)
@@ -262,7 +262,7 @@ Also, note that we would expect results to converge for $\lambda=0$.
 ```{r plt-pcr, fig.width=5, fig.height=2.5}
 #| code-fold: true
 pcr$id <- factor(pcr$id, ids)
-pal <- c("magenta", "gold", "cyan", "blue", "black")
+pal <- c("red", "magenta", "gold", "cyan", "blue", "black")
 ggplot(pcr, aes(pc, r2, col=id)) +
     geom_line(show.legend=FALSE) + geom_point() +
     scale_color_manual("predictor", values=pal) +
@@ -280,14 +280,18 @@ ggplot(pcr, aes(pc, r2, col=id)) +
 
 ### DGE analysis
 
+To help characterize (unsupervised) clusters, we want to identify 'markers' for each subpopulation, i.e., features whose expression is positively or negatively restricted to (a) specific subpopulation(s).
 For details on identifying genes that are differentially expressed (DE) between groups of cells, we refer readers to [OSCA](https://bioconductor.org/books/3.19/OSCA.basic/marker-detection.html); a standard approach is given below, visualizing the average expression of exemplary markers across clusters:
 
-```{r dge, fig.width=10, fig.height=3}
+```{r mgs}
 # differential gene expression analysis
 mgs <- findMarkers(spe, groups=spe$Leiden, direction="up")
 # select for a few markers per cluster
 top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
 length(top <- unique(unlist(top)))
+```
+
+```{r plt-mgs-hm, fig.width=10, fig.height=3}
 # average expression by clusters
 pbs <- aggregateAcrossCells(spe, 
     ids=spe$Leiden, subset.row=top, 
@@ -296,7 +300,7 @@ pbs <- aggregateAcrossCells(spe,
 pheatmap(mat=t(assay(pbs)), scale="column")
 ```
 
-<!-- I would do this for one of the results only, as to not make it overly complicated for the less proficient readers out there... I think doing a comparison is interesting as well, but might be best to have in a collapsed box, i.e., independent of the main content. The goal being not so much science (e.g., benchmarking), but providing a resource for others.
+<!--
 
 ```{r DEG analysis, eval=FALSE, fig.width=8, fig.height=4}
 #| code-fold: true
@@ -361,18 +365,13 @@ gene_plot | cluster_plot
 
 ## Appendix
 
-### Saving {.unnumbered}
+### Reviews {.unnumbered}
 
-```{r save-data}
-# default to spatially aware clustering
-spe$k <- spe$Banksy; saveRDS(spe, "img-spe_cl.rds")
-```
+* [https://doi.org/10.1093/bfgp/elae040](@Wang2024) categorize ST clustering approaches into probability statistics-, graph neural network- and contrastive learning-based approaches, and review their advantages and limitations for clustering of data from seq- and img-based assays.
 
 ### Benchmarks {.unnumbered}
 
-* [https://doi.org/10.1093/bfgp/elae040]()
-* [https://doi.org/10.1186/s13059-024-03361-0]() 
-* [https://doi.org/10.1038/s41592-024-02325-3]()
-* [https://doi.org/10.1016/j.csbj.2023.11.055]()
+* [https://doi.org/10.1186/s13059-024-03361-0](@Hu2024) compare 16 graph- and statistic-based approaches, including `BayesSpace` and `BANKSY`, across 10 (mostly seq-based) datasets.
+* [https://doi.org/10.1016/j.csbj.2023.11.055](@Liu2024) compare eight GNN-based approaches, including `SpaceFlow`, across four seq- and one img-based dataset.
 
 ### References {.unnumbered}
