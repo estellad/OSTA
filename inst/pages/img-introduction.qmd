@@ -54,6 +54,7 @@ The NanoString CosMx platform gives an imageable area of 15x20 mm and allows up 
 
 The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluorescence-based targeted spatial transcriptomics platforms, allows the highest resolution (≤20 nm), while also providing a high capacity for multiplexing, with (customizable) panels containing up to 1000 genes, and an imageable area of 1 cm^2^. MERSCOPE was recently shown to be amongst the most sensitive in a recent head-to-head comparison [@Hartman2024] using mouse brain tissue.
 
+<!--Davide:
 ## Pre-processing / understanding the input data structure
 
 - Briefly explain the logic behind sequential FISH
@@ -62,12 +63,7 @@ The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluoresc
 - In addition, the raw data typically include immunofluoresce signals (acquired as images in TIFF or ZARR format) from a nucleus stain (e.g., DNA or DAPI) and optionally cell surface stains (e.g., CD3, PanCK, ...). These signals are used for cell (and/or nucleus) segmentation, typically done with deep learning methods such as CellPose.
 - A final preprocessing steps assigns transcripts to segmented regions (cells and optionally nuclei) and counts how many transcripts per gene are present in each cell.
 - Processed files (typically the starting point of a Bioconductor analysis) include: transcript files, segmentation mask, expression matrix (cell x gene), and cell metadata (with xy coordinates of their centroids), and optionally a polygon file which represents the cell boundaries.
-
-## Data Import
-
-The `r BiocStyle::Githubpkg("estellad/SpatialExperimentIO")` and `r BiocStyle::Githubpkg("drighelli/SpaceTrooper")` packages include functions to import these data structures from the three major commercial platforms.
-
-Example of not evaluated code or link to package vignette.
+-->
 
 ## Resources
 
