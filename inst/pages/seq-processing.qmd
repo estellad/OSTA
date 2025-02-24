@@ -14,6 +14,7 @@ We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r 
 library(BayesSpace)
 library(ggspavis)
 library(patchwork)
+library(pheatmap)
 library(scater)
 library(scran)
 library(SpatialExperiment)
@@ -61,7 +62,7 @@ assayNames(spe)
 Here, we re-use feature selection methods from scRNA-seq workflows to identify a set of 'highly variable' genes (HVGs). These will be used as the input for subsequent steps, such as dimensionality reduction and clustering. In this example, we use the `r BiocStyle::Biocpkg("scran")` package [@Lun2016] to identify HVGs. As above, this makes the simplified assumption that spots can be treated as equivalent to single cells.
 
 To identify HVGs, we first remove mitochondrial genes, since these are very highly expressed in this dataset and are not of main biological interest.
-[Note that HVGs are defined based only on molecular features (i.e. gene expression), and do not take any spatial information into account.
+[Note that HVGs are defined based only on molecular features (i.e., gene expression), and do not take any spatial information into account.
 If the biologically meaningful spatial information in this dataset mainly reflects spatial distributions of cell types (defined by gene expression), then relying on HVGs for downstream analyses may be sufficient.
 However, many datasets contain further spatial structure that is not captured in this way, which may be investigated using spatially-aware methods such as identifying spatially variable genes (SVGs).]{.aside}
 
@@ -157,6 +158,43 @@ lapply(colnames(pcs), \(.) {
         plot.title=element_text(hjust=0.5),
         legend.key.width=unit(0.8, "lines"),
         legend.key.height=unit(0.4, "lines"))
+```
+
+## Marker genes
+
+Having clustered our spots, we can test for genes that are differentially expressed (DE) between domains (here, using pairwise t-tests and specifically testing for *up*regulation, i.e., expression should be higher in the cluster for which a gene is reported to be a marker); see @sec-crs-clustering.
+[We could also test for spatially variable genes (SVGs) within domains to identify spatial patterns in gene expression that may be independent of spatial domains; see @sec-crs-spatially-variables.]{.aside}
+
+```{r mgs}
+mgs <- findMarkers(spe, groups=spe$BayesSpace, direction="up")
+top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
+length(top <- unique(unlist(top)))
+```
+
+We can visualize selected markers as a heatmap where bins represent the average expression (here, log-transformed library size-normalize counts) of a given gene (= columns) in a given cluster (= rows).
+[To visually amplify differences, we use `scale="column"`. This will, for every gene, subtract the mean and divide by the standard deviation across per-cluster means, bringing genes of potentially very different expression levels to a comparable scale.]{.aside}
+
+```{r plt-mgs-hm, fig.width=9, fig.height=3}
+#| code-fold: true
+pbs <- aggregateAcrossCells(spe,  
+    ids=spe$BayesSpace, subset.row=top, 
+    use.assay.type="logcounts", statistics="mean")
+# use symbols as feature names
+mtx <- t(assay(pbs))
+colnames(mtx) <- rowData(pbs)$gene_name
+pheatmap(mat=mtx, scale="column")
+```
+
+As well as in space, i.e., coloring spots by their expression of a given marker:
+
+```{r plt-mgs-xy, fig.width=8, fig.height=5.5}
+ps <- lapply(
+    c("MBP", "PLP1", "NRGN", "SNAP25", "NEFL", "HPCAL1"), \(.) 
+    plotSpots(spe, annotate=., feature_names="gene_name", assay_name="logcounts"))
+wrap_plots(ps, nrow=2) & theme(
+    legend.key.width=unit(0.4, "lines"),
+    legend.key.height=unit(0.8, "lines")) &
+    scale_color_gradientn(colors=rev(hcl.colors(9, "Rocket")))
 ```
 
 ## Appendix
