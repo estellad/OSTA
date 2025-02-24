@@ -158,7 +158,7 @@ xy <- data.frame(spatialCoords(vis))
 ids <- factor(sce$Annogrp)
 names(ids) <- colnames(sce)
 ref <- Reference(counts(sce), ids)
-res <- create.RCTD(.vis, ref, max_cores=20)
+res <- create.RCTD(.vis, ref, max_cores=10)
 res <- run.RCTD(res, doublet_mode="full")
 ```
 
