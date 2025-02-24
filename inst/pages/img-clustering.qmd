@@ -51,11 +51,10 @@ these comprise 20 subpopulations.
 # get annotations from 'BiocFileCache'
 # (data has been retrieved already)
 id <- "Xenium_HumanBreast1_Janesick"
-pa <- .load_data(id)
-dir.create(tf <- tempfile())
-unzip(pa, exdir=tf)
-nm <- list.files(tf, full.names=TRUE)
-df <- read.csv(grep("anno", nm, value=TRUE))
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, "annotation.csv", exdir=td)
+df <- read.csv(list.files(td, full.names=TRUE))
 # add annotations as cell metadata
 cs <- match(spe$cell_id, df$Barcode)
 spe$Label <- df$Annotation[cs]

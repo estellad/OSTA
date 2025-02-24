@@ -11,18 +11,19 @@ The two technological streams, imaging- and sequencing-based assays, are very di
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
-library(SpatialFeatureExperiment)
-library(SFEData)
-library(Voyager)
-library(ggplot2)
-library(scran)
-library(BiocParallel)
 library(dplyr)
-library(tidyr)
+library(scran)
 library(spdep)
+library(tidyr)
+library(ggplot2)
+library(Voyager)
+library(SFEData)
+library(spatstat)
 library(openxlsx)
 library(spatialFDA)
-library(spatstat)
+library(BiocParallel)
+library(SpatialExperiment)
+library(SpatialFeatureExperiment)
 
 bp <- MulticoreParam(10)
 set.seed(77)
