@@ -23,7 +23,7 @@ library(scater)
 library(ggspavis)
 library(patchwork)
 library(SpatialExperiment)
-(spe <- readRDS("seq-spe_dr.rds"))
+(spe <- readRDS("seq-spe_cl.rds"))
 ```
 
 ## Analysis
