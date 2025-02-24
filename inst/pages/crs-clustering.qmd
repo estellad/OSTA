@@ -105,7 +105,7 @@ Several other published methods have also adopted encoder architectures in diffe
 Graph-based encoder methods, such as `STAGATE`, may be particularly well-suited for imaging-based ST data, as their ability to model spatial neighborhoods as graphs aligns naturally with the continuous and fine-grained tissue spatial organization captured by different imaging platforms.
 :::
 
-```{r env, warning=FALSE, eval=FALSE}
+```{r env, warning=FALSE}
 # initialize 'basilisk' environment
 env <- BasiliskEnvironment(
   envname="CellCharter", pkgname="OSTA",
