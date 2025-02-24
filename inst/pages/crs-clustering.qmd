@@ -105,7 +105,7 @@ Several other published methods have also adopted encoder architectures in diffe
 Graph-based encoder methods, such as `STAGATE`, may be particularly well-suited for imaging-based ST data, as their ability to model spatial neighborhoods as graphs aligns naturally with the continuous and fine-grained tissue spatial organization captured by different imaging platforms.
 :::
 
-```{r env, warning=FALSE}
+```{r env, warning=FALSE, eval=FALSE}
 # initialize 'basilisk' environment
 env <- BasiliskEnvironment(
   envname="CellCharter", pkgname="OSTA",
@@ -126,7 +126,7 @@ counts <- r_to_py(t(counts(spe)))
 coords <- r_to_py(spatialCoords(spe))
 ```
 
-```{python CellCharter}
+```{python CellCharter, eval=FALSE}
 import cellcharter as cc
 import anndata as ad
 import squidpy as sq
@@ -165,7 +165,7 @@ label_df = pd.DataFrame({"label": mod.predict(adata, use_rep="X_cellcharter")})
 label_df[["label"]].value_counts()
 ```
 
-```{r py2r}
+```{r py2r, eval=FALSE}
 # pull 'CellCharter' assignments from Python into R
 spe$CellCharter <- unlist(py$label_df)
 ```
@@ -192,7 +192,7 @@ Let's visualize the assignment obtains from non-spatial and spatially aware clus
 ```{r plot-xy-k-joint, message=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
 # TODO: 'ggspavis' is being a bit pedantic...
-ks <- c("Label", "Leiden", "Banksy", "CellCharter")
+ks <- c("Label", "Leiden", "Banksy")#, "CellCharter")
 spe$in_tissue <- 1; spe$x_centroid <- spe$y_centroid <- NULL
 lapply(ks, \(.) {
     plt <- plotSpots(spe, annotate=.)
