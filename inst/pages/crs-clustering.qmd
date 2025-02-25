@@ -216,10 +216,9 @@ To better distinguish between different subpopulations, we can instead generate 
 
 ```{r plot-xy-k-split, fig.width=9, fig.height=6}
 #| code-fold: true
-# plot selected clusters in order of frequency
-ks <- tail(names(sort(table(spe$Banksy))), 12)
-lapply(ks, \(k) {
-    # highlight cells assigned to cluster 'k'
+# plot selected clusters in order of frequency,
+# highlighting cells assigned to cluster 'k'
+lapply(tail(names(sort(table(spe$Banksy))), 12), \(k) {
     spe$foo <- spe$Banksy == k
     spe <- spe[, order(spe$foo)]
     plt <- plotSpots(spe, annotate="foo")
@@ -297,77 +296,14 @@ top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
 length(top <- unique(unlist(top)))
 ```
 
-```{r plt-mgs-hm, fig.width=10, fig.height=3}
+```{r plt-mgs-hm, fig.width=10, fig.height=3.5}
 # average expression by clusters
 pbs <- aggregateAcrossCells(spe, 
     ids=spe$Leiden, subset.row=top, 
     use.assay.type="logcounts", statistics="mean")
 # visualize averages z-scaled across clusters
-pheatmap(mat=t(assay(pbs)), scale="column")
+pheatmap(mat=t(assay(pbs)), scale="column", breaks=seq(-2, 2, length=101))
 ```
-
-<!--
-
-```{r DEG analysis, eval=FALSE, fig.width=8, fig.height=4}
-#| code-fold: true
-#| label: fig-charts
-#| fig-cap: "Charts"
-#| fig-subcap: 
-#|   - "First"
-#|   - "Second"
-#| layout-ncol: 2
-
-getTopDEGs <- function(spe, clustering) {
-  mgs <- findMarkers(spe, groups=spe[[clustering]], direction="up")
-  top <- lapply(mgs, \(.) rownames(.)[.$Top <= 1])
-  top <- unique(unlist(top))
-  top <- top[top %in% rownames(spe)]
-  
-  pbs <- aggregateAcrossCells(spe, 
-    ids=spe[[clustering]], subset.row=top, 
-    use.assay.type="logcounts", statistics="mean")
-  
-  return(pbs)
-}
-pbsLeiden <- getTopDEGs(spe=spe, clustering="Leiden")
-pbsBanksy <- getTopDEGs(spe=spe, clustering="Banksy")
-
-plotHeatmap(pbsLeiden, 
-                    colour_columns_by="Leiden", fontsize=9,
-                    features=rownames(pbsLeiden), center=TRUE, scale=TRUE,
-                    cluster_cols=FALSE, cluster_rows=FALSE)
-
-plotHeatmap(pbsBanksy, 
-                    colour_columns_by="Banksy", fontsize=9,
-                    features=rownames(pbsBanksy), center=TRUE, scale=TRUE,
-                    cluster_cols=FALSE, cluster_rows=FALSE)
-```
-
-```{r plot-xy-expr, fig.width=4, fig.height=3, eval=FALSE, message=FALSE}
-#| collapse: TRUE
-es <- as.matrix(t(logcounts(spe)[rownames(pbsBanksy), ]))
-fd <- data.frame(df, es, check.names=FALSE)
-gene_plot <- ggplot(fd, aes(x_centroid, y_centroid, col=MZB1)) +
-    coord_equal(expand=FALSE) +
-    geom_point(shape=16, stroke=0, size=0.2) +
-    scale_color_gradientn(colors=c("navy", "red", "gold", "ivory")) +
-    theme_xy + theme(legend.key.height=unit(1, "lines"))
-
-cluster_plot <- ggplot(df, aes(x_centroid, y_centroid, col=(Banksy_clusters ==3))) + 
-  geom_point(shape=16, stroke=0, size=0.2) +
-  scale_color_manual(values=c("navy", "cyan")) + 
-  ggtitle("Banksy Cluster 3") + 
-  coord_equal(expand=FALSE) +
-  theme_void() + 
-  theme(legend.position="none",
-        plot.title=element_text(hjust=0.5),
-        panel.background=element_rect(fill="black", color="white"))
-
-gene_plot | cluster_plot
-```
-
-### Comparison of DEGs in different spatially-aware clustering cases (collapse)
--->
 
 ## Appendix
 
