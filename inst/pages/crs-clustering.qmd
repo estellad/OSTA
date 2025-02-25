@@ -52,12 +52,13 @@ spe <- readRDS("img-spe_cl.rds")
 
 As a baseline, we will perform a standard graph-based clustering approach developed for scRNA-seq data, using molecular features (gene expression) only.
 Specifically, we construct a shared nearest neighbor (SNN) graph based on non-spatial PCs (`reducedDim` slot `"PCA_tx"`), and use the Leiden algorithm for community detection [@Traag2018-Leiden].
+[The `resolution` parameter used here was selected in order to obtain a similar number of clusters annotated by the authors.]
 
 ```{r clu-Leiden}
 # build cellular shared nearest-neighbor (SNN) graph
 g <- buildSNNGraph(spe, use.dimred="PCA_tx", type="jaccard", k=20)
 # cluster using Leiden community detection algorithm
-k <- cluster_leiden(g, objective_function="modularity", resolution=0.8)
+k <- cluster_leiden(g, objective_function="modularity", resolution=1.2)
 table(spe$Leiden <- factor(k$membership))
 ```
 
@@ -89,6 +90,7 @@ table(vis$BayesSpace <- factor(.vis$spatial.cluster))
 
 `r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] embeds cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment.
 We have already computed `Banksy` PCs in @sec-crs-dimension-reduction (`reducedDim` slot `PCA_sp`) so that here, we perform SNN graph-based Leiden clustering on said PCs in order to obtain spatially aware cluster assignments:
+[Note that we are using a lower `resolution` here, as `Banksy` PCs tend to yield more clusters on the data at hand.]{.aside}
 
 ```{r clu-Banksy, message=FALSE}
 # perform SNN graph-based clustering on 'Banksy' PCs using
@@ -214,7 +216,9 @@ To better distinguish between different subpopulations, we can instead generate 
 
 ```{r plot-xy-k-split, fig.width=9, fig.height=6}
 #| code-fold: true
-lapply(levels(spe$Banksy), \(k) {
+# plot selected clusters in order of frequency
+ks <- tail(names(sort(table(spe$Banksy))), 12)
+lapply(ks, \(k) {
     # highlight cells assigned to cluster 'k'
     spe$foo <- spe$Banksy == k
     spe <- spe[, order(spe$foo)]
