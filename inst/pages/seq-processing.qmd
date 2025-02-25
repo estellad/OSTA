@@ -202,6 +202,7 @@ wrap_plots(ps, nrow=2) & theme(
 ### Saving {.unnumbered}
 
 ```{r save-data}
+colLabels(spe) <- spe$BayesSpace
 saveRDS(spe, "seq-spe_cl.rds")
 ```
 

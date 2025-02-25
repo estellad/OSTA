@@ -121,7 +121,7 @@ lapply(c("Label", "Leiden", "Banksy"), \(.) {
 ### Saving {.unnumbered}
 
 ```{r save-data}
-spe$k <- spe$Banksy
+colLabels(spe) <- spe$Banksy
 saveRDS(spe, "img-spe_cl.rds")
 ```
 
