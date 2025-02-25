@@ -12,6 +12,7 @@ library(BiocParallel)
 library(SpatialExperiment)
 # load data from previous section
 spe <- readRDS("img-spe_cl.rds")
+spe$k <- colLabels(spe)
 # basic theme for spatial plots
 theme_xy <- list(
     coord_equal(expand=FALSE), 
