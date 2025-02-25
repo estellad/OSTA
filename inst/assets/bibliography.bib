@@ -248,46 +248,6 @@ year = {2022}
 	year = {2024}
 }
 
-@article{Svensson2018,
-  title = {{SpatialDE}: identification of spatially variable genes},
-  author = {Svensson, Valentine and Teichmann, Sarah A. and Stegle, Oliver},
-  journal = {Nature Methods},
-  year = {2018},
-  volume = {15},
-  pages = {343-346},
-  url = {https://doi.org/10.1038/nmeth.4636}
-}
-
-@article{Sun2020,
-  title = {Statistical analysis of spatial expression patterns for spatially resolved transcriptomic studies},
-  author = {Sun, Shiquan and Zhu, Jiaqiang and Zhou, Xiang},
-  journal = {Nature Methods},
-  year = {2020},
-  volume = {17},
-  pages = {193-200},
-  url = {https://doi.org/10.1038/s41592-019-0701-7}
-}
-
-@article{Zhu2021,
-  title = {{SPARK-X}: non-parametric modeling enables scalable and robust detection of spatial expression patterns for large spatial transcriptomic studies},
-  author = {Zhu, Jiaqiang and Sun, Shiquan and Zhou, Xiang},
-  journal = {Genome Biology},
-  year = {2021},
-  volume = {22},
-  pages = {184},
-  url = {https://doi.org/10.1186/s13059-021-02404-0}
-}
-
-@article{Weber2023,
-  title = {{nnSVG} for the scalable identification of spatially variable genes using nearest-neighbor {Gaussian} processes},
-  author = {Weber, Lukas M. and Saha, Arkajyoti and Datta, Abhirup and Hansen, Kasper D. and Hicks, Stephanie C.},
-  journal = {Nature Communications},
-  year = {2023},
-  volume = {14},
-  pages = {4059},
-  url = {https://doi.org/10.1038/s41467-023-39748-z}
-}
-
 @article{Tippani2022,
   title = {{VistoSeg}: processing utilities for high-resolution {Visium/Visium-IF} images for spatial transcriptomics data},
   author = {Tippani, Madhavi and Divecha, Heena R. and Catallini II, Joseph L. and Kwon, Sang Ho and Weber, Lukas M. and Spangler, Abby and Jaffe, Andrew E. and Hicks, Stephanie C. and Martinowich, Keri and Collado-Torres, Leonardo and Page, Stephanie C. and Maynard, Kristen R.},
@@ -366,7 +326,7 @@ year = {2022}
   url = {https://doi.org/10.1093/bioinformatics/btad550}
 }
 
-@article{Hu2021,
+@article{Hu2021-SpaGCN,
   title = {{SpaGCN}: {Integrating} gene expression, spatial location and histology to identify spatial domains and spatially variable genes by graph convolutional network},
   author = {Hu, Jian and Li, Xiangjie and Coleman, Kyle and Schroeder, Amelia and Ma, Nan and Irwin, David J. and Lee, Edward B. and Shinohara, Russell T. and Li, Mingyao},
   journal = {Nature Methods},
@@ -1130,6 +1090,146 @@ year = {2022}
   language = "en"
 }
 
+% crs-spatially-variable =======================================================
+
+@ARTICLE{Yu2022-CTSV,
+  title     = "Identification of cell-type-specific spatially variable genes
+               accounting for excess zeros",
+  author    = "Yu, Jinge and Luo, Xiangyu",
+  journal   = "Bioinformatics",
+  publisher = "Oxford University Press (OUP)",
+  volume    =  38,
+  number    =  17,
+  pages     = "4135--4144",
+  year      =  2022}
+
+@ARTICLE{Cable2022-C-SIDE,
+  title     = "Cell type-specific inference of differential expression in
+               spatial transcriptomics",
+  author    = "Cable, Dylan M and Murray, Evan and Shanmugam, Vignesh and Zhang,
+               Simon and Zou, Luli S and Diao, Michael and Chen, Haiqi and
+               Macosko, Evan Z and Irizarry, Rafael A and Chen, Fei",
+  journal   = "Nature Methods",
+  publisher = "Nature Publishing Group",
+  pages     = "1--12",
+  year      =  2022}
+
+@ARTICLE{Cai2024-DESpace,
+  title     = "{DESpace}: spatially variable gene detection via differential
+               expression testing of spatial clusters",
+  author    = "Cai, Peiying and Robinson, Mark D and Tiberi, Simone",
+  journal   = "Bioinformatics",
+  publisher = "Oxford University Press (OUP)",
+  volume    =  40,
+  number    =  2,
+  pages     = "btae027",
+  year      =  2024}
+
+@ARTICLE{Yu2024-spVC,
+  title     = "{spVC} for the detection and interpretation of spatial gene
+               expression variation",
+  author    = "Yu, Shan and Li, Wei Vivian",
+  journal   = "Genome Biology",
+  publisher = "BioMed Central",
+  volume    =  25,
+  number    =  1,
+  pages     =  103,
+  year      =  2024}
+
+@article{Svensson2018-spatialDE,
+  title = {{SpatialDE}: identification of spatially variable genes},
+  author = {Svensson, Valentine and Teichmann, Sarah A. and Stegle, Oliver},
+  journal = {Nature Methods},
+  year = {2018},
+  volume = {15},
+  pages = {343-346},
+  url = {https://doi.org/10.1038/nmeth.4636}
+}
+
+@article{@Sun2020-SPARK,
+  title = {Statistical analysis of spatial expression patterns for spatially resolved transcriptomic studies},
+  author = {Sun, Shiquan and Zhu, Jiaqiang and Zhou, Xiang},
+  journal = {Nature Methods},
+  year = {2020},
+  volume = {17},
+  pages = {193-200},
+  url = {https://doi.org/10.1038/s41592-019-0701-7}
+}
+
+@article{Zhu2021-SPARK-X,
+  title = {{SPARK-X}: non-parametric modeling enables scalable and robust detection of spatial expression patterns for large spatial transcriptomic studies},
+  author = {Zhu, Jiaqiang and Sun, Shiquan and Zhou, Xiang},
+  journal = {Genome Biology},
+  year = {2021},
+  volume = {22},
+  pages = {184},
+  url = {https://doi.org/10.1186/s13059-021-02404-0}
+}
+
+@article{Weber2023-nnSVG,
+  title = {{nnSVG} for the scalable identification of spatially variable genes using nearest-neighbor {Gaussian} processes},
+  author = {Weber, Lukas M. and Saha, Arkajyoti and Datta, Abhirup and Hansen, Kasper D. and Hicks, Stephanie C.},
+  journal = {Nature Communications},
+  year = {2023},
+  volume = {14},
+  pages = {4059},
+  url = {https://doi.org/10.1038/s41467-023-39748-z}
+}
+
+@ARTICLE{DasAdhikari2024-SVG,
+  title     = "Recent advances in spatially variable gene detection in spatial
+               transcriptomics",
+  author    = "Das Adhikari, Sikta and Yang, Jiaxin and Wang, Jianrong and Cui,
+               Yuehua",
+  journal   = "Computational and Structural Biotechnology Journal",
+  publisher = "Elsevier BV",
+  volume    =  23,
+  pages     = "883--891",
+  year      =  2024}
+
+@ARTICLE{Yan2024-SVG,
+  title         = "Categorization of 33 computational methods to detect
+                   spatially variable genes from spatially resolved
+                   transcriptomics data",
+  author        = "Yan, Guanao and Hua, Shuo Harper and Li, Jingyi Jessica",
+  journal       = "arXiv",
+  month         =  may,
+  year          =  2024,
+  archivePrefix = "arXiv",
+  primaryClass  = "q-bio.QM"}
+
+@ARTICLE{Li2023-SVG,
+  title    = "Benchmarking computational methods to identify spatially variable
+              genes and peaks",
+  author   = "Li, Zhijian and Patel, Zain M and Song, Dongyuan and Yan, Guanao
+              and Li, Jingyi Jessica and Pinello, Luca",
+  journal  = "bioRxiv",
+  pages    = "2023.12.02.569717",
+  year     =  2023}
+
+@ARTICLE{Chen2024-SVG,
+  title     = "Evaluating spatially variable gene detection methods for spatial
+               transcriptomics data",
+  author    = "Chen, Carissa and Kim, Hani Jieun and Yang, Pengyi",
+  journal   = "Genome Biology",
+  publisher = "BioMed Central",
+  volume    =  25,
+  number    =  1,
+  pages     =  18,
+  year      =  2024}
+
+@ARTICLE{Song2024-scDesign3,
+  title     = "{scDesign3} generates realistic in silico data for multimodal
+               single-cell and spatial omics",
+  author    = "Song, Dongyuan and Wang, Qingyang and Yan, Guanao and Liu,
+               Tianyang and Sun, Tianyi and Li, Jingyi Jessica",
+  journal   = "Nature Biotechnology",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  42,
+  number    =  2,
+  pages     = "247--252",
+  year      =  2024}
+  
 % crs-gene-sets ================================================================
 
 @article{Aibar2017-AUCell,
