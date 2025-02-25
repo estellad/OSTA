@@ -16,7 +16,7 @@ book:
         - pages/seq-introduction.qmd
         - pages/seq-quality-control.qmd
         - pages/seq-processing.qmd
-        #- pages/seq-deconvolution.qmd
+        - pages/seq-deconvolution.qmd
         #- pages/seq-colocalization.qmd
         - pages/seq-workflow-dlpfc.qmd
         - pages/seq-workflow-visium-crc.qmd
@@ -24,6 +24,7 @@ book:
     - part: "Imaging-based platforms"
       chapters:
         - pages/img-introduction.qmd
+        - pages/img-segmentation.qmd
         - pages/img-quality-control.qmd
         - pages/img-processing.qmd
         - pages/img-neighbors.qmd
