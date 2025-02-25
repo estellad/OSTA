@@ -1,0 +1,142 @@
+# Imputation
+
+
+## Introduction
+
+The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and the 1k-plex CosMx data (Nanostring) of a mouse brain sample. 
+
+## Dependencies
+
+```{r deps, message=FALSE, warning=FALSE}
+library(scater)
+library(harmony)
+library(STexampleData) # TODO: this will need to be replaced by OSTA.data
+library(SpatialExperiment)
+library(SpatialExperimentIO)
+library(DropletUtils)
+library(Matrix)
+```
+
+## Data import
+
+`r BiocStyle::Biocpkg("SpatialExperimentIO")` provides functions to import CosMx, Xenium, and MERSCOPE datasets in Bioconductor, starting from the output provided by the three platforms.
+
+### Xenium
+
+We now load Xenium data:
+
+```{r, message=FALSE, warning=FALSE}
+spe <- Janesick_breastCancer_Xenium_rep1()
+spe$sample_id <- "JanesickBC_Xenium1"
+spe
+```
+
+### Single Cell
+
+We now load the single cell data:
+
+```{r, message=FALSE, warning=FALSE}
+# retrieve dataset, TODO: this will need to be replaced by OSTA.data
+td <- "/Users/amanuky/Downloads/Chromium_HumanBreast_Janesick/"
+
+# read into 'SingleCellExperiment'
+fs <- list.files(td, full.names=TRUE)
+h5 <- grep("h5$", fs, value=TRUE)
+sce <- read10xCounts(h5, col.names=TRUE)
+metadata(sce) <- list()
+sce$sample_id <- "Janesick_Chromium"
+  
+# set gene symbols as feature names
+rownames(sce) <- make.unique(rowData(sce)$Symbol)
+```
+
+## Harmony Integration
+
+Besides physically aligning both datasets, we can integrate them on 
+a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")`.
+
+To this end, we first consolidate the Visium and Xenium data into one object:
+
+```{r obj}
+# convert to single cell
+spe_single <- as(spe, "SingleCellExperiment")
+
+# get common genes
+gs <- intersect(rownames(spe_single), rownames(sce))
+cd <- intersect(names(colData(spe_single)), names(colData(sce)))
+lys <- list(spe_single=spe_single, sce=sce)
+lys <- lapply(lys, \(scRNA) {
+    scRNA <- scRNA[gs,]
+    rowData(scRNA) <- rowData(scRNA)[gs,]
+    colData(scRNA) <- colData(scRNA)[cd]
+    assay(scRNA) <- as(assay(scRNA), "dgCMatrix")
+    return(scRNA)
+})
+
+# combine datasets
+obj <- SingleCellExperiment(assays = list(counts = cbind(assay(lys[[1]]), assay(lys[[2]]))),
+                            colData = rbind(colData(lys[[1]]), colData(lys[[2]])),
+                            rowData = rowData(lys[[1]]))
+obj$col_counts <- colSums(assay(obj))
+```
+
+We now initiate the harmony integration:
+
+```{r int}
+# minimal filtering
+obj <- obj[, obj$col_counts > 0]
+# library size normalization 
+obj <- logNormCounts(obj)
+# principal component analysis
+# (w/o additional feature selection)
+obj <- runPCA(obj)
+# 'harmony' integration
+pcs <- RunHarmony(
+    data_mat=reducedDim(obj, "PCA"), 
+    meta_data=obj$sample_id, 
+    verbose=FALSE)
+reducedDim(obj, "PCA") <- pcs
+# dimensionality reduction
+map <- calculateUMAP(t(pcs))
+reducedDim(obj, "UMAP") <- map
+```
+
+let us now visualize the embedding of both Xenium and chromium cells to assess the mixing
+
+```{r plt-map, fig.width=3.5, fig.height=3}
+plotUMAP(obj, colour_by="sample_id", point_size=0.1) +
+    guides(col=guide_legend(override.aes=list(alpha=1, size=2))) +
+    theme_void() + theme(aspect.ratio=1, legend.key.size=unit(0, "pt"))
+```
+## Imputation
+
+Now that we show there is a correction of batch effects in the PC space. We can transfer counts of single cell data to the Xenium dataset by detecting kNNs of xenium cells in PC space and aggregate missing genes over nearest neighbors.
+
+```{r impute}
+embeddings <- reducedDim(obj, "PCA")
+
+# find kNN across reference and query
+nNeighbors <- 20
+reference_embedding <- embeddings[obj$sample_id == "JanesickBC_Xenium1",]
+query_embedding <- embeddings[obj$sample_id == "Janesick_Chromium",]
+knn <- RANN::nn2(query_embedding, 
+                 reference_embedding, 
+                 k = nNeighbors)
+weights <- Matrix::Matrix(0, 
+                          nrow = nrow(reference_embedding), 
+                          ncol = nrow(knn$nn.idx), 
+                          sparse = TRUE)
+for (n in seq_len(nrow(knn$nn.idx))) {
+  weights[knn$nn.idx[n, ], n] <- 1/nNeighbors
+}
+
+# impute by kNN
+query_counts <- assay(obj)[,obj$sample_id == "Janesick_Chromium"]
+imputed_reference_counts <- query_counts %*% weights
+colnames(imputed_reference_counts) <- rownames(reference_embedding)
+rownames(imputed_reference_counts) <- colnames(reference_embedding)
+```
+
+## Visualization
+
+## References {.unnumbered}
