@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
 # Clustering {#sec-crs-clustering}
 
 ## Preamble
@@ -46,7 +51,7 @@ spe <- readRDS("img-spe_cl.rds")
 ### Non-spatial
 
 As a baseline, we will perform a standard graph-based clustering approach developed for scRNA-seq data, using molecular features (gene expression) only.
-Specifically, we construct a shared nearest neighbor (SNN) graph based on non-spatial PCs (`reducedDim` slot `"PCA_tx"`), and use the Leiden algorithm for community detection.
+Specifically, we construct a shared nearest neighbor (SNN) graph based on non-spatial PCs (`reducedDim` slot `"PCA_tx"`), and use the Leiden algorithm for community detection [@Traag2018-Leiden].
 
 ```{r clu-Leiden}
 # build cellular shared nearest-neighbor (SNN) graph
@@ -82,16 +87,15 @@ table(vis$BayesSpace <- factor(.vis$spatial.cluster))
 
 #### Neighborhood-based
 
-`r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] embeds cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment. 
-Here, the mixing parameter $\lambda\in[0,1]$ (argument `lambda` in `runBanksyPCA()`), controls the spatial component's weight; e.g., **when $\lambda=0$, `BANKSY` reduces to non-spatial clustering**.
+`r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] embeds cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment.
+We have already computed `Banksy` PCs in @sec-crs-dimension-reduction (`reducedDim` slot `PCA_sp`) so that here, we perform SNN graph-based Leiden clustering on said PCs in order to obtain spatially aware cluster assignments:
 
 ```{r clu-Banksy, message=FALSE}
-# perform 'Banksy' clustering
-spe <- clusterBanksy(spe, dimred="PCA_sp", resolution=0.4)
-# reformat cluster assignments
-k <- grep("^clust", names(colData(spe)))
-names(colData(spe))[k] <- "Banksy"
-table(spe$Banksy <- factor(spe$Banksy))
+# perform SNN graph-based clustering on 'Banksy' PCs using
+# same parameters as for 'non-spatial' clustering above
+g <- buildSNNGraph(spe, use.dimred="PCA_sp", type="jaccard", k=20)
+k <- cluster_leiden(g, objective_function="modularity", resolution=0.8)
+table(spe$Banksy <- factor(k$membership))
 ```
 
 #### Encoder-based
@@ -102,7 +106,7 @@ One typical example is `r BiocStyle::Githubpkg("CSOgroup/cellcharter")` [@Varron
 ::: {.callout-note title="Other methods" collapse="true"}
 Several other published methods have also adopted encoder architectures in different ways to perform spatially-aware clustering. 
 `r BiocStyle::Githubpkg("zhanglabtools/STAGATE")` [@Dong2022-STAGATE] uses a graph attention autoencoder to integrate spatial and transcriptional data by modeling spatial neighborhoods as graphs, whereas `r BiocStyle::Githubpkg("Tang-Lab-super/PROST")` [@Liang2024-PROST] employs a self-attention transformer-based encoder to learn spatial patterns by jointly modeling gene expression and spatial coordinates. 
-Graph-based encoder methods, such as `STAGATE`, may be particularly well-suited for imaging-based ST data, as their ability to model spatial neighborhoods as graphs aligns naturally with the continuous and fine-grained tissue spatial organization captured by different imaging platforms.
+Graph-based encoder methods, such as `STAGATE`, may be particularly well-suited for imaging-based ST data, as their ability to model spatial neighborhoods as graphs aligns naturally with the continuous and fine-grained spatial organization of tissues captured through imaging.
 :::
 
 ```{r env, warning=FALSE, eval=FALSE}
@@ -189,11 +193,9 @@ spe$CellCharter <- unlist(py$label_df)
 
 Let's visualize the assignment obtains from non-spatial and spatially aware clustering:
 
-```{r plot-xy-k-joint, message=FALSE, fig.width=10, fig.height=5}
+```{r plot-xy-k-joint, message=FALSE, fig.width=11, fig.height=6}
 #| code-fold: true
-# TODO: 'ggspavis' is being a bit pedantic...
 ks <- c("Label", "Leiden", "Banksy")#, "CellCharter")
-spe$in_tissue <- 1; spe$x_centroid <- spe$y_centroid <- NULL
 lapply(ks, \(.) {
     plt <- plotSpots(spe, annotate=.)
     plt$layers[[1]]$aes_params$stroke <- 0
@@ -205,7 +207,7 @@ lapply(ks, \(.) {
     theme(legend.key.size=unit(0, "lines"), legend.justification="left")
 ```
 
-Especially in large tissues, the above type of plot makes it difficult to spot rare subpopulations, and might cause cells to overlap in regions with high cellular density.
+Especially in large tissues, and when there are many subpopulations, the above type of plot makes it difficult to spot rare subpopulations, and might cause cells to overlap in regions with high cellular density.
 This can be misleading, as we will tend to see only highly abundant subpopulations, or the cells plotted last and on top (i.e., later columns in the object).
 
 To better distinguish between different subpopulations, we can instead generate separate spatial plots with one subpopulation highlighted at a time:
