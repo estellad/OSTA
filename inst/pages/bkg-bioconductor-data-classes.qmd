@@ -33,7 +33,7 @@ These classes extend `SpatialExperiment` and are compatible with `SpatialExperim
 
 ### SpatialFeatureExperiment
 
-`SpatialFeatureExperiment` is available as a [Bioconductor package](https://bioconductor.org/packages/SpatialFeatureExperiment) and described by the authors in their paper [@Moses2023].
+`SpatialFeatureExperiment` is available as a [Bioconductor package](https://bioconductor.org/packages/SpatialFeatureExperiment) and described by the authors in their paper [@Moses2023-Voyager].
 
 
 ### MoleculeExperiment

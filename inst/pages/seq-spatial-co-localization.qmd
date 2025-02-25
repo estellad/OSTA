@@ -9,7 +9,7 @@ For these analyses, we will use a different dataset that provides single-cell sp
 
 ## Load previously saved data
 
-We start by loading the previously saved data object(s) (see @sec-seq-clustering-save-objects).
+We start by loading the previously saved data object(s).
 
 ```{r, message=FALSE, results='hide'}
 library(SpatialExperiment)

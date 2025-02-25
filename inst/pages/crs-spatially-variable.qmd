@@ -53,7 +53,7 @@ library(ggrepel)
 
 ### Spatially aware analysis frameworks
 
-Here, we demonstrate brief examples of how to identify a set of top SVGs using (`r BiocStyle::Biocpkg("nnSVG")` [@Weber2023] and `r BiocStyle::Biocpkg("DESpace")` [@Cai2024]). These methods are available through Bioconductor and can be easily integrated into Bioconductor-based workflows. 
+Here, we demonstrate brief examples of how to identify a set of top SVGs using (`r BiocStyle::Biocpkg("nnSVG")` [@Weber2023-nnSVG] and `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace]). These methods are available through Bioconductor and can be easily integrated into Bioconductor-based workflows. 
 
 #### nnSVG
 
@@ -77,7 +77,6 @@ In this example, we use a small subset of the dataset for faster runtime. We sel
 # sub <- logNormCounts(sub)
 ```
 
-
 ```{r nnSVG, cache=TRUE}
 # # run nnSVG
 # set.seed(123)
@@ -86,7 +85,7 @@ In this example, we use a small subset of the dataset for faster runtime. We sel
 
 ```{r res}
 # # extract gene-level results
-res_nnSVG <- rowData(sub)
+# res_nnSVG <- rowData(sub)
 # # show results
 # head(res_nnSVG, 3)
 # # count significant SVGs (at 5% FDR significance level)
@@ -123,10 +122,7 @@ top_DESpace <- res_DESpace$gene_id[seq_len(7)]
 
 ### Non-spatial analysis frameworks
 
-
 We can also use methods originally developed for bulk and single-cell transcriptomics, such as those for detecting highly variable genes (HVGs) and differentially expressed genes (DEGs), on spatial omics data. Note that HVGs are defined only based on molecular features (i.e., gene expression), and do not incorporate spatial information. In the context of single-cell and spatial transcriptomics, differentially expressed (DE) may refer to differences between groups of samples, or to differences between clusters (e.g., cell types, or spatial domains); below, we consider changes across spatial structures.
-
-
 
 
 #### Highly variable genes (HVGs)
@@ -174,37 +170,37 @@ To visualize the expression levels of selected genes in spatial coordinates on t
 ```{r plt-xy, message=FALSE, fig.width=10, fig.height=7}
 #| code-fold: true
 # selected genes for 4 methods
-method_names <- c("nnSVG", "DESpace", "HVGs", "DEGs")
-gs <- c(top_DESpace, top_hvgs, top_deg)
-# convert ensembl gene id to gene name
-gs <- rowData(spe)$gene_name[match(gs, rowData(spe)$gene_id)]
-gs <- c(top_nnSVG, gs)
-# expression plots for each top gene
-ps <- lapply(gs, \(.) 
-    plotSpots(spe, 
-        annotate=., 
-        assay_name="logcounts", 
-        feature_names="gene_name")
-)
-# seven top genes for each method
-ranges <- split(seq_along(ps), ceiling(seq_along(ps) / 7))
-# wrap plots
-plots <- mapply(\(idx, name) {
-    wrap_plots(ps[idx], nrow = 1) & 
-        plot_annotation(title = name) & 
-        theme(
-            legend.key.width = unit(0.4, "lines"), 
-            legend.key.height = unit(0.8, "lines")
-        ) &
-    scale_color_gradientn(colors = pals::parula())
-}, ranges, method_names, SIMPLIFY = FALSE)
-# to keep titles
-final_plot <- wrap_plots(
-    lapply(seq_along(plots), \(i) 
-        wrap_elements(plots[[i]])), 
-    ncol = 1
-)
-final_plot
+# method_names <- c("nnSVG", "DESpace", "HVGs", "DEGs")
+# gs <- c(top_DESpace, top_hvgs, top_deg)
+# # convert ensembl gene id to gene name
+# gs <- rowData(spe)$gene_name[match(gs, rowData(spe)$gene_id)]
+# gs <- c(top_nnSVG, gs)
+# # expression plots for each top gene
+# ps <- lapply(gs, \(.) 
+#     plotSpots(spe, 
+#         annotate=., 
+#         assay_name="logcounts", 
+#         feature_names="gene_name")
+# )
+# # seven top genes for each method
+# ranges <- split(seq_along(ps), ceiling(seq_along(ps) / 7))
+# # wrap plots
+# plots <- mapply(\(idx, name) {
+#     wrap_plots(ps[idx], nrow = 1) & 
+#         plot_annotation(title = name) & 
+#         theme(
+#             legend.key.width = unit(0.4, "lines"), 
+#             legend.key.height = unit(0.8, "lines")
+#         ) &
+#     scale_color_gradientn(colors = pals::parula())
+# }, ranges, method_names, SIMPLIFY = FALSE)
+# # to keep titles
+# final_plot <- wrap_plots(
+#     lapply(seq_along(plots), \(i) 
+#         wrap_elements(plots[[i]])), 
+#     ncol = 1
+# )
+# final_plot
 ```
 
 
@@ -217,78 +213,70 @@ While all four methods—nnSVG, DESpace, HVGs, and DEGs—identify similar gene 
 ```{r plt-data, message=FALSE}
 #| code-fold: true
 # subset data for the 113 genes nnSVG is based on
-sub_gene <- rowData(sub)$gene_id
-sub_DESpace <- res_DESpace[sub_gene, ] 
-sub_HVG <- as.data.frame(dec[sub_gene, ])
-
-# aggregate DEGs for each spatial domain
-subset_mgs <- lapply(mgs, \(x) x[sub_gene, 1:3] |> as.data.frame())
-sub_DEG <- do.call(cbind, subset_mgs) 
-top_cols <- sub_DEG |> select(ends_with(".Top"))
-sub_DEG$Top <- do.call(pmin, c(top_cols, na.rm = TRUE))
-
-# compute ranks 
-sub_DESpace$rank <- rank(sub_DESpace$FDR, ties.method = "first")
-sub_HVG$rank <- rank(-1 * sub_HVG$bio, ties.method = "first")
-sub_DEG$rank <- rank(sub_DEG$Top, ties.method = "first")
-
-# combine 'rank' column for each method
-res_all <- list(
-    nnSVG = as.data.frame(res_nnSVG),
-    DESpace = sub_DESpace, HVGs = sub_HVG, DEGs = sub_DEG
-)
-rank_all <- do.call(cbind, lapply(res_all, `[[`, "rank"))
-rank_all <- data.frame(gene_id = sub_gene, rank_all)
+# sub_gene <- rowData(sub)$gene_id
+# sub_DESpace <- res_DESpace[sub_gene, ] 
+# sub_HVG <- as.data.frame(dec[sub_gene, ])
+# 
+# # aggregate DEGs for each spatial domain
+# subset_mgs <- lapply(mgs, \(x) x[sub_gene, 1:3] |> as.data.frame())
+# sub_DEG <- do.call(cbind, subset_mgs) 
+# top_cols <- sub_DEG |> select(ends_with(".Top"))
+# sub_DEG$Top <- do.call(pmin, c(top_cols, na.rm = TRUE))
+# 
+# # compute ranks 
+# sub_DESpace$rank <- rank(sub_DESpace$FDR, ties.method = "first")
+# sub_HVG$rank <- rank(-1 * sub_HVG$bio, ties.method = "first")
+# sub_DEG$rank <- rank(sub_DEG$Top, ties.method = "first")
+# 
+# # combine 'rank' column for each method
+# res_all <- list(
+#     nnSVG = as.data.frame(res_nnSVG),
+#     DESpace = sub_DESpace, HVGs = sub_HVG, DEGs = sub_DEG
+# )
+# rank_all <- do.call(cbind, lapply(res_all, `[[`, "rank"))
+# rank_all <- data.frame(gene_id = sub_gene, rank_all)
 ```
 
 ```{r plt-scatter-nnsvg, message=FALSE, fig.width=10, fig.height=7}
 #| code-fold: true
 # known SVGs for this data
-known_genes <- c("MOBP", "SNAP25")
-# convert data structure
-rank_long <- rank_all |>
-    left_join(data.frame(rowData(sub)[, c("gene_id", "gene_name")]), by = "gene_id") |>
-    select(all_of(c("gene_name", method_names))) |>
-    pivot_longer(cols = c(nnSVG, DESpace, HVGs, DEGs), 
-                 names_to = "method", 
-                 values_to = "rank")
-# all pairwise comparisons
-df_pairs <- t(combn(method_names, 2)) |> as.data.frame()
-# function to plot each pairwise comparison
-plot_pairwise_comparison <- function(m1, m2, df) {
-  # filter the data for the two methods being compared
-  df <- df |>
-      filter(method %in% c(m1, m2)) |>
-      pivot_wider(names_from = method, values_from = rank)
-  # compute pearson correlation between methods
-  cor_val <- cor(df[[m1]], df[[m2]], method = "spearman")
-  # plot
-  ggplot(df, aes(x = .data[[m1]], y = .data[[m2]])) +
-      geom_point() + 
-      geom_text_repel(data = df %>% filter(gene_name %in% known_genes), 
-                      aes(label = gene_name), color = "red", size = 3.25, 
-                      nudge_x = 50, nudge_y = 10, box.padding = 0.5) +
-      labs(x = paste(m1, "rank"), y = paste(m2, "rank"),
-           title = paste(m2, "vs.", m1, ": Cor = ", round(cor_val, 2))) +
-      #scale_color_manual(values = c("darkorange", "firebrick3", "deepskyblue2")) +
-      theme_bw() + coord_fixed() + 
-      xlim(c(0, 120)) + ylim(c(0, 120))
-}
-
-# generate and display all pairwise comparison plots
-plots <- lapply(seq_len(nrow(df_pairs)), \(i) {
-    plot_pairwise_comparison(df_pairs[i, 2], df_pairs[i, 1],rank_long)
-})
-
-wrap_plots(plots, ncol = 3)
-```
-
-Alternative visualization:
-
-```{r plt-ggpairs, message=FALSE, fig.width=10, fig.height=8}
-#| code-fold: true
-GGally::ggpairs(rank_all, columns = 2:5) + theme_bw() + 
-    theme(panel.grid = element_blank())
+# known_genes <- c("MOBP", "SNAP25")
+# # convert data structure
+# rank_long <- rank_all |>
+#     left_join(data.frame(rowData(sub)[, c("gene_id", "gene_name")]), by = "gene_id") |>
+#     select(all_of(c("gene_name", method_names))) |>
+#     pivot_longer(cols = c(nnSVG, DESpace, HVGs, DEGs), 
+#                  names_to = "method", 
+#                  values_to = "rank")
+# # all pairwise comparisons
+# df_pairs <- t(combn(method_names, 2)) |> as.data.frame()
+# # function to plot each pairwise comparison
+# plot_pairwise_comparison <- function(m1, m2, df) {
+#   # filter the data for the two methods being compared
+#   df <- df |>
+#       filter(method %in% c(m1, m2)) |>
+#       pivot_wider(names_from = method, values_from = rank)
+#   # compute pearson correlation between methods
+#   cor_val <- cor(df[[m1]], df[[m2]], method = "spearman")
+#   # plot
+#   ggplot(df, aes(x = .data[[m1]], y = .data[[m2]])) +
+#       geom_point() + 
+#       geom_text_repel(data = df %>% filter(gene_name %in% known_genes), 
+#                       aes(label = gene_name), color = "red", size = 3.25, 
+#                       nudge_x = 50, nudge_y = 10, box.padding = 0.5) +
+#       labs(x = paste(m1, "rank"), y = paste(m2, "rank"),
+#            title = paste(m2, "vs.", m1, ": Cor = ", round(cor_val, 2))) +
+#       #scale_color_manual(values = c("darkorange", "firebrick3", "deepskyblue2")) +
+#       theme_bw() + coord_fixed() + 
+#       xlim(c(0, 120)) + ylim(c(0, 120))
+# }
+# 
+# # generate and display all pairwise comparison plots
+# plots <- lapply(seq_len(nrow(df_pairs)), \(i) {
+#     plot_pairwise_comparison(df_pairs[i, 2], df_pairs[i, 1],rank_long)
+# })
+# 
+# wrap_plots(plots, ncol = 3)
 ```
 
 :::
@@ -302,4 +290,3 @@ GGally::ggpairs(rank_all, columns = 2:5) + theme_bw() +
 * https://genomebiology.biomedcentral.com/articles/10.1186/s13059-023-03145-y
 
 ### References {.unnumbered}
-
