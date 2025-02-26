@@ -30,7 +30,7 @@ library(tidyr)
 set.seed(123)
 # load data from previous chapters
 # (post quality control & clustering)
-(spe <- readRDS("seq-spe_clustering.rds"))
+(spe <- readRDS("seq-spe_cl.rds"))
 ```
 
 ## Non-spatial
