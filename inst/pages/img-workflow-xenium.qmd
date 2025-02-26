@@ -9,7 +9,11 @@ editor_options:
 
 ### Introduction
 
-<!-- TODO -->
+In this demo, we will analyze 313-plex Xenium data on human breast cancer tissue
+[@Janesick2023]. Following very basic quality control and preprocessing, we will 
+perform both (non-spatial) unsupervised clustering as well as fully supervised 
+label-transfer based on scRNA-seq reference data; then compare the obtained 
+cluster assignments to those provided by the authors.
 
 ### Dependencies
 
@@ -225,7 +229,7 @@ assay(sce) <- as(assay(sce), "dgCMatrix")
 sce <- logNormCounts(sce)
 # restrict to Xenium targets
 sce <- sce[rowData(sce)$ID %in% rowData(sub)$ID, ]
-# use gene symbols as names
+# set gene symbols as feature names
 rownames(sce) <- rowData(sce)$Symbol
 # perform label transfer at the single cell-level,
 # using pseudo-bulk Chromium profiles as reference
