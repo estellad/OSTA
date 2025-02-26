@@ -85,6 +85,7 @@ the underlying quality control metrics (total counts and detected features):
 
 ```{r plt-ol, fig.width=12, fig.height=4}
 #| code-fold: true
+spe$ol <- ol$discard
 .plt_xy(spe, "sum") +  
     scale_color_viridis_c(
         "# counts", 
@@ -96,7 +97,7 @@ the underlying quality control metrics (total counts and detected features):
         "# features", 
         breaks=range(spe$detected), 
         labels=c("low", "high")) +
-.plt_xy(spe[, order(spe$discard)], "discard") + 
+.plt_xy(spe[, order(spe$ol)], "ol") + 
     scale_color_manual(
         "low-quality",
         labels=c("no", "yes"),
