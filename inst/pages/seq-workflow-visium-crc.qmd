@@ -170,9 +170,7 @@ colData(sce)[names(cd)] <- cd[colnames(sce), ]
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
 # exclude cells deemed to be of low-quality
 sce <- sce[, sce$QCFilter == "Keep"]
-# tabulate subpopulations by disease status
-sce$Group <- gsub("P[0-9]", "", sce$Patient)
-sce$Patient <- gsub("(P[0-9]).*", "\\1", sce$Patient)
+# tabulate subpopulations
 table(sce$Level1)
 ```
 
@@ -185,10 +183,11 @@ xy <- data.frame(spatialCoords(spe))
 .spe <- SpatialRNA(xy, counts(spe))
 # prep reference data (Chromium);
 # subset cells from same patient
-.sce <- sce[, sce$Patient == "P2"]
+.sce <- sce[, grepl("P2", sce$Patient)]
 ids <- factor(.sce$Level1)
 names(ids) <- colnames(.sce)
 ref <- Reference(counts(.sce), ids)
+# run 'RCTD' deconvolution
 res <- create.RCTD(.spe, ref, max_cores=th)
 res <- run.RCTD(res, doublet_mode="full")
 ```
