@@ -1,4 +1,4 @@
-# Workflow: Human DLPFC {#sec-seq-workflow-dlpfc}
+# Workflow: Visium DLPFC {#sec-seq-workflow-dlpfc}
 
 ## Introduction
 
@@ -177,7 +177,7 @@ length(top_hvgs)
 
 ## Spatially-aware feature selection
 
-Alternatively, run [nnSVG](https://bioconductor.org/packages/nnSVG) [@Weber2023] to identify a set of top spatially variable genes (SVGs) instead of HVGs.
+Alternatively, run [nnSVG](https://bioconductor.org/packages/nnSVG) [@Weber2023-nnSVG] to identify a set of top spatially variable genes (SVGs) instead of HVGs.
 
 Here, we run nnSVG using a small subset of the dataset for faster runtime. We select a subset of the data by subsampling on the set of spots and including stringent filtering for low-expressed genes. For a full analysis, we recommend running `nnSVG` on all spots and using default filtering parameters (for Visium data from human brain tissue), which takes around 45 minutes for one Visium slide on a standard laptop using multiple cores.
 

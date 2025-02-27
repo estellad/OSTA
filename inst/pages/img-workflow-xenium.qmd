@@ -3,7 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: inline
 ---
-# Xenium workflow {#sec-img-workflow-xenium}
+# Workflow: Xenium {#sec-img-workflow-xenium}
 
 ## Preamble
 
