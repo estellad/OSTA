@@ -87,7 +87,7 @@ Methods that belong to this category include `r BiocStyle::Biocpkg("DESpace")` [
 They analyze interaction effects between cell types and spatial coordinates [@Yan2024-SVG].
 Examplary methods in R include `r BiocStyle::Biocpkg("CTSV")` [@Yu2022-CTSV], *C-SIDE* (implemented in `r BiocStyle::Githubpkg("dmcable/spacexr")`; [@Cable2022-C-SIDE]), and `r BiocStyle::Githubpkg("shanyu-stat/spVC")` [@Yu2024-spVC].
 
-#### `nnSVG`
+### `nnSVG`
 
 In this example, we use a small subset of the dataset for faster runtime. We select a subset of the data, by subsampling the set of spots and including stringent filtering for lowly expressed genes. 
 [A full analysis with `nnSVG` using all spots for this dataset and default filtering parameters for an individual Visium sample from human brain tissue (available from `r BiocStyle::Biocpkg("spatialLIBD")`) takes around 45 minutes on a standard laptop.]{.aside}
@@ -125,7 +125,7 @@ In this example, we use a small subset of the dataset for faster runtime. We sel
 # top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
 ```
 
-#### `DESpace`
+### `DESpace`
 
 `DESapce` relies on pre-computed spatial domains to summarize the primary spatial structures of the data; see @sec-crs-clustering on clustering.
 
