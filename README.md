@@ -24,13 +24,18 @@ The GitHub Actions workflows are split into two files:
 
 A new public version of the book is deployed if changes are pushed to `devel` branch.
 
-Please send pull requests into `sandbox` branch. This will trigger GitHub Actions to build the book and run checks, but will not deploy a new version of the book. The maintainers will then merge into `devel` to deploy a new version of the book after reviewing and accepting the pull request.
+Please send pull requests into `sandbox` branch (instead of `devel`). This will trigger GitHub Actions to build the book and run checks, but will not deploy a new version of the book. The maintainers will then merge into `devel` to deploy a new version of the book after reviewing and accepting the pull request.
 
 To build a local version of the book, run the following in an R session in the `inst/` directory (after installing all dependencies):
 
 ```
 quarto::quarto_render(cache = TRUE)
 ```
+
+To compile a complete fresh local build, delete all existing build files by deleting the following directories and files: `inst/.quarto/`, `inst/docs/`, `inst/index_cache/`, any files and directories except `.qmd` files and `images/` directory in `inst/pages/` (e.g. directory names ending with `_cache/` or `_files/`, `.md` files, and `.rds` files). You may also need to empty the `BiocFileCache` cache directory if any data files stored in the OSF data repository have changed.
+
+
+## Instructions
 
 In each analysis / method chapter, we aim to include the following:
 - brief background and overview
