@@ -2,7 +2,6 @@ book:
   title: "Orchestrating Spatial Transcriptomics Analysis with Bioconductor"
   chapters:
     - index.qmd
-    - pages/preamble.qmd
     - part: "Introduction"
       chapters:
         - pages/bkg-introduction.qmd
@@ -46,6 +45,7 @@ book:
   appendices:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd
+    - pages/apx-session-info.qmd
   cover-image: assets/cover.png
   favicon: assets/favicon.png
   sidebar: 
