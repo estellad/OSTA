@@ -23,7 +23,7 @@ The chapters are organized into several parts:
 
 The aim of this book is to demonstrate key principles of computational analysis workflows for spatial omics data through interactive examples and discussion, including example R code and datasets. We assume some familiarity with R programming and an understanding of the types of biological questions that single-cell and spatial omics can be used to answer. Previous experience with [Bioconductor](http://bioconductor.org/) is not required.
 
-The book covers both preprocessing and downstream analyses, so the starting point can be raw spatial omics datsets, or those that already spot/cell-level expression matrix and set of spatial coordinates as the main inputs. Preprocessing procedures can vary from platform to platform and we aim to cover here some of the main pipelines for multiple platforms. It can be that other resources a
+The book covers both preprocessing and downstream analyses, so the starting point can be raw spatial omics datsets, or those that already spot/cell-level expression matrix and set of spatial coordinates as the main inputs. Preprocessing procedures can vary from platform to platform and we aim to cover here some of the main pipelines for multiple platforms.
 
 For most analysis steps, multiple methods are available to choose from. In general, we will showcase methods that we have found to work well and are computationally scalable, with a preference for methods available through Bioconductor. However, the book is not intended to provide a comprehensive listing of all available methods.
 
