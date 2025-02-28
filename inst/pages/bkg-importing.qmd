@@ -1,4 +1,4 @@
-# Data import {#sec-bkg-importing}
+# Importing data {#sec-bkg-importing}
 
 ## Flat file structure
 
