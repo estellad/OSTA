@@ -181,7 +181,7 @@ table(sce$Level1)
 ```{r dec, message=FALSE, warning=FALSE}
 xy <- data.frame(spatialCoords(spe))
 .spe <- SpatialRNA(xy, counts(spe))
-.sce <- sce[, sce$Patient == "P1"]
+.sce <- sce[, sce$Patient == "P2"]
 ids <- factor(.sce$Level1)
 names(ids) <- colnames(.sce)
 ref <- Reference(counts(.sce), ids)
