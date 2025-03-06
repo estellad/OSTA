@@ -1,10 +1,13 @@
 # Datasets {#sec-bkg-datasets}
 
-Throughout this book, we will rely on a set of publicly available datasets that cover different sequencing- and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics) and CosMx (NanoString).
+## Introduction
+
+Throughout this book, we will rely on a set of publicly available datasets that cover different sequencing- and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics), and CosMx (NanoString).
+
 
 ## Distribution
 
-These have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` package. For convenience, we have implemented `OSTA.data` to:
+These datasets have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` package. For convenience, we have implemented the `OSTA.data` package to:
 
 - list and retrieve datasets available through our OSF node
 - cache data as a *.zip* archive using `r BiocStyle::Biocpkg("BiocFileCache")`
@@ -23,14 +26,15 @@ library(OSTA.data)
 OSTA.data_list()
 ```
 
+
 ## Description
 
-Below, we briefly summarize the characteristics of each dataset, 
-and note across which parts of the book each dataset is being used.
+Below, we briefly summarize the characteristics of each dataset, and note across which parts of the book each dataset is being used.
 
-**HumanBreast_Janesick**
 
-In the underlying paper, the Xenium data (2 replicates) were accompanied by consecutive slices of Chromium and Visium data. Therefore, these replicates are expected to have nearly identical biological findings. By transferring Chromium cell type labels to spatial technologies, such as Visium(with full transcriptome) and Xenium (at single-cell resolution), we can combine analytical insights from different platforms.
+### `HumanBreast_Janesick`
+
+In the underlying paper, the Xenium data (2 replicates) were accompanied by consecutive slices of Chromium and Visium data. Therefore, these replicates are expected to have nearly identical biological findings. By transferring Chromium cell type labels to spatial technologies, such as Visium (with full transcriptome) and Xenium (at single-cell resolution), we can combine analytical insights from different platforms.
 
 -   @Janesick2023
 -   source: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
@@ -46,9 +50,10 @@ In the underlying paper, the Xenium data (2 replicates) were accompanied by cons
     -   replicate 1: 313 RNA targets x 167,780 cells
     -   replicate 2: 313 RNA targets x 118,752 cells
 
-**HumanColon_Oliveira**
 
-In the underlying paper, there are both normal adjacent tissue (NAT) and colorectal carcinoma (CRC) samples from 5 patients. The VisiumHD data ( P2 CRC) were accompanied by consecutive slices of Chromium, Visium, and Xenium data. Therefore, we can jointly analyze these modalities.
+### `HumanColon_Oliveira`
+
+In the underlying paper, there are both normal adjacent tissue (NAT) and colorectal carcinoma (CRC) samples from 5 patients. The Visium HD data (P2 CRC) were accompanied by consecutive slices of Chromium, Visium, and Xenium data. Therefore, we can jointly analyze these modalities.
 
 - @Oliveira2024
 - source: [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression/dataset-human-crc)
@@ -68,7 +73,8 @@ In the underlying paper, there are both normal adjacent tissue (NAT) and colorec
   - **Xenium**
     - 422 RNA targets x 340,837 cells
 
-**CosMx1k_MouseBrain1/2**
+
+### `CosMx1k_MouseBrain1/2`
 
 There are two sections from the CosMx mouse brain sample, namely "coronal hemisphere" (sample 1) and "coronal hippocampus and cortex" (sample 2).
 
@@ -77,11 +83,15 @@ There are two sections from the CosMx mouse brain sample, namely "coronal hemisp
   - 48,556 cells (coronal hemisphere)
   - 38,996 cells (coronal hippocampus and cortex)
 
-**CosMx6k_HumanBrain**
+
+### `CosMx6k_HumanBrain`
 
 The CosMx human prefrontal cortex sample has a larger gene panel of \~6,000 RNA targets.
 
 - source: [NanoString](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-frontal-cortex-ffpe-dataset/)
 - 6,278 RNA targets x 188,686 cells
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}
