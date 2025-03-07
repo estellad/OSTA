@@ -100,7 +100,6 @@ Suggests:
     xml2
 Remotes:
     drisso/SpaceTrooper@devel_spatialBook,
-    estellad/SpatialExperimentIO,
     estellad/OSTA.data,
     dmcable/spacexr
 Encoding: UTF-8
