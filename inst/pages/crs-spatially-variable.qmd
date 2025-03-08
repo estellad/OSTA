@@ -30,7 +30,7 @@ library(tidyr)
 set.seed(123)
 # load data from previous chapters
 # (post quality control & clustering)
-(spe <- readRDS("seq-spe_clustering.rds"))
+(spe <- readRDS("seq-spe_cl.rds"))
 ```
 
 ## Non-spatial
@@ -69,14 +69,14 @@ Here, we demonstrate brief examples of how to identify a set of top SVGs using (
 ### Spatially-variable genes (SVGs) {#sec-crs-svg}
 
 SVGs are usually identified integrating gene expression measurements with spatial coordinates, either with or without predefined spatial domains.
-SVGs approaches can be broadly categorized into three types: overall SVGs, spatial domain-specific SVGs, and cell type-specific SVGs [@Yan2024]. 
+SVGs approaches can be broadly categorized into three types: overall SVGs, spatial domain-specific SVGs, and cell type-specific SVGs [@Yan2024-SVG]. 
 
 The detection of **overall SVGs** is sometimes used as a feature selection step for further downstream analyses such as spatially-aware clustering (see @sec-crs-clustering).
 Several methods have been proposed for detecting overall SVGs; below, we report some few notable examples:
 
 - `r BiocStyle::Biocpkg("spatialDE")` [@Svensson2018-spatialDE] and `r BiocStyle::Biocpkg("nnSVG")` [@Weber2023-nnSVG], which are based on a Gaussian process model;
 - [Moran's I](https://en.wikipedia.org/wiki/Moran%27s_I) and [Geary's C](https://en.wikipedia.org/wiki/Geary%27s_C), which ranks genes according to their observed spatial autocorrelation (see @sec-crs-spat-stat); and,
-- `r BiocStyle::Githubpkg("xzhoulab/SPARK")` [@Sun2020-SPARK,@Zhu2021-SPARK-X], which uses a non-parametric test of the covariance matrices of the spatial expression data.
+- `r BiocStyle::Githubpkg("xzhoulab/SPARK")` [@Sun2020-SPARK; @Zhu2021-SPARK-X], which uses a non-parametric test of the covariance matrices of the spatial expression data.
 
 **Spatial domain-specific** SVGs target changes in gene expression between spatial domains, which are used to summarize the whole spatial information.
 Genes displaying expression changes across spatial clusters indicate SVGs. 
@@ -84,10 +84,10 @@ Spatial domains can be predefined based on morphology knowledge, or identified t
 Methods that belong to this category include `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace] in R, and `r BiocStyle::Githubpkg("jianhuupenn/SpaGCN")` [@Hu2021-SpaGCN] in Python.
 
 **Cell type-specific** SVG methods leverage external cell type annotations to identify SVGs within cell types. 
-They analyze interaction effects between cell types and spatial coordinates [@Yan2024].
+They analyze interaction effects between cell types and spatial coordinates [@Yan2024-SVG].
 Examplary methods in R include `r BiocStyle::Biocpkg("CTSV")` [@Yu2022-CTSV], *C-SIDE* (implemented in `r BiocStyle::Githubpkg("dmcable/spacexr")`; [@Cable2022-C-SIDE]), and `r BiocStyle::Githubpkg("shanyu-stat/spVC")` [@Yu2024-spVC].
 
-#### `nnSVG`
+### `nnSVG`
 
 In this example, we use a small subset of the dataset for faster runtime. We select a subset of the data, by subsampling the set of spots and including stringent filtering for lowly expressed genes. 
 [A full analysis with `nnSVG` using all spots for this dataset and default filtering parameters for an individual Visium sample from human brain tissue (available from `r BiocStyle::Biocpkg("spatialLIBD")`) takes around 45 minutes on a standard laptop.]{.aside}
@@ -125,7 +125,7 @@ In this example, we use a small subset of the dataset for faster runtime. We sel
 # top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
 ```
 
-#### `DESpace`
+### `DESpace`
 
 `DESapce` relies on pre-computed spatial domains to summarize the primary spatial structures of the data; see @sec-crs-clustering on clustering.
 

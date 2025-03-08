@@ -2,7 +2,6 @@ book:
   title: "Orchestrating Spatial Transcriptomics Analysis with Bioconductor"
   chapters:
     - index.qmd
-    - pages/preamble.qmd
     - part: "Introduction"
       chapters:
         - pages/bkg-introduction.qmd
@@ -14,13 +13,10 @@ book:
     - part: "Sequencing-based platforms"
       chapters:
         - pages/seq-introduction.qmd
-        - pages/seq-data-import-structure.qmd
         - pages/seq-quality-control.qmd
-        - pages/seq-norm-feat-dimred.qmd
-        - pages/seq-clustering.qmd
-        - pages/seq-marker-genes.qmd
+        - pages/seq-processing.qmd
         - pages/seq-deconvolution.qmd
-        - pages/seq-spatial-co-localization.qmd
+        #- pages/seq-colocalization.qmd
         - pages/seq-workflow-dlpfc.qmd
         - pages/seq-workflow-visium-crc.qmd
         - pages/seq-workflow-spatialibd.qmd
@@ -29,8 +25,7 @@ book:
         - pages/img-introduction.qmd
         - pages/img-segmentation.qmd
         - pages/img-quality-control.qmd
-        - pages/img-dimensionality-reduction.qmd
-        - pages/img-clustering.qmd
+        - pages/img-processing.qmd
         - pages/img-neighbors.qmd
         - pages/img-cell-comm.qmd
         - pages/img-imputation.qmd
@@ -40,6 +35,8 @@ book:
     - part: "Technology-agnostic/cross-platform/downstream analyses"
       chapters:
         - pages/crs-introduction.qmd
+        - pages/crs-dimension-reduction.qmd
+        - pages/crs-clustering.qmd
         - pages/crs-spatially-variable.qmd
         - pages/crs-signatures.qmd
         - pages/crs-spat-stat.qmd
@@ -49,6 +46,7 @@ book:
   appendices:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd
+    - pages/apx-session-info.qmd
   cover-image: assets/cover.png
   favicon: assets/favicon.png
   sidebar: 
