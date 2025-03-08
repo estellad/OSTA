@@ -10,11 +10,12 @@ The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a
 ```{r deps, message=FALSE, warning=FALSE}
 library(scater)
 library(harmony)
-library(STexampleData) # TODO: this will need to be replaced by OSTA.data
+library(OSTA.data)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
 library(DropletUtils)
 library(Matrix)
+library(RANN)
 ```
 
 ## Data import
@@ -26,7 +27,11 @@ library(Matrix)
 We now load Xenium data:
 
 ```{r, message=FALSE, warning=FALSE}
-spe <- Janesick_breastCancer_Xenium_rep1()
+id <- "Xenium_HumanBreast1_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+spe <- readXeniumSXE(td)
 spe$sample_id <- "JanesickBC_Xenium1"
 spe
 ```
@@ -36,16 +41,16 @@ spe
 We now load the single cell data:
 
 ```{r, message=FALSE, warning=FALSE}
-# retrieve dataset, TODO: this will need to be replaced by OSTA.data
-td <- "/Users/amanuky/Downloads/Chromium_HumanBreast_Janesick/"
-
-# read into 'SingleCellExperiment'
-fs <- list.files(td, full.names=TRUE)
-h5 <- grep("h5$", fs, value=TRUE)
+id <- "Chromium_HumanBreast_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+h5 <- file.path(td, "filtered_feature_bc_matrix.h5")
 sce <- read10xCounts(h5, col.names=TRUE)
 metadata(sce) <- list()
 sce$sample_id <- "Janesick_Chromium"
-  
+sce
+
 # set gene symbols as feature names
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
 ```
