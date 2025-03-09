@@ -7,6 +7,7 @@ The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a
 ## Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
+library(scran)
 library(scater)
 library(harmony)
 library(OSTA.data)
@@ -14,7 +15,10 @@ library(SpatialExperiment)
 library(SpatialExperimentIO)
 library(DropletUtils)
 library(Matrix)
+library(data.table)
 library(RANN)
+library(igraph)
+library(patchwork)
 ```
 
 ## Data import
@@ -61,6 +65,25 @@ fs <- list.files(td, full.names=TRUE)
 csv <- grep("csv$", fs, value=TRUE)
 cd <- read.csv(csv, row.names=1)
 colData(sce)[names(cd)] <- cd[colnames(sce), ]
+```
+## scRNA Marker Analysis
+
+```{r markers}
+# # normalize
+# sce <- logNormCounts(sce)
+# 
+# # test for marker genes
+# colLabels(sce) <- sce$Annotation
+# markers <- findMarkers(sce, test="wilcox", direction="up")
+markers <- readRDS("../../../PrincipalSTA-supp/markers_imputation.rds")
+top.markers <- mapply(function(tbl,nm){
+  cur.tbl <- tbl[1:20,c("p.value", "FDR", "summary.AUC")]
+  data.frame(cur.tbl, 
+             celltype = nm, 
+             genes = rownames(cur.tbl),
+             row.names = NULL)
+}, tbl = markers, nm = names(markers), SIMPLIFY = FALSE)
+top.markers <- do.call("rbind", top.markers)
 ```
 
 ## Harmony Integration
@@ -143,24 +166,82 @@ embeddings <- reducedDim(obj, "PCA")
 nNeighbors <- 20
 reference_embedding <- embeddings[obj$sample_id == "JanesickBC_Xenium1",]
 query_embedding <- embeddings[obj$sample_id == "Janesick_Chromium",]
-knn <- RANN::nn2(query_embedding, 
-                 reference_embedding, 
+knn <- RANN::nn2(query_embedding,
+                 reference_embedding,
                  k = nNeighbors)
-weights <- Matrix::Matrix(0, 
-                          nrow = nrow(reference_embedding), 
-                          ncol = nrow(knn$nn.idx), 
-                          sparse = TRUE)
-for (n in seq_len(nrow(knn$nn.idx))) {
-  weights[knn$nn.idx[n, ], n] <- 1/nNeighbors
-}
+# knn <- readRDS("../../../PrincipalSTA-supp/knn.rds")
+
+# create weight matrix
+# nn_graph <- knn$nn.idx
+# nnedges <- data.table::melt(data.table::data.table(id = 1:nrow(nn_graph), nn_graph), id.vars = "id")
+# nnedges <- as.vector(t(as.matrix(nnedges[,c("id", "value")])))
+# weights <- igraph::make_empty_graph(n = nrow(nn_graph)) %>% 
+#   add_edges(nn_graph) %>% 
+#   as_adjacency_matrix()
+# weights <- weights[,1:nrow(query_embedding)]
+# weights <- weights * 1/nNeighbors
+
+# create weight matrix alternative
+# weights <- Matrix::Matrix(0, 
+#                           nrow = nrow(reference_embedding), 
+#                           ncol = nrow(knn$nn.idx), 
+#                           sparse = TRUE)
+# for (n in seq_len(nrow(knn$nn.idx))) {
+#   print(n)
+#   weights[knn$nn.idx[n, ], n] <- 1/nNeighbors
+# }
+# weights <- t(weights)
+# weights <- weights[,1:nrow(query_embedding)]
+weights <- readRDS("../../../PrincipalSTA-supp/weights.rds")
 
 # impute by kNN
-query_counts <- assay(obj)[,obj$sample_id == "Janesick_Chromium"]
-imputed_reference_counts <- query_counts %*% weights
+query_counts <- assay(sce)[unique(top.markers$genes),colnames(obj)[obj$sample_id == "Janesick_Chromium"]]
+imputed_reference_counts <- query_counts %*% t(weights)
 colnames(imputed_reference_counts) <- rownames(reference_embedding)
-rownames(imputed_reference_counts) <- colnames(reference_embedding)
 ```
 
 ## Visualization
+
+Create the imputed reference counts
+
+```{r create_new_counts}
+spe_imputed <- spe[,colnames(obj)[obj$sample_id == "JanesickBC_Xenium1"]]
+altExp(spe_imputed, "Imputed") <- SummarizedExperiment(assays = list(counts = imputed_reference_counts))
+spe_imputed.tmp <- swapAltExp(spe_imputed, name="Imputed")
+spe_imputed_new <- SpatialExperiment(list(counts = assay(spe_imputed.tmp, "counts")), 
+                                 colData = colData(spe_imputed),
+                                 spatialCoords = spatialCoords(spe_imputed), 
+                                 imgData = imgData(spe_imputed))
+```
+
+We can now compare transfered counts with the original counts. Lets start with ACTA2 which is included in both datasets.
+
+```{r vis-imputed}
+vis.data <- data.frame(spatialCoords(spe_imputed),
+                       ACTA2_new = assay(spe_imputed_new, "counts")["ACTA2",],
+                       ACTA2 = assay(spe_imputed, "counts")["ACTA2",])
+g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2)) + 
+  geom_point(size = 1) +
+  scale_color_gradient2(low="grey", high="red", space ="Lab")
+g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2_new)) + 
+  geom_point(size = 1) +
+  scale_color_gradient2(low="grey", high="red", space ="Lab")
+g1 | g2
+```
+
+Now lets select a gene that is not available in the Xenium panel. Here, KRT17 is again a marker of ACTA2 myoepithelial cells that together with ACTA2
+
+```{r vis-imputed}
+vis.data <- data.frame(spatialCoords(spe_imputed),
+                       ACTA2 = assay(spe_imputed, "counts")["ACTA2",],
+                       KRT17 = assay(spe_imputed_new, "counts")["KRT17",])
+g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2)) + 
+  geom_point(size = 1) +
+  scale_color_gradient2(low="grey", high="red", space ="Lab")
+g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = KRT17)) + 
+  geom_point(size = 1) +
+  scale_color_gradient2(low="grey", high="red", space ="Lab")
+g1 | g2
+```
 
 ## References {.unnumbered}
