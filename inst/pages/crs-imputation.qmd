@@ -1,6 +1,5 @@
 # Imputation
 
-
 ## Introduction
 
 The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and the 1k-plex CosMx data (Nanostring) of a mouse brain sample. 
