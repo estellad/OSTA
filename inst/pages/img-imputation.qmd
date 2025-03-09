@@ -53,6 +53,15 @@ sce
 
 # set gene symbols as feature names
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
+
+# count the number of reads per cell
+sce$Count <- colSums(assay(sce))
+
+# retrieve cell type labels
+fs <- list.files(td, full.names=TRUE)
+csv <- grep("csv$", fs, value=TRUE)
+cd <- read.csv(csv, row.names=1)
+colData(sce)[names(cd)] <- cd[colnames(sce), ]
 ```
 
 ## Harmony Integration
@@ -89,7 +98,7 @@ We now initiate the harmony integration:
 
 ```{r int}
 # minimal filtering
-obj <- obj[, obj$col_counts > 0]
+obj <- obj[, obj$col_counts > 20]
 # library size normalization 
 obj <- logNormCounts(obj)
 # principal component analysis
@@ -113,6 +122,17 @@ plotUMAP(obj, colour_by="sample_id", point_size=0.1) +
     guides(col=guide_legend(override.aes=list(alpha=1, size=2))) +
     theme_void() + theme(aspect.ratio=1, legend.key.size=unit(0, "pt"))
 ```
+We can also check if annotations of the chromium cells are associated with the embedding of cells when the embedding was trained jointly on Xenium and chromium cells.
+
+```{r plt-map-subset, fig.width=3.5, fig.height=3}
+obj_subset <- obj[,obj$sample_id == "Janesick_Chromium"]
+annotations <- setNames(sce$Annotation, colnames(sce))
+obj_subset$Annotation <- annotations[colnames(obj_subset)]
+plotUMAP(obj_subset, colour_by="Annotation", point_size=0.1) +
+    guides(col=guide_legend(override.aes=list(alpha=1, size=2))) +
+    theme_void() + theme(aspect.ratio=1, legend.key.size=unit(0, "pt"))
+```
+
 ## Imputation
 
 Now that we show there is a correction of batch effects in the PC space. We can transfer counts of single cell data to the Xenium dataset by detecting kNNs of xenium cells in PC space and aggregate missing genes over nearest neighbors.
