@@ -328,10 +328,8 @@ gs <- rowData(sce)$Symbol
 rownames(sce) <- make.unique(gs)
 # exclude cells deemed to be of low-quality
 sce <- sce[, sce$QCFilter == "Keep"]
-# subsets cells from patient 2
-sce$Group <- gsub("P[0-9]", "", sce$Patient)
-sce$Patient <- gsub("(P[0-9]).*", "\\1", sce$Patient)
-sce <- sce[, sce$Patient == "P2"]
+# subset cells from same patient
+sce <- sce[, grepl("P2", sce$Patient)]
 sce
 ```
 
@@ -434,7 +432,12 @@ We also assume there are at most two cell types in a 16 µm bin as in 8 µm,
 and thus we would expect a smaller proportion of singlets.
 
 ```{r RCDT, message=FALSE, warning=FALSE, results="hide"}
-obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=5)
+# downsample to at most 4,000 cells per cluster
+# (this is done only to keep runtime/memory low)
+cs <- split(seq_len(ncol(sce)), sce$Level1)
+cs <- lapply(cs, \(.) sample(., min(length(.), 4e3)))
+ncol(.sce <- sce[, unlist(cs)])
+obj <- createRctd(.vhd16, .sce, cell_type_col="Level1", max_cores=5)
 (res <- runRctd(obj, rctd_mode="doublet"))
 ```
 
