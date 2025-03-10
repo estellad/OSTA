@@ -101,7 +101,7 @@ Suggests:
 Remotes:
     drisso/SpaceTrooper@devel_spatialBook,
     estellad/OSTA.data,
-    dmcable/spacexr
+    ggrajeda/spacexr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
