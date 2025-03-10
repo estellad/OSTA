@@ -150,8 +150,8 @@ dim(sce)
 ## `RCTD`
 
 Next, we perform deconvolution with `r BiocStyle::Githubpkg("dmcable/spacexr")` (f.k.a. RCTD)[@Cable2022-RCTD].
-[Note that RCTD can also be adapted to VisiumHD data with `doublet_mode="doublet"`, as demonstrated by [@Oliveira2024] and @sec-seq-workflow-visiumhd.]{.aside}
-By default, `run.RCTD()`'s `doublet_mode="doublet"`, specifies at most two subpopulations coexist in a data unit, such as a "spot"; here, we set `doublet_mode="full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
+[Note that RCTD can also be adapted to VisiumHD data with `rctd_mode="doublet"`, as demonstrated by [@Oliveira2024] and @sec-seq-workflow-visiumhd.]{.aside}
+By default, `runRctd()`'s `rctd_mode="doublet"`, specifies at most two subpopulations coexist in a data unit, such as a "spot"; here, we set `rctd_mode="full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
 ```{r dec, message=FALSE, warning=FALSE}
 obj <- createRctd(vis, sce, cell_type_col="Annogrp", max_cores=10)
