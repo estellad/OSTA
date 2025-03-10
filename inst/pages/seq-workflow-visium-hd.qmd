@@ -433,8 +433,8 @@ We will visualize the same subset for both bin sizes in any downstream analyses.
 We also assume there are at most two cell types in a 16 µm bin as in 8 µm, 
 and thus we would expect a smaller proportion of singlets.
 
-```{r RCDT, message=FALSE, warning=FALSE, results="hide", cache=TRUE}
-obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=10)
+```{r RCDT, message=FALSE, warning=FALSE, results="hide"}
+obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=5)
 (res <- runRctd(obj, rctd_mode="doublet"))
 ```
 
