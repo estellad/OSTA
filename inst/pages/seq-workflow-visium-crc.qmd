@@ -180,13 +180,12 @@ obj <- createRctd(spe, .sce, cell_type_col="Level1", max_cores=10)
 (res <- runRctd(obj, rctd_mode="full"))
 ```
 
-Weights inferred by `RCTD` correspond to proportions of cell types, such that
-they sum to 1 for a given observation (expect for rejected ones, which sum to 0):
+Weights inferred by `RCDT` should be normalized such that proportions of cell types sum to 1 in each spot:
 
 ```{r dec-res}
-# counts rejected observations
-ws <- assay(res, "weights")
-table(colSums(ws) == 0)
+# scale weights such that they sum to 1
+ws <- assay(res)
+ws <- sweep(ws, 2, colSums(ws), `/`)
 # add proportion estimates as metadata
 ws <- data.frame(t(as.matrix(ws)))
 colData(spe)[names(ws)] <- ws[colnames(spe), ]
