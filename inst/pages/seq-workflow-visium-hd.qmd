@@ -1,9 +1,5 @@
 # Workflow: Visium HD {#sec-seq-workflow-visium-hd}
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
-```
-
 ## Introduction
 
 Visium HD is a next-generation spatial transcriptomics technology developed by 
@@ -291,6 +287,18 @@ pheatmap(
     cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
+Or, we can visualize the bin-wise expression of selected markers in space:
+
+```{r plt-mgs-xy, fig.width=10, fig.height=3, message=FALSE}
+#| code-fold: true
+gs <- c("MMP2", "PIGR", "IGHG1")
+ps <- lapply(gs, \(.) plotSpots(.vhd16, annotate=., assay_name="logcounts"))
+wrap_plots(ps, nrow=1) & theme(
+    legend.key.width=unit(0.5, "lines"),
+    legend.key.height=unit(1, "lines")) &
+    scale_color_gradientn(colors=rev(hcl.colors(9, "Rocket")))
+```
+
 ## Deconvolution
 
 ### Load single-cell reference
@@ -327,7 +335,7 @@ sce <- sce[, sce$Patient == "P2"]
 sce
 ```
 
-::: {.callout-note title="Single cell reference annotation level mapping" collapse="true"}
+::: {.callout-note title="Single-cell reference annotation mapping" collapse="true"}
 
 We can visualize the mapping between low- and high-res. annotations 
 in the single-cell reference data with a contingency table:
@@ -359,34 +367,11 @@ setdiff(vhd8$DeconLabel1, sce$Level2)
 setdiff(vhd8$DeconLabel2, sce$Level2)
 ```
 
-Below, these extra classes in the Visium HD 8 μm bin annotations will be merged 
-into `"Fibroblast"`, `"Myeloid"`, `"Prolif. Immune"`, `"B cells"` and `"Tumor"`, 
-respectively, in order to generate a simplified lower-res. annotation.
+Below, these extra classes in the Visium HD 8 μm bin annotations will be ignored.
 
 :::
 
 ### Simplify 8 µm annotations
-
-```{r sc-mapping-vhd8-lab1}
-df <- data.frame(prop.table(table(sce$Level1, sce$Level2), 2))
-colnames(df) <- c("Level1", "Level2", "Freq")
-df <- df[df$Freq > 0.4, ]
-df <- df[order(df$Level2),]
-df <- df[df$Level2 != "Proliferating Immune II", names(df) != "Freq"]
-df_map <- data.frame(rbind(apply(df, 2, as.character), 
-                           c("Fibroblast", "Proliferating Fibroblast"),
-                           c("Myeloid", "Proliferating Macrophages"),
-                           c("Myeloid", "cDC I"),
-                           c("Tumor", "Tumor IV"),
-                           c("Fibroblast", "Vascular Fibroblast"),
-                           c("B cells", "Memory B"),
-                           c("Prolif. Immune", "NK"),
-                           c("Prolif. Immune", "Proliferating Immune II")))
-
-vhd8$deconlab1level1 <- df_map$Level1[match(vhd8$DeconLabel1, df_map$Level2)]
-vhd8$deconlab2level1 <- df_map$Level1[match(vhd8$DeconLabel2, df_map$Level2)]
-table(vhd8$deconlab1level1)
-```
 
 We can merge the provided deconvolution annotation `"DeconLabel1"` 
 (most likely cell type for singlets, most dominant type for doublets) 
@@ -448,7 +433,7 @@ We will visualize the same subset for both bin sizes in any downstream analyses.
 We also assume there are at most two cell types in a 16 µm bin as in 8 µm, 
 and thus we would expect a smaller proportion of singlets.
 
-```{r RCDT, message=FALSE, warning=FALSE, results="hide"}
+```{r RCDT, message=FALSE, warning=FALSE, results="hide", cache=TRUE}
 obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=10)
 (res <- runRctd(obj, rctd_mode="doublet"))
 ```
@@ -456,7 +441,7 @@ obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=10)
 Weights inferred by `RCTD` correspond to proportions of cell types, such that
 they sum to 1 for a given observation (expect for rejected ones, which sum to 0):
 
-```{r dec-res, warning=FALSE, message=FALSE}
+```{r dec-res}
 # counts rejected observations
 ws <- assay(res, "weights")
 table(colSums(ws) == 0)
@@ -467,21 +452,21 @@ colData(.vhd16)[names(ws)] <- ws[colnames(.vhd16), ]
 
 Next, we can spatially visualize the deconvolution proportions estimates:
 
-```{r rctd-vis, message=FALSE, fig.width=9, fig.height=4}
+```{r plt-dec-est, message=FALSE, fig.width=9, fig.height=4}
 #| code-fold: true
 lapply(names(ws), \(.) 
     plotSpots(.vhd16, annotate=., point_size=0.1)) |>
     wrap_plots(nrow=2, guides="collect") & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
-    scale_color_gradientn(colors=pals::jet())
+    scale_color_gradientn(colors=rev(hcl.colors(9, "Rocket")))
 ```
 
 We may also obtain the majority vote class for 16 µm bins:
 [This type of analysis procedure is underlying 
 the annotations provided by the authors.]{.aside}
 
-```{r rctd-majvote, message=FALSE}
+```{r dec-lab, message=FALSE}
 # derive majority vote labels
 ids <- names(ws)[apply(ws, 1, which.max)]
 ids <- gsub("\\.([A-z])", " \\1", ids)
@@ -494,7 +479,7 @@ table(.vhd16$.DeconLabel1 <- factor(ids[idx]))
 We can also check the proportional frequency difference 
 between 8 and 16 µm bins in our region of interest:
 
-```{r dens-decon-ct-diff, fig.width=5, fig.height=2.5}
+```{r dec-816, fig.width=5, fig.height=2.5}
 #| code-fold: true
 n8 <- table(.vhd8$.DeconLabel1)
 n16 <- table(.vhd16$.DeconLabel1)
@@ -515,11 +500,11 @@ which is expected given the difference in bin size.
 
 Let's visualize deconvolution result for 8 and 16 µm bins in the zoomed area:
 
-```{r plt-vhd, fig.width=7.5, fig.height=3, message=FALSE}
+```{r plt-dec-lab, fig.width=8, fig.height=3, message=FALSE}
 #| code-fold: true
-plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8) + ggtitle("8 µm") + 
+plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8) + ggtitle("8 µm") + plot_spacer() +
 plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6) + ggtitle("16 µm") +
-plot_layout(nrow=1, guides="collect") &
+plot_layout(nrow=1, guides="collect", widths=c(1, 0.05, 1)) &
   guides(col=guide_legend(override.aes=list(size=2))) &
   scale_fill_manual(values=unname(pals::trubetskoy())) & 
   facet_null() & theme(
@@ -533,19 +518,21 @@ plot_layout(nrow=1, guides="collect") &
 
 We can visualize the results spatially:
 
-```{r concordance-spatial, fig.width=8, fig.height=3.6}
+```{r plt-dec-clu-xy, fig.width=8, fig.height=3}
 #| code-fold: true
 plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, 
-    point_size=1.6, pal=unname(pals::kelly())) +
+    point_size=1.6, pal=unname(pals::kelly())) + 
+    plot_spacer() +
 plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, 
     point_size=1.6, pal=unname(pals::trubetskoy())) +
-    plot_layout(nrow=1) & facet_null() &
+plot_layout(nrow=1, 
+    widths=c(1, 0.05, 1)) & facet_null() &
     theme(legend.key.size=unit(0, "lines"))
 ```
 
 Their concordance can be visualized with a heatmap:
 
-```{r concordance-heatmap, fig.width=2.5, fig.height=3}
+```{r plt-dec-clu-hm, fig.width=2.5, fig.height=3}
 #| code-fold: true
 fq <- prop.table(table(.vhd16$Banksy, .vhd16$.DeconLabel1), 2)
 pheatmap(fq, cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
@@ -600,7 +587,9 @@ n_tum <- table(.vhd16$.DeconLabel1)["Tumor"]
 n_fib <- table(.vhd16$.DeconLabel1)["Fibroblast"]
 fd$p <- ifelse(fd$target == "Tumor", fd$n/n_tum, fd$n/n_fib)
 ggplot(fd, aes(x=CT, y=n, fill=target)) + 
+    labs(y="# cells within 200px") +
 ggplot(fd, aes(x=CT, y=p, fill=target)) + 
+    labs(y="relative abundance") +
 plot_layout(nrow=1, guides="collect") & 
     geom_boxplot(key_glyph="point") & 
     scale_fill_manual(values=c("dodgerblue", "tomato")) & 
