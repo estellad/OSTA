@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and the 1k-plex CosMx data (Nanostring) of a mouse brain sample. 
+As was previously discussed, Image-based spatial transcriptomics assays can resolve 100s to 1000s features. However, non-spatially resolved single cell assays are still able to capture transcripts across 10000 gene features. To allow estimating the expression of genes that may not be available in an Image-based ST assay, we integrate these spatially resolved assays with scRNA datasets using common genes/features, and predict the missing gene features using nearest neighbor graphs in the joint embedding spaces of scRNA and spatial assays. 
 
 ## Dependencies
 
@@ -23,11 +23,11 @@ library(patchwork)
 
 ## Data import
 
-`r BiocStyle::Biocpkg("SpatialExperimentIO")` provides functions to import CosMx, Xenium, and MERSCOPE datasets in Bioconductor, starting from the output provided by the three platforms.
+The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section and the Chromium Single Cell Gene Expression Flex applied to FFPE tissues (scFFPE-Seq) assay with around 18000 gene features [@Janesick2023].
 
 ### Xenium
 
-We now load Xenium data:
+We first load the Xenium dataset.
 
 ```{r, message=FALSE, warning=FALSE}
 id <- "Xenium_HumanBreast1_Janesick"
@@ -41,7 +41,7 @@ spe
 
 ### Single Cell
 
-We now load the single cell data:
+We now load the single cell FFPE RNA-Seq assay. To streamline the demonstration, we consolidate some of the cell type annotations provided by 10x Genomics (i.e. `Annotation`) into the scRNA assay. The single cell assay has 18082 features, some of which markers of the cell types available in the data but most of these markers are not available in the Xenium assay. 
 
 ```{r, message=FALSE, warning=FALSE}
 id <- "Chromium_HumanBreast_Janesick"
@@ -68,14 +68,17 @@ colData(sce)[names(cd)] <- cd[colnames(sce), ]
 ```
 ## scRNA Marker Analysis
 
+Here, we choose a small subset of gene features to transfer to Xenium assay. For that purpose, we run a marker analysis across cell types provided in the `Annotation` column and select top 20 genes from each cell type. 
+
 ```{r markers}
-# # normalize
-# sce <- logNormCounts(sce)
-# 
-# # test for marker genes
-# colLabels(sce) <- sce$Annotation
-# markers <- findMarkers(sce, test="wilcox", direction="up")
-markers <- readRDS("../../../PrincipalSTA-supp/markers_imputation.rds")
+# normalize
+sce <- logNormCounts(sce)
+
+# test for marker genes
+colLabels(sce) <- sce$Annotation
+markers <- findMarkers(sce, test="wilcox", direction="up")
+
+# get top markers per cell type
 top.markers <- mapply(function(tbl,nm){
   cur.tbl <- tbl[1:20,c("p.value", "FDR", "summary.AUC")]
   data.frame(cur.tbl, 
@@ -88,10 +91,9 @@ top.markers <- do.call("rbind", top.markers)
 
 ## Harmony Integration
 
-Besides physically aligning both datasets, we can integrate them on 
-a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")`.
+To accomplish data transfer across cells of either two assays (scRNA and Image-based ST), we first need to find cells that are similar across two datasets. To this end, we use the common genes of both assays and integrate these two subsetted datasets by computationally train a joint embedding space. The objective is to find the nearest scRNA cell neighbors of each Xenium cell in the joint embedding space as these cells will most likely compose of similar profiles as the targeted Xenium cell. 
 
-To this end, we first consolidate the Visium and Xenium data into one object:
+We can integrate them on a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")`. To this end, we first consolidate the scRNA and Xenium data into one object:
 
 ```{r obj}
 # convert to single cell
@@ -116,37 +118,42 @@ obj <- SingleCellExperiment(assays = list(counts = cbind(assay(lys[[1]]), assay(
 obj$col_counts <- colSums(assay(obj))
 ```
 
-We now initiate the harmony integration:
+We now filter the low count cells and then initiate the harmony integration.
 
 ```{r int}
 # minimal filtering
 obj <- obj[, obj$col_counts > 20]
+
 # library size normalization 
 obj <- logNormCounts(obj)
+
 # principal component analysis
 # (w/o additional feature selection)
 obj <- runPCA(obj)
+
 # 'harmony' integration
 pcs <- RunHarmony(
     data_mat=reducedDim(obj, "PCA"), 
     meta_data=obj$sample_id, 
     verbose=FALSE)
 reducedDim(obj, "PCA") <- pcs
+
 # dimensionality reduction
 map <- calculateUMAP(t(pcs))
 reducedDim(obj, "UMAP") <- map
 ```
 
-let us now visualize the embedding of both Xenium and chromium cells to assess the mixing
+let us now visualize the embedding of both Xenium and scRNA cells to assess the mixing of observations from both datasets.
 
-```{r plt-map, fig.width=3.5, fig.height=3}
+```{r plt-map}
 plotUMAP(obj, colour_by="sample_id", point_size=0.1) +
     guides(col=guide_legend(override.aes=list(alpha=1, size=2))) +
     theme_void() + theme(aspect.ratio=1, legend.key.size=unit(0, "pt"))
 ```
-We can also check if annotations of the chromium cells are associated with the embedding of cells when the embedding was trained jointly on Xenium and chromium cells.
 
-```{r plt-map-subset, fig.width=3.5, fig.height=3}
+We can also check if scRNA cells are well-partitioned in both the joint-embedding space and UMAP given the cell type annotations.  
+
+```{r plt-map-subset}
 obj_subset <- obj[,obj$sample_id == "Janesick_Chromium"]
 annotations <- setNames(sce$Annotation, colnames(sce))
 obj_subset$Annotation <- annotations[colnames(obj_subset)]
@@ -157,42 +164,28 @@ plotUMAP(obj_subset, colour_by="Annotation", point_size=0.1) +
 
 ## Imputation
 
-Now that we show there is a correction of batch effects in the PC space. We can transfer counts of single cell data to the Xenium dataset by detecting kNNs of xenium cells in PC space and aggregate missing genes over nearest neighbors.
+Now that we show there is a correction of batch effects across Xenium and scRNA assays in the harmony-integrated joint embedding space. We can transfer counts of single cell data to the Xenium dataset by detecting k-nearest scRNA cell neighbor of each Xenium cell and impute the missing genes of these cells by aggregating (mean) each gene across nearest neighbors. 
 
 ```{r impute}
 embeddings <- reducedDim(obj, "PCA")
 
-# find kNN across reference and query
+# find kNN across reference and query embeddings
 nNeighbors <- 20
 reference_embedding <- embeddings[obj$sample_id == "JanesickBC_Xenium1",]
 query_embedding <- embeddings[obj$sample_id == "Janesick_Chromium",]
 knn <- RANN::nn2(query_embedding,
                  reference_embedding,
                  k = nNeighbors)
-# knn <- readRDS("../../../PrincipalSTA-supp/knn.rds")
 
 # create weight matrix
-# nn_graph <- knn$nn.idx
-# nnedges <- data.table::melt(data.table::data.table(id = 1:nrow(nn_graph), nn_graph), id.vars = "id")
-# nnedges <- as.vector(t(as.matrix(nnedges[,c("id", "value")])))
-# weights <- igraph::make_empty_graph(n = nrow(nn_graph)) %>% 
-#   add_edges(nn_graph) %>% 
-#   as_adjacency_matrix()
-# weights <- weights[,1:nrow(query_embedding)]
-# weights <- weights * 1/nNeighbors
-
-# create weight matrix alternative
-# weights <- Matrix::Matrix(0, 
-#                           nrow = nrow(reference_embedding), 
-#                           ncol = nrow(knn$nn.idx), 
-#                           sparse = TRUE)
-# for (n in seq_len(nrow(knn$nn.idx))) {
-#   print(n)
-#   weights[knn$nn.idx[n, ], n] <- 1/nNeighbors
-# }
-# weights <- t(weights)
-# weights <- weights[,1:nrow(query_embedding)]
-weights <- readRDS("../../../PrincipalSTA-supp/weights.rds")
+nn_graph <- knn$nn.idx
+nnedges <- data.table::melt(data.table::data.table(id = 1:nrow(nn_graph), nn_graph), id.vars = "id")
+nnedges <- as.vector(t(as.matrix(nnedges[,c("id", "value")])))
+weights <- igraph::make_empty_graph(n = nrow(nn_graph), directed = TRUE) %>%
+  add_edges(nnedges) %>%
+  as_adjacency_matrix()
+weights <- weights[,1:nrow(query_embedding)]
+weights <- weights * 1/nNeighbors
 
 # impute by kNN
 query_counts <- assay(sce)[unique(top.markers$genes),colnames(obj)[obj$sample_id == "Janesick_Chromium"]]
@@ -202,46 +195,52 @@ colnames(imputed_reference_counts) <- rownames(reference_embedding)
 
 ## Visualization
 
-Create the imputed reference counts
+We can now create a new SpatialExperiment object using the transfered gene counts.
 
 ```{r create_new_counts}
-spe_imputed <- spe[,colnames(obj)[obj$sample_id == "JanesickBC_Xenium1"]]
-altExp(spe_imputed, "Imputed") <- SummarizedExperiment(assays = list(counts = imputed_reference_counts))
-spe_imputed.tmp <- swapAltExp(spe_imputed, name="Imputed")
-spe_imputed_new <- SpatialExperiment(list(counts = assay(spe_imputed.tmp, "counts")), 
-                                 colData = colData(spe_imputed),
-                                 spatialCoords = spatialCoords(spe_imputed), 
-                                 imgData = imgData(spe_imputed))
+spe <- spe[,colnames(obj)[obj$sample_id == "JanesickBC_Xenium1"]]
+spe_imputed <- SpatialExperiment(list(counts = imputed_reference_counts), 
+                                 colData = colData(spe),
+                                 spatialCoords = spatialCoords(spe), 
+                                 imgData = imgData(spe))
 ```
 
 We can now compare transfered counts with the original counts. Lets start with ACTA2 which is included in both datasets.
 
-```{r vis-imputed}
+```{r vis-valid, fig.width=12, fig.height=5}
 vis.data <- data.frame(spatialCoords(spe_imputed),
-                       ACTA2_new = assay(spe_imputed_new, "counts")["ACTA2",],
-                       ACTA2 = assay(spe_imputed, "counts")["ACTA2",])
-g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2)) + 
-  geom_point(size = 1) +
-  scale_color_gradient2(low="grey", high="red", space ="Lab")
-g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2_new)) + 
-  geom_point(size = 1) +
-  scale_color_gradient2(low="grey", high="red", space ="Lab")
+                       orig = assay(spe_imputed, "counts")["ACTA2",],
+                       imputed = assay(spe_imputed_new, "counts")["ACTA2",])
+g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = orig)) + 
+  geom_point(size = 0.01) +
+  scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
+g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = imputed)) + 
+  geom_point(size = 0.01) +
+  scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
 g1 | g2
 ```
 
 Now lets select a gene that is not available in the Xenium panel. Here, KRT17 is again a marker of ACTA2 myoepithelial cells that together with ACTA2
 
-```{r vis-imputed}
+```{r vis-compare, fig.width=12, fig.height=5}
 vis.data <- data.frame(spatialCoords(spe_imputed),
                        ACTA2 = assay(spe_imputed, "counts")["ACTA2",],
                        KRT17 = assay(spe_imputed_new, "counts")["KRT17",])
 g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2)) + 
-  geom_point(size = 1) +
-  scale_color_gradient2(low="grey", high="red", space ="Lab")
+  geom_point(size = 0.01) +
+  scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
 g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = KRT17)) + 
-  geom_point(size = 1) +
-  scale_color_gradient2(low="grey", high="red", space ="Lab")
+  geom_point(size = 0.01) +
+  scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
 g1 | g2
 ```
+
+### Imputation Algorithms
+
+Alternatively, we can use other R/Python frameworks to integrate Image-based ST assays with scRNA datasets, and impute missing features. Some of these methods could be used through R using packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`.
+
+- **Tangram**: 
+
+- **LIGER**: 
 
 ## References {.unnumbered}
