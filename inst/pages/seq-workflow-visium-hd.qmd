@@ -1,33 +1,48 @@
 # Workflow: Visium HD {#sec-seq-workflow-visium-hd}
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
 ## Introduction
 
-Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024 [@Oliveira2024], Visium HD advanced data resolution from 55 µm (spot-based resolution) to bins near subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024]. 
+Visium HD is a next-generation spatial transcriptomics technology developed by 
+10x Genomics, designed to provide single-cell resolution spatial gene expression 
+data across entire tissue sections. Commercially available since 2024, Visium HD 
+advanced the platform's resolution from 55 µm spots to bins of near subcellular 
+resolution (2 µm). In this workflow, we will demonstrate common analysis steps 
+with a Visium HD dataset on colorectal cancer [@Oliveira2024]. 
 
 ## Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
-library(OSTA.data)
-library(VisiumIO)
-library(SpatialExperiment)
-library(ggspavis)
-library(spacexr)
-library(ggplot2)
-library(patchwork)
-library(DropletUtils)
-library(BiocParallel)
-library(scran)
-library(scater)
-library(scuttle)
-library(pheatmap)
-library(tidyr)
-library(SpotSweeper)
 library(Banksy)
+library(BiocParallel)
+library(DropletUtils)
+library(ggplot2)
+library(ggspavis)
+library(igraph)
+library(OSTA.data)
+library(patchwork)
+library(pheatmap)
+library(scater)
+library(scran)
+library(scuttle)
+library(spacexr)
+library(SpatialExperiment)
+library(SpotSweeper)
 library(Statial)
+library(tidyr)
+library(VisiumIO)
 ```
 
-In this demo, we perform deconvolution on 16 µm bins and compare the concordance with result on 8 µm bins, provided by 10x Genomics.
-[Here, we only demonstrate the analysis for patient 2. Other patients, such as P1 and P5, also have public data available in CRC condition, with Chromium, Visium HD, and Xenium platforms (see @sec-bkg-datasets). It would be interesting to investigate the differences in malignant cells/bins (e.g. differentially expressed genes, pathway analysis, etc.) between patients across different platforms.]{.aside}
+In this demo, we perform deconvolution on 16 µm bins and compare 
+the concordance with result on 8 µm bins, provided by 10x Genomics.
+[Here, we only demonstrate the analysis for patient 2. Other patients, 
+such as P1 and P5, also have public Chromium, Visium HD, and Xenium 
+data available for the CRC group (see @sec-bkg-datasets). It would be 
+interesting to investigate the differences in malignant cells/bins 
+(e.g., DEGs, pathways) between patients across different platforms.]{.aside}
 
 ```{r load-vhd8, message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repo
@@ -35,261 +50,256 @@ id <- "VisiumHD_HumanColon_Oliveira"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-
 # read 8um bins into 'SpatialExperiment'
-vhd8 <- VisiumIO::TENxVisiumHD(
-  spacerangerOut=td,
-  images="lowres",
-  processing="filtered",
-  bin_size="008",
-  format="h5"
-) |> VisiumIO::import()
-rownames(vhd8) <- make.unique(rowData(vhd8)$Symbol)
-
-# retrieve 008um bin annotations
-gz <- "binned_outputs/square_008um/deconvolution.csv.gz"
-df <- read.csv(file.path(td, gz), row.names=1)
-df <- df[complete.cases(df), ]
-cx <- intersect(colnames(vhd8), rownames(df))
-
-# keep only Visium HD 8um with a provided annotation
-vhd8 <- vhd8[, cx]
-
-# add as metadata
-colData(vhd8)[names(df)] <- df[cx, ]
-
+vhd8 <- TENxVisiumHD(
+    spacerangerOut=td, 
+    processing="filtered",
+    format="h5", 
+    images="lowres", 
+    bin_size="008") |>
+    import()
+# use gene symbols as feature names
+gs <- rowData(vhd8)$Symbol
+rownames(vhd8) <- make.unique(gs)
+colnames(vhd8) <- vhd8$barcode # TODO: VisiumIO bug?
 vhd8
 ```
 
-Next, we read in Visium HD data for 16 µm bins. There is no annotation result for 16 µm bin in the public data download. Given the relatively smaller number of bins compared to 8 µm, our downstream analysis will be performed on a subset area of 16 µm bins.
+These data come with bin-level annotations from deconvolution estimates
+by `RCDT`, implemented in `r BiocStyle::Githubpkg("ggrajeda/spacexr")`. 
+Specifically, two sets of labels are available that correspond to the 
+most and second most frequent of 38 cell types per bin, respectively:
+
+```{r load-anno, message=FALSE, warning=FALSE}
+# retrieve annotations
+gz <- "binned_outputs/square_008um/deconvolution.csv.gz"
+df <- read.csv(file.path(td, gz), row.names=1)
+head(df <- df[complete.cases(df), ])
+# keep only annotated bins
+vhd8 <- vhd8[, df$barcode]
+colData(vhd8)[names(df[-1])] <- df[-1]
+```
+
+```{r plt-lab-xy, fig.width=12, fig.height=5, message=FALSE}
+#| code-fold: true
+lab <- grep("Label", names(cd <- colData(vhd8)), value=TRUE)
+pal <- hcl.colors(length(unique(unlist(cd[lab]))), "Spectral")
+lapply(lab, \(.) {
+    p <- plotSpots(vhd8, annotate=., point_size=0.2) + ggtitle(.)
+    p$layers[[1]]$aes_params$shape <- 16
+    p$layers[[1]]$aes_params$stroke <- 0
+    p
+}) |>
+    wrap_plots(nrow=1, guides="collect") &
+    scale_color_manual(NULL, values=pal) &
+    theme(legend.key.size=unit(0, "lines"))
+```
+
+To keep runtimes low, our downstream analysis will be performed on a subset 
+area of 16 µm bins (1/64 of the data coverage area), which we read in here; 
+there are no annotations available for this resolution in the public domain.
+[Note that 8 and 16 µm binned Visium HD data share the 
+same full-res. H&E image and scaling factor.]{.aside}
 
 ```{r load-vhd16, message=FALSE}
 # read 16um bins into 'SpatialExperiment'
-vhd16 <- VisiumIO::TENxVisiumHD(
-  spacerangerOut=td,
-  images="lowres",
-  processing="filtered",
-  bin_size="016",
-  format="h5"
-) |> VisiumIO::import()
+vhd16 <- TENxVisiumHD(
+    spacerangerOut=td,
+    processing="filtered",
+    format="h5",
+    images="lowres",
+    bin_size="016") |>
+    import()
 # use symbols as feature names
 gs <- rowData(vhd16)$Symbol
 rownames(vhd16) <- make.unique(gs)
+colnames(vhd16) <- vhd16$barcode # TODO: VisiumIO bug?
 vhd16
 ```
 
-```{r vhd816-spavis, fig.width=12, fig.height=6.5}
+```{r plt-xy-box, fig.width=12, fig.height=3.5, message=FALSE, warning=FALSE}
 #| code-fold: true
-# vhd8$loglibsize <- log1p(colSums(counts(vhd8)))
-# vhd16$loglibsize <- log1p(colSums(counts(vhd16)))
-# plotSpots(vhd8, 
-#     annotate="loglibsize", pal="viridis", 
-#     point_size=0) + ggtitle("8 µm log-library size") 
-# p <- plotSpots(vhd16, 
-#     annotate="loglibsize", pal="viridis", 
-#     point_size=0) + ggtitle("16 µm log-library size")
-# p$layers[[1]]$aes_params$shape <- 16
-# p$layers[[1]]$aes_params$stroke <- 0
-# p$layers[[1]]$aes_params$size <- 0.3
-# p
+.rng <- \(spe) {
+    xy <- spatialCoords(spe)*scaleFactors(spe)
+    xs <- range(xy[, 1]); ys <- nrow(imgRaster(spe))-range(xy[, 2])
+    x1 <- xs[1] + 4*(xs[2]-xs[1])/8; x2 <- xs[2] - 3*(xs[2]-xs[1])/8
+    y1 <- ys[1] + 3*(ys[2]-ys[1])/8; y2 <- ys[2] - 4*(ys[2]-ys[1])/8
+    list(box=c(x1, x2, y1, y2), cov=c(xs, ys))
+}
+vhd8r <- .rng(vhd8)
+vhd16r <- .rng(vhd16)
+# get 8um bounding boxes; 
+# should be similar to 16um 
+.box <- \(roi, lty, lwd, col) {
+    geom_rect(
+        xmin=vhd8r[[roi]][1], xmax=vhd8r[[roi]][2], 
+        ymin=vhd8r[[roi]][3], ymax=vhd8r[[roi]][4],
+        col=col, fill=NA, linetype=lty, linewidth=lwd)
+}
+cov <- .box(roi="cov", lty=2, lwd=1/2, col="grey")
+box <- .box(roi="box", lty=4, lwd=2/3, col="black")
+# plotting
+.lim <- \(spe) list(
+    xlim(spe[["box"]][c(1, 2)]),
+    ylim(spe[["box"]][c(4, 3)]))
+plotVisium(vhd8, spots=FALSE) + cov + box +
+    ggtitle("grey: data coverage\n black: zoomed region") + 
+plotVisium(vhd8, point_size=0.8, zoom=TRUE) + .lim(vhd8r) +
+    ggtitle("8 µm bins in black box") + 
+plotVisium(vhd16, point_size=1.6, zoom=TRUE) + .lim(vhd16r) +
+    ggtitle("16 µm bins in black box") + 
+plot_layout(nrow=1, widths=c(1.5, 1, 1)) & facet_null() &
+    theme(plot.title=element_text(hjust=0.5, vjust=0.5))
 ```
 
-Note that 8 and 16 µm binned Visium HD data share the same full resolution H&E image and scaling factor. 
-For 16 µm bins, we will perform analysis steps on only 1/64 of the tissue area that was measured using Visium HD (to reduce demo runtime).
+Subset the 16 µm object to bins in the black box:
 
-```{r plotvis-cove-zoom-8-16, warning=FALSE, message=FALSE, fig.width=12, fig.height=4}
+```{r vhd16-sub, message=FALSE}
 #| code-fold: true
-get_range <- function(spe){
-  xy <- spatialCoords(spe)*scaleFactors(spe)
-  xs <- range(xy[, 1]); ys <- nrow(imgRaster(vhd8))-range(xy[, 2])
-  xmi <- xs[1] + 4*(xs[2]-xs[1])/8; xma <- xs[2] - 3*(xs[2]-xs[1])/8
-  ymi <- ys[1] + 3*(ys[2]-ys[1])/8; yma <- ys[2] - 4*(ys[2]-ys[1])/8
-  return(list(zoom=c(xmi, xma, ymi, yma), cove=c(xs, ys)))
+.sub <- function(spe, rng, roi="box") {
+    xs <- rng[[roi]][c(1, 2)]
+    ys <- nrow(imgRaster(spe)) - rng[[roi]][c(3,4)]
+    xy <- spatialCoords(spe)*scaleFactors(spe)
+    spe[, xy[, 1] > xs[1] & xy[, 1] < xs[2] & 
+          xy[, 2] > ys[1] & xy[, 2] < ys[2] ]
 }
-vhd8r <- get_range(vhd8)
-vhd16r <- get_range(vhd16)
-
-# 8um bounding box, should be similar to 16um 
-get_box <- function(cate, ltp, lwd, col){
-  box <- geom_rect(
-    xmin=vhd8r[[cate]][1], xmax=vhd8r[[cate]][2], 
-    ymin=vhd8r[[cate]][3], ymax=vhd8r[[cate]][4],
-    col=col, fill=NA, linetype=ltp, linewidth=lwd)
-  return(box)
-}
-box <- get_box(cate="zoom", ltp=4, lwd=2/3, col="black")
-box2 <- get_box(cate="cove", ltp=2, lwd=1/2, col="grey")
-
-plotVisium(vhd8, spots=FALSE, point_size=.75) + box + box2 +
-  theme(plot.title=element_text(hjust=0.5)) + 
-  ggtitle("grey box: data coverage \n black box: zoomed region") + 
-plotVisium(vhd8, point_size=0.9, zoom=TRUE) + xlim(vhd8r[["zoom"]][c(1, 2)]) + ylim(vhd8r[["zoom"]][c(4, 3)]) + 
-  theme(plot.title=element_text(hjust=0.5)) + 
-  ggtitle("8 µm bins in black box") + 
-  plot_spacer() +
-plotVisium(vhd16, point_size=1.8, zoom=TRUE) + xlim(vhd16r[["zoom"]][c(1, 2)]) + ylim(vhd16r[["zoom"]][c(4, 3)]) + 
-  theme(plot.title=element_text(hjust=0.5)) + 
-  ggtitle("16 µm bins in black box") + 
-plot_layout(nrow=1, widths=c(1.7, 1, 0.05, 1)) & facet_null()
+.vhd16 <- .sub(spe=vhd16, rng=vhd16r)
+dim(.vhd16)
 ```
 
-Subset the 16 µm object to bins in the black box.
-
-```{r vhd16-subset-zoom, message=FALSE}
-get_subset_vhd <- function(spe, spe_range){
-  xy <- spatialCoords(spe)*scaleFactors(spe)
-  y_no_rev <- nrow(imgRaster(spe)) - spe_range[["zoom"]][c(3,4)]
-  vhd16sub <- spe[, xy[, 1] > spe_range[["zoom"]][1] & 
-                    xy[, 1] < spe_range[["zoom"]][2] & 
-                    xy[, 2] > y_no_rev[1] & 
-                    xy[, 2] < y_no_rev[2]]
-  return(vhd16sub)
-}
-
-vhd16sub <- get_subset_vhd(spe=vhd16, spe_range=vhd16r)
-dim(vhd16sub)
-
-# plotVisium(vhd16sub, point_size=1.8, zoom=TRUE) # sanity check
-```
-
-Now we are operating on `r ncol(vhd16sub)` 16 µm bins.
+From now one, we are operating on `r ncol(.vhd16)` 16 µm bins.
 
 ## Quality control
 
-As detailed in @sec-seq-quality-control, we use `r BiocStyle::Biocpkg("SpotSweeper")` to perform quality control on the subsetted 16 µm data.
+As detailed in @sec-seq-quality-control, we use `r BiocStyle::Biocpkg("SpotSweeper")`
+to perform quality control on the subsetted 16 µm data.
 
 ```{r qc-vhd16-local}
 # calculate per-cell QC metrics
-mt <- grepl("^MT-", rownames(vhd16sub))
-vhd16sub <- addPerCellQCMetrics(vhd16sub, subsets=list(mt=mt))
+mt <- grepl("^MT-", rownames(.vhd16))
+.vhd16 <- addPerCellQCMetrics(.vhd16, subsets=list(mt=mt))
 # determine outliers based on 
 # - low log-library size
 # - few uniquely detected features
 # - high mitochondrial count fraction
-vhd16sub <- localOutliers(vhd16sub, metric="sum", direction="lower", log=TRUE)
-vhd16sub <- localOutliers(vhd16sub, metric="detected", direction="lower", log=TRUE)
-vhd16sub <- localOutliers(vhd16sub, metric="subsets_mt_percent", direction="higher", log=TRUE)
-vhd16sub$discard <- 
-    vhd16sub$sum_outliers | 
-    vhd16sub$detected_outliers | 
-    vhd16sub$subsets_mt_percent_outliers
-# tabulate observations retained 
+.vhd16 <- localOutliers(.vhd16, metric="sum", direction="lower", log=TRUE)
+.vhd16 <- localOutliers(.vhd16, metric="detected", direction="lower", log=TRUE)
+.vhd16 <- localOutliers(.vhd16, metric="subsets_mt_percent", direction="higher", log=TRUE)
+.vhd16$discard <- 
+    .vhd16$sum_outliers | 
+    .vhd16$detected_outliers | 
+    .vhd16$subsets_mt_percent_outliers
+# tabulate number of bins retained 
 # vs. removed by any criterion 
-table(vhd16sub$discard)
+table(.vhd16$discard)
 ```
 
 ```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
 #| code-fold: true
-plotSpots(vhd16sub, annotate="sum_log", point_size=0.2) + ggtitle("log-library size") +
-plotSpots(vhd16sub, annotate="subsets_mt_percent", point_size=0.2) + ggtitle("% mitochondrial") +
+plotSpots(.vhd16, annotate="sum_log", point_size=0.2) + ggtitle("log-library size") +
+plotSpots(.vhd16, annotate="subsets_mt_percent", point_size=0.2) + ggtitle("% mitochondrial") +
 plot_layout(nrow=1) & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
     scale_color_gradientn(colors=pals::jet())
 ```
 
-We can visualize the local outliers identified by SpotSweeper:
-```{r qc-vis, message=FALSE, fig.width=7.5, fig.height=2.5}
+We can visualize the local outliers identified by `SpotSweeper` in space:
+
+```{r qc-vis, fig.width=7.5, fig.height=2.5, message=FALSE}
 #| code-fold: true
-# table(vhd16sub$subsets_mt_percent_outliers) # NULL
-plotSpots(vhd16sub, annotate="sum_outliers") + ggtitle("low_lib_size") +
-plotSpots(vhd16sub, annotate="detected_outliers") + ggtitle("low_n_features") +
-plotSpots(vhd16sub, annotate="discard") + ggtitle("discard") +
+plotSpots(.vhd16, annotate="sum_outliers") + ggtitle("low_lib_size") +
+plotSpots(.vhd16, annotate="detected_outliers") + ggtitle("low_n_features") +
+plotSpots(.vhd16, annotate="discard") + ggtitle("discard") +
 plot_layout(nrow=1, guides="collect") & theme(
     plot.title=element_text(hjust=0.5),
-    legend.key.width=unit(0.5, "lines"),
-    legend.key.height=unit(1, "lines")) &
+    legend.key.size=unit(0, "lines")) &
     guides(col=guide_legend(override.aes=list(size=3))) & 
     scale_color_manual("discard", values=c("lavender", "purple"))
 ```
 
-Subset the Visium HD 16 µm object to bins that passed QC:
+Lastly, we subset the Visium HD 16 µm object to bins that passed QC:
+
 ```{r vhd16-qc-subset}
-vhd16sub <- vhd16sub[, !vhd16sub$discard]
-dim(vhd16sub)
+.vhd16 <- .vhd16[, !.vhd16$discard]
+dim(.vhd16)
 ```
 
 ## Clustering
 
-First, we identify and subset to the highly/spatially variable genes in the target area:
+First, we identify highly variable genes (HVGs) in the target area:
+[Note that spatially variable genes (SVGs) could be used instead; 
+c.f. @sec-seq-processing.]{.aside}
 
-```{r vhd16-lognorm-hvg}
-vhd16sub <- logNormCounts(vhd16sub)
-dec <- modelGeneVar(vhd16sub)
-hvg <- getTopHVGs(dec, n=3000)
-
-# restrict to HVGs; SVGs could also be used
-.vhd16sub <- logNormCounts(vhd16sub[hvg, ])
+```{r vhd16-hvg}
+.vhd16 <- logNormCounts(.vhd16)
+dec <- modelGeneVar(.vhd16)
+hvg <- getTopHVGs(dec, n=3e3)
 ```
 
-As detailed in @sec-crs-clustering, `BANKSY` utilizes a pair of spatial kernels to capture gene expression variation, followed by dimension reduction and graph-based clustering to determine spatial domains.
+As detailed in @sec-crs-clustering, `r BiocStyle::Biocpkg("Banksy")` utilizes 
+a pair of spatial kernels to capture gene expression variation, followed by 
+dimension reduction and graph-based clustering to identify spatial domains.
 
-```{r BANKSY, message=FALSE}
-# use weak spatial information
-l <- 0.2 
-# first order neighbours in VisiumHD
-k <- 8
+```{r Banksy, message=FALSE}
+# set seed for random number generation
+# in order to make results reproducible
+set.seed(112358)
+# 'Banksy' parameter settings
+k <- 8   # consider first order neighbors
+l <- 0.2 # use little spatial information
 a <- "logcounts"
 xy <- c("array_row", "array_col")
-# Run PCA on the BANKSY matrix
-set.seed(2025)
-.vhd16sub <- computeBanksy(.vhd16sub, assay_name=a, coord_names=xy, k_geom=k)
-.vhd16sub <- runBanksyPCA(.vhd16sub, lambda=l, npcs=25, seed=2025)
-# Run UMAP for marker gene visualization
-set.seed(2025); .vhd16sub <- runUMAP(.vhd16sub)
-reducedDim(vhd16sub, "UMAP") <- reducedDim(.vhd16sub, "UMAP")
-# Perform BANKSY clustering
-.vhd16sub<-clusterBanksy(.vhd16sub,resolution=1.2,lambda=l,npcs=25,seed=2025)
-table(vhd16sub$BANKSY <- factor(.vhd16sub[[clusterNames(.vhd16sub)]]))
+# restrict to selected features
+tmp <- .vhd16[hvg, ]
+# compute spatially aware 'Banksy' PCs
+tmp <- computeBanksy(tmp, assay_name=a, coord_names=xy, k_geom=k)
+tmp <- runBanksyPCA(tmp, lambda=l, npcs=20)
+reducedDim(.vhd16, "PCA") <- reducedDim(tmp)
+# run UMAP (for visualization purposes only)
+.vhd16 <- runUMAP(.vhd16, dimred="PCA")
+# build cellular shared nearest-neighbor (SNN) graph
+g <- buildSNNGraph(.vhd16, use.dimred="PCA", type="jaccard", k=20)
+# cluster using Leiden community detection algorithm
+k <- cluster_leiden(g, objective_function="modularity", resolution=1.2)
+table(.vhd16$Banksy <- factor(k$membership))
 ```
 
-Next, we can perform differential expresison (DE) analysis and find markers for each cluster. Across all cells in each cluster, we obtain the average expression:
-```{r deg}
+Next, we can perform differential gene expresison (DGE) analysis to 
+identify markers for each cluster; c.f. @sec-crs-spatially-variable.
+We also compute the cluster-wise mean expression of selected markers:
+
+```{r mgs}
 # differential gene expression analysis
-mgs <- findMarkers(vhd16sub, groups=vhd16sub$BANKSY, direction="up")
+mgs <- findMarkers(.vhd16, groups=.vhd16$Banksy, direction="up")
 # select for a few markers per cluster
 top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
 top <- unique(unlist(top))
-
 # average expression by clusters
-pbs <- aggregateAcrossCells(vhd16sub, 
-    ids=vhd16sub$BANKSY, subset.row=top, 
+pbs <- aggregateAcrossCells(.vhd16, 
+    ids=.vhd16$Banksy, subset.row=top, 
     use.assay.type="logcounts", statistics="mean")
 ```
 
 The marker genes in each cluster can be visualized with a heatmap:
 
-```{r clus-gene-heatmap, message=FALSE, fig.width=10, fig.height=3.5}
+```{r plt-mgs-hm, message=FALSE, fig.width=10, fig.height=3}
 #| code-fold: true
 # visualize averages z-scaled across clusters
-pheatmap(mat=t(assay(pbs)), scale="column", breaks=seq(-2, 2, length=101), 
-         treeheight_row=5, treeheight_col=5)
-```
-
-The expression of marker genes in cluster 4, *MMP2* for instance, can be visualized in UMAP and spatially.
-```{r spatial-marker-gene, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5}
-#| code-fold: true
-vhd16sub$log_MMP2 <- logcounts(vhd16sub)["MMP2", ]
-(plotUMAP(vhd16sub, colour_by="BANKSY", point_size=0.8) +
-  theme(legend.position="none") + plot_spacer() + 
-  plotSpots(vhd16sub, annotate="BANKSY", point_size=0.8) +
-  plot_layout(nrow=1, widths=c(1, 0.1, 1)) &
-  scale_color_manual(name="BANKSY", values=unname(pals::watlington())) &
-  theme(aspect.ratio=1, legend.key.size=unit(2/3, "lines"))) /
-  (plotUMAP(vhd16sub, colour_by="log_MMP2", point_size=0.8) + 
-     theme(legend.position="none") + plot_spacer() + 
-  plotSpots(vhd16sub, annotate="log_MMP2", point_size=0.8) + 
-    theme(plot.title=element_blank()) + 
-    plot_layout(nrow=1, widths=c(1, 0.1, 1)) &
-  scale_color_viridis_c(option="viridis", name="log_MMP2") &
-  theme(aspect.ratio=1))
+pheatmap(
+    mat=t(assay(pbs)), scale="column", breaks=seq(-2, 2, length=101), 
+    cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
 ## Deconvolution
 
-### Single cell reference
+### Load single-cell reference
 
-We will perform deconvolution on 16 µm binned Visium HD. First, we retrieve a matching (Chromium) scRNA-seq dataset, which includes low- (`Level1`) and high-resolution (`Level2`) annotations of cells into 9 and 31 subpopulations, respectively. We filter the reference population to patient 2 only, to ensure similar transcriptional profile across technologies.
+We will now perform deconvolution on the 16 µm binned Visium HD data. First, 
+we retrieve matching (Chromium) scRNA-seq data, which includes low- (`Level1`)
+and high-res. (`Level2`) annotations of cells into 9 respective 31 clusters.
+In order to ensure similar transcriptional profile across technologies,
+we filter the reference population to patient 2 only.
 
 ```{r load-sce, results="hold", message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repository
@@ -297,24 +307,20 @@ id <- "Chromium_HumanColon_Oliveira"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-
 # read into `SingleCellExperiment`
 fs <- list.files(td, full.names=TRUE)
 h5 <- grep("h5$", fs, value=TRUE)
 sce <- read10xCounts(h5, col.names=TRUE)
-
 # add cell metadata
 csv <- grep("csv$", fs, value=TRUE)
 cd <- read.csv(csv, row.names=1)
 colData(sce)[names(cd)] <- cd[colnames(sce), ]
-
 # use gene symbols as feature names
-rownames(sce) <- make.unique(rowData(sce)$Symbol)
-
+gs <- rowData(sce)$Symbol
+rownames(sce) <- make.unique(gs)
 # exclude cells deemed to be of low-quality
 sce <- sce[, sce$QCFilter == "Keep"]
-
-# tabulate subpopulations by disease status
+# subsets cells from patient 2
 sce$Group <- gsub("P[0-9]", "", sce$Patient)
 sce$Patient <- gsub("(P[0-9]).*", "\\1", sce$Patient)
 sce <- sce[, sce$Patient == "P2"]
@@ -322,39 +328,44 @@ sce
 ```
 
 ::: {.callout-note title="Single cell reference annotation level mapping" collapse="true"}
-We can visualize the mapping between the Level 1 and Level 2 annotation in the single cell reference data with a proportion table:
+
+We can visualize the mapping between low- and high-res. annotations 
+in the single-cell reference data with a contingency table:
 
 ```{r sce-heatmap-level12, fig.width=6.5, fig.height=3.5}
 #| code-fold: true
-pheatmap(prop.table(table(sce$Level1, sce$Level2), 2),
-         cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
+fq <- prop.table(table(sce$Level1, sce$Level2), 2)
+pheatmap(fq, cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
-Note that `"Proliferating Immune II"` spans evenly between `"B cells"` and `"Tumor"`, so we will make it a separate class `"Prolif. Immune"` in Level 1 annotation.
+Note that `"Proliferating Immune II"` spans evenly between `"B cells"` and `"Tumor"`, 
+so we will make it a separate class, `"Prolif. Immune"` in the low-res. annotations:
 
 ```{r sce-level1addprolifimmune}
-sce$Level1 <- ifelse(sce$Level2 == "Proliferating Immune II", "Prolif. Immune", sce$Level1)
+sce$Level1 <- ifelse(grepl("Prolif", sce$Level2), "Prolif. Immune", sce$Level1)
 table(sce$Level1) # tabulate low-res. labels
 ```
 
-There are some differences in the provided deconvolution label (cell type 1 and 2) at 8 µm bin and the Level 2 single cell reference label:
+There are some differences in the provided deconvolution labels 
+at 8 µm resolution and the high-res. single-cell reference labels:
 
-```{r diff-lab1-level2}
-setdiff(unique(vhd8$DeconvolutionLabel1), unique(sce$Level2))
-setdiff(unique(sce$Level2), unique(vhd8$DeconvolutionLabel1))
+```{r diff-labs-lvl2}
+# all single-cell reference labels 
+# are present in the Visium HD data
+setdiff(sce$Level2, vhd8$DeconLabel1)
+setdiff(sce$Level2, vhd8$DeconLabel2)
+# but not vice versa
+setdiff(vhd8$DeconLabel1, sce$Level2)
+setdiff(vhd8$DeconLabel2, sce$Level2)
 ```
 
-```{r diff-lab2-level2}
-setdiff(unique(vhd8$DeconvolutionLabel2), unique(sce$Level2))
-setdiff(unique(sce$Level2), unique(vhd8$DeconvolutionLabel2))
-```
+Below, these extra classes in the Visium HD 8 μm bin annotations will be merged 
+into `"Fibroblast"`, `"Myeloid"`, `"Prolif. Immune"`, `"B cells"` and `"Tumor"`, 
+respectively, in order to generate a simplified lower-res. annotation.
 
-These extra classes in Visium HD 8um annotation will be merged to `"Fibroblast"`, `"Myeloid"`, `"Prolif. Immune"`, "`B cells`", and `"Tumor"` as Level 1 annotation, respectively.
 :::
 
-### Merge annotation levels for 8 µm
-
-We can merge the provided deconvolution annotation `"DeconvolutionLabel1"` (most likely cell type for singlets or first cell type for doublets) and `"DeconvolutionLabel2"` (the second cell type for doublets) into a lower resolution by the following grouping:
+### Simplify 8 µm annotations
 
 ```{r sc-mapping-vhd8-lab1}
 df <- data.frame(prop.table(table(sce$Level1, sce$Level2), 2))
@@ -372,176 +383,189 @@ df_map <- data.frame(rbind(apply(df, 2, as.character),
                            c("Prolif. Immune", "NK"),
                            c("Prolif. Immune", "Proliferating Immune II")))
 
-vhd8$deconlab1level1 <- df_map$Level1[match(vhd8$DeconvolutionLabel1, df_map$Level2)]
-vhd8$deconlab2level1 <- df_map$Level1[match(vhd8$DeconvolutionLabel2, df_map$Level2)]
+vhd8$deconlab1level1 <- df_map$Level1[match(vhd8$DeconLabel1, df_map$Level2)]
+vhd8$deconlab2level1 <- df_map$Level1[match(vhd8$DeconLabel2, df_map$Level2)]
 table(vhd8$deconlab1level1)
 ```
 
-```{r sc-mapping-vhd8-lab2}
-table(vhd8$deconlab2level1)
+We can merge the provided deconvolution annotation `"DeconLabel1"` 
+(most likely cell type for singlets, most dominant type for doublets) 
+into a lower resolution using the single-cell reference annotations:
+
+```{r vhd8-lv1}
+i <- match(vhd8$DeconLabel1, sce$Level2)
+j <- match(vhd8$DeconLabel2, sce$Level2)
+vhd8$.DeconLabel1 <- sce$Level1[i]
+vhd8$.DeconLabel2 <- sce$Level1[j]
+table(vhd8$.DeconLabel1)
 ```
 
-According to `RCTD`, approximately 75% of the 8 µm bins are singlets.
+According to `RCTD`, approximately 75% of the 8 µm bins are singlets:
 
 ```{r vhd8-singlets}
-print(round(table(vhd8$DeconvolutionClass)["singlet"]/ncol(vhd8), 2))
+round(100*mean(vhd8$DeconClass == "singlet"), 2)
 ```
 
-Let us check the top 4 common doublet pairs in the `"doublet_certain"` class:
+Let us check the top-4 common doublet pairs according to the `"doublet_certain"` class:
 
 ```{r vhd8-doublets}
-dl <- data.frame(colData(vhd8)[vhd8$DeconvolutionClass == "doublet_certain", 
-                               c("deconlab1level1", "deconlab2level1")])
-
-combo <- unlist(apply(dl, 1, sort))
-combo_wide <- data.frame(deconlab1level1=combo[seq(1, length(combo), by=2)],
-                         deconlab2level1=combo[seq(2, length(combo), by=2)])
-rownames(combo_wide) <- rownames(dl)
-head(sort(table(paste0(combo_wide$deconlab1level1,
-                       "_", combo_wide$deconlab2level1)), 
-          decreasing=TRUE), 4)
+dbl <- vhd8$DeconClass == "doublet_certain"
+lab <- c(".DeconLabel1", ".DeconLabel2")
+df <- data.frame(colData(vhd8)[dbl, lab])
+# sort as to ignore order
+df <- apply(df, 1, sort)
+df <- do.call(rbind, df)
+names(df) <- lab
+# count unique pairs
+ij <- paste(df[, 1], df[, 2], sep=";")
+head(sort(table(ij), decreasing=TRUE))
 ```
 
-We can see that Myeloid are commonly co-localized with Fibroblast and Tumor cells as doublets.
+We can see that myeloid are commonly co-localized with fibroblasts and tumor cells;
+most doublets are homotypic, i.e., they are (mostly) composed of one low-res. type.
 
-::: {.callout-note title="Subset 8um bins in black box" collapse="true"}
-We can perform the same subsetting procedure to 8 µm bins and compare the difference in number of bins in the zoomed (black box) area.
+::: {.callout-note title="Subset 8um bins within black bounding box" collapse="true"}
+
+We can perform the same subsetting procedure to 8 µm bins and compare 
+the difference in the number of bins in the zoomed (black box) area.
 
 ```{r vhd8-subset-zoom}
-# rename column to be consistent with 16 µm
-vhd8$deconlevel1 <- vhd8$deconlab1level1
-vhd8sub <- get_subset_vhd(spe=vhd8, spe_range=vhd8r)
-dim(vhd8sub)
-# plotVisium(vhd8sub, point_size=0.9, zoom=TRUE) # sanity check
+# subset zoomed (black box) area
+.vhd8 <- .sub(spe=vhd8, rng=vhd8r)
+# compare number of bins between resolutions
+(n <- ncol(.vhd8))
+(m <- ncol(.vhd16))
+round(n/m, 2)
 ```
 
-As expected, the number of bins in 8 µm is 4 times the number of bins in 16 µm. We will visualize on the same zoomed region for both resolutions in any downstream analysis.
+As expected, the number of 8 µm bins is about 4 times the number of 16 µm bins. 
+We will visualize the same subset for both bin sizes in any downstream analyses.
+
 :::
 
-### `RCTD` ("doublet" mode) for 16 µm bins
+### Run `RCTD` on 16 µm bins
 
-We also assume there are at most two cell types in a 16 µm bin as in 8 µm, and thus we would expect less singlet proportions.
+We also assume there are at most two cell types in a 16 µm bin as in 8 µm, 
+and thus we would expect a smaller proportion of singlets.
 
-```{r rctd, message=FALSE, warning=FALSE, results="hide"}
-xy <- data.frame(spatialCoords(vhd16sub))
-.vhd16sub <- SpatialRNA(xy, counts(vhd16sub))
-ids <- factor(sce$Level1)
-names(ids) <- colnames(sce)
-ref <- Reference(counts(sce), ids)
-res <- create.RCTD(.vhd16sub, ref, max_cores=10)
-res <- run.RCTD(res, doublet_mode="doublet")
+```{r RCDT, message=FALSE, warning=FALSE, results="hide"}
+obj <- createRctd(.vhd16, sce, cell_type_col="Level1", max_cores=10)
+(res <- runRctd(obj, rctd_mode="doublet"))
 ```
 
-Weights inferred by `RCTD` should be normalized such that proportions of cell types sum to 1 in each spot:
+Weights inferred by `RCTD` correspond to proportions of cell types, such that
+they sum to 1 for a given observation (expect for rejected ones, which sum to 0):
 
 ```{r dec-res, warning=FALSE, message=FALSE}
-# normalize weights to obtain proportions
-ws <- normalize_weights(res@results$weights)
-
-# add proportion estimates as spot metadata
-ws <- data.frame(as.matrix(ws))
-colData(vhd16sub)[names(ws)] <- ws[colnames(vhd16sub), ]
+# counts rejected observations
+ws <- assay(res, "weights")
+table(colSums(ws) == 0)
+# add proportion estimates as metadata
+ws <- data.frame(t(as.matrix(ws)))
+colData(.vhd16)[names(ws)] <- ws[colnames(.vhd16), ]
 ```
 
-Next, we can visualize the deconvolution proportion in space for each cell type:
-```{r rctd-vis, message=FALSE, fig.width=12, fig.height=4}
+Next, we can spatially visualize the deconvolution proportions estimates:
+
+```{r rctd-vis, message=FALSE, fig.width=9, fig.height=4}
 #| code-fold: true
 lapply(names(ws), \(.) 
-    plotSpots(vhd16sub, annotate=., point_size=0.05)) |>
-    wrap_plots(nrow=2) & theme(
+    plotSpots(.vhd16, annotate=., point_size=0.1)) |>
+    wrap_plots(nrow=2, guides="collect") & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
     scale_color_gradientn(colors=pals::jet())
 ```
 
-Obtain the majority vote class for 16 µm bins. 
+We may also obtain the majority vote class for 16 µm bins:
+[This type of analysis procedure is underlying 
+the annotations provided by the authors.]{.aside}
+
 ```{r rctd-majvote, message=FALSE}
-# replace the last "." to " " in cell types 
-colnames(ws) <- sub("\\.(?=[^.]*$)", " ", colnames(ws), perl=TRUE)
-
-# derive majority vote label
+# derive majority vote labels
 ids <- names(ws)[apply(ws, 1, which.max)]
-names(ids) <- rownames(ws)
-table(vhd16sub$deconlevel1 <- factor(ids[colnames(vhd16sub)]))
-
-# remove bins with NA label due to not passing internal 'RCTD' QC
-vhd16sub <- vhd16sub[, !is.na(vhd16sub$deconlevel1)]
+ids <- gsub("\\.([A-z])", " \\1", ids)
+idx <- match(colnames(.vhd16), rownames(ws))
+table(.vhd16$.DeconLabel1 <- factor(ids[idx]))
 ```
 
-::: {.callout-note title="Majorited voted cell type frequency difference between 8 and 16 µm bins" collapse="true"}
-We can also check the proportional frequency difference between 8 and 16 µm bins in the zoomed area. 
+::: {.callout-note title="Majority voted cell type frequency difference between 8 and 16 µm bins" collapse="true"}
+
+We can also check the proportional frequency difference 
+between 8 and 16 µm bins in our region of interest:
+
 ```{r dens-decon-ct-diff, fig.width=5, fig.height=2.5}
 #| code-fold: true
-n8 <- table(vhd8sub$deconlevel1)
-n16 <- table(vhd16sub$deconlevel1)
-plt_df <- data.frame(x=n8/n16)
-
-ggplot(plt_df, aes(x=x.Freq)) +
-  geom_density() + 
-  scale_x_continuous(breaks=seq(0, max(plt_df$x.Freq), by=2)) + 
+n8 <- table(.vhd8$.DeconLabel1)
+n16 <- table(.vhd16$.DeconLabel1)
+df <- data.frame(x=as.numeric(n8/n16))
+ggplot(df, aes(x)) + geom_density() + 
   xlab("Cell type frequency ratio") + 
-  ggtitle("Distribution of cell type frequency ratio\nbetween 8 and 16 µm bins") + 
-  theme_classic() +
-  theme(plot.title=element_text(hjust=0.5))
+  ggtitle("distribution of cell type frequency\nratio between 8 vs. 16 µm bins") + 
+  scale_x_continuous(breaks=seq(0, max(df$x), by=2)) + 
+  theme_classic() + theme(plot.title=element_text(hjust=0.5))
 ```
-Most cell types appear around 3-4 times more in the 8 compared to 16 µm bins, which is expected given the bin size difference. 
+
+Most cell types appear around 3-4 times more in 8 compared to 16 µm bins,
+which is expected given the difference in bin size. 
+
 :::
 
 ### Deconvolution results at different resolutions
 
-Visualize deconvolution result on 8 and 16 µm bins in the zoomed area.
+Let's visualize deconvolution result for 8 and 16 µm bins in the zoomed area:
 
-```{r plt-vhd, warning=FALSE, fig.width=8, fig.height=3.6}
+```{r plt-vhd, fig.width=7.5, fig.height=3, message=FALSE}
 #| code-fold: true
-plotVisium(vhd8sub, annotate="deconlevel1", zoom =TRUE, point_size=0.8) +
-  ggtitle("8 µm") + plot_spacer() + 
-  plotVisium(vhd16sub, 
-             annotate="deconlevel1", zoom=TRUE, point_size=1.6) +
-  ggtitle("16 µm") +
-  plot_layout(nrow=1, guides="collect", widths=c(1, 0.1, 1)) &
-  guides(col=guide_legend(override.aes=list(size=3))) &
-  theme(legend.key.width=unit(0.5, "lines"),
-        plot.title=element_text(hjust=0.5),
-    legend.key.height=unit(1, "lines")) & 
+plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8) + ggtitle("8 µm") + 
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6) + ggtitle("16 µm") +
+plot_layout(nrow=1, guides="collect") &
+  guides(col=guide_legend(override.aes=list(size=2))) &
   scale_fill_manual(values=unname(pals::trubetskoy())) & 
-  facet_null()
+  facet_null() & theme(
+      plot.title=element_text(hjust=0.5),
+      legend.key.size=unit(0, "lines")) 
 ```
 
-## Concordance of clustering and deconvolution on 16 µm
+## Downstream
+
+### Concordance of clustering \& deconvolution
 
 We can visualize the results spatially:
 
 ```{r concordance-spatial, fig.width=8, fig.height=3.6}
 #| code-fold: true
-plotVisium(vhd16sub, annotate="BANKSY", zoom=TRUE, point_size=1.6,
-           pal=unname(pals::watlington())) +
-plotVisium(vhd16sub, annotate="deconlevel1", zoom=TRUE, point_size=1.6,
-           pal=unname(pals::trubetskoy())) & facet_null()
+plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, 
+    point_size=1.6, pal=unname(pals::kelly())) +
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, 
+    point_size=1.6, pal=unname(pals::trubetskoy())) +
+    plot_layout(nrow=1) & facet_null() &
+    theme(legend.key.size=unit(0, "lines"))
 ```
 
 Their concordance can be visualized with a heatmap:
 
 ```{r concordance-heatmap, fig.width=2.5, fig.height=3}
 #| code-fold: true
-fq <- prop.table(table(vhd16sub$BANKSY, vhd16sub$deconlevel1), 2)
+fq <- prop.table(table(.vhd16$Banksy, .vhd16$.DeconLabel1), 2)
 pheatmap(fq, cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
 From the above heatmap, cluster 1 is mostly immune cells with endothelial; cluster 9 matches B cell bins; cluster 7 and 8 are likely intestinal epithelial and smooth muscle, respectively; fibroblast is common in cluster 4; tumor spans cluster 2, 5, and 6. 
 
-## Neighbourhood analysis
+## Neighborhood analysis
 
-Here, we want to quantify the abundance between *T cells*, *B cells*, or *Myeloid* bins to *Fibroblast* or *Tumor* bins in 16 µm zoomed region.
-We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` to calculate. 
+Here, we want to quantify the abundance between *T cells*, *B cells*, or 
+*Myeloid* bins to *Fibroblast* or *Tumor* bins in 16 µm zoomed region.
+We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` to calculate, 
+for each bin, the abundance of other cell types within a radius of 200 px;
+the resulting (bins $\times$ types) matrix is stored as `reducedDim` slot `"abundances"`.
 
-For each bin, we compute the relative abundance of other cell types within a radius of 200 px;
-the result is stored as `reducedDim` slot `"abundances"`.
-
-```{r statial-vhd16sub}
-xy <- data.frame(spatialCoords(vhd16sub))
-colData(vhd16sub)[names(xy)] <- xy
-vhd16sub <- getAbundances(vhd16sub, 
-    cellType="deconlevel1", 
+```{r Statial}
+xy <- data.frame(spatialCoords(.vhd16))
+colData(.vhd16)[names(xy)] <- xy
+.vhd16 <- getAbundances(.vhd16, 
+    cellType=".DeconLabel1", 
     imageID="sample_id", 
     spatialCoords=names(xy),
     r=200, nCores=4)
@@ -549,54 +573,59 @@ vhd16sub <- getAbundances(vhd16sub,
 
 Let's have a look at the abundance and distance results, also including deconvolution results:
 
-```{r statial-vhd16sub-abd}
-abd <- reducedDim(vhd16sub, "abundances")
-abd$CT <- vhd16sub$deconlevel1
-abd[1:5, 1:5]
+```{r Statial-df}
+df <- reducedDim(.vhd16, "abundances")
+df$CT <- .vhd16$.DeconLabel1
+df[1:5, 1:5]
 ```
 
 Now, we filter to only *T cells*, *B cells* and *Myeloid* bins, and investigate -- within their neighbourhood -- the spatial proximity differences to *Fibroblast* or *Tumor* bins in terms of abundance.
 
-```{r statial-vhd16sub-plt-df}
-abd_plt_df <- abd[
-    abd$CT %in% c("T cells", "B cells", "Myeloid"), 
-    c("Tumor", "Fibroblast", "CT")] |>
-    pivot_longer(
-        cols=c("Tumor", "Fibroblast"),
-        names_to="targetCT", 
-        values_to="Abundance")
+```{r Statial-fd}
+source <- df$CT %in% c("T cells", "B cells", "Myeloid")
+target <- c("Tumor", "Fibroblast", "CT")
+fd <- pivot_longer(
+    df[source, target], cols=-CT,
+    names_to="target", values_to="n")
+head(fd)
 ```
 
 In this region, we observe more tumor than fibroblast bins around each of the immune bins.
 However, note that in this zoomed region, we have nearly 3 times more tumor bins compared to fibroblast bins. 
 Thus, we need to scale abundance values by the number of target cell type bins observed in the region. 
 
-```{r statial-vhd16sub-plt, fig.width=6, fig.height=2.5}
+```{r Statial-plt, fig.width=6, fig.height=2.5}
 #| code-fold: true
-abd_plt_df$Abundance_scaled <- 
-  ifelse(abd_plt_df$targetCT == "Tumor",
-         abd_plt_df$Abundance/table(vhd16sub$deconlevel1)["Tumor"],
-         abd_plt_df$Abundance/table(vhd16sub$deconlevel1)["Fibroblast"])
-
-ggplot(abd_plt_df, aes(x=CT, y=Abundance, fill=targetCT)) + 
-ggplot(abd_plt_df, aes(x=CT, y=Abundance_scaled, fill=targetCT)) + 
-plot_layout(nrow=1, guides="collect") & geom_boxplot() & 
+n_tum <- table(.vhd16$.DeconLabel1)["Tumor"]
+n_fib <- table(.vhd16$.DeconLabel1)["Fibroblast"]
+fd$p <- ifelse(fd$target == "Tumor", fd$n/n_tum, fd$n/n_fib)
+ggplot(fd, aes(x=CT, y=n, fill=target)) + 
+ggplot(fd, aes(x=CT, y=p, fill=target)) + 
+plot_layout(nrow=1, guides="collect") & 
+    geom_boxplot(key_glyph="point") & 
     scale_fill_manual(values=c("dodgerblue", "tomato")) & 
-    theme_classic() & theme(legend.key.size=unit(0, "lines")) &
-    guides(fill=guide_legend(override.aes=list(shape=21, size=2)))
+    guides(fill=guide_legend(override.aes=list(shape=21, size=2))) &
+    theme_classic() & theme(
+        axis.title.x=element_blank(),
+        legend.key.size=unit(0, "lines"))
 ```
 
-After correction, we see that the abundance of fibroblast bins does not differ much from the abundance of tumor bins around each immune cell type in the zoomed region. 
+After correction, we see that the abundance of fibroblast bins does not differ much 
+from the abundance of tumor bins around each immune cell type in the zoomed region. 
 
-The same analysis steps could be applied to the (unfiltered) 8 μm resolution data with the corresponding `RCTD` results provided by the authors. 
+The same analysis steps could be applied to the (unfiltered) 8 μm resolution 
+data with the corresponding `RCTD` results provided by the authors. 
 
 ## Conclusion
 
-In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm.
-Most methods and visualization techqniues developed for Visium can be applied to Visium HD.
-However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55µm).
-Each bin cannot be interpreted as a cell, but rather, a cell-segmentation-free approach is applied here.
-Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
+In this workflow, we demonstrated how to perform a standard analysis pipeline
+on a subset of Visium HD data binned at 16 µm. Most methods and visualization 
+techqniues developed for Visium can be applied to Visium HD. 
+However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) 
+has smaller area compared to Visium (55µm).
+Each bin cannot be interpreted as a cell, but rather, a segmentation-free 
+approach is applied here. Below are some resources and news for Visium HD 
+to consider and incorporate into your pipeline:
 
 - GitHub repository of `bin2cell` for H&E segmentation and obtaining cell boundaries: https://github.com/Teichlab/bin2cell
 
