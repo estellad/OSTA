@@ -164,7 +164,7 @@ plotUMAP(obj_subset, colour_by="Annotation", point_size=0.1) +
 
 ## Imputation
 
-Now that we show there is a correction of batch effects across Xenium and scRNA assays in the harmony-integrated joint embedding space. We can transfer counts of single cell data to the Xenium dataset by detecting k-nearest scRNA cell neighbor of each Xenium cell and impute the missing genes of these cells by aggregating (mean) each gene across nearest neighbors. 
+Now that we show there is a correction of batch effects across Xenium and scRNA assays in the harmony-integrated joint embedding space, we can transfer counts of single cell data to the Xenium dataset by detecting k-nearest scRNA cell neighbor of each Xenium cell and impute the missing genes of these cells by aggregating (mean) each gene across nearest neighbors. 
 
 ```{r impute}
 embeddings <- reducedDim(obj, "PCA")
@@ -208,9 +208,9 @@ spe_imputed <- SpatialExperiment(list(counts = imputed_reference_counts),
 We can now compare transfered counts with the original counts. Lets start with ACTA2 which is included in both datasets.
 
 ```{r vis-valid, fig.width=12, fig.height=5}
-vis.data <- data.frame(spatialCoords(spe_imputed),
-                       orig = assay(spe_imputed, "counts")["ACTA2",],
-                       imputed = assay(spe_imputed_new, "counts")["ACTA2",])
+vis.data <- data.frame(spatialCoords(spe),
+                       orig = assay(spe, "counts")["ACTA2",],
+                       imputed = assay(spe_imputed, "counts")["ACTA2",])
 g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = orig)) + 
   geom_point(size = 0.01) +
   scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
@@ -223,9 +223,9 @@ g1 | g2
 Now lets select a gene that is not available in the Xenium panel. Here, KRT17 is again a marker of ACTA2 myoepithelial cells that together with ACTA2
 
 ```{r vis-compare, fig.width=12, fig.height=5}
-vis.data <- data.frame(spatialCoords(spe_imputed),
-                       ACTA2 = assay(spe_imputed, "counts")["ACTA2",],
-                       KRT17 = assay(spe_imputed_new, "counts")["KRT17",])
+vis.data <- data.frame(spatialCoords(spe),
+                       ACTA2 = assay(spe, "counts")["ACTA2",],
+                       KRT17 = assay(spe_imputed, "counts")["KRT17",])
 g1 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = ACTA2)) + 
   geom_point(size = 0.01) +
   scale_color_gradient2(low="white", high="blue", space ="Lab") + theme_classic()
@@ -235,12 +235,12 @@ g2 <- ggplot(vis.data, aes(x = x_centroid, y = y_centroid, color = KRT17)) +
 g1 | g2
 ```
 
-### Imputation Algorithms
+## Other Imputation Algorithms
 
 Alternatively, we can use other R/Python frameworks to integrate Image-based ST assays with scRNA datasets, and impute missing features. Some of these methods could be used through R using packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`.
 
-- **Tangram**: 
+- **Tangram**: is available as a Python module in [scvi-tools](https://docs.scvi-tools.org/en/latest/user_guide/models/tangram.html) [@biancalani2021-tangram]. The tool performs a softmax optimization to generate a probabilistic mapping between cells of an scRNA data and voxels (cells or spots) of an ST data, which is then used to transfer labels or feature profiles across datasets.
 
-- **LIGER**: 
+- **LIGER**: is available at CRAN `r BiocStyle::CRANpkg("rliger")` [@welch2019-liger], and incorporates a similar workflow performed in this chapter using `r BiocStyle::Biocpkg("harmony")`. The only difference between two algorithms is how the joint embedding is trained where LIGER performs this using non-negative matrix factorization (NMF). LIGER has been employed to perform this task first between scRNA and scATAC-seq assays.
 
 ## References {.unnumbered}
