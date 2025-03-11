@@ -4,11 +4,11 @@
 
 **Spatial Registation** is defined as the task of mapping features or spatial localization of omic profiles from a **query** assay to a **reference** assay (@friston1995-registerationintro, @lewis2021-registerationintro2, @rajewsky2019-novosparc). Here, the reference is a spatially-resolved omic dataset whereas the query could be an assay with single cell and/or spatial resolution. In this chapter, we demonstrate methods that are available within/for BioConductor infrastructure for registering spatially aware datasets where the utility and function of the registration method is defined by the modality of the query dataset. 
 
-We first start with the case **(1)** where both reference and query datasets are composed of spatially resolved profiles, then we continue with case **(2)** where we review methods that allows registering/reconstructing information from non-spatially resolved single cell datasets. 
+We first start with the case **(1)** where both reference and query datasets are spatially resolved, then we continue with case **(2)** where we review methods that allows registering/reconstructing information from non-spatially resolved single cell datasets. 
 
 ## Spatial vs Spatial Registration (Alignment)
 
-Spatial omic technologies often generate data modalities that capture morphological features of tissue sections as well as omic profiles of cells and spots. Localization of these profiles can also be defined in different units and even in different perspectives (i.e. coordinate systems). Image registration and alignment methods provide transformation functions to map spatial localization of observations from one coordinate system to the other, which allows transfering features and information across observations of identical tissue section, adjacent sections as well as tissue sections with similar morphology and structure.
+Spatial omic technologies often generate data modalities that capture morphological features of tissue sections as well as omic profiles of cells, spots or other entities. Localization of these profiles can also be defined in different units and even in different perspectives (i.e. coordinate systems). Image registration and alignment methods provide transformations to map spatial localization of observations from one coordinate system to the other, which allows transfering features and information across observations of identical tissue sections, adjacent sections as well as tissue sections with similar morphology and structure.
 
 Strategies and approaches for aligning/integrating spatial omic assays differ depending on the modalility and/or instrument used to generate the dataset. These methods could be categorized into two where some incorporate **(i)** the morphology of microscropy images (*Image Registration*) of reference and query datasets [@friston1995-registerationintro] and others that rely on the **(ii)** spatial localization of observations (cells or spots) and the distribution of omic profiles (*Omics Coverage*) [@kiessling2024-registerationintro3].
 
@@ -82,7 +82,7 @@ xen$sample_id <- "JanesickBC_Xenium1"
 xen
 ```
 
-The `SpatialExperiment` of the Xenium data does not include any images, to perform the spatial alignment via image registration. We add the DAPI stained image channel to the object. We use the `morphology_mip.ome.tif` file provided in the standard Xenium output and use `r BiocStyle::Biocpkg("RBioFormats")` package to read a specific resolution from the image pyramid. We choose the lowest resolution image and define the parameter for scaling spatial coordinates of cells according to the selected resolution. See [here](https://kb.10xgenomics.com/hc/en-us/articles/11636252598925-What-are-the-Xenium-image-scale-factors) for more information on image scale factors. 
+The `SpatialExperiment` of the Xenium data does not include any images. However to perform the spatial alignment via image registration, we first add the DAPI stained image channel to the object. We use the `morphology_mip.ome.tif` file provided in the standard Xenium output and use `r BiocStyle::Biocpkg("RBioFormats")` package to read a specific resolution from the image pyramid. We choose the lowest resolution image and define the parameter for scaling spatial coordinates of cells according to the selected resolution. See [here](https://kb.10xgenomics.com/hc/en-us/articles/11636252598925-What-are-the-Xenium-image-scale-factors) for more information on image scale factors. 
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
 resolution_level <- 7
@@ -104,7 +104,7 @@ scaleparam <- 0.2125*(2^(resolution_level-1))
 Dapi.image <- "../images/crs-registration-Xenium_DAPI_res7.png"
 ```
 
-We can now add the DAPI channel to the `SpatialExperiment`.  
+We can now add the DAPI channel to the `SpatialExperiment` object.
 
 ```{r, message=FALSE, warning=FALSE}
 xen <- addImg(xen, 
@@ -149,7 +149,7 @@ EBImage::writeImage(ome.tiff.he, files=He.image, type="png")
 HE_image_vr <- importImageData(image=He.image)
 ```
 
-Before executing the automated registration, we have to convert the `SpatialExperiment` object of the Xenium data into a VoltRon object. The `assay_type` argument requires you to define the spatial entity type of the `SpatialExperiment` which is `cell` for spatial datasets in single cell resolution.
+Before executing the automated registration, we have to convert the `SpatialExperiment` object into a VoltRon object. The `assay_type` argument requires you to define the spatial entity type of the `SpatialExperiment` which is `cell` for spatial datasets in single cell resolution.
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
 xen_vr <- as.VoltRon(xen, assay_type="cell", assay_name="Xenium")
@@ -157,7 +157,7 @@ xen_vr <- as.VoltRon(xen, assay_type="cell", assay_name="Xenium")
 
 The `registerSpatialData` function performs the registration using a mini Shiny application which allows the user to manipulate images of both modalities. We first select the `Automated` option for non-manual (hence automated) registration method. We choose `Homography` method for registration which incorporates the **SIFT** method for detecting landmark points across two images which are paired by the **FLANN** method later [@lowe2004-sift]. 
 
-Before executing alignment, we can use the interface to negate the DAPI image (this step is needed to transform the DAPI image to make it similar to the H&E image). Then we horizontally flip the DAPI image to slightly synchronize the perspective of two images before automated alignment with SIFT and FLANN. These prior transformations help finding better landmarks.
+Before executing alignment, we can use the interface to negate the DAPI image (this step is needed to transform the DAPI image to make it similar to an H&E image). Then we horizontally flip the DAPI image to slightly synchronize the perspective of two images before automated alignment with SIFT and FLANN. These prior transformations help SIFT algorithm finding better landmarks.
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
 xen_reg <- registerSpatialData(
@@ -167,7 +167,7 @@ xen_reg <- registerSpatialData(
 
 ![](../images/crs-registration-alignment.png){width="75%" fig-align="center" alt="The Shiny application interface for alignment Spatial datasets stored in VoltRon objects"}
 
-The returning value of the function will have a list that includes the query spatial data that is registered to the reference. We can also convert the registered Xenium data using `as.SpatialExperiment` function available in `VoltRon`.
+The returning value of the function will have a list of VoltRon objects that includes the query spatial data that is registered to the reference. We can also convert the registered Xenium data using `as.SpatialExperiment` function available in `VoltRon`.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 # transformation matrix generated by 'VoltRon::registerSpatialData()'
