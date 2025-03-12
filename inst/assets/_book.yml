@@ -41,6 +41,7 @@ book:
         - pages/crs-signatures.qmd
         - pages/crs-spat-stat.qmd
         - pages/crs-registration.qmd
+        - pages/crs-imputation.qmd
         - pages/crs-multi-sample.qmd
         - pages/crs-workflow-xenvis.qmd
   appendices:
