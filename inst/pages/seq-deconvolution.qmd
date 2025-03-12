@@ -28,6 +28,7 @@ library(VisiumIO)
 library(SpatialExperiment)
 library(ggspavis)
 library(spacexr)
+library(CARDspa)
 library(ggplot2)
 library(patchwork)
 library(DropletUtils)
@@ -170,30 +171,103 @@ Weights inferred by `RCTD` should be normalized such that proportions of cell ty
 
 ```{r dec-res, warning=FALSE, message=FALSE}
 # normalize weights to obtain proportions
-ws <- normalize_weights(res@results$weights)
+ws_rctd <- normalize_weights(res@results$weights)
 # add proportion estimates as spot metadata
-ws <- data.frame(as.matrix(ws))
-colData(vis)[names(ws)] <- ws[colnames(vis), ]
+ws_rctd <- data.frame(as.matrix(ws_rctd))
+# colData(vis)[names(ws_rctd)] <- ws_rctd[colnames(vis), ]
+ws_rctd[1:5, 1:5]
 ```
+
+## CARD
+
+Another method could be used is CARD. First, we realized delayed count matrices and rename spatial coordinate columns to make the input data compatible with CARD [Note: RCTD handles the conversion internally with spacexr::check_counts()]{.aside}
+
+```{r}
+# realize the delayed matrices
+counts(sce) <- as(counts(sce), "matrix")
+counts(vis) <- as(counts(vis), "matrix")
+colnames(spatialCoords(vis)) <- c("x", "y")
+```
+
+Next, we perform the `CARD` deconvoluition. Here we demonstrate `CARD`'s interoperability with `SingleCellExperiment` and `SpatialExperiment`. [Note: `CARD` can also take a reference matrix, a reference cell type annotation column, a spatial count matrix, and a spatial coordinates data frame as separate items in `sc_count`, `sc_meta`, `spatial_count`, and `spatial_location`, respectively. Yet, we encourage simplify such process with using existing Bioconductor classes.]{.aside} The deconvolution result matrix is already normalized such that the sum of cell type proportions for each spot is equal to 1. 
+
+```{r}
+set.seed(2025)
+CARD_obj <- CARD_deconvolution(
+    spe = vis,
+    sce = sce,
+    sc_count = NULL,
+    sc_meta = NULL,
+    spatial_count = NULL,
+    spatial_location = NULL,
+    ct_varname = "Annogrp",
+    ct_select = NULL, # decon with all sce$Annogrp cell-types
+    sample_varname = NULL, # use all sce as one ref sample 
+    mincountgene = 100,
+    mincountspot = 5
+)
+ws_card <- CARD_obj$Proportion_CARD
+# Order cell type names alphabetically as RCTD
+ws_card <- ws_card[, colnames(ws_rctd)]
+
+ws_card[1:5, 1:5]
+```
+
+
+## Visualization
 
 Let's visualize deconvolution weights in space, i.e., coloring by the proportion of a given cell type estimated to fall within a given spot:
 
-```{r plt-dec-xy, message=FALSE, fig.width=10, fig.height=5}
+```{r plt-dec-xy-rctd, message=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
-lapply(names(ws), \(.) 
-    plotSpots(vis, annotate=., point_size = 0.05)) |>
+plotSpatial <- function(plt_df, annotate="CT"){
+  stopifnot(c(annotate, "x", "y") %in% names(plt_df))
+  
+  ggplot(plt_df, aes(x=x, y=y, color=get(annotate))) + 
+  geom_point(size=0.05) + 
+  scale_color_gradientn(colors=pals::jet()) + 
+  scale_y_reverse() +
+  labs(color = NULL) + 
+  theme_classic() + 
+  theme(panel.border=element_rect(colour="black", fill=NA, linewidth=1),
+        plot.title = element_text(hjust = 0.5),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()) + 
+  ggtitle(annotate)
+}
+
+plot_per_ct_ws <- function(ws){
+  ws
+  p <- lapply(names(ws), \(.) 
+    plotSpatial(, annotate=., point_size = 0.05)) |>
     wrap_plots(nrow=3) & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
     scale_color_gradientn(colors=pals::jet())
+  return(p)
+}
+
+plot_per_ct_ws(ws_rctd)
+```
+
+```{r plt-dec-xy-card, message=FALSE, fig.width=10, fig.height=5}
+#| code-fold: true
+plot_per_ct_ws(ws_card)
 ```
 
 The deconvolution result can also be viewed as a heatmap, where rows = cells and columns = clusters:
 
-```{r heatmap, fig.width=4, fig.height=3}
+```{r heatmap, fig.width=7, fig.height=4}
+#| layout-ncol: 2
 #| code-fold: true
-pheatmap(ws, show_rownames=FALSE, show_colnames=TRUE,
+plot_heat_ws <- function(ws){
+  p <- pheatmap(ws, show_rownames=FALSE, show_colnames=TRUE,
     cellwidth=12, treeheight_row=5, treeheight_col=5)
+  return(p)
+}
+plot_heat_ws(ws_rctd)
+plot_heat_ws(ws_card)
 ```
 
 We see that more than half of the spots are estimated to have a stromal proportion of more than 50%. Few spots have an intense and distinct signal for cancerous subpopulations, DCIS1 and DCIS2.
@@ -207,12 +281,13 @@ ids <- names(ws)[apply(ws, 1, which.max)]
 names(ids) <- rownames(ws)
 vis$RCTD <- factor(ids[colnames(vis)])
 
-# derive majority vote nouding stromal cells
+# derive majority vote excluding stromal cells
 ws_no_stroma <- ws[, colnames(ws) != "stromal"]
 ids_no_stroma <- names(ws_no_stroma)[apply(ws_no_stroma, 1, which.max)]
 names(ids_no_stroma) <- rownames(ws)
 vis$RCTD_no_stroma <- factor(ids_no_stroma[colnames(vis)])
 ```
+
 
 We can visualize these three annotations spatially:
 
