@@ -62,7 +62,7 @@ sce
 
 ## Analysis
 
-### `harmony` integration
+### Integration
 
 To accomplish data transfer across cells of either two assays (scRNA-seq and imaging-based ST), we first need to find cells that are similar between the two datasets. To this end, we use the common genes of both assays to integrate both datasets into a joint embedding space. Here, the objective is to find the nearest scRNA-seq cell neighbors of each Xenium cell in the joint embedding space, assuming that these cells will have similar transcriptional profiles. 
 
@@ -126,7 +126,7 @@ plot_layout(nrow=1, guides="collect") &
         plot.title=element_text(hjust=0.5))
 ```
 
-### Marker gene selection
+### Selection
 
 Here, we choose a small subset of features to transfer onto the Xenium assay. 
 For this purpose, we test for differentially expressed genes (DEGs) between 
@@ -149,7 +149,7 @@ rownames(top) <- NULL
 head(top)
 ```
 
-### kNN-based aggregation
+### Aggregation
 
 Now that we have shown there is a correction for batch effects between Xenium and Chromium assays, we can transfer counts from single-cell onto Xenium data by identifying the k-nearest neighbors (kNNs) of each Xenium cell in the Chromium data, and imputing missing genes by aggregating their profile across kNNs (here, using mean expression). 
 
