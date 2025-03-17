@@ -72,8 +72,9 @@ gz <- "binned_outputs/square_008um/deconvolution.csv.gz"
 df <- read.csv(file.path(td, gz), row.names=1)
 head(df <- df[complete.cases(df), ])
 # keep only annotated bins
-vhd8 <- vhd8[, df$barcode]
-colData(vhd8)[names(df[-1])] <- df[-1]
+vhd8 <- vhd8[, rownames(df)]
+names(df) <- c("DeconClass", "DeconLabel1", "DeconLabel2")
+colData(vhd8)[names(df)] <- df
 ```
 
 ```{r plt-lab-xy, fig.width=12, fig.height=5, message=FALSE}
@@ -431,14 +432,14 @@ We will visualize the same subset for both bin sizes in any downstream analyses.
 We also assume there are at most two cell types in a 16 µm bin as in 8 µm, 
 and thus we would expect a smaller proportion of singlets.
 
-```{r RCDT, message=FALSE, warning=FALSE, results="hide"}
+```{r RCTD, message=FALSE, warning=FALSE, results="hide"}
 # downsample to at most 4,000 cells per cluster
 # (this is done only to keep runtime/memory low)
 cs <- split(seq_len(ncol(sce)), sce$Level1)
 cs <- lapply(cs, \(.) sample(., min(length(.), 4e3)))
 ncol(.sce <- sce[, unlist(cs)])
-obj <- createRctd(.vhd16, .sce, cell_type_col="Level1", max_cores=5)
-(res <- runRctd(obj, rctd_mode="doublet"))
+(res <- runRctd(.vhd16, .sce, cell_type_col="Level1", 
+                max_cores=5, rctd_mode="doublet"))
 ```
 
 Weights inferred by `RCTD` correspond to proportions of cell types, such that
@@ -541,20 +542,20 @@ fq <- prop.table(table(.vhd16$Banksy, .vhd16$.DeconLabel1), 2)
 pheatmap(fq, cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
-From the above heatmap, cluster 1 is mostly immune cells with endothelial; cluster 9 matches B cell bins; cluster 7 and 8 are likely intestinal epithelial and smooth muscle, respectively; fibroblast is common in cluster 4; tumor spans cluster 2, 5, and 6. 
+From the above heatmap, cluster 7 is mostly immune cells with endothelial; cluster 9 matches B cell bins; cluster 3 and 6 are likely intestinal epithelial and smooth muscle, respectively; fibroblast is common in cluster 5; tumor spans cluster 2 and 8. 
 
 ## Neighborhood analysis
 
 Here, we want to quantify the abundance between *T cells*, *B cells*, or 
-*Myeloid* bins to *Fibroblast* or *Tumor* bins in 16 µm zoomed region.
+*Myeloid* bins to *Fibroblast* or *Tumor* bins in 8 µm zoomed region.
 We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` to calculate, 
 for each bin, the abundance of other cell types within a radius of 200 px;
 the resulting (bins $\times$ types) matrix is stored as `reducedDim` slot `"abundances"`.
 
 ```{r Statial}
-xy <- data.frame(spatialCoords(.vhd16))
-colData(.vhd16)[names(xy)] <- xy
-.vhd16 <- getAbundances(.vhd16, 
+xy <- data.frame(spatialCoords(.vhd8))
+colData(.vhd8)[names(xy)] <- xy
+.vhd8 <- getAbundances(.vhd8, 
     cellType=".DeconLabel1", 
     imageID="sample_id", 
     spatialCoords=names(xy),
@@ -564,8 +565,8 @@ colData(.vhd16)[names(xy)] <- xy
 Let's have a look at the abundance and distance results, also including deconvolution results:
 
 ```{r Statial-df}
-df <- reducedDim(.vhd16, "abundances")
-df$CT <- .vhd16$.DeconLabel1
+df <- reducedDim(.vhd8, "abundances")
+df$CT <- .vhd8$.DeconLabel1
 df[1:5, 1:5]
 ```
 
@@ -580,14 +581,14 @@ fd <- pivot_longer(
 head(fd)
 ```
 
-In this region, we observe more tumor than fibroblast bins around each of the immune bins.
-However, note that in this zoomed region, we have nearly 3 times more tumor bins compared to fibroblast bins. 
+In this region, we observe more fibroblast than tumor bins around each of the immune bins.
+However, note that in this zoomed region, we have nearly 1.4 times more fibroblast bins compared to tumor bins. 
 Thus, we need to scale abundance values by the number of target cell type bins observed in the region. 
 
 ```{r Statial-plt, fig.width=6, fig.height=2.5}
 #| code-fold: true
-n_tum <- table(.vhd16$.DeconLabel1)["Tumor"]
-n_fib <- table(.vhd16$.DeconLabel1)["Fibroblast"]
+n_tum <- table(.vhd8$.DeconLabel1)["Tumor"]
+n_fib <- table(.vhd8$.DeconLabel1)["Fibroblast"]
 fd$p <- ifelse(fd$target == "Tumor", fd$n/n_tum, fd$n/n_fib)
 ggplot(fd, aes(x=CT, y=n, fill=target)) + 
     labs(y="# cells within 200px") +
@@ -602,10 +603,11 @@ plot_layout(nrow=1, guides="collect") &
         legend.key.size=unit(0, "lines"))
 ```
 
-After correction, we see that the abundance of fibroblast bins does not differ much 
-from the abundance of tumor bins around each immune cell type in the zoomed region. 
+After correction, we see amplified differences in the relative abundance of 
+fibroblast bins compared to tumor bins around each immune cell type in the 
+zoomed region. 
 
-The same analysis steps could be applied to the (unfiltered) 8 μm resolution 
+The same analysis steps could be applied to the (unfiltered) 16 μm resolution 
 data with the corresponding `RCTD` results provided by the authors. 
 
 ## Conclusion
