@@ -99,12 +99,115 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ```{r eval=FALSE}
 #| code-fold: false
-(ad <- SCE2AnnData(sce, X_name="X"))
+(ad <- SCE2AnnData(spe, X_name="counts"))
 # AnnData object with n_obs × n_vars = 3005 × 19972
 #     obs: 'labels', 'precise_labels', 'cell_type'
 #     uns: 'X_name'
 ```
 
+## SpatialExperiment
+
+We can also use `SCE2AnnData` function from the previous example and convert an `SpatialExperiment` object to an AnnData. 
+
+```{r load-spe, message=FALSE, results="hide"}
+# retrieve dataset from OSF repo
+library(OSTA.data)
+library(SpatialExperiment)
+library(VisiumIO)
+library(zellkonverter)
+id <- "Visium_HumanColon_Oliveira"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+```
+
+```{r spe}
+# read into 'SpatialExperiment'
+obj <- TENxVisium(
+    spacerangerOut=td, 
+    format="h5", 
+    images="lowres")
+(spe <- import(obj))
+```
+
+```{r}
+(ad <- SCE2AnnData(spe, X_name="counts"))
+# AnnData object with n_obs × n_vars = 4269 × 18085
+#     obs: 'in_tissue', 'array_row', 'array_col', 'sample_id'
+#     var: 'ID', 'Symbol', 'Type'
+#     uns: 'X_name', 'resources', 'spatialList'
+```
+
+We should now populate `uns` and `obsm` components of `anndata` with spatial coordinates and images. We start with the coordinates
+
+```{r}
+coords <- spatialCoords(spe)
+colnames(coords) <- c("x", "y")
+obsm <- list(spatial = coords[,c(2,1)])
+```
+
+Now lets create the `uns` component. The list of `uns` should compose of as many as samples as the `SpatialExperiment` object has. Also, each sample should have two elements, one for the image and the other for datasets.
+
+```{r}
+# get image metadata
+imgdata <- imgData(spe)
+
+# get image
+img <- imgRaster(spe)
+img <- apply(img, c(1,2), \(x) col2rgb(x))
+img <- aperm(img, perm = c(2,3,1))
+img <- img/255
+
+# create uns
+uns <- list(
+  spatial = setNames(list(NULL), imgdata$sample_id)
+)
+uns[["spatial"]][[imgdata$sample_id]] <-
+  list(images = list(hires = img,
+                     # scalefactors = list(tissue_lowres_scalef = imgdata$scaleFactor,
+                     scalefactors = list(tissue_hires_scalef = 1,
+                                         spot_diameter_fullres = 0.5)))
+```
+
+Now lets insert the components bask to the `anndata`.
+
+```{r}
+ad$library_id <- imgdata$sample_id
+ad$obsm <- obsm
+ad$uns <- uns
+ad$write_h5ad("spe.h5ad")
+```
+
+### Calling Python
+
+We can then point `reticulate` to said environment via:
+
+```{r eval=FALSE}
+#| code-fold: false
+library(reticulate)
+# bin <- "~/software/mambaforge/bin/conda"
+# options(reticulate.conda_binary=bin)
+use_condaenv("scverse")
+```
+
+Visualize in python
+
+```{python eval=FALSE}
+#| code-fold: false
+import squidpy as sq
+import anndata as ad
+adata = ad.read_h5ad("spe.h5ad")
+adata.uns['spatial']['sample01']['images']['scalefactors']['tissue_hires_scalef'] = 0.01
+sq.pl.spatial_scatter(adata,
+                      color=["array_row"], 
+                      img_res_key = "hires",
+                      # library_id = "sample01", 
+                      save='test.png')
+```
+
+```{r fig-spd, echo = FALSE, out.width = "60%", fig.cap = "Overview of the scverse/Python `SpatialData` framework."}
+knitr::include_graphics("figures//test.png")
+```
 
 ## Appendix
 
