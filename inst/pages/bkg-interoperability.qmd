@@ -99,7 +99,7 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ```{r eval=FALSE}
 #| code-fold: false
-(ad <- SCE2AnnData(spe, X_name="X"))
+(ad <- SCE2AnnData(sce, X_name="X"))
 # AnnData object with n_obs × n_vars = 3005 × 19972
 #     obs: 'labels', 'precise_labels', 'cell_type'
 #     uns: 'X_name'
