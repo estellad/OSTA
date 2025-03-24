@@ -109,16 +109,24 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 We can also use `SCE2AnnData` function from the previous example and convert an `SpatialExperiment` object to an AnnData. 
 
-```{r load-spe, message=FALSE, results="hide"}
+```{r}
 # retrieve dataset from OSF repo
 library(OSTA.data)
 library(SpatialExperiment)
 library(VisiumIO)
 library(zellkonverter)
-id <- "Visium_HumanColon_Oliveira"
+library(jsonlite)
+```
+
+
+```{r load-spe, message=FALSE, results="hide"}
+# retrieve dataset from OSF repo
+id <- "Visium_HumanBreast_Janesick"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
+# retrieve scalefactors for Visium assay
+scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
 ```
 
 ```{r spe}
@@ -143,7 +151,7 @@ We should now populate `uns` and `obsm` components of `anndata` with spatial coo
 ```{r}
 coords <- spatialCoords(spe)
 colnames(coords) <- c("x", "y")
-obsm <- list(spatial = coords[,c(2,1)])
+obsm <- list(spatial = coords)
 ```
 
 Now lets create the `uns` component. The list of `uns` should compose of as many as samples as the `SpatialExperiment` object has. Also, each sample should have two elements, one for the image and the other for datasets.
@@ -163,10 +171,8 @@ uns <- list(
   spatial = setNames(list(NULL), imgdata$sample_id)
 )
 uns[["spatial"]][[imgdata$sample_id]] <-
-  list(images = list(hires = img,
-                     # scalefactors = list(tissue_lowres_scalef = imgdata$scaleFactor,
-                     scalefactors = list(tissue_hires_scalef = 1,
-                                         spot_diameter_fullres = 0.5)))
+  list(images = list(lowres = img),
+       scalefactors = scalefactors)
 ```
 
 Now lets insert the components bask to the `anndata`.
@@ -197,16 +203,19 @@ Visualize in python
 import squidpy as sq
 import anndata as ad
 adata = ad.read_h5ad("spe.h5ad")
-adata.uns['spatial']['sample01']['images']['scalefactors']['tissue_hires_scalef'] = 0.01
 sq.pl.spatial_scatter(adata,
                       color=["array_row"], 
-                      img_res_key = "hires",
+                      img_res_key = "lowres",
                       # library_id = "sample01", 
                       save='test.png')
 ```
 
-```{r fig-spd, echo = FALSE, out.width = "60%", fig.cap = "Overview of the scverse/Python `SpatialData` framework."}
+```{r fig-spd, echo = FALSE, out.width = "60%"}
 knitr::include_graphics("figures//test.png")
+```
+```{r, echo = FALSE}
+unlink("figures", recursive = TRUE)
+file.remove("spe.h5ad")
 ```
 
 ## Appendix
