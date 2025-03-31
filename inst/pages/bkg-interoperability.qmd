@@ -34,9 +34,10 @@ Say we have created a `conda` environment; e.g.:
 ```{bash eval=FALSE}
 #| code-fold: false
 # from the command line
-conda create -n scvi python=3.12
-conda activate scvi
-conda install scvi-tools -c conda-forge
+conda create -n bkg-interop python=3.12
+conda activate bkg-interop
+conda install Dask==2024.12.1 scvi-tools -c conda-forge
+pip install squidpy==1.6.2
 ```
 
 We can then point `reticulate` to said environment via:
@@ -46,7 +47,7 @@ We can then point `reticulate` to said environment via:
 library(reticulate)
 bin <- "~/software/mambaforge/bin/conda"
 options(reticulate.conda_binary=bin)
-use_condaenv("scvi")
+use_condaenv("bkg-interop")
 ```
 
 R commands will now be `reticulate`d in the above environment; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
@@ -186,16 +187,6 @@ ad$write_h5ad("spe.h5ad")
 
 ### Calling Python
 
-We can then point `reticulate` to said environment via:
-
-```{r eval=FALSE}
-#| code-fold: false
-library(reticulate)
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-use_condaenv("scverse")
-```
-
 Visualize in python
 
 ```{python eval=FALSE}
@@ -206,8 +197,7 @@ adata = ad.read_h5ad("spe.h5ad")
 sq.pl.spatial_scatter(adata,
                       color=["array_row"], 
                       img_res_key = "lowres",
-                      # library_id = "sample01", 
-                      save='test.png')
+                      save='spe.png')
 ```
 
 ```{r fig-spd, echo = FALSE, out.width = "60%"}
