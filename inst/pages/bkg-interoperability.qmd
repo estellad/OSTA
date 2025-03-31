@@ -24,12 +24,9 @@ The `r BiocStyle::Biocpkg("Rarr")` package, which has recently been submitted to
 Together, these developments have the potential to lay a foundation for more seamless interoperability of computational tools to analyze single-cell and spatial omics data.
 -->
 
+## Configuring Python
 
-## Example
-
-### Calling Python
-
-Say we have created a `conda` environment; e.g.:
+We first create an environment with Python modules necessary the examples in this chapter.
 
 ```{bash eval=FALSE}
 #| code-fold: false
@@ -40,11 +37,26 @@ conda install Dask==2024.12.1 scvi-tools -c conda-forge
 pip install squidpy==1.6.2
 ```
 
-We can then point `reticulate` to said environment via:
+## Dependencies 
+
+```{r}
+# retrieve dataset from OSF repo
+library(OSTA.data)
+library(SpatialExperiment)
+library(VisiumIO)
+library(zellkonverter)
+library(jsonlite)
+library(reticulate)
+```
+
+## SingleCellExperiment
+
+### Calling Python
+
+We can point `reticulate` to said environment we just created via:
 
 ```{r eval=FALSE}
 #| code-fold: false
-library(reticulate)
 bin <- "~/software/mambaforge/bin/conda"
 options(reticulate.conda_binary=bin)
 use_condaenv("bkg-interop")
@@ -60,7 +72,6 @@ dir.create(td <- tempfile())
 # AnnData object with n_obs × n_vars = 3005 × 19972
 #     obs: 'labels', 'precise_labels', 'cell_type'
 ```
-
 
 ### Continuing in R
 
@@ -78,7 +89,6 @@ Then again, `reticulate` supports few direct [type conversions](https://rstudio.
 
 ```{r eval=FALSE}
 #| code-fold: false
-library(zellkonverter)
 (sce <- AnnData2SCE(ad))
 # class: SingleCellExperiment 
 # dim: 19972 3005 
@@ -108,17 +118,9 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ## SpatialExperiment
 
-We can also use `SCE2AnnData` function from the previous example and convert an `SpatialExperiment` object to an AnnData. 
+### Starting with R
 
-```{r}
-# retrieve dataset from OSF repo
-library(OSTA.data)
-library(SpatialExperiment)
-library(VisiumIO)
-library(zellkonverter)
-library(jsonlite)
-```
-
+For the example with `SpatialExperiment`, we will use the dataset from @Janesick2023, which includes Visium measurements on human breast cancer tissue.
 
 ```{r load-spe, message=FALSE, results="hide"}
 # retrieve dataset from OSF repo
@@ -126,18 +128,21 @@ id <- "Visium_HumanBreast_Janesick"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-# retrieve scalefactors for Visium assay
-scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
-```
-
-```{r spe}
-# read into 'SpatialExperiment'
 obj <- TENxVisium(
     spacerangerOut=td, 
     format="h5", 
     images="lowres")
 (spe <- import(obj))
 ```
+
+We also have to parse the original scaling information for spots and images available in standard Visium output. We will use this later during conversion.
+
+```{r scalefactors, message=FALSE, results="hide"}
+# retrieve scalefactors for Visium assay
+scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
+```
+
+We can also use `SCE2AnnData` function from the previous example and convert the `SingleCellExperiment` relevant information of the `SpatialExperiment` object to an `AnnData`. 
 
 ```{r}
 (ad <- SCE2AnnData(spe, X_name="counts"))
@@ -147,7 +152,7 @@ obj <- TENxVisium(
 #     uns: 'X_name', 'resources', 'spatialList'
 ```
 
-We should now populate `uns` and `obsm` components of `anndata` with spatial coordinates and images. We start with the coordinates
+We should now populate `uns` and `obsm` components of `AnnData` with spatial coordinates and images. We start with the coordinates.
 
 ```{r}
 coords <- spatialCoords(spe)
@@ -155,7 +160,7 @@ colnames(coords) <- c("x", "y")
 obsm <- list(spatial = coords)
 ```
 
-Now lets create the `uns` component. The list of `uns` should compose of as many as samples as the `SpatialExperiment` object has. Also, each sample should have two elements, one for the image and the other for datasets.
+Now lets create the `uns` component. The list of `uns` should compose of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for scaling information.
 
 ```{r}
 # get image metadata
@@ -176,7 +181,7 @@ uns[["spatial"]][[imgdata$sample_id]] <-
        scalefactors = scalefactors)
 ```
 
-Now lets insert the components bask to the `anndata`.
+Now lets insert the components back to the `AnnData`.
 
 ```{r}
 ad$library_id <- imgdata$sample_id
@@ -187,7 +192,7 @@ ad$write_h5ad("spe.h5ad")
 
 ### Calling Python
 
-Visualize in python
+Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `Squidpy` module to visualize the Visium data.
 
 ```{python eval=FALSE}
 #| code-fold: false
