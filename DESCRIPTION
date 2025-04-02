@@ -98,7 +98,7 @@ Suggests:
     scrapper,
     sessioninfo, 
     xml2
-Remotes:
+Remotes: 
     drisso/SpaceTrooper@devel_spatialBook,
     ggrajeda/spacexr
 Encoding: UTF-8
