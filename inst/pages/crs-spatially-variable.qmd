@@ -139,7 +139,7 @@ plotSpots(spe,
 
 ```{r svg-DESpace, message=FALSE}
 # run DESpace
-res <- DESpace_test(spe, spatial_cluster="BayesSpace")
+res <- svg_test(spe, cluster_col="BayesSpace")
 head(res_DESpace <- res$gene_results)
 # count significant SVGs (at 5% FDR significance level)
 table(res_DESpace$FDR <= 0.05)
