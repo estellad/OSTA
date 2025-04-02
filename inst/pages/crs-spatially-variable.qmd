@@ -93,36 +93,36 @@ In this example, we use a small subset of the dataset for faster runtime. We sel
 [A full analysis with `nnSVG` using all spots for this dataset and default filtering parameters for an individual Visium sample from human brain tissue (available from `r BiocStyle::Biocpkg("spatialLIBD")`) takes around 45 minutes on a standard laptop.]{.aside}
 
 ```{r svg-nnSVG, message=FALSE, eval=FALSE}
-# # set random seed for number generation
-# # in order to make results reproducible
-# set.seed(123)
-# # sample 100 spots to decrease runtime in this demo
-# # (note: skip this step in full analysis)
-# n <- 100
-# sub <- spe[, sample(ncol(spe), 100)]
-# # filter lowly expressed genes using stringent
-# # criteria to decrease runtime in this demo
-# # (note: use default criteria in full analysis)
-# sub <- filter_genes(sub,     # filter for genes with...
-#     filter_genes_ncounts=10, # at least 10 counts in
-#     filter_genes_pcspots=3)  # at least 3% of spots
-# # re-normalize counts post-filtering
-# sub <- logNormCounts(sub)
-# 
-# # run nnSVG
-# set.seed(123)
-# sub <- nnSVG(sub)
-# 
-# # extract gene-level results
-# res_nnSVG <- rowData(sub)
-# # show results
-# head(res_nnSVG, 3)
-# # count significant SVGs (at 5% FDR significance level)
-# table(res_nnSVG$padj <= 0.05)
-# # identify the top-ranked SVGs
-# res_nnSVG$gene_name[res_nnSVG$rank == 1]
-# # store the top 7 SVGs
-# top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
+# set random seed for number generation
+# in order to make results reproducible
+set.seed(123)
+# sample 100 spots to decrease runtime in this demo
+# (note: skip this step in full analysis)
+n <- 100
+sub <- spe[, sample(ncol(spe), 100)]
+# filter lowly expressed genes using stringent
+# criteria to decrease runtime in this demo
+# (note: use default criteria in full analysis)
+sub <- filter_genes(sub,     # filter for genes with...
+    filter_genes_ncounts=10, # at least 10 counts in
+    filter_genes_pcspots=3)  # at least 3% of spots
+# re-normalize counts post-filtering
+sub <- logNormCounts(sub)
+
+# run nnSVG
+set.seed(123)
+sub <- nnSVG(sub)
+
+# extract gene-level results
+res_nnSVG <- rowData(sub)
+# show results
+head(res_nnSVG, 3)
+# count significant SVGs (at 5% FDR significance level)
+table(res_nnSVG$padj <= 0.05)
+# identify the top-ranked SVGs
+res_nnSVG$gene_name[res_nnSVG$rank == 1]
+# store the top 7 SVGs
+top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
 ```
 
 ### `DESpace`
