@@ -2,7 +2,7 @@
 
 ## Preamble
 
-Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification. These spots are usually removed prior to further analysis, since otherwise they tend to create problems during downstream analyses such as clustering. For example, problematic spots that are not removed could show up as separate clusters, which may be misidentified as distinct cell types.
+Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification. These spots are usually removed prior to further analysis, since they otherwise tend to create problems during downstream analyses such as clustering. For example, problematic spots that are not removed could show up as separate clusters, which may be misidentified as distinct cell types.
 
 Low-quality spots can be identified according to several characteristics, including:
 
@@ -23,13 +23,13 @@ The first three characteristics listed above are the standard QC metrics used in
 
 ### Structure of the Chapter
 
-In this chapter, we'll start with introducing some methods to idenitfy low-quality spots using various strategies, inclduing 1) standard methods developed for snRNA-seq via global thresholding, 2) more recent methods that aim to mediates bias in quality control attributed to the spatial confounding. Some diagnositic visualization and strategies are further introduced in [QC Diagnositc](#qc-diagnosis).
+### Structure of the chapter
 
-In the[advanced topics section](#advanced-topics), we'll visit some novel and unique challenges the quality control of SRT data, including idenitfying novel artefacts, i.e. regnional artifacts and quality control based on number of cells idenitfied in each spot. While these knowledges are every useful, the procedures are not necessarily necessary for every SRT samples, depending on the needs. 
+In this chapter, we'll start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for snRNA-seq via global thresholding, 2) more recent methods that aim to mediates bias in quality control attributed to the spatial confounding. Some diagnostic visualization and strategies are further introduced in [QC Diagnositc](#qc-diagnosis).
 
-For readers have minimium experience with scRNA-seq data analysis, we recommond to read the remaining of the chapters. For experienced readers, one can start from @spotsweeper_local_outlier section. 
+In the[advanced topics section](#advanced-topics), we'll visit some novel and unique challenges the quality control of SRT data, including identifying novel artefacts, i.e. regional artifacts and quality control based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all data sets. 
 
-To note, the current Chapter focuses on the quality control at the spot level. In some datasets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
+To note, the current Chapter focuses on the quality control at the spot level. In some data sets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
 
 
 ### Dependencies and prerequisite
@@ -51,7 +51,7 @@ Load previously saved data object (see @sec-seq-load-data-save-objects).
 spe <- readRDS("seq-spe_load.rds")
 ```
 
-#### Calculate QC metrics using `scater`
+## Calculate QC metrics using `scater`
 
 We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. The QC metrics from `scater` can be calculated and added to the `SpatialExperiment` object's column data using the `addPerCellQC` function. The `sum` column contains the total number of unique molecular identifiers (UMIs) for each spot, the `detected` column contains the number of unique genes detected per spot, and `subsets_mito_percent` contains the percentage (or proportion) of transcripts mapping to mitochondrial genes per spot.
 
@@ -78,7 +78,7 @@ head(colData(spe))
 
 ### Global outlier detection with fixed threhsolds
 
-Many commonly used QC methods currently applied to SRT were adapted from snRNA-seq workflows, such as **global** **outlier detection**. The simplest option for identifying potentially low-quality spots is to apply fixed thresholds to each QC metrics across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics. For example, we might consider spots to be of low-qualty if they have library sizes below 600 UMI or mitochondrial propotion above 30%. These cutoffs are somewhat arbitrary and often require extensive knowledge of the tissue type and dataset at hand. Exploratory visualizations can be used to help select appropriate thresholds, which may differ depending on the dataset.
+Many commonly used QC methods currently applied to SRT were adapted from snRNA-seq workflows, such as **global outlier detection**. The simplest option for identifying potentially low-quality spots is to apply fixed thresholds to each QC metrics across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics. For example, we might consider spots to be of low-qualty if they have library sizes below 600 UMI or mitochondrial propotion above 30%. These cutoffs are somewhat arbitrary and often require extensive knowledge of the tissue type and dataset at hand. Exploratory visualizations can be used to help select appropriate thresholds, which may differ depending on the dataset.
 
 Here, we use visualizations to select thresholds for several QC metrics in our human DLPFC dataset: (i) library size, (ii) number of expressed genes, (iii) proportion of mitochondrial reads, and (iv) number of cells per spot.
 
@@ -197,95 +197,28 @@ p1 | p2 | p3
 
 ```
 
-<!--### Global outlier detection using adaptive thresholds
-
-An alternative approach to using fixed thresholds is to use adaptive thresholds that adjusts based on the underling data distribution. These methods assume that the dataset is composed of mostly high-quality observations. The method we will show here is based on median absolute deviations (MAD) from the median value of each metric across all spots. This should ensure that \~99% of non-outlier values will be retained, so long as they follow a normal distribution
-
-As shown above, the distribution for library and detected genes tend to follow a more log-normal distribution, whereas mitochondrial proportion typically follows a normal distribution. For this reason, we will conduct outlier detection using the `isOutlier` function from the `scuttle` package to find spots that are more than 3 MADs below the median of the log-transformed library size and detected genes. For mitochondrial percentage, we will find spots that are 3 MADs above the median of the mitochondrial percentage (without log-transformation).
-
-```{r}
-# find 3 MADs outliers
-qc_lib_mads <- isOutlier(spe$sum, nmads=3, log=TRUE, type="lower")
-qc_detected_mads <- isOutlier(spe$detected, nmads=3, log=TRUE, type="lower")
-qc_mito_mads <- isOutlier(spe$subsets_mito_percent, nmads=3, log=FALSE, type="higher")
-
-table(qc_lib_mads)
-table(qc_detected_mads)
-table(qc_mito_mads)
-```
-
-As before, we can use spot plots and violins to determine how well these adaptive thresholds worked.
-
-```{r, fig.height=3.5, fig.width=10.5}
-# add QC results to colData
-spe$qc_lib_mads <- qc_lib_mads
-spe$qc_detected_mads <- qc_detected_mads
-spe$qc_mito_mads <- qc_mito_mads
-
-# check spatial pattern of discarded spots
-p1 <- plotSpotQC(spe, plot_type = "spot", 
-           annotate = "qc_lib_mads") +
-  ggtitle("Library size (< 3 MADs)")
-
-p2 <-  plotSpotQC(spe, plot_type = "spot", 
-           annotate = "qc_detected_mads") +
-  ggtitle("Detected genes (< 3 MADs)")
-
-p3 <-  plotSpotQC(spe, plot_type = "spot", 
-           annotate = "qc_mito_mads") +
-  ggtitle("Mito proportion (> 3 MADs)")
-
-p1 | p2 | p3
-
-```
-
-```{r, fig.height=3.75}
-# library size and outliers
-p1 <- plotSpotQC(spe, plot_type="violin", x_metric="sum", 
-                 annotate="qc_lib_mads", point_size=0.5) +
-      xlab("Library size")
-  
-
-# detected genes and outliers
-p2 <- plotSpotQC(spe, plot_type="violin", x_metric="detected", 
-                 annotate="qc_detected_mads", point_size=0.5) +
-      xlab("Detected genes") 
-
-# mito percent and outliers
-p3 <- plotSpotQC(spe, plot_type="violin", x_metric="subsets_mito_percent", 
-                 annotate="qc_mito_mads", point_size=0.5) +
-      xlab("Mito proportion") 
-
-# plot with patchwork
-p1 | p2 | p3
-
-```
-
-The main advantage of using adaptive thresholds is that it relieves the user of manually searching for and finding a reasonable fixed threshold (or worse, blindly picking a fixed threshold). However, looking at the spots plots, it appears that global outlier detection using a threshold of 3 MADs is beginning to show spatial patterning in this particular dataset. Users should always carefully inspect their QC results before moving to downstream analyses. Next, we'll look at methods developed to account for biology confound in QC metrics by incorporating spatial information.
-
--->
 
 ### Local outlier detection using SpotSweeper {#spotsweeper_local_outlier}
 
-One of the key assumptions of outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based SRT due to the biological heterogeneity in the tissue being sampled for each spot.
+One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell/spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based SRT due to the biological heterogeneity in the tissue being sampled for each spot.
 
 One strategy to address this issue is to look for outliers within their local biological neighborhood. Here we will implement **local outlier detection** using the `localOutliers` function from the [SpotSweeper](https://www.bioconductor.org/packages/release/bioc/html/SpotSweeper.html) package [@Totty2024-SpotSweeper]. This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of it's nearest neighbors. By default, `localOutliers` uses `k=36` nearest neighbors, which equates to third-order neighbors (i.e., three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g., STOmics), third-order neighbors would be `k=48`.
 
-The QC metrics for each spot undergo a modified local z-score transformation (two-tailed) based on the median and median absolute deviations of it's neighbors. Here we will use threshold of 3.3 z-scores (`cutoff=3.3`), motivated by the reasoning this corresponding to a p-value of .001. These methods assume a normal distribution, so we’ll use the log-transformed `sum` of the total counts and the log-transformed number of `detected` genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
+Similar to the adaptive thresholds used above, these methods assume a normal distribution, so we’ll use the log-transformed `sum` of the total counts and the log-transformed number of `detected` genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
 
 ```{r, message=FALSE}
 # library size
-spe <- localOutliers(spe, metric = "sum", cutoff=3.3, direction = "lower", log = TRUE)
+spe <- localOutliers(spe, metric = "sum", direction = "lower", log = TRUE)
 
 # unique genes
-spe <- localOutliers(spe, metric = "detected", cutoff=3.3, direction = "lower", log = TRUE)
+spe <- localOutliers(spe, metric = "detected", direction = "lower", log = TRUE)
 
 # mitochondrial percent
-spe <- localOutliers(spe, metric = "subsets_mito_percent", cutoff=3.3, direction = "higher",
+spe <- localOutliers(spe, metric = "subsets_mito_percent", direction = "higher",
                      log = FALSE)
 ```
 
-Similar to `scater`'s `addPerCellQC` function, the `localOutliers` function adds several columns to the `colData` slot of the `SpatialExperiment` object. The `_outlier` column contains a logical vector indicating whether the spot is an outlier for the respective metric and the `_z` column returns the local z-transformed QC metric. If `log=TRUE`, an additional `_log` column will return the log-transformed metric.
+Similar to `scater`'s `addPerCellQC` function, the `localOutliers` function adds several columns to the `colData` slot of the `SpatialExperiment` object. The `X_outlier` column contains a logical vector indicating whether the spot is an outlier for the respective metric and the `X_z` column returns the local z-transformed QC metric. If `log=TRUE`, an additional `X_log` column will return the log-transformed metric.
 
 We can then visually confirm that the local outliers detected indeed appear to be outliers by using spot plots of the QC metrics. To do this, we'll visualize the output log2-transformed data (or un-transformed mitochondrial proportion), next to the detected local outliers.
 
@@ -321,7 +254,7 @@ p6 <- plotSpotQC(spe, plot_type="spot", in_tissue="in_tissue",
 
 ```
 
-Indeed, it is particularly evident in the log-transformed library size and detected genes that there are clear outliers in the bottom right-hand corner of the sample. We can additionally see that these spots were successfully identified in the bottom row. This "eye test" is a good diagnostic for confirming that local outliers are being accurately detected. We can alternatively visualize the spots that were detected as outliers by visualizing the z-transformed metrics for each spot using violin plots.
+It is particularly evident in the log-transformed library size and detected genes that there are clear outliers in the bottom right corner of the sample. We can additionally see that these spots were successfully identified in the bottom row. This "eye test" is a good diagnostic for confirming that local outliers are being accurately detected. We can alternatively visualize the spots that were detected as outliers by visualizing the z-transformed metrics for each spot using violin plots.
 
 ```{r, fig.height=3.75}
 
@@ -346,83 +279,6 @@ p1 | p2 | p3
 
 ```
 
-The spots that were clearly local outliers in library size and number of genes detected display z-scores of up to -10. In other words, these spots deviate up to 10 standard deviations lower than their local mean.
-
-### Local outlier detection using adaptive thresholds
-
-Similar to the global examples above, and as alternative to the fixed threshold of 3.3 z-scores, we can use the `isOutlier` function from `scuttle` to determine outliers based on 3 MADs from the median of the local z-transformed QC metrics. The z-transformed data here already follows a normal distribution, so we set `log=FALSE`.
-
-```{r}
-# find 3 MADs outliers
-sum_z_mads <- isOutlier(spe$sum_z, nmads=3, log=FALSE, type="lower")
-detected_z_mads <- isOutlier(spe$detected_z, nmads=3, log=FALSE, type="lower")
-subsets_mito_percent_z_mads <- isOutlier(spe$subsets_mito_percent_z, nmads=3, 
-                                         log=FALSE, type="higher")
-
-table(sum_z_mads)
-table(detected_z_mads)
-table(subsets_mito_percent_z_mads)
-```
-
-```{r, fig.height=7, fig.width=11}
-# add QC results to colData
-spe$sum_z_mads <- sum_z_mads
-spe$detected_z_mads <- detected_z_mads
-spe$subsets_mito_percent_z_mads <- subsets_mito_percent_z_mads
-
-# spot plot of log-transformed library size
-p1 <- plotSpots(spe, annotate="sum_log") +
-  ggtitle("log2(Library Size)")
-
-p2 <- plotSpotQC(spe, plot_type="spot", in_tissue="in_tissue",
-                 annotate="sum_z_mads", point_size=0.2) +
-        ggtitle("Local Outliers (Library Size)")
-
-
-# spot plot of log-transformed detected genes
-p3 <- plotSpots(spe, annotate="detected_log") +
-  ggtitle("log2(Detected)")
-  
-p4 <- plotSpotQC(spe, plot_type="spot", in_tissue="in_tissue",
-                 annotate="detected_z_mads", point_size=0.2) +
-        ggtitle("Local Outliers (Detected)")
-
-
-# spot plot of mitochondrial proportion
-p5 <- plotSpots(spe, annotate="subsets_mito_percent") +
-  ggtitle("Mito Proportion")
-  
-p6 <- plotSpotQC(spe, plot_type="spot", in_tissue="in_tissue",
-                 annotate="subsets_mito_percent_z_mads", point_size=0.2) +
-        ggtitle("Local Outliers (Mito Prop)")
-
-# plotting together using patchwork
-(p1 / p2) | (p3 / p4) | (p5 / p6)
-```
-
-```{r, fig.height=3.75}
-
-# z-transformed library size and outliers
-p1 <- plotSpotQC(spe, plot_type="violin", x_metric="sum_z", 
-                 annotate="sum_z_mads", point_size=0.5) +
-      xlab("sum_outliers")
-  
-
-# z-transformed detected genes and outliers
-p2 <- plotSpotQC(spe, plot_type="violin", x_metric="detected_z", 
-                 annotate="detected_z_mads", point_size=0.5)+
-      xlab("detected_outliers")
-
-# z-transformed mito percent and outliers
-p3 <- plotSpotQC(spe, plot_type="violin", x_metric="subsets_mito_percent_z", 
-                 annotate="subsets_mito_percent_z_mads", point_size=0.5)+
-      xlab("mito_outliers")
-
-# plot with patchwork
-p1 | p2 | p3
-```
-
-We can see that using an adaptive threshold also works well, though the thresholds determined here are slightly lower than 3 z-scores, so more spots are excluded.
 
 ### Remove low-quality spots
 
@@ -431,51 +287,55 @@ Now that we have calculated several QC metrics and selected thresholds for each 
 We also check again that the combined set of discarded spots does not correspond to any obvious biologically relevant group of spots.
 
 ```{r}
-# number of discarded spots for each metric
-apply(cbind(qc_lib_size, qc_detected, qc_mito_prop#, qc_cell_count
-), 2, sum)
 
-# combined set of discarded spots
-discard <- qc_lib_size | qc_detected | qc_mito_prop#| qc_cell_count
-table(discard)
+# combined global outliers
+spe$global_outliers <- as.logical(qc_lib_size) |
+    as.logical(qc_detected) |
+    as.logical(qc_mito) 
 
-# store in object
-colData(spe)$discard <- discard
-```
+# check number of global outliers
+table(spe$global_outliers)
 
-```{r, fig.height=3.5}
-# check spatial pattern of combined set of discarded spots
-plotSpotQC(spe, plot_type = "spot", 
-           annotate = "discard")
-```
-
-```{r}
-# remove combined set of low-quality spots
-#spe <- spe[, !colData(spe)$discard]
-#dim(spe)
-```
-
-### Removing local outliers
-
-We can then combine all outliers into a single column called `local_outliers` in the `colData` of the `SpatialExperiment` object.
-
-```{r}
-# combine all outliers into "local_outliers" column
+# combine local outliers
 spe$local_outliers <- as.logical(spe$sum_outliers) |
     as.logical(spe$detected_outliers) |
     as.logical(spe$subsets_mito_percent_outliers)
+
+# check number of local outliers
+table(spe$local_outliers)
 ```
 
-## QC Diagnostic
+```{r, fig.height=4}
+# check spatial pattern of combined set of discarded spots
+p1 <- plotSpotQC(spe, plot_type = "spot", 
+           annotate = "global_outliers")
 
-### Bivariate QC plot
+p2 <- plotSpotQC(spe, plot_type = "spot", 
+           annotate = "local_outliers")
+
+p1 + p2
+```
+
+```{r}
+
+# combine local and global outliers to "discard" column
+spe$discard <- as.logical(spe$global_outliers) | as.logical(spe$local_outliers)
+
+# remove combined set of low-quality spots
+spe <- spe[, !colData(spe)$discard]
+dim(spe)
+```
 
 
+## Advanced Topics {#spot-qc-adv-topic}
+### Artifact detection
+#### Hangnail artifact detection with SpotSweeper
 
-### Visually Identifying Hangnail Artifacts
-Hangnail artifacts are best identified by plotting QC metrics for all samples, as they appear as regions with unusually smooth or low variance mitochondrial percentage. We can observe this in the example below as the oblong piece of tissue on the right side has an usually smooth or "smudged" appearance in the mitochondrial percentage (`subsets_mito_percent`) on the right, but not in the library size (`sum`) on the left.
+When working with SRT data sets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how detect and remove hangnail artifacts from Visium datasets. Hangnails artifacts arise during tissue preparation, and most commonly occur when when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper.
 
-#### Loading Data and Adding QC metrics
+Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** like mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
+
+### Loading Data and Adding QC metrics
 
 We start by loading an example Visium dataset from SpotSweeper containing a known "hangnail" artifact, and then calculat per-spot QC metrics, such as mitochondrial percentage, as shown above.
 
@@ -494,6 +354,11 @@ spe.hangnail <- addPerCellQC(spe.hangnail, subsets = list(mito = is_mito))
 head(colData(spe.hangnail))
 ```
 
+#### Identifying Hangnail Artifacts via Local Variance
+
+As a note, SpotSweeper's `findArtifacts` function assumes that an artifact is present in the sample being ran. **This means that if no artifact is present, the function will arbitrary label half the sample as an "artifact".** Therefore, confirming the presence of a hangnail artifact prior to artifact detection is essential.
+
+Hangnail artifacts are best identified by plotting QC metrics for all samples, as they appear as regions with unusually smooth or low variance mitochondrial percentage. We can observe this in the example below as the oblong piece of tissue on the right side has an usually smooth or "smudged" appearance in the mitochondrial percentage (`subsets_mito_percent`) on the right, but not in the library size (`sum`) on the left.
 
 ```{r, fig.height=3.75}
 
@@ -503,19 +368,7 @@ p2 <- plotSpots(spe.hangnail, annotate="subsets_mito_percent")
 p1 | p2
 ```
 
-
-## Advanced Topics {#spot-qc-adv-topic}
-### Artifact detection
-#### Hangnail artifact detection with SpotSweeper
-
-When working with spatial transcriptomics datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how detect and remove hangnail artifacts from Visium datasets. Hangnails artifacts arise during tissue preparation, and most commonly occur when when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper.
-
-The use of high-power drills or other tools during dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** like mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
-
-
-#### Quantifying Local Variance in Mitochondrial Percentage
-
-One strategy to detect this artifacts for subsequent removal is to qunaity this loval variance in mitochondrial percentage. Here we will do this using the `localVariance` function in `SpotSweeper`, specifying the QC metric (`subsets_mito_percent`) and the number of neighbors to consider. The default neighbor size of `n_neighbors=36` works well in our hands.
+A complementary strategy to confirm that existance of an artifact prior to removal is to quantify the local variance in mitochondrial percentage. Here we will do this using the `localVariance` function in `SpotSweeper`, specifying the QC metric (`subsets_mito_percent`) and the number of neighbors to consider. The default neighbor size of `n_neighbors=36` works well in our hands.
 
 ```{r, fig.height=3.75}
 spe.hangnail <- localVariance(spe.hangnail, metric = "subsets_mito_percent", 
@@ -525,15 +378,38 @@ spe.hangnail <- localVariance(spe.hangnail, metric = "subsets_mito_percent",
 plotSpots(spe.hangnail, annotate="local_mito_variance_k36", point_size=1)
 ```
 
-Indeed, we can see that the hangnail artifact has a much lower local variance in mitochondrial percentage compared to the rest of the tissue section.
+Another way to confirm the presence of a hangnail artifact is via the distribution of the local variance in mitochondrial percentage. Samples affected by hangnails often exhibit a long-tailed or bimodal distribution towards lower variance, reflecting regions with abnormal mitochondrial signal variation. We'll demonstrate this here by comparing the distribution of local mitochondrial variance in ths hangnail sample to the distribution in a normal sample.
+
+```{r, fig.height=3.75}
+
+# get local mito ratio variance of a normal sample
+spe <- localVariance(spe, metric = "subsets_mito_percent", 
+                          n_neighbors = 36, name = "local_mito_variance_k36"
+                          )
+
+# plot distribution of local variance in mitochondrial percentage
+hangnail_sample <- data.frame(local_mito_variance = colData(spe.hangnail)$local_mito_variance_k36)
+normal_sample <- data.frame(local_mito_variance = colData(spe)$local_mito_variance_k36)
+
+p1 <- ggplot(hangnail_sample, aes(x = local_mito_variance)) +
+  geom_density(fill = "grey", alpha = 0.5) +
+  ggtitle("Hangnail Sample")
+
+p2 <- ggplot(normal_sample, aes(x = local_mito_variance)) +
+  geom_density(fill = "grey", alpha = 0.5) +
+  ggtitle("Normal Sample")
+
+p1 | p2
+```
+
 
 #### Classifying Artifacts Using Multiscale Local Variance
 
-After visualizing local variance in mitochondrial percentage, we can move on to classify potential artifact regions using the `findArtifacts` function. This function calculates the local variance (`subsets_mito_ratio`) at multiple scales (`n_order`) while adjusting for mean-variance relationships to reliably detect hangnail artifacts. Here we use `n_order=5` to calculate the local variance using 1st-5th order neighbors. Visium spots are shaped as hexagonal grids, so we specify `shape="hexagonal"` to ensure the correct number of neighbors are used for each order. Use `shape="sqaure"` for data sets with square grid arrangements, such as STEREO-seq or VisiumHD.
+After confirming that our sample contains a hangnail artifact with low local variance, we can move on to artifact clarrifcation using the `findArtifacts` function. This function calculates the local variance (`subsets_mito_ratio`) at multiple scales (`n_order`) to accurately detect hangnail artifacts. Visium spots form hexagonal grids, so we specify `shape="hexagonal"` to ensure the correct number of neighbors are used for each order. Use `shape="sqaure"` for data sets with square grid arrangements, such as STEREO-seq or VisiumHD.
 
 ```{r, fig.height=3.75}
 spe.hangnail <- findArtifacts(spe.hangnail, mito_percent = "expr_chrM_ratio", 
-                              mito_sum = "expr_chrM", n_order = 5, 
+                              mito_sum = "expr_chrM", n_order = 7, 
                               shape = "hexagonal", name = "artifact"
                               )
 
@@ -547,7 +423,10 @@ plotSpotQC(spe.hangnail, plot_type='spot', annotate="artifact")
 spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
 ```
 
-### Number of cells per spot
+
+
+
+### Discarding spots based on the number of cells
 The number of cells per spot depends on the tissue type and organism.
 
 Here, we check for any outlier values that could indicate problems during cell segmentation.
@@ -588,25 +467,6 @@ plotSpotQC(spe, plot_type = "spot",
 ```
 
 While there is a spatial pattern to the discarded spots, it does not appear to be correlated with the known biological features (cortical layers). The discarded spots are all on the edges of the tissue. It seems plausible that something has gone wrong with the cell segmentation on the edges of the images, so it makes sense to remove these spots.
-
-```{r}
-# number of discarded spots for each metric
-apply(cbind(qc_lib_size, qc_detected, qc_mito_prop#, qc_cell_count
-), 2, sum)
-
-# combined set of discarded spots
-discard <- qc_lib_size | qc_detected | qc_mito_prop#| qc_cell_count
-table(discard)
-
-# store in object
-colData(spe)$discard <- discard
-```
-
-```{r, fig.height=3.5}
-# check spatial pattern of combined set of discarded spots
-plotSpotQC(spe, plot_type = "spot", 
-           annotate = "discard")
-```
 
 
 #### Zero-cell and single-cell spots
