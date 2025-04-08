@@ -45,6 +45,7 @@ Imports:
     EBImage,
     ExperimentHub, 
     ggplot2, 
+    ggrepel, 
     ggspavis, 
     harmony, 
     hoodscanR,
