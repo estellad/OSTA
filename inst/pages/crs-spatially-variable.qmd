@@ -93,7 +93,7 @@ Examplary methods in R include `r BiocStyle::Biocpkg("CTSV")` [@Yu2022-CTSV], *C
 In this example, we use a small subset of the dataset for faster runtime. We select a subset of the data, by subsampling the set of spots and including stringent filtering for lowly expressed genes. 
 [A full analysis with `nnSVG` using all spots for this dataset and default filtering parameters for an individual Visium sample from human brain tissue (available from `r BiocStyle::Biocpkg("spatialLIBD")`) takes around 45 minutes on a standard laptop.]{.aside}
 
-```{r svg-nnSVG, message=FALSE, eval=FALSE}
+```{r svg-nnSVG, message=FALSE}
 # set random seed for number generation
 # in order to make results reproducible
 set.seed(123)
