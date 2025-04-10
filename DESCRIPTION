@@ -46,6 +46,7 @@ Imports:
     EBImage,
     ExperimentHub, 
     ggplot2, 
+    ggrepel, 
     ggspavis, 
     harmony, 
     hoodscanR,
@@ -99,7 +100,7 @@ Suggests:
     scrapper,
     sessioninfo, 
     xml2
-Remotes:
+Remotes: 
     drisso/SpaceTrooper@devel_spatialBook,
     ggrajeda/spacexr
 Encoding: UTF-8
