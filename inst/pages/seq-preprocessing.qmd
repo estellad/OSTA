@@ -9,14 +9,12 @@ To perform spatial data analysis several preprocessing steps are needed to conve
 
 ### Sequencing Platforms
 ::: {.callout-warning}
-This section is still in progress awaiting additional resources and review
+This section is still in progress awaiting additional resources and review. This may also be a topic for seq-introduction instead.
 :::
-
-
 
 ### Introduction to Reads
 ::: {.callout-warning}
-This section is still in progress awaiting additional resources and review
+This section is still in progress awaiting additional resources and review. This should explain what a 'read' is once finalised.
 :::
 
 ### Read Structure
