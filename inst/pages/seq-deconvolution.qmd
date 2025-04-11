@@ -157,8 +157,11 @@ Next, we perform deconvolution with `r BiocStyle::Githubpkg("dmcable/spacexr")` 
 By default, `runRctd()`'s `rctd_mode="doublet"`, specifies at most two subpopulations coexist in a data unit, such as a "spot"; here, we set `rctd_mode="full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
 ```{r dec, message=FALSE, warning=FALSE}
-(res <- runRctd(vis, sce, cell_type_col="Annogrp", 
-                rctd_mode="full", max_cores=10))
+counts(vis) <- as(counts(vis), "dgCMatrix")
+counts(sce) <- as(counts(sce), "dgCMatrix")
+
+rctd_data <- createRctd(vis, sce, cell_type_col="Annogrp")
+(res <- runRctd(rctd_data, max_cores=4, rctd_mode="full"))
 ```
 
 Weights inferred by `RCTD` should be normalized such that proportions of cell types sum to 1 in each spot:
