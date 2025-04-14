@@ -101,8 +101,7 @@ Suggests:
     sessioninfo, 
     xml2
 Remotes: 
-    drisso/SpaceTrooper@devel_spatialBook,
-    ggrajeda/spacexr
+    drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
