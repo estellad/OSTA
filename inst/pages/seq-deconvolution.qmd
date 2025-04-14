@@ -181,8 +181,8 @@ Another method could be used is CARD. First, we realized delayed count matrices 
 
 ```{r}
 # realize the delayed matrices
-counts(sce) <- as(counts(sce), "matrix")
-counts(vis) <- as(counts(vis), "matrix")
+# counts(sce) <- as(counts(sce), "matrix")
+# counts(vis) <- as(counts(vis), "matrix")
 colnames(spatialCoords(vis)) <- c("x", "y")
 ```
 
