@@ -38,6 +38,7 @@ Imports:
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
+    CARDspa,
     DESpace,
     doMC,
     dplyr, 
@@ -45,6 +46,7 @@ Imports:
     EBImage,
     ExperimentHub, 
     ggplot2, 
+    ggrepel, 
     ggspavis, 
     harmony, 
     hoodscanR,
@@ -97,10 +99,9 @@ Suggests:
     knitr,
     scrapper,
     sessioninfo, 
-    xml2
-Remotes:
-    drisso/SpaceTrooper@devel_spatialBook,
-    ggrajeda/spacexr
+    xml2 
+Remotes: 
+    drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
