@@ -1,4 +1,4 @@
-# Gene/feature-set signatures
+# Feature-set signatures {#sec-crs-signatures}
 
 ## Preamble
 
