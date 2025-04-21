@@ -1,8 +1,14 @@
 # Quality control {#sec-seq-quality-control}
 
-## Preamble
+> "Quality is everyone's responsibility." - W. Edwards Deming
 
-Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification. These spots are usually removed prior to further analysis, since they otherwise tend to create problems during downstream analyses such as clustering. For example, problematic spots that are not removed could show up as separate clusters, which may be misidentified as distinct cell types.
+## Introduction
+<!-- Boyi's comment: The preamble title doesn't seems to help the structure of the manuscript ---> 
+
+Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. 
+<!-- Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification.  -->
+To prevent introducing unneccessary bias into downstream analysis, low-quality spots are usually removed prior to further analysis.
+<!-- , since they otherwise tend to create problems during downstream analyses such as clustering. For example, problematic spots that are not removed could show up as separate clusters, which may be misidentified as distinct cell types. -->
 
 Low-quality spots can be identified according to several characteristics, including:
 
@@ -12,25 +18,22 @@ Low-quality spots can be identified according to several characteristics, includ
 
 -   proportion of reads mapping to mitochondrial genes (a high proportion indicates cell damage)
 
--   number of cells per spot (unusually high values can indicate problems)
+-   number of cells per spot (unusually high values can indicate problems due to improperiate cell segmentation as a computational step, or tissue damages)
+<!-- NOTES: do we have example of tissue damages example? -->
+<!-- Do we care about cell segmentation at all in the rest of this chapter or book? -->
 
 Low library size or low number of expressed features can indicate poor mRNA capture rates, e.g. due to cell damage and missing mRNAs, or low reaction efficiency. A high proportion of mitochondrial reads can be indicative of cell damage, e.g. partial cell lysis leading to leakage and missing cytoplasmic mRNAs, with the resulting reads therefore concentrated on the remaining mitochondrial mRNAs that are relatively protected inside the mitochondrial membrane. Unusually high numbers of cells per spot can indicate problems during cell segmentation.
 
-
-
-### QC challenges to sequencing-based SRT data 
-The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for spatial transcriptions as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based SRTs** [@Bhuva2024, @Totty2024-SpotSweeper]. For example, in the brain, neuronal cell bodies reside in grey matter, whereas white matter is made up almost entirely neuronal processes. This naturally leads to regions of grey matter containing much higher number of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than grey matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
+### QC challenges in sequencing-based SRT 
+The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for spatial transcriptions as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based SRT data** [@Bhuva2024; @Totty2024-SpotSweeper]. For example, in the brain, neuronal cell bodies reside in grey matter, whereas white matter is made up almost entirely neuronal processes. This naturally leads to regions of grey matter containing much higher number of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than grey matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
 
 ### Structure of the Chapter
 
-### Structure of the chapter
+In this chapter, we'll start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for snRNA-seq via global thresholding, 2) more recent methods that aim to mediates bias in quality control attributed to the spatial confounding. Some diagnostic visualization and strategies are further introduced in [QC Diagnositc](#spot-qc-diagnosis).
 
-In this chapter, we'll start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for snRNA-seq via global thresholding, 2) more recent methods that aim to mediates bias in quality control attributed to the spatial confounding. Some diagnostic visualization and strategies are further introduced in [QC Diagnositc](#qc-diagnosis).
-
-In the[advanced topics section](#advanced-topics), we'll visit some novel and unique challenges the quality control of SRT data, including identifying novel artefacts, i.e. regional artifacts and quality control based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all data sets. 
+In the [advanced topics section](#spot-qc-adv-topic), we'll visit some novel and unique challenges in the quality control of SRT data, including identifying histological artefacts, i.e. regional artifacts and quality control based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all data sets. 
 
 To note, the current Chapter focuses on the quality control at the spot level. In some data sets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
-
 
 ### Dependencies and prerequisite
 
@@ -51,7 +54,7 @@ Load previously saved data object (see @sec-seq-load-data-save-objects).
 spe <- readRDS("seq-spe_load.rds")
 ```
 
-## Calculate QC metrics using `scater`
+#### Calculate QC metrics using `scater`
 
 We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. The QC metrics from `scater` can be calculated and added to the `SpatialExperiment` object's column data using the `addPerCellQC` function. The `sum` column contains the total number of unique molecular identifiers (UMIs) for each spot, the `detected` column contains the number of unique genes detected per spot, and `subsets_mito_percent` contains the percentage (or proportion) of transcripts mapping to mitochondrial genes per spot.
 
@@ -74,7 +77,7 @@ spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
 head(colData(spe))
 ```
 
-## Identifying low-quality spots
+## Identifying low-quality spots {#spot-qc-diagnosis}
 
 ### Global outlier detection with fixed threhsolds
 
@@ -170,7 +173,7 @@ p2 <- plotSpots(spe, annotate = "ground_truth",
 p1 | p2
 ```
 
-Looking at the flagged spots versus the manually annotated layers, it's clear the a setting a library size threshold of 2000 UMIs is flagging more spots in layers 1 and 6 relative to other spatial domains. In other words, library size is confounded with biology, as has been previously demonstrated (@Bhuva2024, @Totty2024-SpotSweeper).
+Looking at the flagged spots versus the manually annotated layers, it's clear the a setting a library size threshold of 2000 UMIs is flagging more spots in layers 1 and 6 relative to other spatial domains. In other words, library size is confounded with biology, as has been previously demonstrated [@Bhuva2024; @Totty2024-SpotSweeper].
 
 We can additionally use violin plots to visualize the distribution of the QC metrics, with outliers annotated. This can help us to determine if the thresholds we have chosen are appropriate or are excluding too many spots.
 
@@ -288,6 +291,9 @@ We also check again that the combined set of discarded spots does not correspond
 
 ```{r}
 
+qc_mito <- colData(spe)$subsets_mito_percent > 28
+table(qc_mito)
+
 # combined global outliers
 spe$global_outliers <- as.logical(qc_lib_size) |
     as.logical(qc_detected) |
@@ -328,14 +334,14 @@ dim(spe)
 
 
 ## Advanced Topics {#spot-qc-adv-topic}
-### Artifact detection
+### Histological artifact detection
 #### Hangnail artifact detection with SpotSweeper
 
 When working with SRT data sets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how detect and remove hangnail artifacts from Visium datasets. Hangnails artifacts arise during tissue preparation, and most commonly occur when when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper.
 
 Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** like mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
 
-### Loading Data and Adding QC metrics
+#### Loading data and adding QC metrics
 
 We start by loading an example Visium dataset from SpotSweeper containing a known "hangnail" artifact, and then calculat per-spot QC metrics, such as mitochondrial percentage, as shown above.
 
@@ -354,7 +360,7 @@ spe.hangnail <- addPerCellQC(spe.hangnail, subsets = list(mito = is_mito))
 head(colData(spe.hangnail))
 ```
 
-#### Identifying Hangnail Artifacts via Local Variance
+#### Identifying hangnail artifacts via local variance
 
 As a note, SpotSweeper's `findArtifacts` function assumes that an artifact is present in the sample being ran. **This means that if no artifact is present, the function will arbitrary label half the sample as an "artifact".** Therefore, confirming the presence of a hangnail artifact prior to artifact detection is essential.
 
@@ -408,28 +414,20 @@ p1 | p2
 After confirming that our sample contains a hangnail artifact with low local variance, we can move on to artifact clarrifcation using the `findArtifacts` function. This function calculates the local variance (`subsets_mito_ratio`) at multiple scales (`n_order`) to accurately detect hangnail artifacts. Visium spots form hexagonal grids, so we specify `shape="hexagonal"` to ensure the correct number of neighbors are used for each order. Use `shape="sqaure"` for data sets with square grid arrangements, such as STEREO-seq or VisiumHD.
 
 ```{r, fig.height=3.75}
-spe.hangnail <- findArtifacts(spe.hangnail, mito_percent = "expr_chrM_ratio", 
-                              mito_sum = "expr_chrM", n_order = 7, 
-                              shape = "hexagonal", name = "artifact"
-                              )
+spe.hangnail <- findArtifacts(
+  spe.hangnail, mito_percent = "expr_chrM_ratio", 
+  mito_sum = "expr_chrM", n_order = 7, 
+  shape = "hexagonal", name = "artifact"
+  )
 
 plotSpotQC(spe.hangnail, plot_type='spot', annotate="artifact")
-```
 
-#### Discarding detected artifacts
-
-```{r,}
 # removing hangnail artifacts prior to downstream analyses
 spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
 ```
 
-
-
-
-### Discarding spots based on the number of cells
-The number of cells per spot depends on the tissue type and organism.
-
-Here, we check for any outlier values that could indicate problems during cell segmentation.
+### Assess spot quality via cell segmentation
+The number of cells per spot depends on the tissue type and organism. Here, we check for any outlier values that could indicate problems during cell segmentation.
 
 ```{r, fig.height=3.5}
 # histogram of cell counts
@@ -488,7 +486,7 @@ prop_cells_per_spot[1:13]
 
 Only 6% of spots contain a single cell. If we restricted the analysis to these spots only, we would be discarding most of the data.
 
-Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In our paper [@Maynard2021], we explore the information contained in these neuropil spots.
+Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile describing these neuropil spots.
 
 
 ## Appendix
@@ -502,8 +500,8 @@ Save object(s) in `.rds` format for re-use within later chapters to speed up the
 saveRDS(spe, file = "seq-spe_qc.rds") 
 ```
 
-### Benchmarks {.unnumbered}
-
+<!-- NOTE: if there's more benchmark paper, cite it here --> 
+<!-- ### Benchmarks {.unnumbered} -->
 <!-- Any benchmark papers to list -->
 
 ### References {.unnumbered}
