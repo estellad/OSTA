@@ -99,7 +99,7 @@ Suggests:
     knitr,
     scrapper,
     sessioninfo, 
-    xml2 
+    xml2
 Remotes: 
     drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
