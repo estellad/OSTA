@@ -101,6 +101,7 @@ Suggests:
     sessioninfo, 
     xml2 
 Remotes: 
+    edward130603/BayesSpace, 
     drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
