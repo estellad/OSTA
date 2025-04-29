@@ -37,7 +37,7 @@ jobs:
             version=${branch%%-*}
             echo "BIOC_VERSION=${version}" >> "${GITHUB_ENV}"
           else
-            echo "BIOC_VERSION=devel" >> "${GITHUB_ENV}"
+            echo "BIOC_VERSION=RELEASE_3_21" >> "${GITHUB_ENV}"  # change back to "BIOC_VERSION=devel" when 3.22 stable
           fi
 
       - name: ⏳ Collect Workflow Telemetry
