@@ -60,7 +60,7 @@ use_condaenv(obtainEnvironmentPath(env))
 
 After configuring the python environment, R commands will now be `reticulate`d; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
 
-```{r load-sce, results='hide'}
+```{r load-sce}
 #| code-fold: false
 anndata <- reticulate::import("anndata")
 example_h5ad <- system.file("extdata", "krumsiek11.h5ad", package = "zellkonverter")
@@ -180,7 +180,7 @@ import anndata as ad
 import matplotlib.pyplot as plt
 ```
 
-Now, we read `spe.h5ad` and visualize features and/or gene expression. Here we visualize ENSG00000141736 which is ensemble ID for gene ERBB2.
+Now, we read `spe.h5ad` and visualize features and/or gene expression (e.g. ERBB2).
 
 ```{python spatial-scatter}
 #| code-fold: false
