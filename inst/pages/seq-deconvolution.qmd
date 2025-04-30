@@ -87,8 +87,14 @@ vis <- addPerCellQCMetrics(vis, subsets=sub)
 ```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
 #| code-fold: true
 vis$log_sum <- log1p(vis$sum)
-plotSpots(vis, annotate="log_sum") + ggtitle("log-library size") +
-    plotSpots(vis, annotate="subsets_mt_percent") + ggtitle("% mitochondrial") +
+# plotSpots(vis, annotate="log_sum") + ggtitle("log-library size") +
+#     plotSpots(vis, annotate="subsets_mt_percent") + ggtitle("% mitochondrial") +
+#     plot_layout(nrow=1) & theme(
+#       legend.key.width=unit(0.5, "lines"),
+#       legend.key.height=unit(1, "lines")) &
+#     scale_color_gradientn(colors=pals::jet())
+plotSpatial(vis, annotate="log_sum") + ggtitle("log-library size") +
+    plotSpatial(vis, annotate="subsets_mt_percent") + ggtitle("% mitochondrial") +
     plot_layout(nrow=1) & theme(
       legend.key.width=unit(0.5, "lines"),
       legend.key.height=unit(1, "lines")) &
@@ -99,7 +105,7 @@ All spots have non-zero library size, so we can proceed without subsetting. We f
 
 ```{r visanno, message=FALSE, fig.width=5.5, fig.height=3.5}
 #| code-fold: true
-plotSpots(vis, 
+plotSpatial(vis, 
           annotate = "anno", point_size = 1, 
           pal = unname(pals::trubetskoy())) +
     theme(legend.key.size = unit(0, "lines"))
@@ -157,8 +163,8 @@ Next, we perform deconvolution with `r BiocStyle::Githubpkg("dmcable/spacexr")` 
 By default, `runRctd()`'s `rctd_mode="doublet"`, specifies at most two subpopulations coexist in a data unit, such as a "spot"; here, we set `rctd_mode="full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
 ```{r dec, message=FALSE, warning=FALSE}
-counts(vis) <- as(counts(vis), "dgCMatrix")
-counts(sce) <- as(counts(sce), "dgCMatrix")
+# counts(vis) <- as(counts(vis), "dgCMatrix")
+# counts(sce) <- as(counts(sce), "dgCMatrix")
 
 rctd_data <- createRctd(vis, sce, cell_type_col="Annogrp")
 (res <- runRctd(rctd_data, max_cores=4, rctd_mode="full"))
@@ -181,8 +187,8 @@ Another method could be used is CARD. First, we realized delayed count matrices 
 
 ```{r}
 # realize the delayed matrices
-counts(sce) <- as(counts(sce), "matrix")
-counts(vis) <- as(counts(vis), "matrix")
+counts(sce) <- as(counts(sce), "sparseMatrix")
+counts(vis) <- as(counts(vis), "sparseMatrix")
 colnames(spatialCoords(vis)) <- c("x", "y")
 ```
 
