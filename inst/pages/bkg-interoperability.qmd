@@ -32,15 +32,14 @@ library(VisiumIO)
 library(zellkonverter)
 library(jsonlite)
 library(reticulate)
+library(basilisk)
 ```
 
 ## Configuring Python
 
-We first create an environment with Python modules necessary the examples in this chapter.
+We first create an environment with Python modules necessary the examples in this chapter. For that, we first define a `r BiocStyle::Biocpkg("basilisk")` environment and use the resulting conda environment with `r BiocStyle::Biocpkg("reticulate")`. 
 
 ```{r env, warning=FALSE}
-# initialize 'basilisk' environment
-library(basilisk)
 env <- BasiliskEnvironment(
   envname="bkg-interop", 
   pkgname="base",
@@ -60,16 +59,7 @@ use_condaenv(obtainEnvironmentPath(env))
 
 ### Calling Python
 
-We can point `reticulate` to said environment we just created via:
-
-```{r eval=FALSE}
-#| code-fold: false
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-# use_condaenv("bkg-interop")
-```
-
-R commands will now be `reticulate`d in the above environment; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
+After configuring the python environment, R commands will now be `reticulate`d; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
 
 ```{r eval=FALSE}
 #| code-fold: false
@@ -198,7 +188,7 @@ ad$write_h5ad("spe.h5ad")
 
 ### Calling Python
 
-Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `Squidpy` module to visualize the Visium data.
+Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `squidpy` module to visualize the Visium data. Since we wrote the `spe.h5ad` to disk, we can as well use python directly.
 
 ```{python warning=FALSE, fig.keep='all', fig.show='hold'}
 #| code-fold: false
@@ -209,7 +199,6 @@ adata = ad.read_h5ad("spe.h5ad")
 sq.pl.spatial_scatter(adata,
                       color=["array_row"], 
                       img_res_key = "lowres")
-# plt.show()
 ```
 
 ## Appendix
