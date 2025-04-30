@@ -38,6 +38,7 @@ Imports:
     BayesSpace,
     BiocFileCache, 
     BiocParallel,
+    CARDspa,
     DESpace,
     doMC,
     dplyr, 
@@ -45,6 +46,7 @@ Imports:
     EBImage,
     ExperimentHub, 
     ggplot2, 
+    ggrepel, 
     ggspavis, 
     harmony, 
     hoodscanR,
@@ -67,7 +69,7 @@ Imports:
     scales, 
     scater, 
     scran,
-    scuttle, 
+    scuttle,
     SFEData,
     SingleR,
     SpaceTrooper,
@@ -79,7 +81,7 @@ Imports:
     spatialLIBD,
     spatstat,
     spdep,
-    SpotSweeper,
+    SpotSweeper (>= 1.3.3),
     STexampleData, 
     Statial,
     tidyr,
@@ -97,11 +99,10 @@ Suggests:
     knitr,
     scrapper,
     sessioninfo, 
-    xml2
-Remotes:
-    drisso/SpaceTrooper@devel_spatialBook,
-    estellad/OSTA.data,
-    ggrajeda/spacexr
+    xml2 
+Remotes: 
+    edward130603/BayesSpace, 
+    drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book

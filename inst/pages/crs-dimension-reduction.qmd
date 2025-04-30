@@ -1,8 +1,8 @@
 # Dimension reduction {#sec-crs-dimension-reduction}
 
-# Preamble
+## Preamble
 
-## Introduction
+### Introduction
 
 In single-cell omics data analysis, dimension reduction (DR) techniques are often categorized as linear (e.g., multi-dimensional scaling (MDS), linear discriminant analysis (LDA), principal component analysis (PCA)), or non-linear (e.g., t-distributed stochastic neighbor embedding (t-SNE), uniform manifold approximation and projection (UMAP)); see [OSCA](https://bioconductor.org/books/release/OSCA.basic/dimensionality-reduction.html).
 
@@ -11,7 +11,7 @@ Spatially aware DR may be used as input for standard single-cell clustering appr
 While these approach may differ in methodological detail, they are arguably similar conceptually.
 We will try and demonstrate as much here.
 
-## Dependencies
+### Dependencies
 
 ```{r load-libs, message=FALSE, warning=FALSE}
 library(dplyr)
