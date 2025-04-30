@@ -47,6 +47,7 @@ env <- BasiliskEnvironment(
   channels=c("conda-forge", "bioconda", "pytorch"),
   packages=c(
     "python=3.11",
+    "openssl=3.5.0",
     "Dask=2024.12.1"),
   pip=c(
     "scvi-tools==1.3.0",
@@ -61,7 +62,7 @@ use_condaenv(obtainEnvironmentPath(env))
 
 After configuring the python environment, R commands will now be `reticulate`d; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
 
-```{r load-sce, results='hide'}
+```{r load-sce, eval=FALSE, results='hide'}
 #| code-fold: false
 scvi <- reticulate::import("scvi")
 dir.create(td <- tempfile())
@@ -74,14 +75,14 @@ dir.create(td <- tempfile())
 
 We can access *any* of the variables above in R. For basic outputs, this works out of the box:
 
-```{r uniq-celltype}
+```{r uniq-celltype, eval=FALSE}
 #| code-fold: false
 unique(ad$obs$cell_type)
 ```
 
 Then again, `reticulate` supports few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we can use `zellkonverter` to go from `AnnData` to `SingleCellExperiment`:
 
-```{r anndata2sce}
+```{r anndata2sce, eval=FALSE}
 #| code-fold: false
 (sce <- AnnData2SCE(ad))
 ```
@@ -90,7 +91,7 @@ Then again, `reticulate` supports few direct [type conversions](https://rstudio.
 
 We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
 
-```{r sce2anndata}
+```{r sce2anndata, eval=FALSE}
 #| code-fold: false
 (ad <- SCE2AnnData(sce, X_name="X"))
 ```
@@ -172,7 +173,7 @@ ad$write_h5ad("spe.h5ad")
 
 ### Calling Python
 
-Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `squidpy` module to visualize the Visium data. Since we wrote the `spe.h5ad` to disk, we can as well use python directly.
+Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `squidpy` module to visualize the Visium data. 
 
 ```{python modules}
 #| code-fold: false
@@ -181,6 +182,8 @@ import squidpy as sq
 import anndata as ad
 import matplotlib.pyplot as plt
 ```
+
+Now, we read `spe.h5ad` and visualize metadata columns/features. 
 
 ```{python spatial-scatter}
 #| code-fold: false
