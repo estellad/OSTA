@@ -47,10 +47,8 @@ env <- BasiliskEnvironment(
   channels=c("conda-forge", "bioconda", "pytorch"),
   packages=c(
     "python=3.11",
-    "openssl=3.5.0",
     "Dask=2024.12.1"),
   pip=c(
-    "scvi-tools==1.3.0",
     "squidpy==1.6.2"))
 # activate underlying conda environment
 use_condaenv(obtainEnvironmentPath(env))
@@ -62,28 +60,27 @@ use_condaenv(obtainEnvironmentPath(env))
 
 After configuring the python environment, R commands will now be `reticulate`d; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
 
-```{r load-sce, eval=FALSE, results='hide'}
+```{r load-sce, results='hide'}
 #| code-fold: false
-scvi <- reticulate::import("scvi")
-dir.create(td <- tempfile())
-(ad <- scvi$data$cortex(save_path=td))
-# AnnData object with n_obs × n_vars = 3005 × 19972
-#     obs: 'labels', 'precise_labels', 'cell_type'
+anndata <- reticulate::import("anndata")
+example_h5ad <- system.file("extdata", "krumsiek11.h5ad", package = "zellkonverter")
+(ad <- anndata$read_h5ad(example_h5ad))
 ```
 
 ### Continuing in R
 
 We can access *any* of the variables above in R. For basic outputs, this works out of the box:
 
-```{r uniq-celltype, eval=FALSE}
+```{r uniq-celltype}
 #| code-fold: false
 unique(ad$obs$cell_type)
 ```
 
 Then again, `reticulate` supports few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we can use `zellkonverter` to go from `AnnData` to `SingleCellExperiment`:
 
-```{r anndata2sce, eval=FALSE}
+```{r anndata2sce}
 #| code-fold: false
+#| warning: false
 (sce <- AnnData2SCE(ad))
 ```
 
@@ -91,7 +88,7 @@ Then again, `reticulate` supports few direct [type conversions](https://rstudio.
 
 We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
 
-```{r sce2anndata, eval=FALSE}
+```{r sce2anndata}
 #| code-fold: false
 (ad <- SCE2AnnData(sce, X_name="X"))
 ```
@@ -165,7 +162,7 @@ Now lets insert the components back to the `AnnData`.
 
 ```{r writeh5ad}
 #| code-fold: false
-ad$library_id <- imgdata$sample_id
+ad$obs$library_id <- imgdata$sample_id
 ad$obsm <- obsm
 ad$uns <- uns
 ad$write_h5ad("spe.h5ad")
@@ -183,7 +180,7 @@ import anndata as ad
 import matplotlib.pyplot as plt
 ```
 
-Now, we read `spe.h5ad` and visualize metadata columns/features. 
+Now, we read `spe.h5ad` and visualize features and/or gene expression. Here we visualize ENSG00000141736 which is ensemble ID for gene ERBB2.
 
 ```{python spatial-scatter}
 #| code-fold: false
@@ -194,8 +191,9 @@ Now, we read `spe.h5ad` and visualize metadata columns/features.
 #| output: true
 #| label: spatial_scatter
 adata = ad.read_h5ad("spe.h5ad")
+adata.var_names = adata.var['Symbol'].astype(str)
 sq.pl.spatial_scatter(adata,
-                      color=["array_row"], 
+                      color=["ERBB2"], 
                       img_res_key = "lowres")
 ```
 
