@@ -24,8 +24,8 @@ Together, these developments have the potential to lay a foundation for more sea
 
 ## Dependencies
 
-```{r}
-# retrieve dataset from OSF repo
+```{r libraries, message=FALSE, warning=FALSE}
+#| code-fold: false
 library(OSTA.data)
 library(SpatialExperiment)
 library(VisiumIO)
@@ -37,9 +37,10 @@ library(basilisk)
 
 ## Configuring Python
 
-We first create an environment with Python modules necessary the examples in this chapter. For that, we first define a `r BiocStyle::Biocpkg("basilisk")` environment and use the resulting conda environment with `r BiocStyle::Biocpkg("reticulate")`. 
+We first create an environment with Python modules necessary the examples in this chapter. For that, we first define a `r BiocStyle::Biocpkg("basilisk")` environment and use the resulting conda environment with `r BiocStyle::Biocpkg("reticulate")`.
 
 ```{r env, warning=FALSE}
+#| code-fold: false
 env <- BasiliskEnvironment(
   envname="bkg-interop", 
   pkgname="base",
@@ -49,7 +50,6 @@ env <- BasiliskEnvironment(
     "Dask=2024.12.1"),
   pip=c(
     "scvi-tools==1.3.0",
-    # "torchmetrics==0.6.0",
     "squidpy==1.6.2"))
 # activate underlying conda environment
 use_condaenv(obtainEnvironmentPath(env))
@@ -61,7 +61,7 @@ use_condaenv(obtainEnvironmentPath(env))
 
 After configuring the python environment, R commands will now be `reticulate`d; e.g.: [Note that running code in this way comes with the overhead of starting up a Python session in the background. But this is typically negligible compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (100,000s of cells).]{.aside}
 
-```{r eval=FALSE}
+```{r load-sce, results='hide'}
 #| code-fold: false
 scvi <- reticulate::import("scvi")
 dir.create(td <- tempfile())
@@ -74,42 +74,25 @@ dir.create(td <- tempfile())
 
 We can access *any* of the variables above in R. For basic outputs, this works out of the box:
 
-```{r eval=FALSE}
+```{r uniq-celltype}
 #| code-fold: false
 unique(ad$obs$cell_type)
-# [1] "interneurons"         "pyramidal SS" "pyramidal CA1"       
-# [4] "oligodendrocytes"     "microglia"    "endothelial-mural"   
-# [7] "astrocytes_ependymal"
 ```
 
 Then again, `reticulate` supports few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we can use `zellkonverter` to go from `AnnData` to `SingleCellExperiment`:
 
-```{r eval=FALSE}
+```{r anndata2sce}
 #| code-fold: false
 (sce <- AnnData2SCE(ad))
-# class: SingleCellExperiment 
-# dim: 19972 3005 
-# metadata(0):
-# assays(1): X
-# rownames(19972): Tspan12 Tshz1 ... Gm21943_loc3 Gm20738_loc3
-# rowData names(0):
-# colnames(3005): 0 1 ... 3003 3004
-# colData names(3): labels precise_labels cell_type
-# reducedDimNames(0):
-# mainExpName: NULL
-# altExpNames(0):
 ```
 
 ### Back to Python
 
 We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
 
-```{r eval=FALSE}
+```{r sce2anndata}
 #| code-fold: false
 (ad <- SCE2AnnData(sce, X_name="X"))
-# AnnData object with n_obs × n_vars = 3005 × 19972
-#     obs: 'labels', 'precise_labels', 'cell_type'
-#     uns: 'X_name'
 ```
 
 ## SpatialExperiment
@@ -118,8 +101,8 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 For the example with `SpatialExperiment`, we will use the dataset from @Janesick2023, which includes Visium measurements on human breast cancer tissue.
 
-```{r load-spe, message=FALSE, results="hide"}
-# retrieve dataset from OSF repo
+```{r load-spe, message=FALSE, warning=FALSE, results="hide"}
+#| code-fold: false
 id <- "Visium_HumanBreast_Janesick"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
@@ -134,23 +117,22 @@ obj <- TENxVisium(
 We also have to parse the original scaling information for spots and images available in standard Visium output. We will use this later during conversion.
 
 ```{r scalefactors, message=FALSE, results="hide"}
+#| code-fold: false
 # retrieve scalefactors for Visium assay
 scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
 ```
 
 We can also use `SCE2AnnData` function from the previous example and convert the `SingleCellExperiment` relevant information of the `SpatialExperiment` object to an `AnnData`.
 
-```{r}
+```{r spe2anndata, message=FALSE}
+#| code-fold: false
 (ad <- SCE2AnnData(spe, X_name="counts"))
-# AnnData object with n_obs × n_vars = 4269 × 18085
-#     obs: 'in_tissue', 'array_row', 'array_col', 'sample_id'
-#     var: 'ID', 'Symbol', 'Type'
-#     uns: 'X_name', 'resources', 'spatialList'
 ```
 
 We should now populate `uns` and `obsm` components of `AnnData` with spatial coordinates and images. We start with the coordinates.
 
-```{r}
+```{r coords}
+#| code-fold: false
 coords <- spatialCoords(spe)
 colnames(coords) <- c("x", "y")
 obsm <- list(spatial = coords)
@@ -158,7 +140,8 @@ obsm <- list(spatial = coords)
 
 Now lets create the `uns` component. The list of `uns` should compose of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for scaling information.
 
-```{r}
+```{r uns}
+#| code-fold: false
 # get image metadata
 imgdata <- imgData(spe)
 
@@ -179,7 +162,8 @@ uns[["spatial"]][[imgdata$sample_id]] <-
 
 Now lets insert the components back to the `AnnData`.
 
-```{r}
+```{r writeh5ad}
+#| code-fold: false
 ad$library_id <- imgdata$sample_id
 ad$obsm <- obsm
 ad$uns <- uns
@@ -190,15 +174,30 @@ ad$write_h5ad("spe.h5ad")
 
 Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `squidpy` module to visualize the Visium data. Since we wrote the `spe.h5ad` to disk, we can as well use python directly.
 
-```{python warning=FALSE, fig.keep='all', fig.show='hold'}
+```{python modules}
 #| code-fold: false
+#| output: false
 import squidpy as sq
 import anndata as ad
 import matplotlib.pyplot as plt
+```
+
+```{python spatial-scatter}
+#| code-fold: false
+#| include: true
+#| warning: false
+#| message: false
+#| error: false
+#| output: true
+#| label: spatial_scatter
 adata = ad.read_h5ad("spe.h5ad")
 sq.pl.spatial_scatter(adata,
                       color=["array_row"], 
                       img_res_key = "lowres")
+```
+
+```{r, include=FALSE}
+file.remove("spe.h5ad")
 ```
 
 ## Appendix
