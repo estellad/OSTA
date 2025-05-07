@@ -68,7 +68,7 @@ colData(vhd8)[names(df)] <- df
 lab <- grep("Label", names(cd <- colData(vhd8)), value=TRUE)
 pal <- hcl.colors(length(unique(unlist(cd[lab]))), "Spectral")
 lapply(lab, \(.) {
-    p <- plotSpots(vhd8, annotate=., point_size=0.2) + ggtitle(.)
+    p <- plotSpatial(vhd8, annotate=., point_size=0.2) + ggtitle(.)
     p$layers[[1]]$aes_params$shape <- 16
     p$layers[[1]]$aes_params$stroke <- 0
     p
@@ -140,10 +140,10 @@ We can visualize the given clustering results at 8 µm and 16 µm resolutions. L
 
 ```{r clusvis, fig.width=12, fig.height=6, message=FALSE}
 #| code-fold: true
-(plotSpots(vhd8, annotate="cluster", point_size=0.05, 
-           pal=unname(pals::kelly())) + ggtitle("8 µm")) |
-(plotSpots(vhd16[, !is.na(vhd16$cluster)], annotate="cluster", point_size=0.1, 
-           pal=unname(pals::kelly())) + ggtitle("16 µm")) 
+(plotSpatial(vhd8, annotate="cluster", point_size=0.05, 
+             pal=unname(pals::kelly())) + ggtitle("8 µm")) |
+(plotSpatial(vhd16[, !is.na(vhd16$cluster)], annotate="cluster", point_size=0.1, 
+             pal=unname(pals::kelly())) + ggtitle("16 µm")) 
 ```
 
 To keep runtimes low, our downstream analysis will be performed on a subset area of 16 µm bins (1/64 of the data coverage area), which we read in here; there are no annotations available for this resolution in the public domain. [Note that 8 and 16 µm binned Visium HD data share the same full-resolution H&E image and scaling factor.]{.aside}
@@ -226,8 +226,8 @@ table(.vhd16$discard)
 
 ```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
 #| code-fold: true
-plotSpots(.vhd16, annotate="sum_log", point_size=0.2) + ggtitle("log-library size") +
-plotSpots(.vhd16, annotate="subsets_mt_percent", point_size=0.2) + ggtitle("% mitochondrial") +
+plotSpatial(.vhd16, annotate="sum_log", point_size=0.2) + ggtitle("log-library size") +
+plotSpatial(.vhd16, annotate="subsets_mt_percent", point_size=0.2) + ggtitle("% mitochondrial") +
 plot_layout(nrow=1) & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
@@ -238,9 +238,9 @@ We can visualize the local outliers identified by `SpotSweeper` in space:
 
 ```{r qc-vis, fig.width=7.5, fig.height=2.5, message=FALSE}
 #| code-fold: true
-plotSpots(.vhd16, annotate="sum_outliers") + ggtitle("low_lib_size") +
-plotSpots(.vhd16, annotate="detected_outliers") + ggtitle("low_n_features") +
-plotSpots(.vhd16, annotate="discard") + ggtitle("discard") +
+plotSpatial(.vhd16, annotate="sum_outliers") + ggtitle("low_lib_size") +
+plotSpatial(.vhd16, annotate="detected_outliers") + ggtitle("low_n_features") +
+plotSpatial(.vhd16, annotate="discard") + ggtitle("discard") +
 plot_layout(nrow=1, guides="collect") & theme(
     plot.title=element_text(hjust=0.5),
     legend.key.size=unit(0, "lines")) &
@@ -320,7 +320,7 @@ Or, we can visualize the bin-wise expression of selected markers in space:
 ```{r plt-mgs-xy, fig.width=10, fig.height=3, message=FALSE}
 #| code-fold: true
 gs <- c("MMP2", "PIGR", "IGHG1")
-ps <- lapply(gs, \(.) plotSpots(.vhd16, annotate=., assay_name="logcounts"))
+ps <- lapply(gs, \(.) plotSpatial(.vhd16, annotate=., assay_name="logcounts"))
 wrap_plots(ps, nrow=1) & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
@@ -469,7 +469,7 @@ Next, we can spatially visualize the deconvolution proportions estimates:
 ```{r plt-dec-est, message=FALSE, fig.width=9, fig.height=4}
 #| code-fold: true
 lapply(names(ws), \(.) 
-    plotSpots(.vhd16, annotate=., point_size=0.1)) |>
+    plotSpatial(.vhd16, annotate=., point_size=0.1)) |>
     wrap_plots(nrow=2, guides="collect") & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
