@@ -121,16 +121,16 @@ We can also plot QC metrics together, such as the library size or mitochondrial 
 ```{r, fig.width=7, fig.height=3.75, message=FALSE}
 # plot library size vs. number of cells per spot
 p1 <- 
-  plotSpatialQC(spe, plot_type = "scatter", 
-                x_metric = "cell_count", y_metric = "sum", 
-                y_threshold = 600) + 
+  plotSpaQC(spe, plot_type = "scatter", 
+            x_metric = "cell_count", y_metric = "sum", 
+            y_threshold = 600) + 
   ggtitle("Library size vs. cells per spot")
 
 # plot mito proportion vs. number of cells per spot
 p2 <- 
-  plotSpatialQC(spe, plot_type = "scatter", 
-                x_metric = "cell_count", y_metric = "subsets_mito_percent", 
-                y_threshold = 30) + 
+  plotSpaQC(spe, plot_type = "scatter", 
+            x_metric = "cell_count", y_metric = "subsets_mito_percent", 
+            y_threshold = 30) + 
   ggtitle("Mito proportion vs. cells per spot")
 
 p1 | p2
@@ -162,18 +162,18 @@ spe$qc_mito_prop <- qc_mito_prop
 
 # check spatial pattern of discarded spots
 p1 <- 
-  plotSpatialQC(spe, plot_type = "spot", 
-                annotate = "qc_lib_size") + 
+  plotSpaQC(spe, plot_type = "spot", 
+            annotate = "qc_lib_size") + 
   ggtitle("Library size (< 600 UMI)")
 
 p2 <- 
-  plotSpatialQC(spe, plot_type = "spot", 
-                annotate = "qc_detected") + 
+  plotSpaQC(spe, plot_type = "spot", 
+            annotate = "qc_detected") + 
   ggtitle("Detected genes (< 400 genes)")
 
 p3 <- 
-  plotSpatialQC(spe, plot_type = "spot", 
-                annotate = "qc_mito_prop") + 
+  plotSpaQC(spe, plot_type = "spot", 
+            annotate = "qc_mito_prop") + 
   ggtitle("Mito proportion (> 30%)")
 
 p1 | p2 | p3
@@ -188,14 +188,14 @@ colData(spe)$qc_lib_size_2000 <- qc_lib_size_2000
 
 # plot the spots flagged with the high threshold
 p1 <- 
-  plotSpatialQC(spe, plot_type = "spot", 
-                annotate = "qc_lib_size_2000") + 
+  plotSpaQC(spe, plot_type = "spot", 
+            annotate = "qc_lib_size_2000") + 
   ggtitle("Library size (< 2000 UMI)")
 
 # plot manually annotated reference layers
 p2 <- 
-  plotSpatial(spe, annotate = "ground_truth", 
-              pal = "libd_layer_colors") + 
+  plotSpa(spe, annotate = "ground_truth", 
+          pal = "libd_layer_colors") + 
   ggtitle("Manually annotated layers")
 
 p1 | p2
@@ -208,19 +208,19 @@ We can additionally use violin plots to visualize the distribution of the QC met
 ```{r, fig.height=3.75}
 # library size and outliers
 p1 <- 
-  plotSpatialQC(spe, plot_type = "violin", x_metric = "sum", 
-                annotate = "qc_lib_size", point_size = 0.5) + 
+  plotSpaQC(spe, plot_type = "violin", x_metric = "sum", 
+            annotate = "qc_lib_size", point_size = 0.5) + 
   xlab("Library size")
 
 # detected genes and outliers
 p2 <- 
-  plotSpatialQC(spe, plot_type = "violin", x_metric = "detected", 
-                annotate = "qc_detected", point_size = 0.5) + 
+  plotSpaQC(spe, plot_type = "violin", x_metric = "detected", 
+            annotate = "qc_detected", point_size = 0.5) + 
   xlab("Detected genes") 
 
 # mito proportion and outliers
-p3 <- plotSpatialQC(spe, plot_type = "violin", x_metric = "subsets_mito_percent", 
-                    annotate = "qc_mito_prop", point_size = 0.5) + 
+p3 <- plotSpaQC(spe, plot_type = "violin", x_metric = "subsets_mito_percent", 
+                annotate = "qc_mito_prop", point_size = 0.5) + 
   xlab("Mito proportion")
 
 p1 | p2 | p3
@@ -254,32 +254,32 @@ We can then visually confirm that the local outliers detected indeed appear to b
 ```{r, fig.height=7, fig.width=11}
 # spot plot of log-transformed library size
 p1 <- 
-  plotSpatial(spe, annotate="sum_log") + 
+  plotSpa(spe, annotate="sum_log") + 
   ggtitle("log2(Library Size)")
 
 p2 <- 
-  plotSpatialQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
-                annotate = "sum_outliers", point_size = 0.2) + 
+  plotSpaQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
+            annotate = "sum_outliers", point_size = 0.2) + 
   ggtitle("Local Outliers (Library Size)")
 
 # spot plot of log-transformed detected genes
 p3 <- 
-  plotSpatial(spe, annotate = "detected_log") + 
+  plotSpa(spe, annotate = "detected_log") + 
   ggtitle("log2(Detected)")
 
 p4 <- 
-  plotSpatialQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
-                annotate = "detected_outliers", point_size = 0.2) + 
+  plotSpaQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
+            annotate = "detected_outliers", point_size = 0.2) + 
   ggtitle("Local Outliers (Detected)")
 
 # spot plot of mitochondrial proportion
 p5 <- 
-  plotSpatial(spe, annotate = "subsets_mito_percent") + 
+  plotSpa(spe, annotate = "subsets_mito_percent") + 
   ggtitle("Mito Proportion")
 
 p6 <- 
-  plotSpatialQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
-                annotate = "subsets_mito_percent_outliers", point_size = 0.2) + 
+  plotSpaQC(spe, plot_type = "spot", in_tissue = "in_tissue", 
+            annotate = "subsets_mito_percent_outliers", point_size = 0.2) + 
   ggtitle("Local Outliers (Mito Prop)")
 
 # plot using patchwork
@@ -291,20 +291,20 @@ It is particularly evident in the log-transformed library size and detected gene
 ```{r, fig.height=3.75}
 # z-transformed library size and outliers
 p1 <- 
-  plotSpatialQC(spe, plot_type = "violin", x_metric = "sum_z", 
-                annotate = "sum_outliers", point_size = 0.5) + 
+  plotSpaQC(spe, plot_type = "violin", x_metric = "sum_z", 
+            annotate = "sum_outliers", point_size = 0.5) + 
   xlab("sum_outliers")
 
 # z-transformed detected genes and outliers
 p2 <- 
-  plotSpatialQC(spe, plot_type = "violin", x_metric = "detected_z", 
-                annotate = "detected_outliers", point_size = 0.5) + 
+  plotSpaQC(spe, plot_type = "violin", x_metric = "detected_z", 
+            annotate = "detected_outliers", point_size = 0.5) + 
   xlab("detected_outliers")
 
 # z-transformed mito percent and outliers
 p3 <- 
-  plotSpatialQC(spe, plot_type = "violin", x_metric = "subsets_mito_percent_z", 
-                annotate = "subsets_mito_percent_outliers", point_size = 0.5) + 
+  plotSpaQC(spe, plot_type = "violin", x_metric = "subsets_mito_percent_z", 
+            annotate = "subsets_mito_percent_outliers", point_size = 0.5) + 
   xlab("mito_outliers")
 
 # plot using patchwork
@@ -346,9 +346,9 @@ table(spe$local_outliers)
 
 ```{r, fig.height=4}
 # check spatial pattern of combined set of discarded spots
-p1 <- plotSpatialQC(spe, plot_type = "spot", annotate = "global_outliers")
+p1 <- plotSpaQC(spe, plot_type = "spot", annotate = "global_outliers")
 
-p2 <- plotSpatialQC(spe, plot_type = "spot", annotate = "local_outliers")
+p2 <- plotSpaQC(spe, plot_type = "spot", annotate = "local_outliers")
 
 p1 + p2
 ```
@@ -401,8 +401,8 @@ As a note, SpotSweeper's `findArtifacts()` function assumes that an artifact is 
 Hangnail artifacts are best identified by plotting QC metrics for all samples, as they appear as regions with unusually smooth or low variance in mitochondrial percentage. We can observe this in the example below, as the oblong piece of tissue on the right side has an usually smooth or "smudged" appearance in the mitochondrial percentage (`subsets_mito_percent`) on the right, but not in the library size (`sum`) on the left.
 
 ```{r, fig.height=3.75}
-p1 <- plotSpatial(spe.hangnail, annotate = "sum")
-p2 <- plotSpatial(spe.hangnail, annotate = "subsets_mito_percent")
+p1 <- plotSpa(spe.hangnail, annotate = "sum")
+p2 <- plotSpa(spe.hangnail, annotate = "subsets_mito_percent")
 
 p1 | p2
 ```
@@ -414,7 +414,7 @@ spe.hangnail <-
   localVariance(spe.hangnail, metric = "subsets_mito_percent", 
                 n_neighbors = 36, name = "local_mito_variance_k36")
 
-plotSpatial(spe.hangnail, annotate = "local_mito_variance_k36", point_size = 1)
+plotSpa(spe.hangnail, annotate = "local_mito_variance_k36", point_size = 1)
 ```
 
 Another way to confirm the presence of a hangnail artifact is via the distribution of the local variance in mitochondrial percentage. Samples affected by hangnails often exhibit a long-tailed or bimodal distribution towards lower variance, reflecting regions with abnormal mitochondrial signal variation. We will demonstrate this here by comparing the distribution of local mitochondrial variance in ths hangnail sample to the distribution in a normal sample.
@@ -454,7 +454,7 @@ spe.hangnail <- findArtifacts(
   mito_sum = "expr_chrM", n_order = 7, 
   shape = "hexagonal", name = "artifact")
 
-plotSpatialQC(spe.hangnail, plot_type = "spot", annotate = "artifact")
+plotSpaQC(spe.hangnail, plot_type = "spot", annotate = "artifact")
 
 # removing hangnail artifacts prior to downstream analyses
 spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
@@ -480,9 +480,9 @@ We see a tail of very high values, which could indicate problems for these spots
 
 ```{r, fig.width=3.75, fig.height=3.75}
 # plot number of expressed genes vs. number of cells per spot
-plotSpatialQC(spe, plot_type = "scatter", 
-              x_metric = "cell_count", y_metric = "detected", 
-              x_threshold = 10)
+plotSpaQC(spe, plot_type = "scatter", 
+          x_metric = "cell_count", y_metric = "detected", 
+          x_threshold = 10)
 ```
 
 In particular, we see that the spots with very high cell counts also have low numbers of expressed genes. This indicates that the experiments may have failed for these spots, and they should be removed.
@@ -499,7 +499,7 @@ colData(spe)$qc_cell_count <- qc_cell_count
 
 ```{r, fig.height=3.5}
 # check spatial pattern of discarded spots
-plotSpatialQC(spe, plot_type = "spot", annotate = "qc_cell_count")
+plotSpaQC(spe, plot_type = "spot", annotate = "qc_cell_count")
 ```
 
 While there is a spatial pattern to the discarded spots, it does not appear to be correlated with the known biological features (cortical layers). The discarded spots are all on the edges of the tissue. It seems plausible that there may have been experimental issues and/or issues with computational cell segmentation at the edges of the images, so it makes sense to remove these spots.
