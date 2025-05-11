@@ -46,7 +46,7 @@ library(ggspavis)
 
 ```{r, fig.height=3.5}
 # plot spatial coordinates (spots)
-plotSpa(spe)
+plotCoords(spe)
 ```
 
 
@@ -110,7 +110,7 @@ Plot the set of discarded spots in the spatial x-y coordinates, to confirm that 
 
 ```{r, fig.height=3.5}
 # check spatial pattern of discarded spots
-plotSpaQC(spe, plot_type = "spot", annotate = "discard")
+plotObsQC(spe, plot_type = "spot", annotate = "discard")
 ```
 
 There is some concentration of discarded spots at the edge of the tissue region, which may be due to tissue damage. Importantly, the discarded spots do not correspond to any of the cortical layers of interest.
@@ -279,12 +279,12 @@ From the visualizations, we can see that the clustering reproduces the known bio
 
 ```{r, fig.height=3.5}
 # plot clusters in spatial x-y coordinates
-plotSpa(spe, annotate = "label", 
-        pal = "libd_layer_colors")
+plotCoords(spe, annotate = "label", 
+           pal = "libd_layer_colors")
 
 # plot ground truth labels in spatial coordinates
-plotSpa(spe, annotate = "ground_truth", 
-        pal = "libd_layer_colors")
+plotCoords(spe, annotate = "ground_truth", 
+           pal = "libd_layer_colors")
 ```
 
 ```{r, fig.width=5, fig.height=4.25}

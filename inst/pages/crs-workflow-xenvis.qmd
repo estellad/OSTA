@@ -137,7 +137,7 @@ Let's count and visualize the number of cells that overlap each spot:
 ```{r plt-ncs, message=FALSE, fig.width=3.5, fig.height=3}
 # get cell indices and number of cells per spot
 vis$n_cells <- rowSums((idx <- nns$nn.idx) > 0)
-plotSpa(vis, annotate="n_cells")
+plotCoords(vis, annotate="n_cells")
 ```
 
 Next, we can aggregate single cell-level Xenium data into pseudo-spots. 

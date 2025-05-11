@@ -133,8 +133,8 @@ table(spe$BayesSpace <- factor(.spe$spatial.cluster))
 Let's visualize cluster predictions in space, here alongside `ground_truth` spot labels from manual annotation:
 
 ```{r plt-clu-xy, fig.width=7, fig.height=2.5, message=FALSE}
-plotSpa(spe, annotate="ground_truth") +
-plotSpa(spe, annotate="BayesSpace") +
+plotCoords(spe, annotate="ground_truth") +
+plotCoords(spe, annotate="BayesSpace") +
     plot_layout() &
     theme(legend.key.size=unit(0, "lines")) &
     scale_color_manual(values=unname(pals::trubetskoy())) 
@@ -148,7 +148,7 @@ pcs <- reducedDim(spe, "PCA")
 pcs <- pcs[, seq_len(4)]
 lapply(colnames(pcs), \(.) {
     spe[[.]] <- pcs[, .]
-    plotSpa(spe, annotate=.)
+    plotCoords(spe, annotate=.)
 }) |>
     wrap_plots(nrow=1) &
     geom_point(shape=16, stroke=0, size=0.2) &
@@ -190,7 +190,7 @@ As well as in space, i.e., coloring spots by their expression of a given marker:
 ```{r plt-mgs-xy, fig.width=8, fig.height=5.5}
 ps <- lapply(
     c("MBP", "PLP1", "NRGN", "SNAP25", "NEFL", "HPCAL1"), \(.) 
-    plotSpa(spe, annotate=., feature_names="gene_name", assay_name="logcounts"))
+    plotCoords(spe, annotate=., feature_names="gene_name", assay_name="logcounts"))
 wrap_plots(ps, nrow=2) & theme(
     legend.key.width=unit(0.4, "lines"),
     legend.key.height=unit(0.8, "lines")) &
