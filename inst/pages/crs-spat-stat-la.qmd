@@ -33,14 +33,14 @@ As different weight matrices  influence downstream results, analysts should just
 colGraph(sfe, "knn6") <-
   findSpatialNeighbors(
     sfe,
-    type = "cellSeg",
+    type = "centroids",
     method = "knearneigh",
     k = 6
   )
 
 plotColGraph(sfe,
   colGraphName = "knn6",
-  colGeometryName = "cellSeg"
+  colGeometryName = "centroids"
 ) + theme_void()
 ```
 
@@ -155,10 +155,35 @@ plotLocalResult(
 
 ### Join count statistics
 
-> TODO with cluster labels
+```{r clustering, fig.width=20, fig.height=10}
+### code adapted from https://robinsonlabuzh.github.io/pasta/04-imaging-multivar-latSOD.html ###
 
-```{r}
-resJc <- joincount.multi(as.factor(sfe$Cluster), colGraph(sfe, "knn6"))
+library(BiocNeighbors)
+library(BiocSingular)
+
+# normalise exression
+sfe <- logNormCounts(sfe)
+
+set.seed(123)
+# Run PCA on the sample
+sfe <- scater::runPCA(sfe, exprs_values = "logcounts", ncomponents = 50)
+# Cluster based on first 20 PC's and using leiden
+colData(sfe)$cluster <- bluster::clusterRows(reducedDim(sfe, "PCA")[,1:10],
+                                    BLUSPARAM = bluster::KNNGraphParam(
+                                      k = 20,
+                                      cluster.fun = "leiden",
+                                      cluster.args = list(
+                                          resolution = 0.3,
+                                          objective_function = "modularity")))
+
+plotSpatialFeature(sfe,
+  "cluster",
+  colGeometryName = "centroids"
+)
+```
+
+```{r join counts}
+resJc <- joincount.multi(as.factor(sfe$cluster), colGraph(sfe, "knn6"))
 resJc <- resJc[order(resJc[, "z-value"], decreasing=TRUE), ]
-resJc[head(grep("Invasive", rownames(resJc)), 10), ]
+head(resJc)
 ```

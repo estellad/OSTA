@@ -28,16 +28,16 @@ library(SpatialFeatureExperiment)
 bp <- MulticoreParam(10)
 set.seed(77)
 
-sfe <- JanesickBreastData()
+sfe <- STexampleData::Janesick_breastCancer_Xenium_rep1() %>% toSpatialFeatureExperiment()
 
 # load the official 10X annotations 
 labels <- read.xlsx("https://cdn.10xgenomics.com/raw/upload/v1695234604/Xenium%20Preview%20Data/Cell_Barcode_Type_Matrices.xlsx", sheet = 4)
 
-# add cell id to label dataframe
-labels$Barcode <- rownames(labels)
+labels$cell_id <- (labels$Barcode)
+
 # add the cell type labels to the spe
 matchedDf <- as.data.frame(colData(sfe)) |>
-  left_join(as.data.frame(labels), by = join_by("Barcode"))
+  left_join(as.data.frame(labels), by = join_by("cell_id"))
 
 colData(sfe) <- DataFrame(matchedDf)
 

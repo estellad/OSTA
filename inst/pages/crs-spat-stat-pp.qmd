@@ -100,7 +100,7 @@ resCross <- calcCrossMetricPerFov(
   fun = 'Kcross',
   marks = 'Cluster',
   rSeq = seq(0, 500, length.out = 100),
-  by = c("sample_id", "Sample")
+  by = c("sample_id")
 )
 
 plotCrossMetricPerFov(
@@ -112,7 +112,7 @@ plotCrossMetricPerFov(
 )
 ```
 
-This plot shows Ripley's $K$ function corrected for inhomogeneities of the chosen marks. The diagonal is Ripley's $K$ function among the three cell types themselves and the off diagonal plots show the cross type combinations. We note that all cell types, ductal carcinoma in situ 1 (DCIS 1),  ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves, even when correcting for the inhomogeneity. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighbourhood.  
+This plot shows Ripley's $K$ function not corrected for inhomogeneities of the chosen marks. The diagonal is Ripley's $K$ function among the three cell types themselves and the off diagonal plots show the cross type combinations. We note that all cell types, ductal carcinoma in situ 1 (DCIS 1),  ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighbourhood.  
 
 #### Spacing
 
@@ -137,7 +137,7 @@ resCross <- calcCrossMetricPerFov(
   fun = 'Gcross',
   marks = 'Cluster',
   rSeq = seq(0, 100, length.out = 100),
-  by = c("sample_id", "Sample")
+  by = c("sample_id")
 )
 
 plotCrossMetricPerFov(
@@ -179,7 +179,7 @@ resLocal <- localK(ppSub, verbose=FALSE)
 df <- resLocal |>
     as.data.frame() |>
     pivot_longer(
-        iso0001:iso1408, 
+        iso0001:iso1327, 
         names_to="curve") 
 
 sel <- df %>% 
