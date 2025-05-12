@@ -19,9 +19,9 @@ Lattice based spatial methods rely on the concept of neighborhood. The neighborh
 Different methods for the construction of the weight matrix exist, such as
 
 * contiguity-based neighbors (neighbors in direct contact),
-* graph-based neighbours (e.g., k-nearest neighbours),
-* distance-based neighbours,
-* higher order neighbours.
+* graph-based neighbors (e.g., k-nearest neighbors),
+* distance-based neighbors,
+* higher order neighbors.
 
 A detailed overview can be found in the [documentation](https://r-spatial.github.io/spdep/articles/nb.html) of the `r BiocStyle::CRANpkg("spdep")` package.
 
@@ -50,7 +50,7 @@ Spatial autocorrelation measures similarity between spatial units (e.g., cells) 
 
 #### Univariate measures - Moran's $I$
 
-Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neigbours. The global value is a weighted average of the respective local values [@Moran1950].
+Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neigbors. The global value is a weighted average of the respective local values [@Moran1950].
 
 ```{r calculate global moran, warning=FALSE}
 # get all gene probes
@@ -154,9 +154,9 @@ plotLocalResult(
 
 ### Join count statistics
 
-Join count statistics can be used to quantify the arrangement of categorical marks on lattices. The join count statistic calculates how often a categorical mark appears next to itself or to another category within the pre-defined neighbourhood. This values can then be compared against a theoretical or a permutation-based value test of the null hypothesis of random spatial allocation of the marks [@getis2009spatial].
+Join count statistics can be used to quantify the arrangement of categorical marks on lattices. The join count statistic calculates how often a categorical mark appears next to itself or to another category within the pre-defined neighborhood. This values can then be compared against a theoretical or a permutation-based value test of the null hypothesis of random spatial allocation of the marks [@getis2009spatial].
 
-Here, we will use the this to quantify the tendency of clusters (non-spatial) to co-localise in their relative neigbhourhood. Note that the output contains z-scores and no p-values such that a user-defined threshold can be applied.
+Here, we will use the this to quantify the tendency of clusters (non-spatial) to co-localize in their relative neigbhorhood. Note that the output contains z-scores and no p-values such that a user-defined threshold can be applied.
 
 ```{r clustering, fig.width=20, fig.height=10}
 ### code adapted from https://robinsonlabuzh.github.io/pasta/04-imaging-multivar-latSOD.html ###
@@ -164,7 +164,7 @@ Here, we will use the this to quantify the tendency of clusters (non-spatial) to
 library(BiocNeighbors)
 library(BiocSingular)
 
-# normalise expression
+# normalize expression
 sfe <- logNormCounts(sfe)
 
 set.seed(123)
