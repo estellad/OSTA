@@ -199,7 +199,7 @@ Let's visualize the assignment obtains from non-spatial and spatially aware clus
 #| code-fold: true
 ks <- c("Label", "Leiden", "Banksy")#, "CellCharter")
 lapply(ks, \(.) {
-    plt <- plotSpots(spe, annotate=.)
+    plt <- plotCoords(spe, annotate=.)
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
     plt
@@ -221,7 +221,7 @@ To better distinguish between different subpopulations, we can instead generate 
 lapply(tail(names(sort(table(spe$Banksy))), 12), \(k) {
     spe$foo <- spe$Banksy == k
     spe <- spe[, order(spe$foo)]
-    plt <- plotSpots(spe, annotate="foo")
+    plt <- plotCoords(spe, annotate="foo")
     plt$layers[[1]]$aes_params$stroke <- 0
     plt$layers[[1]]$aes_params$size <- 0.2
     plt + ggtitle(k)
