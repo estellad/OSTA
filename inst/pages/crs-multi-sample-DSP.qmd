@@ -29,7 +29,7 @@ spe <- Wei22_example()
 ```{r plt-clu-xy, message=FALSE, warning=FALSE, fig.width=5.5, fig.height=3}
 #| code-fold: true
 colnames(spatialCoords(spe)) <- c("x", "y")
-plotSpots(spe, 
+plotCoords(spe, 
     annotate="Banksy_smooth",
     in_tissue = NULL,
     x_coord = "sdimx",
@@ -82,7 +82,7 @@ DSP genes can be further investigated, for example, by plotting the spatial expr
 
 ```{r plt-xy, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
 #| code-fold: true
-plotSpots(spe, 
+plotCoords(spe, 
     annotate=.gs,
     assay_name="logcounts", 
     feature_names="gene_id",
