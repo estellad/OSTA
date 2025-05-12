@@ -1,4 +1,9 @@
-# Multiple-sample differential expression
+# Multiple-sample differential analyses
 
+{{< include crs-multiple-sample-DSP.qmd >}}
+
+{{< include crs-multi-sample-coloc.qmd >}}
+
+{{< include crs-multi-sample-structs.qmd >}}
 
 ## References {.unnumbered}
