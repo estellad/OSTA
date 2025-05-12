@@ -25,7 +25,7 @@ Different methods for the construction of the weight matrix exist, such as
 
 A detailed overview can be found in the [documentation](https://r-spatial.github.io/spdep/articles/nb.html) of the `r BiocStyle::CRANpkg("spdep")` package.
 
-As different weight matrices  influence downstream results, analysts should justify their choice of the weight matrix. A more detailed overview can be found in @Pebesma2023.
+As different weight matrices influence downstream results, analysts should justify their choice of the weight matrix. A more detailed overview can be found in @Pebesma2023.
 
 :::
 
@@ -46,11 +46,11 @@ plotColGraph(sfe,
 
 ### Spatial autocorrelation
 
-Spatial autocorrelation measures similarity between spatial units (e.g., cells) while recognize that the units are not independent due to their spatial context. Spatial autocorrelation metrics can be global (summarizing the entire study area) of view or local (provide statistic for each unit). In addition, there exist methods for univariate and multivariate comparisons of continuous and categorical data @Pebesma2023.
+Spatial autocorrelation measures similarity between spatial units (e.g., cells) while recognize that the units are not independent due to their spatial context. Spatial autocorrelation metrics can be global (summarizing the entire study area) of view or local (provide statistic for each unit). In addition, there exist methods for univariate and multivariate comparisons of continuous and categorical data [@Pebesma2023].
 
 #### Univariate measures - Moran's $I$
 
-Moran’s $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neigbours. The global value is a weighted average of the respective local values @Moran1950.
+Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neigbours. The global value is a weighted average of the respective local values [@Moran1950].
 
 ```{r calculate global moran, warning=FALSE}
 # get all gene probes
@@ -71,7 +71,7 @@ topGenes <- rownames(sfe)[order(rowData(sfe)$moran_sample01, decreasing = TRUE)[
 plotSpatialFeature(sfe, topGenes, ncol = 3)
 ```
 
-We can further visualize this using when calculating and plotting local Moran's $I$ values @Anselin1995. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell's neighbors. Negative values indicate local dissimilarity in expression.
+We can further visualize this using when calculating and plotting local Moran's $I$ values [@Anselin1995]. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell's neighbors. Negative values indicate local dissimilarity in expression.
  
 ```{r local moran, fig.width=25, fig.height=10}
 sfe <- runUnivariate(sfe,
@@ -110,8 +110,7 @@ plotLocalResult(sfe,
 
 Multivariate measures – Lee's L
 
-Lee's $L$ combines the Pearson correlation coefficient and Moran's $I$ @Lee2001 This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial)
-variable features.
+Lee's $L$ combines the Pearson correlation coefficient and Moran's $I$ [@Lee2001]. This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial) variable features.
 
 ```{r lees l, warning=FALSE}
 hvgs <- getTopHVGs(sfe, n = 20)

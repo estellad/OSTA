@@ -7,7 +7,7 @@ Point pattern analysis is a subfield of spatial statistics that focuses on the r
 
 The central `R` package to perform point pattern analysis is called `r BiocStyle::CRANpkg('spatstat')` [@Baddeley2005-spatstat]. The package `spatialFDA` creates an interface between `SpatialExperiment` objects and the `r BiocStyle::CRANpkg('spatstat')` library for easy integration into analysis workflows.
 
-Part of this vignette is based on the [pasta overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) @Emons2024-pasta
+Part of this vignette is based on the [pasta overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2024-pasta]
 
 ::: {.callout-note collapse="true" title="`ppp` object"}
 
