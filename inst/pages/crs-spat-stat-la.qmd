@@ -155,13 +155,17 @@ plotLocalResult(
 
 ### Join count statistics
 
+Join count statistics can be used to quantify the arrangement of categorical marks on lattices. The join count statistic calculates how often a categorical mark appears next to itself or to another category within the pre-defined neighbourhood. This values can then be compared against a theoretical or a permutation-based value test of the null hypothesis of random spatial allocation of the marks [@getis2009spatial].
+
+Here, we will use the this to quantify the tendency of clusters (non-spatial) to co-localise in their relative neigbhourhood. Note that the output contains z-scores and no p-values such that a user-defined threshold can be applied.
+
 ```{r clustering, fig.width=20, fig.height=10}
 ### code adapted from https://robinsonlabuzh.github.io/pasta/04-imaging-multivar-latSOD.html ###
 
 library(BiocNeighbors)
 library(BiocSingular)
 
-# normalise exression
+# normalise expression
 sfe <- logNormCounts(sfe)
 
 set.seed(123)
@@ -185,5 +189,7 @@ plotSpatialFeature(sfe,
 ```{r join counts}
 resJc <- joincount.multi(as.factor(sfe$cluster), colGraph(sfe, "knn6"))
 resJc <- resJc[order(resJc[, "z-value"], decreasing=TRUE), ]
-head(resJc)
+head(resJc, n = 20)
 ```
+
+We note that the non-spatial cluster labels are of course most likely found next to each other. Apart from this obvious result, the first top non-self interaction is $5:3$. Looking at the plot of the spatial distributions of the clusters these are two clusters in the ductal carcinoma regions of the tissue, the inner (blue) and the outer (green) lining. 
