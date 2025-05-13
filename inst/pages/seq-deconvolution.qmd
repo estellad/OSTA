@@ -88,8 +88,8 @@ vis <- addPerCellQCMetrics(vis, subsets = sub)
 ```{r plt-xy-qc, echo = FALSE, message = FALSE, fig.width = 6, fig.height = 2.5}
 #| code-fold: true
 vis$log_sum <- log1p(vis$sum)
-plotSpots(vis, annotate = "log_sum") + ggtitle("log library size") + 
-    plotSpots(vis, annotate = "subsets_mt_percent") + ggtitle("% mitochondrial") + 
+plotCoords(vis, annotate = "log_sum") + ggtitle("log library size") + 
+    plotCoords(vis, annotate = "subsets_mt_percent") + ggtitle("% mitochondrial") + 
     plot_layout(nrow = 1) & theme(
       legend.key.width = unit(0.5, "lines"), 
       legend.key.height = unit(1, "lines")) & 
@@ -100,9 +100,9 @@ All spots have non-zero library sizes, so we can proceed without subsetting. We 
 
 ```{r visanno, message = FALSE, fig.width = 5.5, fig.height = 3.5}
 #| code-fold: true
-plotSpots(vis, 
-          annotate = "anno", point_size = 1, 
-          pal = unname(pals::trubetskoy())) + 
+plotCoords(vis, 
+           annotate = "anno", point_size = 1, 
+           pal = unname(pals::trubetskoy())) + 
     theme(legend.key.size = unit(0, "lines"))
 ```
 
@@ -289,7 +289,7 @@ We can visualize these three annotations spatially:
 ```{r plt-clu-xy, message = FALSE, fig.width = 10, fig.height = 2.5}
 #| code-fold: true
 lapply(c("anno", "RCTD", "RCTD_no_stroma"), 
-       \(.) plotSpots(vis, annotate=.)) |>
+       \(.) plotCoords(vis, annotate=.)) |>
     wrap_plots(nrow = 1) &
     theme(legend.key.size = unit(0, "lines")) &
     scale_color_manual(values = unname(pals::trubetskoy()))

@@ -102,6 +102,7 @@ Suggests:
     xml2 
 Remotes: 
     edward130603/BayesSpace, 
+    lmweber/ggspavis, 
     drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

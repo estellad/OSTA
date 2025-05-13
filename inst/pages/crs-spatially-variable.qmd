@@ -132,7 +132,7 @@ top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
 
 ```{r plt-clu-xy, message=FALSE, fig.width=3.5, fig.height=3}
 #| code-fold: true
-plotSpots(spe, 
+plotCoords(spe, 
     annotate="BayesSpace") +
     theme(legend.key.size=unit(0, "lines")) +
     scale_color_manual(values=unname(pals::trubetskoy()))
@@ -175,7 +175,7 @@ idx <- match(unlist(gs), rowData(spe)$gene_id)
 .gs <- rowData(spe)$gene_name[idx]
 # expression plots for each top gene
 ps <- lapply(seq_along(.gs), \(.) {
-    plotSpots(spe, 
+    plotCoords(spe, 
         point_size=0,
         annotate=.gs[.], 
         assay_name="logcounts", 
