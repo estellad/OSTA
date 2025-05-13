@@ -5,17 +5,15 @@ Sequencing-based Spatial Transcriptomics (sST) platforms employ next-generation 
 
 To perform spatial data analysis several preprocessing steps are needed to convert raw sequencing data into a useful format, often a count matrix, from which we can analyse gene expression across a tissue of interest. These steps differ platform to platform but all start from a series of 'reads' and end with one of the several spatial data formats used with downstream analysis tools like `Squidpy`, `Seurat`, or Bioconductor workflows using `SpatialExperiment` objects.
 
-## Reads and Sequencing Platforms
+## Introduction to Reads and Sequencing
+When we talk about 'reads' in transcriptomics we're referring to a sequence of nucleotides (bases) which represent a cDNA fragment which is reverse transcribed from an RNA molecule. The abundance of these transcripts is corollary to gene expression which is what we're trying to measure in transcriptomics analysis. The benefit to spatial transcriptomics data is the ability to associate reads with locations on the tissue where the RNA molecule, and thus the expression of the corresponding gene, originated. The process of generating reads generally involves the following steps:
+1. RNA Extraction
+2. Reverse Transcription
+3. cDNA Fragmentation
+4. Adapter Ligation
+5. PCR Amplification
 
-### Sequencing Platforms
-::: {.callout-warning}
-This section is still in progress awaiting additional resources and review. This may also be a topic for seq-introduction instead.
-:::
-
-### Introduction to Reads
-::: {.callout-warning}
-This section is still in progress awaiting additional resources and review. This should explain what a 'read' is once finalised.
-:::
+Because of the PCR Amplification step, and the imperfect nature of RNA Extraction we can only consider read abundance as a relative measure of gene expression, and it should never be treated as an absolute measure. Additionally, this means that steps need to be taken to normalise the data before analyses such as Differential Expression (DE) analysis can be performed. However, well before the point in analysis where we might perform Normalisation, reads first need to be pre-processed through a number of methods to construct a count matrix or equivalent data structure, which we would normally use in downstream analysis. The rest of this chapter aims to address these pre-processing steps and provide some examples to help when pre-processing in your own analysis.
 
 ### Read Structure
 For the majority of sequencing based spatial technology platforms reads are recorded as 'paired end' where both ends of the DNA fragment are sequenced into different files, often `.fastq` files. One of these files (often read 1) contains barcode sequences, and depending on whether reads have been trimmed first, may also include linking or other structural sequences. The other file will contain the sequence containing the transcript (or probe) which we intend to align to a reference genome (or probe-set) to determine the gene expressed.
