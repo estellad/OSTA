@@ -6,7 +6,7 @@ Ideally, users would be able to leverage the full range of available tools for t
 
 [R's application to spatial data dates back decades, primarily in epidemiological and geospatial research. As a result, various tools for spatial analyses have been established; for example, `r BiocStyle::CRANpkg("sp")` provides a "coherent set of classes and methods for \[...\] points, lines, polygons, and grids"; `r BiocStyle::CRANpkg("spatstat")` and, more recently, `r BiocStyle::CRANpkg("sf")` provide tools for spatial point pattern and vector data, respectively.]{.aside} For single-cell and spatial omics data analysis, being able to leverage different ecosystems is especially powerful. On the one hand, Python offers superb infrastructure for image analysis and machine learning-based approaches. On the other hand, the R programming language has been historically dedicated to statistical computing; as a result, many a modern R method for spatial omics data builds on a solid foundation of tools for spatial statistics and statistical modeling in general.
 
-Different data structures, although standardized within a given framework, make switching between languages and tools especially cumbersome. In the realm of single-cell and spatial omics, Bioconductor tools build around `r BiocStyle::Biocpkg("SummarizedExperiment")`-derived classes, while `r BiocStyle::CRANpkg("Seurat")`, `r BiocStyle::CRANpkg("Giotto")` and `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` rely on objects built in-house; and Python's [`scanpy`](https://scanpy.readthedocs.io/) [@Wolf2018-scanpy] and [`squidpy`](https://squidpy.readthedocs.io/) [@Palla2022-squidpy] use [`AnnData`](https://anndata.readthedocs.io/). Attempts to alleviate the problem are being made; e.g. `r BiocStyle::Biocpkg("zellkonverter")` and functions from `r BiocStyle::CRANpkg("Seurat")` allow for conversion between Python's `AnnData` and R/Bioconductor's `r BiocStyle::Biocpkg("SingleCellExperiment")`.
+Different data structures, although standardized within a given framework, make switching between languages and tools especially cumbersome. In the realm of single-cell and spatial omics, Bioconductor tools build around `r BiocStyle::Biocpkg("SummarizedExperiment")`-derived classes, while `r BiocStyle::CRANpkg("Seurat")`, `r BiocStyle::CRANpkg("Giotto")` and `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` rely on objects built in-house; and Python's [`scanpy`](https://scanpy.readthedocs.io/) [@Wolf2018-scanpy] and [`squidpy`](https://squidpy.readthedocs.io/) [@Palla2022-squidpy] use [`AnnData`](https://anndata.readthedocs.io/). Attempts to alleviate the problem are being made; e.g. `r BiocStyle::Biocpkg("zellkonverter")` and functions from `r BiocStyle::CRANpkg("Seurat")` allow for conversion between Python's `AnnData`, R/Bioconductor's `r BiocStyle::Biocpkg("SingleCellExperiment")` and also `r BiocStyle::Biocpkg("SingleCellExperiment")`.
 
 [[Quarto](https://quarto.org) is the successor of [R Markdown](https://rmarkdown.rstudio.com) by Posit (formerly known as RStudio). Similar to *.rmd* files, *.qmd* files can include scientific content (e.g. cross-referencing, LaTeX-based equations), and can be published in multiple output formats (HTML, PDF, etc.). -- This book uses Quarto.]{.aside} On a higher level, tools that enable interoperability between programming languages have become available. For example, the `r BiocStyle::Biocpkg("reticulate")` package provides an R interface to Python, including support to translate between objects from both languages; `r BiocStyle::Biocpkg("basilisk")` facilitates Python environment management within the Bioconductor ecosystems, but can be interfaced with `reticulate` as well; and, Quarto can generate dynamic reports from code in different languages.
 
@@ -37,7 +37,7 @@ library(basilisk)
 
 ## Configuring Python
 
-We first create an environment with Python modules necessary the examples in this chapter. For that, we first define a `r BiocStyle::Biocpkg("basilisk")` environment and use the resulting conda environment with `r BiocStyle::Biocpkg("reticulate")`.
+We first create an environment with Python modules necessary for the examples in this chapter. For that, we first define a `r BiocStyle::Biocpkg("basilisk")` environment and use the resulting conda environment with `r BiocStyle::Biocpkg("reticulate")`.
 
 ```{r env, warning=FALSE}
 #| code-fold: false
@@ -50,7 +50,6 @@ env <- BasiliskEnvironment(
     "Dask=2024.12.1"),
   pip=c(
     "squidpy==1.6.2"))
-# activate underlying conda environment
 use_condaenv(obtainEnvironmentPath(env))
 ```
 
@@ -95,9 +94,11 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ## SpatialExperiment
 
+Since `SpatialExperiment` extends the `SingleCellExperiment` class, conversion operations that we discussed above are also applicable to the `SpatialExperiment` class. However, to accomplish a full conversion from the `AnnData` object, we need to manually insert/import the remaining spatial information using `reticulate` directly. 
+
 ### Starting with R
 
-For the example with `SpatialExperiment`, we will use the dataset from @Janesick2023, which includes Visium measurements on human breast cancer tissue.
+For this use case with `SpatialExperiment`, we will use the dataset from @Janesick2023, which includes Visium measurements on human breast cancer tissue.
 
 ```{r load-spe, message=FALSE, warning=FALSE, results="hide"}
 #| code-fold: false
@@ -112,15 +113,14 @@ obj <- TENxVisium(
 (spe <- VisiumIO::import(obj))
 ```
 
-We also have to parse the original scaling information for spots and images available in standard Visium output. We will use this later during conversion.
+We also have to parse the original scaling information (i.e. scale factor) for spots and images available in standard Visium output. We will use this later during conversion.
 
 ```{r scalefactors, message=FALSE, results="hide"}
 #| code-fold: false
-# retrieve scalefactors for Visium assay
 scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
 ```
 
-We can also use `SCE2AnnData` function from the previous example and convert the `SingleCellExperiment` relevant information of the `SpatialExperiment` object to an `AnnData`.
+We again use the `SCE2AnnData` function from the previous example, and convert the `SingleCellExperiment` relevant components of the `SpatialExperiment` object to an `AnnData` object.
 
 ```{r spe2anndata, message=FALSE}
 #| code-fold: false
@@ -136,7 +136,7 @@ colnames(coords) <- c("x", "y")
 obsm <- list(spatial = coords)
 ```
 
-Now lets create the `uns` component. The list of `uns` should compose of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for scaling information.
+Now lets create the `uns` component. The list of `uns` should compose of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for scaling information. 
 
 ```{r uns}
 #| code-fold: false
@@ -158,7 +158,7 @@ uns[["spatial"]][[imgdata$sample_id]] <-
        scalefactors = scalefactors)
 ```
 
-Now lets insert the components back to the `AnnData`.
+Now lets insert the components to the `AnnData` object, and write back to an h5ad file.
 
 ```{r writeh5ad}
 #| code-fold: false
@@ -170,7 +170,7 @@ ad$write_h5ad("spe.h5ad")
 
 ### Calling Python
 
-Now that we have converted our `SpatialExperiment` object to `AnnData` format, we can use `squidpy` module to visualize the Visium data. 
+Now that we have converted our `SpatialExperiment` object to `AnnData` format, we visualize the Visium data using, for example, the `squidpy` module.
 
 ```{python modules}
 #| code-fold: false
