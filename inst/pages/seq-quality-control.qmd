@@ -1,4 +1,4 @@
-# Quality control {#sec-seq-qc}
+# Quality control {#sec-seq-quality-control}
 
 > "Quality is everyone's responsibility." - W. Edwards Deming
 
@@ -36,11 +36,11 @@ For example, in the brain, neuronal cell bodies reside in gray matter, whereas w
 
 ### Structure of the chapter
 
-In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @seq-qc-diagnosis.
+In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-qc-diagnosis.
 
-In the advanced topics section (@seq-qc-adv-topic), we will visit some novel and unique challenges in QC of ST data, including identifying histological artifacts, i.e. regional artifacts and QC based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all datasets.
+In the advanced topics section (@sec-seq-qc-adv-topic), we will visit some novel and unique challenges in QC of ST data, including identifying histological artifacts, i.e. regional artifacts and QC based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all datasets.
 
-To note, the current chapter focuses on QC at the spot level. In some datasets, it may also be appropriate to apply QC procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between QC and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @seq-normalize-featselect-dimred chapter.
+To note, the current chapter focuses on QC at the spot level. In some datasets, it may also be appropriate to apply QC procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between QC and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @sec-seq-processing chapter.
 
 
 ### Dependencies
@@ -95,7 +95,7 @@ head(colData(spe))
 ```
 
 
-## Identifying low-quality spots {#seq-qc-diagnosis}
+## Identifying low-quality spots {#sec-seq-qc-diagnosis}
 
 ### Global outlier detection with fixed thresholds
 
@@ -227,7 +227,7 @@ p1 | p2 | p3
 ```
 
 
-### Local outlier detection using SpotSweeper {#seq-qc-spotsweeper-local}
+### Local outlier detection using SpotSweeper
 
 One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
 
@@ -363,7 +363,7 @@ dim(spe)
 ```
 
 
-## Advanced topics {#seq-qc-adv-topic}
+## Advanced topics {#sec-seq-qc-adv-topic}
 
 ### Histological artifact detection
 
