@@ -13,11 +13,17 @@ library("tidyr")
 
 The use case is a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (Non-diabetic, onset and long-druation diabetes), several patients per condition and per patient several fields-of-view. This hierarchical set-up requires the modeller to account for correlation between fields-of-view if they stem e.g. from the same patient. Such a setup can be modelled with mixed-models.
 
+<!--
+TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if download using 'spe <- .loadExample(full = TRUE)' is too large for GitHub Actions / Bioc builders
+-->
+
 ```{r, load-data, warning=FALSE, error=FALSE}
 # load data
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
 spe <- subset(spe, ,patient_id %in% c(6089,6180,6126,6134,6228,6414))
+# remove assays (for smaller object size since assays not needed here)
+assays(spe) <- list()
 # as factor
 colData(spe)$cell_type <- as.factor(colData(spe)$cell_type) 
 # as factor and relevel
@@ -28,9 +34,12 @@ colData(spe)$patient_stage <- as.factor(colData(spe)$patient_stage) |> relevel("
 
 First, we show the functionality of `r BiocStyle::Biocpkg('spicyR')`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022]. 
 
-```{r, spicyR, warning=FALSE, error=FALSE}
+Since runtime is fairly slow for this example (~10 min), we do not evaluate the code here.
+
+```{r, spicyR, warning=FALSE, error=FALSE, eval=FALSE}
 colData(spe)$cellType <- colData(spe)$cell_type
 colData(spe)$cell_type <- as.factor(colData(spe)$cell_type) 
+
 spicyTestPair <- spicy(
   spe,
   condition = "patient_stage",
@@ -45,7 +54,7 @@ out
 
 We can plot the results of `r BiocStyle::Biocpkg('spicyR')` as a heatmap
 
-```{r, warning=FALSE, error=FALSE}
+```{r, warning=FALSE, error=FALSE, eval=FALSE}
 signifPlot(
   spicyTestPair,
   breaks = c(-3, 3, 1),

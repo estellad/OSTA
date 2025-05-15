@@ -25,6 +25,10 @@ set.seed(8048)
 
 We will load the data directly from `ExperimentHub` and convert it into a `r BiocStyle::Biocpkg('SpatialExperiment')` object. To reduce runtime we will subset to 15 images per patient.
 
+<!--
+TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if downloading full object size is too large for GitHub Actions / Bioc builders
+-->
+
 ```{r, load-data-structs}
 #| message: false
 # load experiment hub
@@ -38,6 +42,9 @@ spe <- eh[[oid]]
 spe <- toSpatialExperiment(spe,
                            sample_id = "image_name",
                            spatialCoordsNames = c("cell_x", "cell_y"))
+
+# remove assays (for smaller object size since assays not needed here)
+assays(spe) <- list()
 ```
 
 Let's plot a few selected field of views (fov).
