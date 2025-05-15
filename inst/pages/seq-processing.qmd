@@ -6,7 +6,9 @@
 
 This chapter demonstrates methods for several data processing steps -- normalization, feature selection, and dimensionality reduction -- that are required before downstream analysis methods can be applied.
 
-We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we demonstrate alternative spatially-aware methods.
+In addition, we include short demonstrations of subsequent steps, including clustering and identification of marker genes. More details on these downstream steps are included in later parts of the book.
+
+We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we discuss alternative spatially-aware methods, and provide links to later parts of the book where these methods are described in more detail.
 
 
 ### Dependencies
