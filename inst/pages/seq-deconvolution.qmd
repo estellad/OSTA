@@ -416,4 +416,7 @@ Benchmarking studies of deconvolution methods often requires generating syntheti
 
 - @li2023comprehensive benchmarked 18 deconvolution methods, including `RCTD`, across 50 simulated and real datasets. Among these methods, `CARD`, `cell2location`, and `Tangram` are highly recommended. Figure 1 summarizes the method performance, and Figure 4 gives a flowchart of how to decide on which method to use.
 
+- @GaspardBoulinc2025deconv review and compare available cell-type deconvolution methods, and provide a continuously updated web-based summary table.
+
+
 ### References {.unnumbered}
