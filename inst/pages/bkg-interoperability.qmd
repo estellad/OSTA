@@ -50,7 +50,7 @@ env <- BasiliskEnvironment(
     "Dask=2024.12.1"),
   pip=c(
     "squidpy==1.6.2"))
-use_condaenv(obtainEnvironmentPath(env))
+use_virtualenv(obtainEnvironmentPath(env))
 ```
 
 ## SingleCellExperiment
