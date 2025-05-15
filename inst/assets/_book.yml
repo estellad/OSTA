@@ -39,6 +39,8 @@ book:
         - pages/crs-spatially-variable.qmd
         - pages/crs-signatures.qmd
         - pages/crs-spat-stat.qmd
+    - part: "Multiple-sample analyses"
+      chapters:
         - pages/crs-multi-sample.qmd
     - part: "Cross-platform analyses"
       chapters:
