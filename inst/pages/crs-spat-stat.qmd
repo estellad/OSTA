@@ -25,7 +25,7 @@ library(BiocParallel)
 library(SpatialExperiment)
 library(SpatialFeatureExperiment)
 
-bp <- MulticoreParam(10)
+bp <- MulticoreParam(4)
 set.seed(77)
 
 sfe <- STexampleData::Janesick_breastCancer_Xenium_rep1() %>% toSpatialFeatureExperiment()

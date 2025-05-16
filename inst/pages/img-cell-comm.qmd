@@ -15,7 +15,7 @@ suppressPackageStartupMessages({
 })
 
 # setup
-bp <- MulticoreParam(10)
+bp <- MulticoreParam(4)
 . <- "~/software/mambaforge/bin/conda"
 options(reticulate.conda_binary=.)
 use_condaenv("commot")

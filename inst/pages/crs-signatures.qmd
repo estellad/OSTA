@@ -35,7 +35,7 @@ library(pheatmap)
 library(patchwork)
 library(BiocParallel)
 library(SpatialExperiment)
-bp <- MulticoreParam(th <- 10)
+bp <- MulticoreParam(th <- 4)
 ```
 
 ```{r load-data}

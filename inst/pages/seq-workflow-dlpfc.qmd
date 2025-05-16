@@ -205,10 +205,8 @@ Here, we run nnSVG using a small subset of the dataset for faster runtime. We se
 # spe_nnSVG <- logNormCounts(spe_nnSVG)
 # 
 # # run nnSVG
-# # using a single core for compatibility on build system
-# # note: for a full analysis, use multiple cores
 # set.seed(123)
-# spe_nnSVG <- nnSVG(spe_nnSVG, n_threads = 1)
+# spe_nnSVG <- nnSVG(spe_nnSVG, n_threads = 4)
 # 
 # # investigate results
 # 
