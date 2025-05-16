@@ -79,7 +79,6 @@ Ok, let's get started! First we need to re-create the `spe` object from the @sec
 * [`igraph`](https://cran.r-project.org/package=igraph): for clustering algorithms
 * [`BiocFileCache`](http://bioconductor.org/packages/BiocFileCache): for downloading and storing data
 * [`rtracklayer`](http://bioconductor.org/packages/rtracklayer): for importing gene annotation files
-* [`lobstr`](https://cran.r-project.org/package=igraph): for checking object memory usage
 
 You'll need to have the R version compatible with `bioc-release` ^[This book is under development, so right now you actually need to use `bioc-devel`. Once this book is submitted to Bioconductor, then it'll work with `bioc-release`. TODO: remove this comment when the book is available on `bioc-release`.] installed in your computer, as [documented by Bioconductor](http://bioconductor.org/install/). Alternatively, you can use the [Bioconductor docker images](http://bioconductor.org/help/docker/). Next, if you haven't installed these packages, please do so with the following R code.
 
@@ -100,7 +99,6 @@ BiocManager::install(c(
     "igraph",
     "BiocFileCache",
     "rtracklayer",
-    "lobstr",
     "spatialLIBD"
 ))
 ```
@@ -117,7 +115,6 @@ library("scran")
 library("igraph")
 library("BiocFileCache")
 library("rtracklayer")
-library("lobstr")
 library("spatialLIBD")
 
 ## Start tracking time
@@ -406,11 +403,11 @@ knitr::include_graphics("https://raw.githubusercontent.com/lmweber/OSTA-resource
 
 ## Sharing your website
 
-Now that you have created a `spatialLIBD`-powered website, you might be interested in sharing it. To do so, it'll be useful to have saved a small `spe` object using `saveRDS()` like we did earlier. The smaller the object, the better in terms of performance. For example, you might want to remove the lowly expressed genes to save space. One function you can use to measure how big your object is is `lobstr::obj_size()` as shown below.
+Now that you have created a `spatialLIBD`-powered website, you might be interested in sharing it. To do so, it'll be useful to have saved a small `spe` object using `saveRDS()` like we did earlier. The smaller the object, the better in terms of performance. For example, you might want to remove the lowly expressed genes to save space. One function you can use to measure how big your object is is `object.size()` as shown below.
 
 ```{r spatialLIBD_object_size}
 ## Object size
-lobstr::obj_size(spe) / 1024^2 ## Convert to MB
+format(object.size(spe), units = "MB")
 ```
 
 If your data is small enough, you might want to share your website by hosting on [shinyapps.io](https://www.shinyapps.io/) by RStudio, which you can try for free. Once you have created your account, you'll want to create an `app.R` file like the one we have [on the `spatialLIBD_demo` directory](https://github.com/lmweber/OSTA-resources/tree/main/spatialLIBD_demo).
