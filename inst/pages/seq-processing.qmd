@@ -32,6 +32,7 @@ Here, we import a 10x Genomics Visium dataset that will be used in several of th
 This dataset consists of one sample (Visium capture area) from one donor, consisting of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region, measured with the 10x Genomics Visium platform. The dataset is described in @Maynard2021.
 
 ```{r load-data, message=FALSE}
+# load data from STexampleData package
 spe <- Visium_humanDLPFC()
 
 class(spe)

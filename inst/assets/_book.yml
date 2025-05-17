@@ -44,7 +44,6 @@ book:
         - pages/crs-multi-sample.qmd
     - part: "Cross-platform analyses"
       chapters:
-        - pages/crs-introduction.qmd
         - pages/crs-registration.qmd
         - pages/crs-imputation.qmd
         - pages/crs-workflow-xenvis.qmd

@@ -4,6 +4,8 @@
 
 ### Introduction
 
+Cross-platform analyses aim to integrate or combine information across platforms, for example to improve resolution, or to improve biological interpretability.
+
 Spatial **registation** is defined as the task of mapping features or or spatial locations of from a **query** to a **reference** assay (@Friston1995, @Lewis2021, @Rajewsky2019-novoSpaRc). 
 Here, the reference is a spatially-resolved dataset whereas the query could be an assay with or without spatial resolution. 
 

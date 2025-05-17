@@ -36,7 +36,7 @@ For example, in the brain, neuronal cell bodies reside in gray matter, whereas w
 
 ### Structure of the chapter
 
-In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-qc-diagnosis.
+In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-qc-global and @sec-seq-qc-local.
 
 In the advanced topics section (@sec-seq-qc-adv-topic), we will visit some novel and unique challenges in QC of ST data, including identifying histological artifacts, i.e. regional artifacts and QC based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all datasets.
 
@@ -69,9 +69,9 @@ spe
 ```
 
 
-### Calculate QC metrics using scater
+## Calculate QC metrics using scater
 
-We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions.
+We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. We can then use these metrics to identify low-quality spots.
 
 The QC metrics from `scater` can be calculated and added to the `SpatialExperiment` object's column data using the `addPerCellQC` function. The `sum` column contains the total number of unique molecular identifiers (UMIs) for each spot, the `detected` column contains the number of unique genes detected per spot, and `subsets_mito_percent` contains the percentage (or proportion) of transcripts mapping to mitochondrial genes per spot.
 
@@ -95,9 +95,7 @@ head(colData(spe))
 ```
 
 
-## Identifying low-quality spots {#sec-seq-qc-diagnosis}
-
-### Global outlier detection with fixed thresholds
+## Global outlier detection with fixed thresholds {#sec-seq-qc-global}
 
 Many commonly used QC methods currently applied to ST were adapted from snRNA-seq workflows, such as **global outlier detection**. The simplest option for identifying potential low-quality spots is to apply fixed thresholds to each QC metric across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics.
 
@@ -227,7 +225,7 @@ p1 | p2 | p3
 ```
 
 
-### Local outlier detection using SpotSweeper
+## Local outlier detection using SpotSweeper {#sec-seq-qc-local}
 
 One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
 
@@ -312,7 +310,7 @@ p1 | p2 | p3
 ```
 
 
-### Remove low-quality spots
+## Identify and remove low-quality spots
 
 Now that we have calculated several QC metrics and selected thresholds for each one, we can combine the sets of low-quality spots, and remove them from our object.
 

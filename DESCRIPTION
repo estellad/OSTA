@@ -80,7 +80,7 @@ Imports:
     spatialLIBD,
     spatstat,
     spdep,
-    SpotSweeper (>= 1.3.3),
+    SpotSweeper,
     STexampleData, 
     Statial,
     tidyr,
