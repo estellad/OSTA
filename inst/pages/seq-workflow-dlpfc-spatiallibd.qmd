@@ -323,7 +323,7 @@ If you prefer to watch videos, recorded presentations related to the dataset [@M
 
 ### Code prerequisites
 
-For this demo, we will re-use the `spe` object (in `r BiocStyle::Biocpkg("SpatialExperiment` format) created in the example DLPFC workflow above. If you are starting from here, you can re-build the object by running the code in section @sec-seq-workflow-dlpfc-workflow above.
+For this demo, we will re-use the `spe` object (in `r BiocStyle::Biocpkg("SpatialExperiment") format) created in the example DLPFC workflow above. If you are starting from here, you can re-build the object by running the code in section @sec-seq-workflow-dlpfc-workflow above.
 
 We also load some additional dependency packages, in addition to the dependencies already loaded in @sec-seq-workflow-dlpfc-workflow above.
 
