@@ -96,6 +96,8 @@ Suggests:
     downlit,
     glue, 
     knitr,
+    markdown,
+    quarto,
     scrapper,
     sessioninfo, 
     xml2 
