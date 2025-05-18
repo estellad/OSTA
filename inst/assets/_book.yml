@@ -17,8 +17,7 @@ book:
         - pages/seq-processing.qmd
         - pages/seq-deconvolution.qmd
         #- pages/seq-colocalization.qmd
-        - pages/seq-workflow-dlpfc.qmd
-        - pages/seq-workflow-spatialibd.qmd
+        - pages/seq-workflow-dlpfc-spatiallibd.qmd
         - pages/seq-workflow-visium-crc.qmd
         - pages/seq-workflow-visium-hd.qmd
     - part: "Imaging-based platforms"
