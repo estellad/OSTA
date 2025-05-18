@@ -157,6 +157,18 @@ Next, we perform deconvolution with `r BiocStyle::Biocpkg("spacexr")` (also know
 [Note that RCTD can also be adapted to Visium HD data with `rctd_mode = "doublet"`, as demonstrated by [@Oliveira2024] and @sec-seq-workflow-visium-hd.]{.aside}
 By default, `runRctd()`'s `rctd_mode = "doublet"` specifies at most two subpopulations coexist in a data unit, such as a spot; here, we set `rctd_mode = "full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
+Note that in order to speed up runtime in this demo, we use only a subset of the Visium spots. For a full analysis, please use the full dataset.
+
+<!-- Note for speeding up this chapter: subsetting the Visium spots speeds up CARD but not RCTD; subsetting the single-cell reference makes no difference to either -->
+
+```{r subsetting}
+# subset Visium spots for faster runtime in this demo
+# selecting region containing tumor and other tissue of interest
+keep_r <- colData(vis)$array_row > 10 & colData(vis)$array_row < 70
+keep_c <- colData(vis)$array_col > 10 & colData(vis)$array_col < 70
+vis <- vis[, keep_r & keep_c]
+```
+
 ```{r dec, message = FALSE, warning = FALSE}
 counts(vis) <- as(counts(vis), "dgCMatrix")
 counts(sce) <- as(counts(sce), "dgCMatrix")
@@ -231,7 +243,7 @@ ws_card[1:5, 1:5]
 
 .plt_decon <- \(ws, vis){
     lapply(names(ws), \(.) 
-      .plt_xy(ws, vis, col = ., point_size = 0.3)) |> 
+      .plt_xy(ws, vis, col = ., point_size = 0.4)) |> 
       wrap_plots(nrow = 3) & theme(
       legend.key.width = unit(0.5, "lines"),
       legend.key.height = unit(1, "lines")) &
@@ -289,7 +301,7 @@ We can visualize these three annotations spatially:
 ```{r plt-clu-xy, message = FALSE, fig.width = 10, fig.height = 2.5}
 #| code-fold: true
 lapply(c("anno", "RCTD", "RCTD_no_stroma"), 
-       \(.) plotCoords(vis, annotate=.)) |>
+       \(.) plotCoords(vis, annotate=., point_size = 1)) |>
     wrap_plots(nrow = 1) &
     theme(legend.key.size = unit(0, "lines")) &
     scale_color_manual(values = unname(pals::trubetskoy()))
