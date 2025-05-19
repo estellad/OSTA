@@ -56,4 +56,7 @@ The resulting representation may be used to cluster and annotate pixels, identif
 ![](../images/img-seg_SSAM.jpeg){width=66%}
 </center>
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}
