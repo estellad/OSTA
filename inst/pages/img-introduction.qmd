@@ -67,7 +67,10 @@ The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluoresc
 - Processed files (typically the starting point of a Bioconductor analysis) include: transcript files, segmentation mask, expression matrix (cell x gene), and cell metadata (with xy coordinates of their centroids), and optionally a polygon file which represents the cell boundaries.
 -->
 
-## Resources
+
+## Appendix
+
+### Resources {.unnumbered}
 
 - Available datasets
   - [Xenium (10x Genomics)](https://www.10xgenomics.com/datasets)
@@ -75,5 +78,6 @@ The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluoresc
   - [MERSCOPE (Vizgen)](https://vizgen.com/data-release-program)
 - Platform-specific methods
   - [CosMx analysis](https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space)
-  
-## References {.unnumbered}
+
+
+### References {.unnumbered}

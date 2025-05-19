@@ -51,7 +51,7 @@ The [STOmics Stereo-seq](https://en.stomics.tech/why-stereo-seq/index.html) plat
 
 ## Appendix
 
-### Resources
+### Resources {.unnumbered}
 
 Datasets available from commercial providers of the platforms:
 
