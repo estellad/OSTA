@@ -1,11 +1,10 @@
 # Quality control {#sec-seq-quality-control}
 
-> "Quality is everyone's responsibility." - W. Edwards Deming
-
-
 ## Preamble
 
 ### Introduction
+
+> "Quality is everyone's responsibility." - W. Edwards Deming
 
 Quality control (QC) procedures aim to remove low-quality spots or technical artifacts before further analysis. Low-quality spots can occur due to problems during library preparation or other experimental procedures. 
 <!-- Examples include large proportions of dead cells due to cell damage during tissue preparation or low mRNA capture efficiency due to inefficient reverse transcription or PCR amplification.  -->
@@ -34,7 +33,7 @@ The first three characteristics listed above are the standard QC metrics used in
 For example, in the brain, neuronal cell bodies reside in gray matter, whereas white matter is made up almost entirely of neuronal processes. This naturally leads to regions of gray matter containing much higher numbers of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than gray matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
 
 
-### Structure of the chapter
+### Structure of this chapter
 
 In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-qc-global and @sec-seq-qc-local.
 
@@ -69,7 +68,7 @@ spe
 ```
 
 
-## Calculate QC metrics using scater
+## Calculate QC metrics
 
 We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. We can then use these metrics to identify low-quality spots.
 
@@ -95,7 +94,7 @@ head(colData(spe))
 ```
 
 
-## Global outlier detection with fixed thresholds {#sec-seq-qc-global}
+## Global outlier detection {#sec-seq-qc-global}
 
 Many commonly used QC methods currently applied to ST were adapted from snRNA-seq workflows, such as **global outlier detection**. The simplest option for identifying potential low-quality spots is to apply fixed thresholds to each QC metric across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics.
 
@@ -225,7 +224,7 @@ p1 | p2 | p3
 ```
 
 
-## Local outlier detection using SpotSweeper {#sec-seq-qc-local}
+## Local outlier detection {#sec-seq-qc-local}
 
 One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
 
@@ -310,7 +309,7 @@ p1 | p2 | p3
 ```
 
 
-## Identify and remove low-quality spots
+## Remove low-quality spots
 
 Now that we have calculated several QC metrics and selected thresholds for each one, we can combine the sets of low-quality spots, and remove them from our object.
 
@@ -365,7 +364,7 @@ dim(spe)
 
 ### Histological artifact detection
 
-#### Hangnail artifact detection with SpotSweeper
+#### Hangnail artifact detection
 
 When working with ST datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how to detect and remove "hangnail" artifacts from Visium datasets.
 
@@ -503,7 +502,7 @@ plotObsQC(spe, plot_type = "spot", annotate = "qc_cell_count")
 While there is a spatial pattern to the discarded spots, it does not appear to be correlated with the known biological features (cortical layers). The discarded spots are all on the edges of the tissue. It seems plausible that there may have been experimental issues and/or issues with computational cell segmentation at the edges of the images, so it makes sense to remove these spots.
 
 
-#### Zero-cell and single-cell spots
+### Zero-cell and single-cell spots
 
 A particular characteristic of Visium data is that spots can contain zero, one, or multiple cells.
 
@@ -538,23 +537,13 @@ However, here we make a distinction between quality control and feature selectio
 
 ## Appendix
 
-### Saving {.unnumbered}
+### Save object {.unnumbered}
 
-Save object(s) in `.rds` format for re-use within later chapters.
+Save object in `.rds` format for re-use within later chapters.
 
 ```{r}
-# save object(s)
-saveRDS(spe, file = "seq-spe_qc.rds") 
+saveRDS(spe, file = "seq-spe_qc.rds")
 ```
-
-
-<!--
-
-### Benchmarks {.unnumbered}
-
-list benchmark papers here
-
--->
 
 
 ### References {.unnumbered}
