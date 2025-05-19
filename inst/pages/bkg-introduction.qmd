@@ -15,11 +15,11 @@ The chapters are organized into several parts:
 
 - **Imaging-based platforms:** analysis steps and workflows for data from imaging-based platforms
 
-- **Non platform-specific analyses:** downstream analyses and workflows that are applicable to data from either sequencing-based or imaging-based platforms
+- **Platform-independent analyses:** downstream analyses and workflows that are applicable to data from either sequencing-based or imaging-based platforms
+
+- **Cross-platform analyses:** downstream analyses and workflows to integrate or combine information across platforms
 
 - **Multiple-sample analyses:** analyses and workflows applicable to datasets consisting of multiple samples
-
-- **Cross-platform analyses:** analyses and workflows to integrate or combine information across platforms
 
 - **Appendix:** acknowledgments, related resources, and session information
 

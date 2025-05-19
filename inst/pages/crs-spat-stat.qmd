@@ -24,7 +24,9 @@ library(spatialFDA)
 library(BiocParallel)
 library(SpatialExperiment)
 library(SpatialFeatureExperiment)
+```
 
+```{r, message=FALSE, warning=FALSE}
 bp <- MulticoreParam(4)
 set.seed(77)
 
@@ -58,6 +60,7 @@ theme_xy <- list(
 {{< include crs-spat-stat-la.qmd >}}
 
 {{< include crs-spat-stat-pp.qmd >}}
+
 
 ## Appendix
 

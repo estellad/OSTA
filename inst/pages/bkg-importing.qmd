@@ -96,6 +96,8 @@ Reader functions from several packages can be used to import data from raw files
 - `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` provides functions to read CosMx, Xenium, MERSCOPE, and Visium(HD) as `SpatialFeatureExperiment` objects.
 
 
+<!--
 ## Appendix
 
-<!-- ### References {.unnumbered} -->
+### References {.unnumbered}
+-->

@@ -298,4 +298,7 @@ Some of these methods could be used through R using packages such as
 
 - `r BiocStyle::Githubpkg("zcang/SpaOTsc")` [@Cang2020-SpaOTsc] also reconstructs the spatial localization of single-cell profiles by solving an OT problem. Three distance matrices that calculate the dissimilarities between spot/cell profiles within and across two datasets, where one is a scRNAseq-seq and the other is a spatial omics dataset. The solution to the unbalanced and structured OT problems returns an OT plan for mapping single-cell profiles to spatial locations.
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}
