@@ -46,7 +46,7 @@ To note, the current chapter focuses on QC at the spot level. In some datasets, 
 
 In this chapter, we will rely on the following packages:
 
-```{r load-libs, message=FALSE}
+```{r load-libs, message=FALSE, warning=FALSE}
 library(STexampleData)
 library(ggspavis)
 library(scater)
@@ -537,9 +537,9 @@ However, here we make a distinction between quality control and feature selectio
 
 ## Appendix
 
-### Save object {.unnumbered}
+### Save data {.unnumbered}
 
-Save object in `.rds` format for re-use within later chapters.
+Save data object for re-use within later chapters.
 
 ```{r}
 saveRDS(spe, file = "seq-spe_qc.rds")

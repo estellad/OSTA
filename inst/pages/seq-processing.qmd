@@ -246,7 +246,7 @@ wrap_plots(ps, nrow = 2) &
 
 ### Save data {.unnumbered}
 
-Save data object for re-use in later chapters.
+Save data object for re-use within later chapters.
 
 ```{r save-data}
 colLabels(spe) <- spe$BayesSpace
