@@ -17,9 +17,15 @@ library(patchwork)
 library(RColorBrewer)
 library(BiocParallel)
 library(SpatialExperiment)
+```
+
+```{r, message=FALSE, warning=FALSE}
 # load data from previous section
 spe <- readRDS("img-spe_cl.rds")
 spe$k <- colLabels(spe)
+```
+
+```{r, message=FALSE, warning=FALSE}
 # basic theme for spatial plots
 theme_xy <- list(
     coord_equal(expand=FALSE), 

@@ -8,6 +8,9 @@ The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a
 
 For the remainder of this Chapter, we will show the two examples in parallel, highlighting when needed the differences between the platforms.
 
+Note that in this chapter we use the `r BiocStyle::Githubpkg("drisso", "SpaceTrooper)` package, which is available from GitHub and currently in the process of submission to Bioconductor.
+
+
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
@@ -20,6 +23,7 @@ library(SpaceTrooper)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
 ```
+
 
 ## Data import
 
@@ -401,9 +405,10 @@ We would expect low-quality cells to be distributed randomly, and otherwise to a
 In general, **spatially organized clusters of excluded cells might indicate a bias towards exclude specific types of cells** (e.g., some immune cells tend to be smaller or might otherwise contain fewer contains due to the panel design).
 Whenever possible, we advice readers to cross-check visualizations like the following with a corresponding H&E stain of the tissue, considering possible experimental faults as well as their prior knowledge on tissue pathology.
 
+
 ## Appendix
 
-### Saving
+### Save data {.unnumbered}
 
 ```{r save-data}
 # exclude low-quality cells
@@ -413,5 +418,6 @@ xen <- xen[, -which(ol)]
 xen$polygons <- NULL
 saveRDS(xen, "img-spe_qc.rds")
 ```
+
 
 ### References {.unnumbered}
