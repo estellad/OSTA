@@ -643,4 +643,7 @@ In this workflow, we demonstrated how to perform a standard analysis pipeline on
 
 -   [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}

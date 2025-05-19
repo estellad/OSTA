@@ -1,4 +1,4 @@
-# Workflow: Visium (DLPFC) {#sec-seq-workflow-dlpfc}
+# Workflow: Visium DLPFC {#sec-seq-workflow-dlpfc}
 
 ## Preamble
 
@@ -13,7 +13,7 @@ For more details on the dataset, see @Maynard2021. The full dataset is publicly 
 
 ### Dependencies
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(SpatialExperiment)
 library(STexampleData)
 library(ggspavis)
@@ -33,7 +33,9 @@ Load sample 151673 from the DLPFC dataset. This sample is available as a `Spatia
 ```{r, message=FALSE}
 # load data
 spe <- Visium_humanDLPFC()
-spe
+
+class(spe)
+dim(spe)
 ```
 
 
@@ -71,7 +73,7 @@ Calculate QC metrics using `r BiocStyle::Biocpkg("scater")` [@McCarthy2017].
 ```{r}
 # calculate per-spot QC metrics and store in colData
 spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
-head(colData(spe))
+head(colData(spe), 3)
 ```
 
 Select global filtering thresholds for the QC metrics by examining distributions using histograms.
@@ -565,23 +567,13 @@ The `Max Worker Processes` determines how many R sessions are open per instance.
 
 ### Wrapping up
 
-Thank you for reading this far! In this workflow we showed you:
+Thank you for reading this far! In this section we showed you:
 
 * why you might be interested in using `spatialLIBD`,
 * we re-used the `spe` object from the DLPFC workflow (@sec-seq-workflow-dlpfc-workflow),
 * we adapted the `spe` object to make it compatible with `spatialLIBD`,
 * we created an interactive website on our laptops,
 * we shared the website with others using `shinyapps.io`.
-
-
-<!-- Here is the R session information for this workflow.
-
-```{r spatialLIBD_reproducibility}
-options(width = 120)
-sessioninfo::session_info()
-```
-
--->
 
 
 ## Appendix

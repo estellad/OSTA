@@ -420,7 +420,7 @@ In such scenarios, the default `doublet_mode = "doublet"` should be used and a c
 
 ## Appendix
 
-### Benchmarks
+### Benchmarks {.unnumbered}
 
 Benchmarking studies of deconvolution methods often requires generating synthetic spots to establish a ground truth for cell type proportions. This process involves either simulating artificial tissue patterns or aggregating counts from scRNA-seq or imaging-based spatial transcriptomics data into spots. However, it is equally important to evaluate how these methods perform in tissues with spatially highly heterogeneous cell type compositions, such as real cancer samples. Below are two comprehensive benchmarking studies that incorporate both artificial and real datasets.
 
