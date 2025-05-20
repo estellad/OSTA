@@ -1,4 +1,4 @@
-# Importing data {#sec-bkg-importing}
+# Data importing {#sec-bkg-importing}
 
 ## Introduction
 

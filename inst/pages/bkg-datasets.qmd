@@ -1,4 +1,4 @@
-# Datasets {#sec-bkg-datasets}
+# Example datasets {#sec-bkg-datasets}
 
 ## Introduction
 
