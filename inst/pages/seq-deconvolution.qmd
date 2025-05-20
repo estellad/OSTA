@@ -20,7 +20,7 @@ Among these, `Berglund et al.`, `STdeconvolve`, and `SpiceMix` are reference-fre
 
 In this section, we will demonstrate deconvolution of cell types per spot, using `RCTD` on Visium and VisiumHD datasets.
 
-## Dependencies
+## Dependencies {#sec-seq-deconvolution-load-data}
 
 ```{r deps, message = FALSE, warning = FALSE}
 library(OSTA.data)

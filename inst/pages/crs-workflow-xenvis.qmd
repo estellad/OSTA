@@ -29,7 +29,7 @@ same-section Visium and Xenium measurements on human breast cancer tissue.
 ![H&E staining](../images/xenvis-visium.png){height=300px}
 ![Xenium IF](../images/xenvis-xenium.png){height=300px}
 
-## Setup
+## Setup {#sec-crs-workflow-xenvis-load-data}
 
 We start out by retrieving these datasets from the OSF repository, and reading 
 them into R as separate `r BiocStyle::Biocpkg("SpatialExperiment")` objects:

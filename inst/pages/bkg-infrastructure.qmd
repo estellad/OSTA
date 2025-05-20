@@ -1,4 +1,4 @@
-# Data infrastructure {#sec-bkg-infrastructure}
+# Data infrastructure {#sec-bkg-data-infrastructure}
 
 ## Introduction
 

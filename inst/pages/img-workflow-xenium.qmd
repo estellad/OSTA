@@ -10,7 +10,7 @@ perform both (non-spatial) unsupervised clustering as well as fully supervised
 label-transfer based on scRNA-seq reference data; then compare the obtained 
 cluster assignments to those provided by the authors.
 
-### Dependencies
+### Dependencies {#sec-img-workflow-xenium-load-data}
 
 ```{r load-libs, message=FALSE, warning=FALSE}
 library(dplyr)

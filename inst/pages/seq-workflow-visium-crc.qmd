@@ -34,7 +34,7 @@ bp <- MulticoreParam(th <- 4)
 set.seed(194849)
 ```
 
-## Data import
+## Data import {#sec-seq-workflow-visium-crc-load-data}
 
 ```{r load-spe, message=FALSE, results="hide"}
 # retrieve dataset from OSF repo
