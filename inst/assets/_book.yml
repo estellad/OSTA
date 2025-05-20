@@ -2,7 +2,7 @@ book:
   title: "Orchestrating Spatial Transcriptomics Analysis with Bioconductor"
   chapters:
     - index.qmd
-    - part: "Introduction"
+    - part: "Background"
       chapters:
         - pages/bkg-introduction.qmd
         - pages/bkg-spatial-omics.qmd
