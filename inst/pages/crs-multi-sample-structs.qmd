@@ -47,7 +47,7 @@ assays(spe) <- list()
 saveRDS(spe, "Damond_T1D_struct.rds")
 ```
 
-```{r, load-data-sub}
+```{r, load-data-sub-structs}
 # load dataset (without assays) from OSF repo for smaller download
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
 osf_files <- osf_ls_files(osf_repo, path = "zzz", 
