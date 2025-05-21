@@ -8,7 +8,9 @@ on:
       - devel-*
       - RELEASE_**
       - sandbox
+      - sandbox-*
     paths-ignore:
+      - 'README.md' 
       - 'deps.Dockerfile'
   pull_request:
     branches:
@@ -125,6 +127,7 @@ jobs:
           path: ${{ env.bundle_path }}
 
   deploy:
+    if: github.ref == 'refs/heads/devel'  # deploy only if pushed to 'devel' branch
     needs: build
 
     permissions:
