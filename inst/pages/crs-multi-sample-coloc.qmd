@@ -15,10 +15,6 @@ library("osfr")
 
 The use case is a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (Non-diabetic, onset and long-druation diabetes), several patients per condition and per patient several fields-of-view. This hierarchical set-up requires the modeller to account for correlation between fields-of-view if they stem e.g. from the same patient. Such a setup can be modelled with mixed-models.
 
-<!--
-TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if download using 'spe <- .loadExample(full = TRUE)' is too large for GitHub Actions / Bioc builders
--->
-
 ```{r, load-data, warning=FALSE, error=FALSE, eval=FALSE}
 # load data
 spe <- .loadExample(full = TRUE)
@@ -26,14 +22,21 @@ spe <- .loadExample(full = TRUE)
 spe <- subset(spe, ,patient_id %in% c(6089,6180,6126,6134,6228,6414))
 # remove assays (for smaller object size since assays not needed here)
 assays(spe) <- list()
-# save object
-saveRDS(spe, "Damond_T1D_coloc.rds")
 ```
 
 ```{r, load-data-sub}
-# load subsetted data (smaller download)
-# to do: replace with osf_download() / osf_ls_files() / osf_retrieve_node()
-spe <- readRDS("Damond_T1D_coloc.rds")
+# load dataset (without assays) from OSF repo for smaller download
+osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
+osf_files <- osf_ls_files(osf_repo, path = "zzz", 
+                          pattern = "Damond_noAssays.rds", n_max = Inf)
+dir.create(td <- tempfile())
+osf_download(osf_files, path = td)
+spe <- readRDS(file.path(td, list.files(td, ".rds")))
+```
+
+```{r}
+# subset patient IDs
+spe <- subset(spe, ,patient_id %in% c(6089,6180,6126,6134,6228,6414))
 
 # as factor
 colData(spe)$cell_type <- as.factor(colData(spe)$cell_type) 

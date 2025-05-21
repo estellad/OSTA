@@ -17,6 +17,7 @@ library("ExperimentHub")
 library("lme4")
 library("lmerTest")
 library("ggfortify")
+library("osfr")
 
 set.seed(8048)
 ```
@@ -24,10 +25,6 @@ set.seed(8048)
 ### Dataset
 
 We will load the data directly from `ExperimentHub` and convert it into a `r BiocStyle::Biocpkg('SpatialExperiment')` object. To reduce runtime we will subset to 15 images per patient.
-
-<!--
-TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if downloading full object size is too large for GitHub Actions / Bioc builders
--->
 
 ```{r, load-data-structs, eval=FALSE}
 #| message: false
@@ -51,9 +48,13 @@ saveRDS(spe, "Damond_T1D_struct.rds")
 ```
 
 ```{r, load-data-sub}
-# load subsetted data (smaller download)
-# to do: replace with osf_download() / osf_ls_files() / osf_retrieve_node()
-spe <- readRDS("Damond_T1D_struct.rds")
+# load dataset (without assays) from OSF repo for smaller download
+osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
+osf_files <- osf_ls_files(osf_repo, path = "zzz", 
+                          pattern = "Damond_noAssays.rds", n_max = Inf)
+dir.create(td <- tempfile())
+osf_download(osf_files, path = td)
+spe <- readRDS(file.path(td, list.files(td, ".rds")))
 ```
 
 Let's plot a few selected field of views (fov).
