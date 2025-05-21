@@ -3,12 +3,14 @@
 In this section we will explore tools to assess differential co-localisation between conditions with the two packages `r BiocStyle::Biocpkg('spicyR')` and `r BiocStyle::Biocpkg('spatialFDA')`. Both packages are based the comparison of known spatial statistics functions implemented in the package `r BiocStyle::CRANpkg('spatstat')`. 
 
 ```{r, setup, warning=FALSE, error=FALSE, message=FALSE}
+library("SpatialExperiment")
 library("spatialFDA")
 library("spicyR")
 library("refund")
 library("dplyr")
 library("stringr")
 library("tidyr")
+library("osfr")
 ```
 
 The use case is a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (Non-diabetic, onset and long-druation diabetes), several patients per condition and per patient several fields-of-view. This hierarchical set-up requires the modeller to account for correlation between fields-of-view if they stem e.g. from the same patient. Such a setup can be modelled with mixed-models.
@@ -17,13 +19,22 @@ The use case is a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. Th
 TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if download using 'spe <- .loadExample(full = TRUE)' is too large for GitHub Actions / Bioc builders
 -->
 
-```{r, load-data, warning=FALSE, error=FALSE}
+```{r, load-data, warning=FALSE, error=FALSE, eval=FALSE}
 # load data
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
 spe <- subset(spe, ,patient_id %in% c(6089,6180,6126,6134,6228,6414))
 # remove assays (for smaller object size since assays not needed here)
 assays(spe) <- list()
+# save object
+saveRDS(spe, "Damond_T1D_coloc.rds")
+```
+
+```{r, load-data-sub}
+# load subsetted data (smaller download)
+# to do: replace with osf_download() / osf_ls_files() / osf_retrieve_node()
+spe <- readRDS("Damond_T1D_coloc.rds")
+
 # as factor
 colData(spe)$cell_type <- as.factor(colData(spe)$cell_type) 
 # as factor and relevel

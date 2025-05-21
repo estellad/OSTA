@@ -29,7 +29,7 @@ We will load the data directly from `ExperimentHub` and convert it into a `r Bio
 TO DO: store spe object below (after removing assays) in OSF repo and load using OSTA.data package, if downloading full object size is too large for GitHub Actions / Bioc builders
 -->
 
-```{r, load-data-structs}
+```{r, load-data-structs, eval=FALSE}
 #| message: false
 # load experiment hub
 eh <- ExperimentHub()
@@ -45,6 +45,15 @@ spe <- toSpatialExperiment(spe,
 
 # remove assays (for smaller object size since assays not needed here)
 assays(spe) <- list()
+
+# save object
+saveRDS(spe, "Damond_T1D_struct.rds")
+```
+
+```{r, load-data-sub}
+# load subsetted data (smaller download)
+# to do: replace with osf_download() / osf_ls_files() / osf_retrieve_node()
+spe <- readRDS("Damond_T1D_struct.rds")
 ```
 
 Let's plot a few selected field of views (fov).
