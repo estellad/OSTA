@@ -201,6 +201,7 @@ sq.pl.spatial_scatter(adata,
 file.remove("spe.h5ad")
 ```
 
+
 ## Appendix
 
 ### References {.unnumbered}

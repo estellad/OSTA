@@ -1,4 +1,4 @@
-# Data importing {#sec-bkg-importing}
+# Data import {#sec-bkg-importing}
 
 ## Introduction
 
@@ -120,7 +120,7 @@ Examples showing how to read in raw data into R using functions from the Biocond
 
 - Xenium datasets using the `readXeniumSXE()` function from `r BiocStyle::Biocpkg("SpatialExperimentIO")`: see @sec-img-workflow-xenium-load-data and @sec-crs-workflow-xenvis-load-data.
 
-In addition, `r BiocStyle::Biocpkg("STexampleData")` provides access to several pre-formatted datasets from several platforms in `SpatialExperiment` and `SingleCellExperiment` formats, which are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and are loaded within several examples in this book.
+In addition, the `r BiocStyle::Biocpkg("STexampleData")` package provides access to several pre-formatted datasets from several platforms in `SpatialExperiment` and `SingleCellExperiment` formats, which are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and are loaded within several examples in this book.
 
 
 ## Appendix

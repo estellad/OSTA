@@ -2,10 +2,14 @@
 
 ## Introduction
 
-Throughout this book, we will rely on a set of publicly available datasets that cover different sequencing- and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics), and CosMx (NanoString).
+For the examples in this book, we will rely on a set of publicly available datasets that cover different sequencing-based and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics), and CosMx (NanoString).
+
+This chapter provides an overview of the example datasets used in the code examples in the later chapters.
 
 
 ## Distribution
+
+### OSF repository and OSTA.data
 
 These datasets have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` package. For convenience, we have implemented the `r BiocStyle::Biocpkg("OSTA.data")` package to:
 
@@ -21,7 +25,17 @@ OSTA.data_list()
 ```
 
 
-## Description
+### STexampleData
+
+In addition, several datasets are available from the `r BiocStyle::Biocpkg("STexampleData")` package as pre-formatted `SpatialExperiment` and `SingleCellExperiment` formats. These data objects are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and can be loaded within R code examples by querying `ExperimentHub` or using loader functions provided in the `STexampleData` package.
+
+```{r list-stexampledata, message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+library(STexampleData)
+?STexampleData
+```
+
+
+## Datasets
 
 Below, we briefly summarize the characteristics of each dataset, and note across which parts of the book each dataset is being used.
 

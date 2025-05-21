@@ -1,6 +1,6 @@
 # Introduction {#sec-img-introduction}
 
-## Background
+## Introduction to imaging-based ST
 
 Imaging-based ST assays have gone from resolving 100s to 1000s of features.
 Their commercialization by Vizgen, NanoString, and 10x Genomics has made these data increasingly popular. 

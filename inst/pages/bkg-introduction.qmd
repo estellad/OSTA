@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This book provides interactive examples and discussion on computational analysis workflows for spatial omics data using [Bioconductor](http://bioconductor.org/) in R. The book contains chapters describing individual analysis steps as well as extended workflows, each with examples including R code and accessible datasets. In a few cases, R code is also integrated with Python tools.
+This book provides interactive examples and discussion on computational analysis workflows for spatial omics data using [Bioconductor](https://bioconductor.org/) in R. The book contains chapters describing individual analysis steps as well as extended workflows, each with examples including R code and accessible datasets. In some examples, R code is also integrated with Python tools.
 
 
 ## Contents
@@ -19,14 +19,14 @@ The chapters are organized into several parts:
 
 - **Cross-platform analyses:** downstream analyses and workflows to integrate or combine information across platforms
 
-- **Multiple-sample analyses:** analyses and workflows applicable to datasets consisting of multiple samples
+- **Multiple-sample analyses:** analyses and workflows applicable to datasets consisting of multiple samples (e.g. multiple tissue sections)
 
 - **Appendix:** acknowledgments, related resources, and session information
 
 
 ## Scope and who this book is for
 
-The aim of this book is to demonstrate key principles of computational analysis workflows for spatial omics data through interactive examples and discussion, including example R code and datasets. We assume some familiarity with R programming and an understanding of the types of biological questions that single-cell and spatial omics can be used to answer. Previous experience with [Bioconductor](http://bioconductor.org/) is not required.
+The aim of this book is to demonstrate key principles of computational analysis workflows for spatial omics data through interactive examples and discussion, including example R code and datasets. We assume some familiarity with R programming and an understanding of the types of biological questions that single-cell and spatial omics can be used to answer. Previous experience with [Bioconductor](https://bioconductor.org/) is not required.
 
 The book covers both preprocessing and downstream analyses, so the starting point can be either raw spatial omics datasets, or processed spot/cell-level expression matrices and sets of spatial coordinates as the main inputs. Since preprocessing procedures vary from platform to platform, we cover some key examples only.
 

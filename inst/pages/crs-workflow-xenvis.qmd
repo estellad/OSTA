@@ -279,6 +279,7 @@ plotVisium(res,
 From here on out, both datasets could be analyzed together and/or independently, 
 e.g., in order to identify cluster markers, annotate cell subpopulations etc.
 
+
 ## Appendix
 
 ### References {.unnumbered}

@@ -1,6 +1,6 @@
 # Introduction {#sec-seq-introduction}
 
-## Background
+## Introduction to sequencing-based ST
 
 Sequencing-based spatial transcriptomics (ST) platforms combine high-throughput gene expression profiling from high-throughput sequencing assays with spatial information derived from unique barcodes that are location-specific. Thus, gene expression patterns can be profiled while retaining spatial arrangement.
 

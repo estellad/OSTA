@@ -307,9 +307,11 @@ pheatmap(mat=t(assay(pbs)), scale="column", breaks=seq(-2, 2, length=101))
 
 * [https://doi.org/10.1093/bfgp/elae040](@Wang2024) categorize ST clustering approaches into probability statistics-, graph neural network- and contrastive learning-based approaches, and review their advantages and limitations for clustering of data from seq- and img-based assays.
 
+
 ### Benchmarks {.unnumbered}
 
 * [https://doi.org/10.1186/s13059-024-03361-0](@Hu2024) compare 16 graph- and statistic-based approaches, including `BayesSpace` and `BANKSY`, across 10 (mostly seq-based) datasets.
 * [https://doi.org/10.1016/j.csbj.2023.11.055](@Liu2024) compare eight GNN-based approaches, including `SpaceFlow`, across four seq- and one img-based dataset.
+
 
 ### References {.unnumbered}

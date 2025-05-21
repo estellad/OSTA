@@ -16,7 +16,7 @@ welcome <- tryCatch(
 
 This is the website for the online book **Orchestrating Spatial Transcriptomics Analysis with Bioconductor**.
 
-This book provides interactive examples and discussion on computational analysis workflows for spatial omics data using [Bioconductor](http://bioconductor.org/) in R. The book contains chapters describing individual analysis steps as well as extended workflows, each with examples including R code and accessible datasets. In a few cases, R code is also integrated with Python tools.
+This book provides interactive examples and discussion on computational analysis workflows for spatial omics data using [Bioconductor](https://bioconductor.org/) in R. The book contains chapters describing individual analysis steps as well as extended workflows, each with examples including R code and accessible datasets. In some examples, R code is also integrated with Python tools.
 
 The book is organized into several parts, consisting of introductory materials, analysis steps, and workflows for the two main streams of spatial omics data: sequencing-based and imaging-based.
 
