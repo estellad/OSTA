@@ -26,12 +26,15 @@ library(scater)
 library(scran)
 library(SpatialExperiment)
 library(tidyr)
+```
+
+```{r, message=FALSE, warning=FALSE}
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(123)
 # load data from previous chapters
 # (post quality control & clustering)
-(spe <- readRDS("seq-spe_cl.rds"))
+spe <- readRDS("seq-spe_cl.rds")
 ```
 
 ## Non-spatial
@@ -88,7 +91,7 @@ Methods that belong to this category include `r BiocStyle::Biocpkg("DESpace")` [
 They analyze interaction effects between cell types and spatial coordinates [@Yan2024-SVG].
 Examplary methods in R include `r BiocStyle::Biocpkg("CTSV")` [@Yu2022-CTSV], *C-SIDE* (implemented in `r BiocStyle::Githubpkg("dmcable/spacexr")`; [@Cable2022-C-SIDE]), and `r BiocStyle::Githubpkg("shanyu-stat/spVC")` [@Yu2024-spVC].
 
-### `nnSVG`
+### nnSVG
 
 In this example, we use a small subset of the dataset for faster runtime. We select a subset of the data, by subsampling the set of spots and including stringent filtering for lowly expressed genes. 
 [A full analysis with `nnSVG` using all spots for this dataset and default filtering parameters for an individual Visium sample from human brain tissue (available from `r BiocStyle::Biocpkg("spatialLIBD")`) takes around 45 minutes on a standard laptop.]{.aside}
@@ -268,6 +271,7 @@ wrap_plots(plots, ncol = 3)
 
 :::
 
+
 ## Appendix
  
 ### Reviews {.unnumbered}
@@ -275,9 +279,11 @@ wrap_plots(plots, ncol = 3)
 - @DasAdhikari2024-SVG
 - @Yan2024-SVG
 
+
 ### Benchmarks {.unnumbered}
 
 - @Li2023-SVG compares 14 methods using 60 simulated datasets, generated using four different strategies, 12 experimental ST datasets, and 3 spatial ATAC-seq datasets.
 - @Chen2024-SVG compares 8 methods based on 22 experimental datasets (8 technologies, 6 tissue types) and 9 datasets simulated using `r BiocStyle::Biocpkg("scDesign3")` [@Song2024-scDesign3].
+
 
 ### References {.unnumbered}

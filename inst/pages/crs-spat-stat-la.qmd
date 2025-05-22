@@ -60,7 +60,7 @@ sfe <- runUnivariate(sfe,
   type = "moran",
   features = geneProbes,
   colGraphName = "knn6",
-  BPPARAM = MulticoreParam(2)
+  BPPARAM = MulticoreParam(4)
 )
 ```
 
@@ -78,7 +78,7 @@ sfe <- runUnivariate(sfe,
   type = "localmoran",
   features = topGenes,
   colGraphName = "knn6",
-  BPPARAM = MulticoreParam(2)
+  BPPARAM = MulticoreParam(4)
 )
 
 plotLocalResult(sfe,

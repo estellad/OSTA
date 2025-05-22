@@ -35,11 +35,11 @@ library(pheatmap)
 library(patchwork)
 library(BiocParallel)
 library(SpatialExperiment)
-bp <- MulticoreParam(th <- 10)
+bp <- MulticoreParam(th <- 4)
 ```
 
 ```{r load-data}
-(spe <- readRDS("img-spe_cl.rds"))
+spe <- readRDS("img-spe_cl.rds")
 ```
 
 ## Set scoring
@@ -158,6 +158,7 @@ between experimental conditions. Ideally, this'd be done at the subpopulation
 level, since compositional differences are deemed to drive differences (e.g.,
 sections richer in CD8+ T cells are, by chance, more likely to score higher
 for cytotoxicity than sections where CD8+ T cells are absent, or similar).
+
 
 ## Appendix
 

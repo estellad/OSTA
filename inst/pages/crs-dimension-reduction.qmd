@@ -147,6 +147,7 @@ ggplot(df, aes(x_centroid, y_centroid, col=rgb)) +
         plot.title=element_text(hjust=0.5))
 ```
 
+
 ## Appendix
 
 ### References {.unnumbered}
