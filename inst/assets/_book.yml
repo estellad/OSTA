@@ -42,7 +42,9 @@ book:
         - pages/crs-workflow-xenvis.qmd
     - part: "Multiple-sample analyses"
       chapters:
-        - pages/crs-multi-sample.qmd
+        - pages/crs-multi-sample-DSP.qmd
+        - pages/crs-multi-sample-coloc.qmd
+        - pages/crs-multi-sample-structs.qmd
   appendices:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd
