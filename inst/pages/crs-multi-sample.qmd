@@ -1,9 +1,0 @@
-# Multiple-sample differential analyses {#sec-crs-multi-sample-de}
-
-{{< include crs-multi-sample-DSP.qmd >}}
-
-{{< include crs-multi-sample-coloc.qmd >}}
-
-{{< include crs-multi-sample-structs.qmd >}}
-
-## References {.unnumbered}

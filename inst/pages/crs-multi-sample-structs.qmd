@@ -1,4 +1,6 @@
-## Multiple-sample comparison of anatomical structure-derived features
+# Comparison of anatomical structure-derived features {#sec-crs-multi-sample-structs}
+
+## Introduction
 
 Spatial omics data further allows us to quantify various features that are related to tissue architecture. We will call this here **structure-based analysis**. We will use the `r BiocStyle::Biocpkg('sosta')` package to reconstruct and quantify pancreatic islets from human donors suffering different stages of diabetic type 1 (T1D) and healthy controls [@damondMapHumanType2019]. We'll then compare some of the features between conditions.
 
@@ -306,3 +308,8 @@ From the fixed effects section in `summary(mod)` we note that there is a statist
 
 ### Notes
 * This chapter is based on the `r BiocStyle::Biocpkg('sosta')` vignette "2. Reconstruction and analysis of pancreatic islets from IMC data".
+
+
+## Appendix
+
+### References {.unnumbered}

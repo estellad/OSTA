@@ -41,7 +41,9 @@ book:
         - pages/crs-spat-stat.qmd
     - part: "Multiple-sample analyses"
       chapters:
-        - pages/crs-multi-sample.qmd
+        - pages/crs-multi-sample-DSP.qmd
+        - pages/crs-multi-sample-coloc.qmd
+        - pages/crs-multi-sample-structs.qmd
     - part: "Cross-platform analyses"
       chapters:
         - pages/crs-introduction.qmd

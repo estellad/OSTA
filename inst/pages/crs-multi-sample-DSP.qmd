@@ -1,4 +1,6 @@
-## Differential expression
+# Differential expression {#sec-crs-multi-sample-de}
+
+## Introduction
 
 Recent advances in spatially resolved transcriptomics (SRT) techniques have facilitated the generation of multi-sample SRT datasets across various experimental conditions (e.g., healthy vs. diseased, or multiple treatments).
 
@@ -120,3 +122,8 @@ ggplot(mdata, aes(x = factor(day), y = log_cpm)) +
 The boxplots above show the average log-CPM for cluster 2 and for all other clusters (excluding cluster 2) across different time phases. The largest difference between cluster 2 and the remaining clusters is observed at 2 DPI, with the difference decreasing over time. At 20 DPI, no significant log-CPM differences are observed between the clusters. This suggests that spatial patterns change across conditions (i.e., time stages).
 
 :::
+
+
+## Appendix
+
+### References {.unnumbered}
