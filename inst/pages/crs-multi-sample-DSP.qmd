@@ -1,4 +1,4 @@
-## Differential expression {#sec-crs-multi-sample}
+## Differential expression
 
 Recent advances in spatially resolved transcriptomics (SRT) techniques have facilitated the generation of multi-sample SRT datasets across various experimental conditions (e.g., healthy vs. diseased, or multiple treatments).
 

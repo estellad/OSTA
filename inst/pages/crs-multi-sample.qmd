@@ -1,4 +1,4 @@
-# Multiple-sample differential analyses
+# Multiple-sample differential analyses {#sec-crs-multi-sample-de}
 
 {{< include crs-multi-sample-DSP.qmd >}}
 

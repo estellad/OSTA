@@ -1,4 +1,4 @@
-## Differential Colocalisation {#sec-crs-multi-sample}
+## Differential Colocalisation
 
 In this section we will explore tools to assess differential co-localisation between conditions with the two packages `r BiocStyle::Biocpkg('spicyR')` and `r BiocStyle::Biocpkg('spatialFDA')`. Both packages are based the comparison of known spatial statistics functions implemented in the package `r BiocStyle::CRANpkg('spatstat')`. 
 
