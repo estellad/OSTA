@@ -6,6 +6,9 @@
 
 In this section we will explore tools to assess differential colocalization between conditions with the two packages `r BiocStyle::Biocpkg("spicyR")` and `r BiocStyle::Biocpkg("spatialFDA")`. Both packages are based the comparison of known spatial statistics functions implemented in the package `r BiocStyle::CRANpkg("spatstat")`.
 
+
+### Dependencies
+
 ```{r, setup, warning=FALSE, error=FALSE, message=FALSE}
 library(SpatialExperiment)
 library(spatialFDA)
@@ -102,9 +105,9 @@ metricRes <- calcMetricPerFov(
 )
 ```
 
-First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@sun2011functional; @ramsay2024fda].
+First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-functional].
 
-```{r, visualise, warning=FALSE, error=FALSE}
+```{r, visualise, warning=FALSE, error=FALSE, fig.width=5.5}
 metricRes$ID <- paste0(
   metricRes$patient_stage, "x", metricRes$patient_id, 
   "x", metricRes$image_number
@@ -124,9 +127,9 @@ The black line indicates the median curve, the purple region is the 50% central 
 
 From these plots we note that onset functions seem to qualitatively have a higher median curve than non-diabetic or long-duration diabetes functions.
 
-Another exploratory technique is functional PCA (FPCA). FPCA is similar to standard PCA in that it decomposes the functional data into the main modes of variation. Here, we decompose into eigenfunctions [@ramsayPrincipalComponentsAnalysis2005; @refund2024].
+Another exploratory technique is functional PCA (FPCA). FPCA is similar to standard PCA in that it decomposes the functional data into the main modes of variation. Here, we decompose into eigenfunctions [@Goldsmith2024-refund-package].
 
-```{r, fPCA, warning=FALSE, error=FALSE}
+```{r, fPCA, warning=FALSE, error=FALSE, fig.width=7}
 # filter out all rows that have a constant zero part - all r < 10
 metricRes <- metricRes %>% filter(r > 10)
 
@@ -156,9 +159,9 @@ plotFpca(dat = dat, res = pca, colourby = "condition")
 
 From the FPCA we note that the variability in onset diabetes curves is larger than the other two categories.
 
-Next, we will show how FDA techniques can be used to make inference on the spatial statistics curves. We use a generalized additive mixed model with a functional response [@scheiplFunctionalAdditiveMixed2015; @scheiplGeneralizedFunctionalAdditive2016; @refund2024].
+Next, we will show how FDA techniques can be used to make inference on the spatial statistics curves. We use a generalized additive mixed model with a functional response [@Scheipl2015-functional-additive; @Scheipl2016-generalized-functional-additive; @Goldsmith2024-refund-package].
 
-```{r, fGAM, warning=FALSE, error=FALSE}
+```{r, fGAM, warning=FALSE, error=FALSE, fig.width=5.5}
 # create a design matrix
 mm <- model.matrix(~condition, data = dat)
 colnames(mm)[1] <- "Intercept"
@@ -186,12 +189,12 @@ patchwork::wrap_plots(plotLs, nrow = 3, axes = "collect")
 
 With the functional GAM we see not only the effect (increased or decreased colocalization in comparison to the reference category) but also at which scale this effect is strong.
 
-```{r, warning=FALSE, error=FALSE}
+The Q-Q plot indicates a reasonable model fit, although not perfect.
+
+```{r, warning=FALSE, error=FALSE, fig.width=5.5}
 qqnorm(resid(mdl), pch = 16)
 qqline(resid(mdl))
 ```
-
-The Q-Q plot indicates a reasonable model fit, although not perfect.
 
 
 ## Appendix

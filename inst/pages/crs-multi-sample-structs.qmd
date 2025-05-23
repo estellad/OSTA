@@ -63,9 +63,12 @@ osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
 ```
 
+
+## Visualize data
+
 Plot a few selected field of views (fov).
 
-```{r, plot-data}
+```{r, plot-data, fig.width=7}
 selPl <- sample(unique(spe$image_name), 4)
 df <- cbind(colData(spe[, spe$image_name %in% selPl]), 
             spatialCoords(spe[, spe$image_name %in% selPl]))
@@ -85,7 +88,7 @@ df |>
 
 Next we will reconstruct or segment the individual islet using a density-based approach implemented in `r BiocStyle::Biocpkg("sosta")`.
 
-```{r, estimate-params}
+```{r, estimate-params, fig.width=5.5}
 n <- estimateReconstructionParametersSPE(
   spe, 
   marks = "cell_category", 
@@ -138,7 +141,7 @@ allIslets <- reconstructShapeDensitySPE(
 
 Now we can inspect the reconstruction in the sample images.
 
-```{r}
+```{r, fig.width=7}
 df <- cbind(colData(spe[, spe$image_name %in% selPl]), 
             spatialCoords(spe[, spe$image_name %in% selPl]))
 
@@ -200,7 +203,7 @@ allIslets <- allIslets |>
 
 PCA can give us an overview of the different features. Each dot represents one structure.
 
-```{r}
+```{r, fig.width=6}
 autoplot(
   prcomp(t(isletMetrics), scale. = TRUE), 
   x = 1, 
@@ -221,7 +224,7 @@ autoplot(
   scale_color_manual(values = unname(pals::tol(n = 3)))
 ```
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=6}
 allIslets |> 
   sf::st_drop_geometry() |> 
   select(patient_stage, rownames(isletMetrics)) |> 
@@ -239,7 +242,7 @@ allIslets |>
 
 Let's focus on the area of the islets and facet by patient to look at patient variability. As the distribution is very skewed we will use a 1/4-power transformation on the area of the islets. The transformation was chosen after inspection of the model diagnostics (see below).
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=6}
 allIslets |> 
   sf::st_drop_geometry() |> 
   select(patient_stage, patient_id,  rownames(isletMetrics)) |> 

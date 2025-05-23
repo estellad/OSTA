@@ -1,4 +1,4 @@
-# Differential spatial expression {#sec-mult-dsp}
+# Differential spatial patterns {#sec-mult-dsp}
 
 ## Preamble
 
@@ -23,7 +23,7 @@ library(edgeR)
 
 ### Load data
 
-In this demo, we will analyze a Stereo-seq dataset from axolotl brain tissues collected at various stages of regeneration [@Wei2022], which includes multiple samples (i.e. serial sections) measured under multiple experimental conditions (i.e. regeneration stages).
+In this demo, we will analyze a Stereo-seq dataset from axolotl brain tissues collected at various stages of regeneration [@Wei2022-axolotl], which includes multiple samples (i.e. serial sections) measured under multiple experimental conditions (i.e. regeneration stages).
 
 In the original dataset, which is publicly available through the [Spatial Transcript Omics DataBase](https://db.cngb.org/stomics/datasets/STDS0000056/data), there are 5 stages with multiple sections, totaling 16 samples (3 to 4 sections per stage).
 
@@ -33,7 +33,7 @@ In this chapter, for computational reasons, we use 3 stages -- 2, 10, and 20 day
 spe <- Wei22_example()
 ```
 
-```{r plt-clu-xy, message=FALSE, warning=FALSE, fig.width=5.5, fig.height=3}
+```{r plt-clu-xy, message=FALSE, warning=FALSE, fig.width=7}
 #| code-fold: true
 colnames(spatialCoords(spe)) <- c("x", "y")
 plotCoords(spe, 
@@ -90,7 +90,7 @@ idx <- match(top_dsp, rowData(spe)$gene_name)
 
 DSP genes can be further investigated, for example, by plotting the spatial expression of genes across groups, or the log2-transformed counts per million of genes across different clusters and groups.
 
-```{r plt-xy, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+```{r plt-xy, message=FALSE, warning=FALSE, fig.width=7}
 #| code-fold: true
 plotCoords(spe, 
     annotate = .gs, 
@@ -103,7 +103,7 @@ plotCoords(spe,
     theme(legend.key.size=unit(1, "lines"))
 ```
 
-```{r plt-cpm, message=FALSE, warning=FALSE, fig.width=7, fig.height=4}
+```{r plt-cpm, message=FALSE, warning=FALSE, fig.width=5.5}
 #| code-fold: true
 # calculate log CPM
 cps <- edgeR::cpm(dsp$estimated_y, log = TRUE)
