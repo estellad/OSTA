@@ -1,4 +1,4 @@
-# Structure-based analysis {#sec-mult-struct}
+# Structure-based analysis {#sec-mult-structure-based}
 
 ## Preamble
 
@@ -31,9 +31,7 @@ set.seed(8048)
 
 ### Load data
 
-To reduce runtime, we will subset the data to 15 images per patient.
-
-We will load the data directly from `ExperimentHub` and convert it into a `r BiocStyle::Biocpkg('SpatialExperiment')` object. To reduce runtime we will subset to 15 images per patient.
+We will load the data directly from `ExperimentHub` and convert it into a `SpatialExperiment` object. To reduce runtime, we will subset the data to 15 images per patient.
 
 ```{r, load-data-structs, message=FALSE, eval=FALSE}
 # load data from ExperimentHub and convert to SpatialExperiment
@@ -53,8 +51,8 @@ spe <- toSpatialExperiment(
 assays(spe) <- list()
 ```
 
-```{r, load-data-sub-struct}
-# load data from OSF repo (for smaller download)
+```{r, load-data-sub-struct, message=FALSE}
+# load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
 osf_files <- osf_ls_files(osf_repo, path = "zzz", 
                           pattern = "Damond_noAssays.rds", n_max = Inf)
@@ -66,7 +64,7 @@ spe <- readRDS(file.path(td, list.files(td, ".rds")))
 
 ## Visualize data
 
-Plot a few selected field of views (fov).
+Plot a few selected fields of view (FOV).
 
 ```{r, plot-data, fig.width=7}
 selPl <- sample(unique(spe$image_name), 4)
@@ -88,7 +86,7 @@ df |>
 
 Next we will reconstruct or segment the individual islet using a density-based approach implemented in `r BiocStyle::Biocpkg("sosta")`.
 
-```{r, estimate-params, fig.width=5.5}
+```{r, estimate-params, fig.width=4.5}
 n <- estimateReconstructionParametersSPE(
   spe, 
   marks = "cell_category", 
@@ -105,9 +103,9 @@ bndwSPE <- mean(n$bndw)
 
 ::: {.callout-note collapse="true" title="Density based reconstruction"}
 
-`r BiocStyle::Biocpkg("sosta")` uses a reconstruction method based on the point pattern *density* of the islet cells. This method needs two parameters -- a bandwidth parameter that is used for the estimation of the intensity profile, and a threshold based on which the islets are reconstructed.
+The `r BiocStyle::Biocpkg("sosta")` package uses a reconstruction method based on the point pattern *density* of the islet cells. This method needs two parameters -- a bandwidth parameter that is used for the estimation of the intensity profile, and a threshold based on which the islets are reconstructed.
 
-```{r}
+```{r, fig.width=7.5}
 shapeIntensityImage(
   spe, 
   marks = "cell_category", 
@@ -117,7 +115,7 @@ shapeIntensityImage(
 )
 ```
 
-Shown on the left is a density (pixel-level) image, and on the right a histogram of the intensity values. The method selects every pixel above a certain thershold for reconstruction. The smoothing bandwidth that generates the image is estimated using cross-validation (c.f., function `bw.diggle` of the `r BiocStyle::CRANpkg("spatstat.explore")` package).
+Shown on the left is a density (pixel-level) image, and on the right a histogram of the intensity values. The method selects every pixel above a certain threshold for reconstruction. The smoothing bandwidth that generates the image is estimated using cross-validation (see function `bw.diggle()` of the `r BiocStyle::CRANpkg("spatstat.explore")` package from CRAN).
 
 The threshold is estimated by taking the mean between the two modes of the (truncated) pixel intensity distribution. The function `estimateReconstructionParametersSPE()` repeats the estimation of these parameters for a selection of images in the dataset.
 
@@ -203,7 +201,7 @@ allIslets <- allIslets |>
 
 PCA can give us an overview of the different features. Each dot represents one structure.
 
-```{r, fig.width=6}
+```{r, fig.width=6.5}
 autoplot(
   prcomp(t(isletMetrics), scale. = TRUE), 
   x = 1, 
@@ -273,11 +271,9 @@ mod <- lmer((Area)^(1/4) ~ patient_stage + (1 | patient_id) + (1 | image_name),
 
 ::: {.callout-note collapse="true" title="Model diagnostics"}
 
-::: {.panel-tabset}
-
 ## Residuals vs. fitted
 
-```{r}
+```{r, fig.width=6}
 plot(
   mod, 
   resid(., scaled = TRUE) ~ fitted(.), 
@@ -292,7 +288,7 @@ plot(
 
 ## Residuals vs. fitted per sample
 
-```{r}
+```{r, fig.width=7}
 plot(
   mod, 
   resid(., scaled = TRUE) ~ fitted(.) | patient_id, 
@@ -305,12 +301,11 @@ plot(
 
 ## QQ plot
 
-```{r}
+```{r, fig.width=5}
 qqnorm(resid(mod), pch = 16)
 qqline(resid(mod))
 ```
 
-:::
 :::
 
 
@@ -323,7 +318,9 @@ From the fixed effects section in `summary(mod)` we note that there is a statist
 
 ## Appendix
 
-### Other packages to calculate anatomical structure-derived features
+### Other packages
+
+Additional packages to calculate anatomical structure-derived features include:
 
 * The Bioconductor packages `r BiocStyle::Biocpkg("SPIAT")` and `r BiocStyle::Biocpkg("imcRtools")` offer other functions to quantify features on the anatomical structure level. These could also be input for mixed effect modeling as illustrated above.
 
