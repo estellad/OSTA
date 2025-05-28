@@ -73,7 +73,6 @@ Imports:
     scuttle,
     SFEData,
     SingleR,
-    SpaceTrooper,
     spacexr,
     SpatialExperiment,
     SpatialExperimentIO,
@@ -109,8 +108,7 @@ Suggests:
     sessioninfo, 
     xml2 
 Remotes: 
-    edward130603/BayesSpace, 
-    drisso/SpaceTrooper@devel_spatialBook
+    edward130603/BayesSpace
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
