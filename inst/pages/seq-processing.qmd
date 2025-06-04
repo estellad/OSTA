@@ -24,6 +24,11 @@ library(patchwork)
 library(pheatmap)
 ```
 
+```{r}
+# set seed for reproducibility
+set.seed(123)
+```
+
 
 ### Load data
 
@@ -128,15 +133,20 @@ A number of methods have been developed to identify SVGs. For more details and e
 
 ## Dimensionality reduction {#sec-seq-processing-dimred}
 
-A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. See @sec-crs-dimension-reduction for more details.
-
-In addition, we will perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The top two UMAP dimensions can then be used for visualization purposes by plotting on the x and y axes. Note that the UMAP algorithm is stochastic, so the visual layout of the UMAP plot will change from one run to the next. We will set a random seed to ensure that the visualization is reproducible.
-
-Note that UMAP plots should be interpreted with caution [@Chari2023-specious]. Specifically, the UMAP algorithm can introduce misleading structure in a 2D plot, and the relative distances between points in the 2D plot are not meaningful. For this reason, we recommend using UMAP only for generating visualizations, not clustering -- any cluster labels shown on a UMAP plot should be generated using a separate clustering algorithm. Similar arguments also apply to the t-SNE algorithm, which may be used as an alternative to UMAP.
+A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. Note that we have set a random seed at the start of the chapter for reproducibility. See @sec-crs-dimension-reduction for more details.
 
 ```{r pca}
 # using scater package
 spe <- runPCA(spe, subset_row = sel)
+```
+
+In addition, we can perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The top two UMAP dimensions can then be used for visualization purposes by plotting on the x and y axes. The UMAP algorithm is stochastic, so the visual layout of the UMAP plot will change from one run to the next. Setting a random seed ensures that the visualization is reproducible.
+
+Note that UMAP plots should be interpreted with caution [@Chari2023-specious]. Specifically, the UMAP algorithm can introduce misleading structure in a 2D plot, and the relative distances between points in the 2D plot are not meaningful. For this reason, we recommend using UMAP only for generating visualizations, not clustering -- any cluster labels shown on a UMAP plot should be generated using a separate clustering algorithm. Similar arguments also apply to the t-SNE algorithm, which may be used as an alternative to UMAP.
+
+```{r umap, eval=FALSE}
+# using scater package
+# not run
 spe <- runUMAP(spe, dimred = "PCA")
 ```
 
@@ -229,7 +239,7 @@ pheatmap(mat = mtx, scale = "column")
 
 In addition, we can plot in x-y space, i.e. coloring spots by their expression of a given marker gene.
 
-```{r plt-mgs-xy, fig.width=8, fig.height=5.5}
+```{r plt-mgs-xy, fig.width=8, fig.height=5.5, message=FALSE}
 ps <- lapply(
     c("MBP", "PLP1", "NRGN", "SNAP25", "NEFL", "HPCAL1"), \(.) 
     plotCoords(spe, annotate = ., feature_names = "gene_name", 
