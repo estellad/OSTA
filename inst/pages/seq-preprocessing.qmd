@@ -59,6 +59,7 @@ Although reads contain most of the information we need to construct a count matr
 
 The process of mapping reads based on their CIDs to spatial locations is known as barcode deconvolution and is often the first step in sST data preprocessing. As this is also the step that differs most platform to platform and across protocol/data versions, it is also the most important step to understand at a lower level than the rest of the steps. To this end a worked hypothetical example of how to perform this preprocessing step is provided below:
 
+<!--
 ::: {.callout-tip collapse="false"}
 ## Example Barcode Deconvolution Methodology
 
@@ -233,6 +234,7 @@ The code above was taken largely from the Stereo-seq barcode demultiplexing subm
 :::
 
 :::
+<--
 
 ### Read Alignment
 The sequences which correspond to transcripts are not particularly useful as is, for useful data analysis to be performed the transcripts need to be mapped back to the genes which expression they resulted from. This is done by aligning the sequences to a reference genome annotated with the locations of genes.
