@@ -116,13 +116,15 @@ lapply(c("Label", "Leiden", "Banksy"), \(.) {
     scale_color_manual(values=unname(pals::trubetskoy()))
 ```
 
+
 ## Appendix
 
-### Saving {.unnumbered}
+### Save data {.unnumbered}
 
 ```{r save-data}
 colLabels(spe) <- spe$Banksy
 saveRDS(spe, "img-spe_cl.rds")
 ```
+
 
 ### References {.unnumbered}

@@ -4,6 +4,8 @@
 
 ### Introduction
 
+Cross-platform analyses aim to integrate or combine information across platforms, for example to improve resolution, or to improve biological interpretability.
+
 Spatial **registation** is defined as the task of mapping features or or spatial locations of from a **query** to a **reference** assay (@Friston1995, @Lewis2021, @Rajewsky2019-novoSpaRc). 
 Here, the reference is a spatially-resolved dataset whereas the query could be an assay with or without spatial resolution. 
 
@@ -296,4 +298,7 @@ Some of these methods could be used through R using packages such as
 
 - `r BiocStyle::Githubpkg("zcang/SpaOTsc")` [@Cang2020-SpaOTsc] also reconstructs the spatial localization of single-cell profiles by solving an OT problem. Three distance matrices that calculate the dissimilarities between spot/cell profiles within and across two datasets, where one is a scRNAseq-seq and the other is a spatial omics dataset. The solution to the unbalanced and structured OT problems returns an OT plan for mapping single-cell profiles to spatial locations.
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}
