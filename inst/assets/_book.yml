@@ -13,6 +13,7 @@ book:
     - part: "Sequencing-based platforms"
       chapters:
         - pages/seq-introduction.qmd
+        - pages/seq-preprocessing.qmd
         - pages/seq-quality-control.qmd
         - pages/seq-processing.qmd
         - pages/seq-deconvolution.qmd
