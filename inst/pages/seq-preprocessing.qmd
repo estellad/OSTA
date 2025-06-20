@@ -57,9 +57,11 @@ See the chapters on Quality Control (#seq-quality-control), and Processing (#seq
 ### Barcode Deconvolution
 Although reads contain most of the information we need to construct a count matrix, a ‘mapping’ file to interpret the Coordinate IDs (CIDs) in Read 1 is often needed to resolve the spatial localisation of the recorded gene expression. For some sST platforms the mapping from barcodes to locations is fixed, such as for 10X Visium, and the mapping file will be fixed for the protocol version while for others the mapping is random and the vendor will have provided a file for this mapping specific to your chips. When the mapping file is fixed most tools, such as Space Ranger, will be able to fetch the mapping file automatically given the chip ID, however when the mapping file is chip specific this will need to be handled by the user.
 
-The process of mapping reads based on their CIDs to spatial locations is known as barcode deconvolution and is often the first step in sST data preprocessing. As this is also the step that differs most platform to platform and across protocol/data versions, it is also the most important step to understand at a lower level than the rest of the steps. To this end a worked hypothetical example of how to perform this preprocessing step is provided below:
+The process of mapping reads based on their CIDs to spatial locations is known as barcode deconvolution and is often the first step in sST data preprocessing. As this is also the step that differs most platform to platform and across protocol/data versions, it is also the most important step to understand at a lower level than the rest of the steps.
 
 <!--
+To this end a worked hypothetical example of how to perform this preprocessing step is provided below:
+
 ::: {.callout-tip collapse="false"}
 ## Example Barcode Deconvolution Methodology
 
