@@ -23,7 +23,7 @@ Because of the PCR Amplification step, and the imperfect nature of RNA Extractio
 
 For the majority of sequencing based spatial technology platforms reads are recorded as 'paired end' where both ends of the DNA fragment are sequenced into different files, often `.fastq` files. One of these files (often read 1) contains barcode sequences, and depending on whether reads have been trimmed first, may also include linking or other structural sequences. The other file will contain the sequence containing the transcript (or probe) which we intend to align to a reference genome (or probe-set) to determine the gene expressed.
 
-An example read structure from the BGI STOmics Stereo-seq is given below[^1]:
+An example read structure from the [BGI STOmics Stereo-seq user manual](https://enfile.stomics.tech/STOmics%20Stereo-seq%20Transcriptomics%20Set%20User%20Manual_C%20August%202023.pdf.pdf) is given below:
 
 ![Read structure of Stereo-seq Spatial Transcriptomics library construction. Demonstrating paired-end next gen sequencing (NGS) reads.](../images/seq-preprocessing-Stereo_seq_Transcriptomics_Set_for_Chip_on_a_slide_User_Manual_Ver_A_Jan_2023_Transcriptome_Library_Construct.jpg){#fig-read_structure}
 
@@ -37,9 +37,9 @@ Another example, this time from the 10X Visium CytAssist kit is provided to demo
 
 ![Example read structure from 10X Genomics User Guide | Visium CytAssist Spatial Gene Expression Reagent Kits. In this example the 16bp spatial barcode and the 12bp UMI are located at the start of Read 1, and Read 2 contains the 50bp Ligated Probe Insert.](../images/seq-preprocessing-CG000495_VisiumCytAssist_GeneExpressionUserGuide_RevF_library_construction.jpg)
 
-Each read in a `.fastq` file also has an associated read header and quality score. An example (also from the STOmics Stereo-seq user manual)[^2] is provided for demonstration:
+Each read in a `.fastq` file also has an associated read header and quality score. An example (also from the BGI STOmics Stereo-seq user manuals) is provided for demonstration:
 
-![FASTQ file format details from the BGI STOmics Stereo-seq user manual. Here both Read 1 and Read 2 are shown while for real data these would be in two separate files as described above.](../images/seq-preprocessing-Stereo-seq_Analysis_Workflow_Manual_fastq_File_Format.png){#fig-fastq_format}
+![FASTQ file format details from the BGI STOmics Stereo-seq user manuals. Here both Read 1 and Read 2 are shown while for real data these would be in two separate files as described above.](../images/seq-preprocessing-Stereo-seq_Analysis_Workflow_Manual_fastq_File_Format.png){#fig-fastq_format}
 
 The first line of both reads is the read 'header' or 'name' and is used to uniquely identify each read and potentially details such as the sequencer lane the read is from. The header is also where tools can insert their own additional metadata for the read as 'comments'. The second line contains the bases of the sequenced transcript as described earlier. Line three is a spacer line and often just contains a single '+' character although occasionally the read identifier and comments from the header are duplicated here. Line four contains the read quality scores for each base of the sequence. The quality scale differs depending on the sequencer version and whether Q4 or Q40 files are used. Q-scores are a logarithmic measure of confidence in base calling given by a p-value. The exact calculation of this p-value and the threshold at which reads are rejected differs platform to platform so it's always worth checking the tools you're using if these statistics are important to your analysis.
 
@@ -254,7 +254,7 @@ The code above was taken largely from the Stereo-seq barcode demultiplexing subm
 
 The sequences which correspond to transcripts are not particularly useful as is, for useful data analysis to be performed the transcripts need to be mapped back to the genes which expression they resulted from. This is done by aligning the sequences to a reference genome annotated with the locations of genes.
 
-Alignment is performed by a software aligner such as `STAR`[^3], or `Rsubread`[^4]. SpaceRanger and SAW are vendor pipelines for Visium and Stereo-seq respectively and both make use of `STAR` for alignment.
+Alignment is performed by a software aligner such as `STAR` [@Dobin2013-STAR], or `r BiocStyle::Biocpkg("Rsubread")` [@Liao2019-Rsubread]. SpaceRanger and SAW are vendor pipelines for Visium and Stereo-seq respectively and both make use of `STAR` for alignment.
 
 ### Filtering and QC
 
@@ -292,7 +292,7 @@ Binning can also be done to cellular resolution if the platform in question has 
 
 ### Vendor Tools
 
-* Space Ranger[^5]
+* [Space Ranger](https://www.10xgenomics.com/support/software/space-ranger/latest)
 : Space Ranger is a popular bioinformatics pipelines developed by 10X Genomics for their Visium platform. Newer versions of Space Ranger also support Visium HD data processing. The Space Ranger can be divided into two main parts: (1) read processing and (2) image processing. The former involves the following steps:
 
 1. Read trimming
@@ -302,7 +302,7 @@ Binning can also be done to cellular resolution if the platform in question has 
 5. UMI counting
 6. Spot binning 
 
-* SAW[^6]
+* [SAW](https://en.stomics.tech/products/stomics-software/stomics-offline-software/list.html) [@Gong2024-SAW]
 : The Stereo-seq Analysis Workflow (SAW) is a preprocessing pipeline designed by BGI to handle the complexities of spatial transcriptomics data from the Stereo-seq technology. SAW requires a reference genome, CID mapping file(s) (often hdf5 format), FASTQ files, and optionally tissue images for cell segmentation. The specific workflow of SAW includes the following steps:
 
 1. Data reformatting
@@ -312,7 +312,7 @@ Binning can also be done to cellular resolution if the platform in question has 
 5. MID Correction
 6. Spatial Visualization and Tissue Region Extraction
 
-* Curio Seeker Bioinformatic Pipeline[^7]
+* [Curio Seeker Bioinformatic Pipeline](https://curiobioscience.com/seeker/)
 : The Curio Seeker bioinformatics pipeline developed by Curio Bioscience processes sST data from the Curio Seeker spatial mapping kit, it is written in Nextflow, and both Singularity and Docker can execute it. The pipeline requires paired end FASTQ files, bead barcode locations, and a reference genome. The Curio Seeker pipeline involves barcode extraction and mapping, read alignment with `STAR`, and UMI deduplication with `UMItools`. Curio Seeker follows a similar workflow pattern to the other tools mentioned, but with some notable differences due to the bead distribution used for spatial barcoding:
 
 1. Bead Barcode extraction and read trimming
@@ -324,7 +324,7 @@ Binning can also be done to cellular resolution if the platform in question has 
 
 ### stPipe: A Platform Agnostic R-based Solution
 
-StPipe[^8] is a sST data preprocessing tool designed to be platform agnostic, and to unify the preprocessing of sST data from a wide variety of spatial technology solutions such as 10x Visium, BGI Stereo-seq, and Curio Slide-seq.
+`r BiocStyle::Githubpkg("mritchielab/stPipe")` [@Xu2025-stPipe] is a sST data preprocessing tool designed to be platform agnostic, and to unify the preprocessing of sST data from a wide variety of spatial technology solutions such as 10x Visium, BGI Stereo-seq, and Curio Slide-seq.
 
 The stPipe workflow (Fig 4) begins with the function Run_ST which streamlines multiple steps into one cohesive process, including FASTQ
 or BAM file reformatting, read alignment, barcode demultiplexing, and gene counting.
@@ -340,12 +340,3 @@ A vignette demonstrating the workflow of stPipe for some example Visium data is 
 ## Appendix
 
 ### References {.unnumbered}
-
-[^1]: BGI Stereo-seq user manual <https://enfile.stomics.tech/STOmics%20Stereo-seq%20Transcriptomics%20Set%20User%20Manual_C%20August%202023.pdf.pdf>
-[^2]: This pdf seems to have been removed from the internet by BGI, will need to think of a way to cite.
-[^3]: STAR aligner <https://github.com/alexdobin/STAR> Dobin, A., Davis, C. A., Schlesinger, F., Drenkow, J., Zaleski, C., Jha, S., Batut, P., Chaisson, M., & Gingeras, T. R. (2013). STAR: ultrafast universal RNA-seq aligner. Bioinformatics (Oxford, England), 29(1), 15–21. <https://doi.org/10.1093/bioinformatics/bts635>
-[^4]: Rsubread <https://bioconductor.org/packages/release/bioc/html/Rsubread.html> Liao, Y., Smyth, G. K., & Shi, W. (2019). The R package Rsubread is easier, faster, cheaper and better for alignment and quantification of RNA sequencing reads. Nucleic acids research, 47(8), e47. <https://doi.org/10.1093/nar/gkz114> <https://doi.org/10.1093/nar/gkz114>
-[^5]: Space Ranger <https://www.10xgenomics.com/support/software/space-ranger/latest>
-[^6]: SAW <https://en.stomics.tech/products/stomics-software/stomics-offline-software/list.html> Gong, C., Li, S., Wang, L., Zhao, F., Fang, S., Yuan, D., Zhao, Z., He, Q., Li, M., Liu, W., Li, Z., Xie, H., Liao, S., Chen, A., Zhang, Y., Li, Y., & Xu, X. (2024). SAW: an efficient and accurate data analysis workflow for Stereo-seq spatial transcriptomics. GigaByte (Hong Kong, China), 2024, gigabyte111. https://doi.org/10.46471/gigabyte.111
-[^7]: Curio Seeker <https://curiobioscience.com/seeker/>
-[^8]: stPipe <https://github.com/mritchielab/stPipe/>
