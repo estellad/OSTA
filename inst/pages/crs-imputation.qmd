@@ -35,7 +35,7 @@ dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 spe <- readXeniumSXE(td)
 spe$sample_id <- "Xenium"
-spe
+dim(spe)
 ```
 
 ### Chromium
@@ -57,7 +57,7 @@ fs <- list.files(td, full.names=TRUE)
 csv <- grep("csv$", fs, value=TRUE)
 cd <- read.csv(csv, row.names=1)
 colData(sce)[names(cd)] <- cd[colnames(sce), ]
-sce
+dim(sce)
 ```
 
 ## Analysis
@@ -199,7 +199,7 @@ as well as KRT17, which also marks myoepithelial cells:
 ```{r plt-xy-one, fig.width=12, fig.height=3, message=FALSE}
 #| code-fold: true
 .p <- \(obj, col) {
-    plotSpots(obj, 
+    plotCoords(obj, 
         point_size=0,
         annotate=col, 
         assay_name="logcounts")
@@ -269,4 +269,7 @@ Alternatively, we can use other R/Python frameworks to integrate imaging-based S
 
 - **LIGER**: is available in R via `r BiocStyle::CRANpkg("rliger")` [@welch2019-liger], and incorporates a similar workflow performed in this chapter using `r BiocStyle::Biocpkg("harmony")`. The only difference between these approaches is how the joint embedding is obtained; here, LIGER uses non-negative matrix factorization (NMF). LIGER has been originally proposed to perform this task for scRNA-seq and scATAC-seq assays.
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}
