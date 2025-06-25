@@ -6,7 +6,7 @@
 
 Recent advances in spatial transcriptomics (ST) techniques have facilitated the generation of multi-sample datasets across various experimental conditions (e.g. healthy vs. diseased, or multiple treatments).
 
-When multi-sample, multi-condition ST data are available, differential analysis can be performed to identify genes with distinct spatial expression patterns between conditions, which we call differential spatial pattern (DSP) genes. A DSP gene may be spatially variable in one condition and display spatially uniform expression in another one, or it could be spatially variable in all conditions, but with distinct spatial expression patterns. Conversely, genes that show spatially uniform abundance, or that are spatially variable with the same spatial structure in all conditions, are not considered DSP, because their spatial distribution is unchanged.
+When multi-sample, multi-condition ST data are available, differential analysis can be performed to identify genes with distinct spatial expression patterns within domains but between conditions, which we call differential spatial pattern (DSP) genes. A DSP gene may be spatially variable in one condition and display spatially uniform expression in another one, or it could be spatially variable in all conditions, but with distinct spatial expression patterns. Conversely, genes that show spatially uniform abundance, or that are spatially variable with the same spatial structure in all conditions, are not considered DSP, because their spatial distribution is unchanged.
 
 Identifying DSP genes can provide valuable insights into how gene expression spatial structures change across experimental conditions, helping to understand the underlying biological processes.
 
@@ -49,7 +49,7 @@ plotCoords(spe,
 
 ## DESpace
 
-Here, we briefly demonstrate how to identify DSP genes using the `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace] Bioconductor package. For more details see the [package vignette](https://peicai.github.io/DESpace/articles/DSP.html).
+Here, we briefly demonstrate how to identify DSP genes using the `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace] Bioconductor package. For more details, see the [package vignette](https://peicai.github.io/DESpace/articles/DSP.html). In brief, spot- or cell-level counts are aggregated into pseudobulk counts for each sample and domain, and these are compared across domains and conditions. DSP focuses on testing whether (condition x domain) interaction terms in the model are different from zero. In other words, does the expression of a gene changing between conditions, but differently across domains?
 
 ```{r dsp-global, message=FALSE, warning=FALSE, results='hide'}
 # run DESpace
@@ -65,7 +65,7 @@ head(dsp_global <- dsp$gene_results, n = 3)
 table(dsp_global$FDR <= 0.05)
 ```
 
-In order to identify the key spatial cluster where expression changes across conditions, we use `individual_dsp()` function.
+In order to identify the key spatial cluster where expression changes across conditions, we use the `individual_dsp()` function.
 
 ```{r dsp-individual, message=FALSE, warning=FALSE, results='hide'}
 dsp_clu <- individual_dsp(spe, cluster_col = "Banksy_smooth", 
@@ -88,7 +88,7 @@ idx <- match(top_dsp, rowData(spe)$gene_name)
 
 ## Visualization
 
-DSP genes can be further investigated, for example, by plotting the spatial expression of genes across groups, or the log2-transformed counts per million of genes across different clusters and groups.
+DSP genes can be further investigated, for example, by plotting the spatial expression of genes across conditions, or the log2-transformed counts per million of genes across different clusters and conditions.
 
 ```{r plt-xy, message=FALSE, warning=FALSE, fig.width=7.5}
 #| code-fold: true
@@ -127,7 +127,7 @@ ggplot(mdata, aes(x = factor(day), y = log_cpm)) +
      theme(legend.position = "right")
 ```
 
-The boxplots above show the average log-CPM for cluster 2 and for all other clusters (excluding cluster 2) across different time phases. The largest difference between cluster 2 and the remaining clusters is observed at 2 DPI, with the difference decreasing over time. At 20 DPI, no significant log-CPM differences are observed between the clusters. This suggests that spatial patterns change across conditions (i.e. time stages).
+The boxplots above show the average log-CPM for cluster 2 and for all other clusters (excluding cluster 2) across different time points. The largest difference between cluster 2 and the remaining clusters is observed at 2 DPI, with the difference decreasing over time. At 20 DPI, no significant log-CPM differences are observed between the clusters. This suggests that spatial patterns change across conditions (i.e. time stages).
 
 
 ## Appendix
