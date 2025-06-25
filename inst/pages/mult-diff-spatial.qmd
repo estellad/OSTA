@@ -49,7 +49,7 @@ plotCoords(spe,
 
 ## DESpace
 
-Here, we briefly demonstrate how to identify DSP genes using the `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace] Bioconductor package. For more details, see the [package vignette](https://peicai.github.io/DESpace/articles/DSP.html). In brief, spot- or cell-level counts are aggregated into pseudobulk counts for each sample and domain, and these are compared across domains and conditions. DSP focuses on testing whether (condition x domain) interaction terms in the model are different from zero. In other words, does the expression of a gene changing between conditions, but differently across domains?
+Here, we briefly demonstrate how to identify DSP genes using the `r BiocStyle::Biocpkg("DESpace")` [@Cai2024-DESpace] Bioconductor package. For more details, see the [package vignette](https://peicai.github.io/DESpace/articles/DSP.html). In brief, spot- or cell-level counts are aggregated into pseudobulk counts for each sample and domain, and these are compared across domains and conditions. DSP focuses on testing whether (condition x domain) interaction terms in the model are different from zero. In other words, does the expression of a gene change between conditions, but differently across domains?
 
 ```{r dsp-global, message=FALSE, warning=FALSE, results='hide'}
 # run DESpace
