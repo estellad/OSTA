@@ -26,7 +26,7 @@ library(ggplot2)
 
 For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (non-diabetic, onset, and long-duration diabetes), several patients per condition, and several fields-of-view per patient. This hierarchical setup requires the modeler to account for correlation between fields-of-view, for example if they stem from the same patient. Such a setup can be modeled with mixed models.
 
-```{r, load-data, warning=FALSE, eval=FALSE, render=FALSE}
+```{r, load-data, warning=FALSE, eval=FALSE, echo=FALSE}
 # load data from full dataset (not run due to computational limitations)
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
