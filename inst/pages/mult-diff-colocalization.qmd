@@ -48,8 +48,10 @@ spe <- readRDS(file.path(td, list.files(td, ".rds")))
 spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
 
 spe$cell_type <- as.factor(spe$cell_type)
-spe$patient_stage <- as.factor(spe$patient_stage) |>
-  relevel("Non-diabetic")
+# spe$patient_stage <- as.factor(spe$patient_stage) |>
+#   relevel("Non-diabetic")
+spe$patient_stage <- factor(spe$patient_stage,
+                            levels = c("Non-diabetic","Onset","Long-duration"))
 ```
 
 
