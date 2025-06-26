@@ -17,7 +17,7 @@ Identifying DSP genes can provide valuable insights into how gene expression spa
 library(muSpaData)
 library(ggspavis)
 library(DESpace)
-library(edgeR)
+library(patchwork)
 ```
 
 
@@ -41,6 +41,7 @@ plotCoords(spe,
     in_tissue = NULL, 
     x_coord = "sdimx", 
     y_coord = "sdimy", 
+    y_reverse = FALSE,
     sample_id = "sample_id") + 
     theme(legend.key.size = unit(0, "lines")) + 
     scale_color_manual(values=unname(pals::trubetskoy()))
@@ -92,15 +93,24 @@ DSP genes can be further investigated, for example, by plotting the spatial expr
 
 ```{r plt-xy, message=FALSE, warning=FALSE, fig.width=7.5}
 #| code-fold: true
-plotCoords(spe, 
-    annotate = .gs, 
-    assay_name = "logcounts", 
-    feature_names = "gene_id", 
-    in_tissue = NULL, 
-    x_coord = "sdimx", 
-    y_coord = "sdimy", 
-    sample_id = "sample_id") + 
-    theme(legend.key.size=unit(1, "lines"))
+.ids <- levels(spe$sample_id)
+ps <- lapply(seq_along(.ids), \(.) {
+  spe_j <- spe[, spe$sample_id == .ids[.]]
+  p <- FeaturePlot(spe_j, 
+                   feature = top_dsp,
+                   platform = "Stereo-seq",
+                   coordinates = c("sdimx", "sdimy"),
+                   cluster_col = "Banksy_smooth", 
+                   cluster = '2', 
+                   diverging = TRUE,
+                   low = "gray95", 
+                   high = "blue") +
+    ggtitle(.ids[.]) 
+  # ignore alignment
+  free(p[[1]]) 
+})
+wrap_plots(ps, ncol=3) & theme(
+  plot.title = element_text(margin = margin(b = 100), hjust = 0.5))
 ```
 
 ```{r plt-cpm, message=FALSE, warning=FALSE, fig.width=5.5}
