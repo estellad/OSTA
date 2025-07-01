@@ -34,5 +34,8 @@ Data structures for storing data from spatial transcriptomics and other spatial 
 
 - [**Modern Statistics for Modern Biology**](https://www.huber.embl.de//msmb/index.html): Online textbook on concepts in modern statistics for high-throughput and high-dimensional biology. This book includes a detailed chapter on [image data and spatial statistics](https://www.huber.embl.de//msmb/Chap-Images.html).
 
+- [**Harnessing the Potential of Spatial Statistics for Spatial Omics Data with `pasta`**](https://robinsonlabuzh.github.io/pasta): Online resource describing concepts from spatial statistics that apply to spatial -omics datasets. This online resource also has a preprint published at [arXiv:2412.01561](https://arxiv.org/abs/2412.01561).
+
+
 
 ## References {.unnumbered}
