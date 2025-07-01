@@ -15,15 +15,15 @@ The [10x Genomics Visium](https://www.10xgenomics.com/products/spatial-gene-expr
 
 The array dimensions are 6.5 x 6.5 mm, with around 5000 barcoded spots. Spots are 55 µm in diameter and spaced 100 µm center-to-center in a hexagonal (honeycomb) grid arrangement. The number of cells overlapping with each spot depends on the tissue cell density, e.g. around 0-10 for human brain tissue or ~50 for mouse brain tissue. Each Visium slide contains four tissue capture areas. The following figure provides an illustration.
 
-Histology images generated from hematoxylin and eosin (H&E) staining can be used to identify anatomical and cell morphological features for each sample, including the number of cells per spot.
-
-An earlier version of the platform was originall developed by @Stahl2016, which was subsequently improved and commercialized as the 10x Genomics Visium platform.
-
-The [Visium CytAssist](https://www.10xgenomics.com/instruments/visium-cytassist) instrument provides streamlined experimental procedures, making the platform more accessible to new research labs.
-
 ```{r, echo = FALSE, out.width = "70%", fig.cap = "Schematic illustrating the 10x Genomics Visium platform. Source: [10x Genomics Visium](https://www.10xgenomics.com/spatial-transcriptomics/)"}
 knitr::include_graphics("../images/Visium.png")
 ```
+
+Histology images generated from hematoxylin and eosin (H&E) staining can be used to identify anatomical and cell morphological features for each sample, including the number of cells per spot.
+
+An earlier version of the platform was originally developed by @Stahl2016, which was subsequently improved and commercialized as the 10x Genomics Visium platform.
+
+The [Visium CytAssist](https://www.10xgenomics.com/instruments/visium-cytassist) instrument provides streamlined experimental procedures, making the platform more accessible to new research labs.
 
 
 ### 10x Genomics Visium HD
