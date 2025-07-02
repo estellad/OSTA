@@ -192,7 +192,9 @@ p3 <-
   plotColData(spe, x = "ground_truth", 
               y = "sum", 
               colour_by = "ground_truth") + 
-  ggtitle("Library size by layer")
+  ggtitle("Library size by layer") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab("")
 
 p1 | p2 | p3
 ```
