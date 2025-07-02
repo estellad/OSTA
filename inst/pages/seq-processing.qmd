@@ -60,7 +60,7 @@ Some alternative non-spatial methods from scRNA-seq workflows (e.g. normalizatio
 spe <- computeLibraryFactors(spe)
 
 summary(sizeFactors(spe))
-hist(sizeFactors(spe), breaks = 20, main = "Histogram of size factors")
+hist(sizeFactors(spe), breaks = 50, main = "Histogram of size factors")
 
 # calculate logcounts and store in new assay
 spe <- logNormCounts(spe)
@@ -140,7 +140,7 @@ A standard next step is to perform dimensionality reduction using principal comp
 spe <- runPCA(spe, subset_row = sel)
 ```
 
-In addition, we can perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The top two UMAP dimensions can then be used for visualization purposes by plotting on the x and y axes. The UMAP algorithm is stochastic, so the visual layout of the UMAP plot will change from one run to the next. Setting a random seed ensures that the visualization is reproducible.
+In addition, we can perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The top two UMAP dimensions can then be used for visualization purposes by plotting on the x and y axes. The UMAP algorithm is stochastic, so the visual layout of the UMAP plot will change from one run to the next. Setting a random seed (as above) ensures that the visualization is reproducible.
 
 Note that UMAP plots should be interpreted with caution [@Chari2023-specious]. Specifically, the UMAP algorithm can introduce misleading structure in a 2D plot, and the relative distances between points in the 2D plot are not meaningful. For this reason, we recommend using UMAP only for generating visualizations, not clustering -- any cluster labels shown on a UMAP plot should be generated using a separate clustering algorithm. Similar arguments also apply to the t-SNE algorithm, which may be used as an alternative to UMAP.
 
@@ -181,6 +181,7 @@ plotCoords(spe, annotate = "BayesSpace") +
   plot_layout() & 
   theme(legend.key.size = unit(0, "lines")) & 
   scale_color_manual(values = unname(pals::trubetskoy()))
+table(spe$BayesSpace, spe$ground_truth, useNA = "ifany")
 ```
 
 Inspecting the spatial distribution of the top PCs, we can observe that the main driver of expression variability is the distinction between white matter (WM) and non-WM cortical layers.
@@ -216,7 +217,7 @@ Alternatively, we could also test for spatially variable genes (SVGs) within dom
 ```{r mgs}
 # using scran package
 mgs <- findMarkers(spe, groups = spe$BayesSpace, direction = "up")
-top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
+top <- lapply(mgs, \(df) rownames(df)[df$Top <= 2])
 length(top <- unique(unlist(top)))
 ```
 
