@@ -25,7 +25,7 @@ Here, we give an overview of frequently encountered file formats and their handl
 
 Data from sequencing-based assays typically include (cell) barcodes and metadata, and a matrix where rows/columns correspond to features/observations.
 These are typically provided as a set of *.csv* and *.mtx* files, or compressed versions thereof (e.g. *.gz*).
-For data from 10x Genomics, count data can be read into R using `r BiocStyle::Biocpkg("DropletUtils")`'s `read10xCounts()` function; data from other providers should be realizable using standard R readers.
+For data from 10x Genomics, count data can be read into R using `r BiocStyle::Biocpkg("DropletUtils")`'s `read10xCounts()` function; data from other providers can be imported using standard R readers.
 For large-scale datasets (say, 100,000s of cells), *.h5* files allow for out-of-memory representation of count matrices, represented as `r BiocStyle::Biocpkg("DelayedArray")`s in R (see `r BiocStyle::Biocpkg("HDF5Array")`).
 
 
@@ -33,7 +33,7 @@ For large-scale datasets (say, 100,000s of cells), *.h5* files allow for out-of-
 
 Tabular data (e.g. segmentation boundaries, molecule locations) may arrive in the form of *.parquet* files.
 These may be interfaced with using `r BiocStyle::Biocpkg("arrow")`.
-Notably, `arrow`'s `read_parquet()` functions allows for delayed `r BiocStyle::CRANpkg("dplyr")`-style operations, such as `filter()` and `select()`, allowing to query the data in a delayed fashion in order to, e.g., realize only relevant parts into memory.
+Notably, `arrow`'s `read_parquet()` functions allows for delayed `r BiocStyle::CRANpkg("dplyr")`-style operations, such as `filter()` and `select()`, allowing to query the data in a delayed fashion in order to, e.g., import only relevant parts into memory.
 
 
 ### *.zarr*
