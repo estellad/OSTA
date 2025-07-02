@@ -63,8 +63,7 @@ Next, we import a 10x Genomics Visium dataset that will be used in several of th
 The dataset consists of one sample (Visium capture area) from one donor, consisting of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region; it is described in @Maynard2021.
 
 ```{r load-data, message=FALSE}
-spe <- Visium_humanDLPFC()
-spe
+(spe <- Visium_humanDLPFC())
 ```
 
 
@@ -78,7 +77,7 @@ First, we subset the object to keep only spots covered by the tissue section. Th
 
 ```{r}
 # subset to keep only spots over tissue
-spe <- spe[, colData(spe)$in_tissue == 1]
+spe <- spe[, spe$in_tissue == 1]
 dim(spe)
 ```
 
@@ -98,17 +97,16 @@ head(colData(spe))
 
 Many commonly used QC methods currently applied to ST were adapted from snRNA-seq workflows, such as **global outlier detection**. The simplest option for identifying potential low-quality spots is to apply fixed thresholds to each QC metric across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics.
 
-For example, we might consider spots to be of low-qualty if they have library sizes below 600 UMI or mitochondrial propotion above 30%. These cutoffs are somewhat arbitrary and often require extensive knowledge of the tissue type and dataset at hand. Exploratory visualizations can be used to help select appropriate thresholds, which may differ depending on the dataset.
+For example, we might consider spots to be of low-qualty if they have library sizes below 600 UMI or mitochondrial propotion above 30%. These cutoffs are somewhat arbitrary and often require knowledge of the tissue type and dataset at hand. In particular, exploratory visualizations can be used to help select appropriate thresholds, which may differ depending on the dataset.
 
 Here, we use visualizations to select thresholds for several QC metrics in our human DLPFC dataset: (i) library size, (ii) number of expressed genes, (iii) proportion of mitochondrial reads, and (iv) number of cells per spot.
 
-```{r, fig.height=3.5, fig.width=9}
+```{r, fig.height=2.5, fig.width=10}
 par(mfrow = c(1, 4))
 hist(colData(spe)$sum, xlab = "sum", main = "UMIs per spot")
-hist(colData(spe)$detected, xlab = "detected", main = "Genes per spot")
-hist(colData(spe)$subsets_mito_percent, xlab = "pct mito", main = "Percent mito UMIs")
-hist(colData(spe)$cell_count, xlab = "no. cells", main = "No. cells per spot")
-par(mfrow = c(1, 1))
+hist(spe$detected, xlab = "detected", main = "Genes per spot")
+hist(spe$subsets_mito_percent, xlab = "pct mito", main = "Percent mito UMIs")
+hist(spe$cell_count, xlab = "no. cells", main = "No. cells per spot")
 ```
 
 The distributions are relatively smooth, and there are no obvious issues such as a spike at very low library sizes.
@@ -136,27 +134,22 @@ p1 | p2
 The plot shows that these filtering thresholds do not appear to select for any obvious biologically consistent group of spots and will not result in removing an excessive number of observations. We can further verify this by checking the exact number of spots excluded.
 
 ```{r}
-# select QC threshold for library size
-qc_lib_size <- colData(spe)$sum < 600
-table(qc_lib_size)
+# select QC threshold for library size, add to colData
+spe$qc_lib_size <- spe$sum < 600
+table(spe$qc_lib_size)
 
-# select QC threshold for detected features
-qc_detected <- colData(spe)$detected < 400
-table(qc_detected)
+# select QC threshold for detected features, add to colData
+spe$qc_detected <- spe$detected < 400
+table(spe$qc_detected)
 
-# select QC threshold for mito proportion
-qc_mito_prop <- colData(spe)$subsets_mito_percent > 30
-table(qc_mito_prop)
+# select QC threshold for mito proportion, add to colData
+spe$qc_mito_prop <- spe$subsets_mito_percent > 30
+table(spe$qc_mito_prop)
 ```
 
 Finally, we also check that the discarded spots do not have any obvious spatial pattern that correlates with known biological features. Otherwise, removing these spots could indicate that we have set the threshold too high, and are removing biologically informative spots.
 
 ```{r, fig.height=3.5, fig.width=10.5}
-# add QC results to colData
-spe$qc_lib_size <- qc_lib_size
-spe$qc_detected <- qc_detected
-spe$qc_mito_prop <- qc_mito_prop
-
 # check spatial pattern of discarded spots
 p1 <- 
   plotObsQC(spe, plot_type = "spot", 
@@ -178,10 +171,9 @@ p1 | p2 | p3
 
 As an aside, here we can also illustrate what happens if we set the threshold too high. For example, if we set the threshold to 2000 UMI counts per spot -- which may also seem like a reasonable value based on the histogram and scatterplot -- then we see a possible spatial pattern in the discarded spots, matching known cortical layers. This illustrates the importance of interactively checking exploratory visualizations when choosing these thresholds. To illustrate this point, we can plot the manually annotated reference ("ground truth") DLPFC layers here for reference.
 
-```{r, fig.height=3.5, fig.width=7}
+```{r, fig.height=3.3, fig.width=10}
 # check spatial pattern of discarded spots if threshold is too high
-qc_lib_size_2000 <- colData(spe)$sum < 2000
-colData(spe)$qc_lib_size_2000 <- qc_lib_size_2000
+spe$qc_lib_size_2000 <- spe$sum < 2000
 
 # plot the spots flagged with the high threshold
 p1 <- 
@@ -195,7 +187,14 @@ p2 <-
              pal = "libd_layer_colors") + 
   ggtitle("Manually annotated layers")
 
-p1 | p2
+# plot library size by manual annotation
+p3 <- 
+  plotColData(spe, x = "ground_truth", 
+              y = "sum", 
+              colour_by = "ground_truth") + 
+  ggtitle("Library size by layer")
+
+p1 | p2 | p3
 ```
 
 Looking at the flagged spots versus the manually annotated layers, it is clear that setting a library size threshold of 2000 UMIs is flagging more spots in layers 1 and 6 relative to other layers or spatial domains. In other words, library size is confounded with biology, as has been previously demonstrated [@Bhuva2024; @Totty2024-SpotSweeper].
@@ -226,9 +225,9 @@ p1 | p2 | p3
 
 ## Local outlier detection {#sec-seq-qc-local}
 
-One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
+One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise, cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
 
-One strategy to address this issue is to look for outliers within their local biological neighborhood. Here we will implement **local outlier detection** using the `localOutliers()` function from the [SpotSweeper](https://bioconductor.org/packages/SpotSweeper) Bioconductor package [@Totty2024-SpotSweeper]. This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of its nearest neighbors. By default, `localOutliers()` uses `k = 36` nearest neighbors, which equates to third-order neighbors (i.e. three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g. STOmics), third-order neighbors would be `k = 48`.
+One strategy to address this issue is to look for outliers within their local biological neighborhood. Here, we will implement **local outlier detection** using the `localOutliers()` function from the [SpotSweeper](https://bioconductor.org/packages/SpotSweeper) Bioconductor package [@Totty2024-SpotSweeper]. This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of its nearest neighbors. By default, `localOutliers()` uses `k = 36` nearest neighbors, which equates to third-order neighbors (i.e. three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g. STOmics), third-order neighbors would be `k = 48`.
 
 Similar to the adaptive thresholds used above, these methods assume a normal distribution, so we will use the log-transformed `sum` of the total counts and the log-transformed number of `detected` genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
 
@@ -319,23 +318,22 @@ We also select a slightly updated global threshold for the mitochondrial percent
 
 ```{r}
 # select updated threshold for mito percent
-qc_mito <- colData(spe)$subsets_mito_percent > 28
-table(qc_mito)
+spe$qc_mito <- spe$subsets_mito_percent > 28
+table(spe$qc_mito)
 ```
 
 ```{r}
 # combine global outliers
 spe$global_outliers <- 
-  as.logical(qc_lib_size) | as.logical(qc_detected) | as.logical(qc_mito)
+  spe$qc_lib_size | spe$qc_detected | spe$qc_mito
 
 # check number of global outliers
 table(spe$global_outliers)
 
 # combine local outliers
 spe$local_outliers <- 
-  as.logical(spe$sum_outliers) | 
-  as.logical(spe$detected_outliers) | 
-  as.logical(spe$subsets_mito_percent_outliers)
+  spe$sum_outliers | spe$detected_outliers |
+  spe$subsets_mito_percent_outliers
 
 # check number of local outliers
 table(spe$local_outliers)
@@ -352,10 +350,14 @@ p1 + p2
 
 ```{r}
 # combine local and global outliers and store in 'discard' column
-spe$discard <- as.logical(spe$global_outliers) | as.logical(spe$local_outliers)
+spe$discard <- spe$global_outliers | spe$local_outliers
 
 # remove combined set of low-quality spots
-spe <- spe[, !colData(spe)$discard]
+spe <- spe[, !spe$discard]
+
+# remove features with all 0 counts
+spe <- spe[rowSums(counts(spe))>0, ]
+
 dim(spe)
 ```
 
@@ -366,9 +368,9 @@ dim(spe)
 
 #### Hangnail artifact detection
 
-When working with ST datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of techical artifacts. Here we will demonstrate how to detect and remove "hangnail" artifacts from Visium datasets.
+When working with ST datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of technical artifacts. Here, we will demonstrate how to detect and remove "hangnail" artifacts from Visium datasets.
 
-Hangnails artifacts arise during tissue preparation, and most commonly occur when when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper. Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** such as mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as spatial domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
+Hangnails artifacts arise during tissue preparation, and most commonly occur when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper. Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** such as mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as spatial domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
 
 
 #### Loading data and adding QC metrics
@@ -404,7 +406,7 @@ p2 <- plotCoords(spe.hangnail, annotate = "subsets_mito_percent")
 p1 | p2
 ```
 
-A complementary strategy to confirm that existence of an artifact prior to removal is to quantify the local variance in mitochondrial percentage. Here we will do this using the `localVariance()` function in `SpotSweeper`, specifying the QC metric (`subsets_mito_percent`) and the number of neighbors to consider. The default neighbor size of `n_neighbors = 36` works well in our experience.
+A complementary strategy to confirm that existence of an artifact prior to removal is to quantify the local variance in mitochondrial percentage. Here, we will do this using the `localVariance()` function in `SpotSweeper`, specifying the QC metric (`subsets_mito_percent`) and the number of neighbors to consider. The default neighbor size of `n_neighbors = 36` works well in our experience.
 
 ```{r, fig.height=3.75}
 spe.hangnail <- 
@@ -424,10 +426,10 @@ spe <-
 
 # plot distribution of local variance in mitochondrial percentage
 hangnail_sample <- 
-  data.frame(local_mito_variance = colData(spe.hangnail)$local_mito_variance_k36)
+  data.frame(local_mito_variance = spe.hangnail$local_mito_variance_k36)
 
 normal_sample <- 
-  data.frame(local_mito_variance = colData(spe)$local_mito_variance_k36)
+  data.frame(local_mito_variance = spe$local_mito_variance_k36)
 
 p1 <- ggplot(hangnail_sample, aes(x = local_mito_variance)) + 
   geom_density(fill = "gray", alpha = 0.5) + 
@@ -454,7 +456,7 @@ spe.hangnail <- findArtifacts(
 plotObsQC(spe.hangnail, plot_type = "spot", annotate = "artifact")
 
 # removing hangnail artifacts prior to downstream analyses
-spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
+spe.hangnail <- spe.hangnail[, !spe.hangnail$artifact]
 ```
 
 
@@ -463,13 +465,11 @@ spe.hangnail <- spe.hangnail[, !colData(spe.hangnail)$artifact]
 The number of cells per spot depends on the tissue type and organism. Here, we check for any outlier values that could indicate problems during cell segmentation.
 
 ```{r, fig.height=3.5}
-par(mfrow = c(1, 1))
-
 # histogram of cell counts
-hist(colData(spe)$cell_count, breaks = 20)
+hist(spe$cell_count, breaks = 20)
 
 # distribution of cells per spot
-tbl_cells_per_spot <- table(colData(spe)$cell_count)
+tbl_cells_per_spot <- table(spe$cell_count)
 tbl_cells_per_spot
 ```
 
@@ -488,10 +488,8 @@ We select a threshold of 10 cells per spot. The number of spots above this thres
 
 ```{r}
 # select QC threshold for number of cells per spot
-qc_cell_count <- colData(spe)$cell_count > 10
-table(qc_cell_count)
-
-colData(spe)$qc_cell_count <- qc_cell_count
+spe$qc_cell_count <- colData(spe)$cell_count > 10
+table(spe$qc_cell_count)
 ```
 
 ```{r, fig.height=3.5}
@@ -521,7 +519,7 @@ prop_cells_per_spot[1:13]
 
 Only 6% of spots contain a single cell. If we restricted the analysis to these spots only, we would be discarding most of the data.
 
-Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile of these neuropil spots.
+Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neurophils (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile of these neurophil spots.
 
 
 <!-- deleted during SpotSweeper merge - move to feature selection chapter instead
