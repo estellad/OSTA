@@ -35,17 +35,23 @@ spe <- subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
 assays(spe) <- list()
 ```
 
+An assay-free version of the dataset is available through our OSF repository
+(used here to reduce runtime as the following analyses do not require assay data):
+
 ```{r, load-data-sub-coloc, message=FALSE}
 # load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
-osf_files <- osf_ls_files(osf_repo, path = "zzz", 
-                          pattern = "Damond_noAssays.rds", n_max = Inf)
+osf_files <- osf_ls_files(osf_repo, 
+    path = "zzz", n_max = Inf,
+    pattern = "Damond_noAssays.rds")
 dir.create(td <- tempfile())
 osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
 
 # subset patient IDs
-spe = subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
+spe <- spe[, spe$patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414)]
+spe$patient_stage <- as.factor(spe$patient_stage) |> relevel("Non-diabetic")
+spe$cell_type <- as.factor(spe$cell_type)
 ```
 
 
@@ -62,14 +68,12 @@ spe$stage |> unique()
 ```
 
 ```{r, spicyR}
-
 # note runtime: ~5 min
 spicyTestPair <- spicy(
   spe, 
-  condition = "stage", 
-  subject = "case",
-  imageID = "imageID", 
-  cellType = "cellType",
+  condition = "patient_stage", 
+  imageID = "image_number", 
+  cellType = "cell_type",
   window = "square", 
   cores = 4
 )
@@ -156,13 +160,14 @@ metricRes <- calcMetricPerFov(
 First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-functional].
 
 ```{r, visualise, warning=FALSE, message=FALSE, fig.width=5}
-metricRes$ID <- with(metricRes,
-                     paste0(patient_stage, "x", 
-                            patient_id, "x", image_number))
+metricRes$ID <- with(metricRes, paste(sep="x", 
+    patient_stage, patient_id, image_number)
 
-# removing field of views that have as a curve only zeros - these are cases
-# where there are no cells of one type
-metricRes <- metricRes %>% dplyr::group_by(ID) %>% dplyr::filter(sum(rs) >= 1)
+# removing field of views that have as a curve only zeros;
+# these are cases where there are no cells of one type
+metricRes <- metricRes %>% 
+    dplyr::group_by(ID) %>% 
+    dplyr::filter(sum(rs) >= 1)
 
 # sqrt transform response
 metricRes$rs <- sqrt(metricRes$rs)
@@ -197,7 +202,7 @@ dat <- cbind(dat, splitData)
 dat <- dat |> drop_na()
 
 # calculate the fPCA
-pca <- functionalPCA(dat = dat, r = metricRes$r |> unique(), pve = 0.995)
+pca <- functionalPCA(dat = dat, r = unique(metricRes$r), pve = 0.995)
 evalues <- pca$evalues
 efunctions <- pca$efunctions
 
@@ -215,14 +220,14 @@ mm <- model.matrix(~ condition, data = dat)
 colnames(mm)[1] <- "Intercept"
 mm %>% head()
 
-r <- metricRes$r |> unique()
+r <- unique(metricRes$r)
 
 # fit the model
 mdl <- functionalGam(
     data = dat, x = r, 
     designmat = mm, weights = dat$npoints, 
     formula = formula(Y ~ 1 + conditionLong_duration + 
-                          conditionOnset + s(patient_id, bs = "re")), 
+            conditionOnset + s(patient_id, bs = "re")), 
     family = mgcv::scat(link = "log"), 
     algorithm = "gam"
 )
