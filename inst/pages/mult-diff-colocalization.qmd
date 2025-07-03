@@ -51,7 +51,7 @@ spe = subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
 
 ## spicyR
 
-First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].  By default, spicyR chooses the first lebel of the `condition` factor as the base condition and the second level as the comparison condition. 
+First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].  By default, spicyR chooses the first level of the `condition` factor as the base condition and the second level as the comparison condition. 
 
 ```{r}
 # reorder levels 
