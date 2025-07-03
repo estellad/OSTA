@@ -26,8 +26,7 @@ library(ggplot2)
 
 For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (non-diabetic, onset, and long-duration diabetes), several patients per condition, and several fields-of-view per patient. This hierarchical setup requires the modeler to account for correlation between fields-of-view, for example if they stem from the same patient. Such a setup can be modeled with mixed models.
 
-<!--
-```{r, load-data, warning=FALSE, eval=FALSE}
+```{r, load-data, warning=FALSE, eval=FALSE, echo=FALSE}
 # load data from full dataset (not run due to computational limitations)
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
@@ -35,7 +34,6 @@ spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
--->
 
 An assay-free version of the dataset is available through our OSF repository
 (used here to reduce runtime as the following analyses do not require assay data):
@@ -51,7 +49,7 @@ osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
 
 # subset patient IDs
-spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
+spe <- spe[, spe$patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414)]
 spe$patient_stage <- as.factor(spe$patient_stage) |> relevel("Non-diabetic")
 spe$cell_type <- as.factor(spe$cell_type)
 ```
@@ -62,14 +60,12 @@ spe$cell_type <- as.factor(spe$cell_type)
 First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].
 
 ```{r, spicyR}
-spe$cellType <- spe$cell_type
-spe$cell_type <- as.factor(spe$cell_type)
-
 # note runtime: ~5 min
 spicyTestPair <- spicy(
   spe, 
   condition = "patient_stage", 
   imageID = "image_number", 
+  cellType = "cell_type",
   window = "square", 
   cores = 4
 )
