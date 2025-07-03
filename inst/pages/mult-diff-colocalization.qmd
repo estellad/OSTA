@@ -4,7 +4,7 @@
 
 ### Introduction
 
-In this section we will explore tools to assess differential colocalization between conditions with the two packages `r BiocStyle::Biocpkg("spicyR")` and `r BiocStyle::Biocpkg("spatialFDA")`. Both packages are based the comparison of known spatial statistics functions implemented in the package `r BiocStyle::CRANpkg("spatstat")`.
+In this section, we will explore tools to assess differential colocalization between conditions with the two packages `r BiocStyle::Biocpkg("spicyR")` and `r BiocStyle::Biocpkg("spatialFDA")`. Both packages are based the comparison of known spatial statistics functions implemented in the package `r BiocStyle::CRANpkg("spatstat")`.
 
 
 ### Dependencies
@@ -24,13 +24,13 @@ library(ggplot2)
 
 ### Load data
 
-For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (non-diabetic, onset, and long-duration diabetes), several patients per condition, and several fields-of-view per patient. This hierarchical setup requires the modeler to account for correlation between fields-of-view, for example if they stem from the same patient. Such a setup can be modeled with mixed models.
+For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (non-diabetic, onset, and long-duration diabetes), several patients per condition, and several fields-of-view per patient. This hierarchical setup requires the modeler to account for correlation between fields-of-view, for example if they stem from the same patient. Such a setup can be modeled with mixed models (see below).
 
-```{r, load-data, warning=FALSE, eval=FALSE}
+```{r, load-data, warning=FALSE, eval=FALSE, echo=FALSE}
 # load data from full dataset (not run due to computational limitations)
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
-spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
+spe <- subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
@@ -45,48 +45,98 @@ osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
 
 # subset patient IDs
-spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
-
-colData(spe)$cell_type <- as.factor(colData(spe)$cell_type)
-colData(spe)$patient_stage <- as.factor(colData(spe)$patient_stage) |> 
-                              relevel("Non-diabetic")
+spe = subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
 ```
 
 
 ## spicyR
 
-First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].
+First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].  By default, spicyR chooses the first level of the `condition` factor as the base condition and the second level as the comparison condition. 
+
+```{r}
+# reorder levels 
+spe$stage <- droplevels(spe$stage)
+levels(spe$stage) <- c("Non-diabetic", "Onset")
+
+spe$stage |> unique()
+```
 
 ```{r, spicyR}
-colData(spe)$cellType <- colData(spe)$cell_type
-colData(spe)$cell_type <- as.factor(colData(spe)$cell_type)
 
 # note runtime: ~5 min
 spicyTestPair <- spicy(
   spe, 
-  condition = "patient_stage", 
-  imageID = "image_number", 
+  condition = "stage", 
+  subject = "case",
+  imageID = "imageID", 
+  cellType = "cellType",
   window = "square", 
   cores = 4
 )
 
 out <- topPairs(spicyTestPair, n = 27)
-out
+head(out)
 ```
 
-We can plot the results as a heatmap.
+The results can be represented as a bubble plot using the `signifPlot` function.
 
 ```{r, spicyR-heatmap, warning=FALSE, message=FALSE, fig.width=7}
 signifPlot(
   spicyTestPair, 
-  breaks = c(-3, 3, 1)
 )
 ```
+
+Here, we can observe that the most significant relationship occurs between cytotoxic T cells (Tc) and the beta cells of the pancreas. Tc and beta cells appear to be significantly more co-localized in patients with onset diabetes compared to non-diabetic patients, indicated by the positive coefficient.
+
+We can use `spicyBoxPlot` to examine a cell type-cell type relationship closely.
+
+```{r}
+spicyBoxPlot(spicyTestPair,
+             from = "Tc",
+             to = "beta") 
+```
+
+We can investigate individual images to ensure our results reflect biologically meaningful relationships. We can extract the individual co-localization metrics from the `spicyTest` object using the `bind` function.
+
+```{r}
+# extract co-localization metrics
+bind(spicyTest) |> 
+  # merge with metadata
+  merge(colData(spe) |> as.data.frame() |> distinct(stage, imageID, case), by = "imageID", all = FALSE) |>
+  # select columns of interest
+  dplyr::select(c(imageID, Tc__beta, stage, case)) |>
+  dplyr::filter(imageID %in% c("L29", "O02", "E17", "G17"))
+```
+
+We can then visualize the spatial relationship between a pair of cell types in the original image using the `plotImage` function.
+
+The image below (L29) comes from a non-diabetic patient. We can see that beta and Tc cells appear to be dispersed, which is reflected in the co-localization metric.
+
+```{r}
+plotImage(spe,
+          imageToPlot = "L29",
+          from = "Tc",
+          to = "beta",
+          imageID = "imageID",
+          cellType = "cellType")
+```
+The image below (O02) comes from a patient with early onset diabetes. We can see that beta and Tc cells are far more co-localized, with Tc cells even infiltrating the pancreatic islets in some cases.
+
+```{r}
+plotImage(spe,
+          imageToPlot = "O02",
+          from = "Tc",
+          to = "beta",
+          imageID = "imageID",
+          cellType = "cellType")
+```
+
+spicyR can also be used with custom distance metrics and to perform survival analysis, which are outlined in the [spicyR vignette](https://www.bioconductor.org/packages/devel/bioc/vignettes/spicyR/inst/doc/spicyR.html).
 
 
 ## spatialFDA
 
-The `r BiocStyle::Biocpkg("spatialFDA")` package computes spatial statistics functions and compares these with tools from functional data analysis (FDA). We will consider the colocalization of $\alpha$ cells in the islet and cytoxic T-cells, which are important in the destruction of islet cells in T1D [@damondMapHumanType2019].
+The `r BiocStyle::Biocpkg("spatialFDA")` package computes spatial summaries as functions (e.g., Ripley's K function) and compares them using tools from functional data analysis (FDA). We will consider the colocalization (spacing) of alpha cells in the islet and cytoxic T-cells, which are important in the destruction of islet cells in T1D [@damondMapHumanType2019].
 
 This example is adapted from the [spatialFDA vignette](https://bioconductor.org/packages/devel/bioc/vignettes/spatialFDA/inst/doc/DiabetesIsletExample.html).
 
@@ -106,10 +156,9 @@ metricRes <- calcMetricPerFov(
 First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-functional].
 
 ```{r, visualise, warning=FALSE, message=FALSE, fig.width=5}
-metricRes$ID <- paste0(
-  metricRes$patient_stage, "x", metricRes$patient_id, 
-  "x", metricRes$image_number
-)
+metricRes$ID <- with(metricRes,
+                     paste0(patient_stage, "x", 
+                            patient_id, "x", image_number))
 
 # removing field of views that have as a curve only zeros - these are cases
 # where there are no cells of one type
@@ -123,7 +172,7 @@ collector <- plotFbPlot(metricRes, "r", "rs", "patient_stage")
 
 The black line indicates the median curve, the purple region is the 50% central region, and the red lines indicate outliers.
 
-From these plots we note that onset functions seem to qualitatively have a higher median curve than non-diabetic or long-duration diabetes functions.
+From these plots, we note that the functions from 'Onset' patients seem to qualitatively have a higher median curve than those from 'Non-diabetic' or 'Long-duration' patients.
 
 Another exploratory technique is functional PCA (FPCA). FPCA is similar to standard PCA in that it decomposes the functional data into the main modes of variation. Here, we decompose into eigenfunctions [@Goldsmith2024-refund-package].
 
@@ -156,9 +205,9 @@ plotFpca(dat = dat, res = pca, colourby = "condition") +
   labs(color = "condition")
 ```
 
-From the FPCA we note that the variability in onset diabetes curves is larger than the other two categories.
+From the FPCA, we note that the variability in curves from 'Onset' patients is larger than the other two groups.
 
-Next, we will show how FDA techniques can be used to make inference on the spatial statistics curves. We use a generalized additive mixed model with a functional response [@Scheipl2015-functional-additive; @Scheipl2016-generalized-functional-additive; @Goldsmith2024-refund-package].
+Next, we will show how FDA techniques can be used to make inferences from the functional spatial summaries. We use a generalized additive mixed model with a functional response [@Scheipl2015-functional-additive; @Scheipl2016-generalized-functional-additive; @Goldsmith2024-refund-package]. In such models, some parameters are functional and some are constants (see below).
 
 ```{r, fGAM, fig.width=5.5}
 # create design matrix
@@ -186,7 +235,7 @@ plotLs <- lapply(colnames(mm), plotMdl, mdl = mdl,
 patchwork::wrap_plots(plotLs, nrow = 3, axes = "collect")
 ```
 
-With the functional GAM we see not only the effect (increased or decreased colocalization in comparison to the reference category) but also at which scale this effect is strong.
+With the functional GAM, we see not only the effect (e.g., increased colocalization of alpha and cytotoxic T cells in 'Onset' patients compared to 'Non-diabetic' paitents) but also the strength of the effect at each scale.
 
 The Q-Q plot indicates a reasonable model fit, although not perfect.
 
