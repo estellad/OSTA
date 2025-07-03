@@ -30,7 +30,7 @@ For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType
 # load data from full dataset (not run due to computational limitations)
 spe <- .loadExample(full = TRUE)
 # subset data to smaller example
-spe <- subset(diabetesData, , case %in% c(6134, 6228, 6414, 6126))
+spe <- spe[, spe$patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414)]
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
