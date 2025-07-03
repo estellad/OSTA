@@ -37,6 +37,9 @@ assays(spe) <- list()
 ```
 -->
 
+An assay-free version of the dataset is available through our OSF repository
+(used here to reduce runtime as the following analyses do not require assay data):
+
 ```{r, load-data-sub-coloc, message=FALSE}
 # load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")

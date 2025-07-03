@@ -31,9 +31,10 @@ set.seed(8048)
 
 ### Load data
 
+<!--
 We will load the data directly from `ExperimentHub` and convert it into a `SpatialExperiment` object. To reduce runtime, we will subset the data to 15 images per patient.
 
-```{r, load-data-structs, message=FALSE, eval=FALSE}
+```{r, load-data-structs, message=FALSE, eval=FALSE, echo=FALSE}
 # load data from ExperimentHub and convert to SpatialExperiment
 # (not run due to computational limitations)
 
@@ -50,12 +51,17 @@ spe <- toSpatialExperiment(
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
+-->
+
+An assay-free version of the dataset is available through our OSF repository
+(used here to reduce runtime as the following analyses do not require assay data):
 
 ```{r, load-data-sub-struct, message=FALSE}
 # load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
-osf_files <- osf_ls_files(osf_repo, path = "zzz", 
-                          pattern = "Damond_noAssays.rds", n_max = Inf)
+osf_files <- osf_ls_files(osf_repo, 
+    path = "zzz", n_max = Inf,
+    pattern = "Damond_noAssays.rds")
 dir.create(td <- tempfile())
 osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
