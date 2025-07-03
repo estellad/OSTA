@@ -521,7 +521,7 @@ prop_cells_per_spot[1:13]
 
 Only 6% of spots contain a single cell. If we restricted the analysis to these spots only, we would be discarding most of the data.
 
-Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neurophils (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile of these neurophil spots.
+Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile of these neuropil spots.
 
 
 <!-- deleted during SpotSweeper merge - move to feature selection chapter instead
