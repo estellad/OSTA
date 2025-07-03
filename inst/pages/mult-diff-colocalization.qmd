@@ -26,6 +26,7 @@ library(ggplot2)
 
 For this example, we use a dataset on type I diabetes (T1D) [@damondMapHumanType2019]. This dataset contains three conditions (non-diabetic, onset, and long-duration diabetes), several patients per condition, and several fields-of-view per patient. This hierarchical setup requires the modeler to account for correlation between fields-of-view, for example if they stem from the same patient. Such a setup can be modeled with mixed models.
 
+<!--
 ```{r, load-data, warning=FALSE, eval=FALSE}
 # load data from full dataset (not run due to computational limitations)
 spe <- .loadExample(full = TRUE)
@@ -34,22 +35,22 @@ spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
+-->
 
 ```{r, load-data-sub-coloc, message=FALSE}
 # load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
-osf_files <- osf_ls_files(osf_repo, path = "zzz", 
-                          pattern = "Damond_noAssays.rds", n_max = Inf)
+osf_files <- osf_ls_files(osf_repo, 
+    path = "zzz", n_max = Inf,
+    pattern = "Damond_noAssays.rds")
 dir.create(td <- tempfile())
 osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
 
 # subset patient IDs
 spe <- subset(spe, , patient_id %in% c(6089, 6180, 6126, 6134, 6228, 6414))
-
-colData(spe)$cell_type <- as.factor(colData(spe)$cell_type)
-colData(spe)$patient_stage <- as.factor(colData(spe)$patient_stage) |> 
-                              relevel("Non-diabetic")
+spe$patient_stage <- as.factor(spe$patient_stage) |> relevel("Non-diabetic")
+spe$cell_type <- as.factor(spe$cell_type)
 ```
 
 
@@ -58,8 +59,8 @@ colData(spe)$patient_stage <- as.factor(colData(spe)$patient_stage) |>
 First, we show the functionality of `r BiocStyle::Biocpkg("spicyR")`. This package condenses the information of a spatial statistics curve to a scalar value and models this continuous value as the response in a linear (mixed) effects model [@Canete2022].
 
 ```{r, spicyR}
-colData(spe)$cellType <- colData(spe)$cell_type
-colData(spe)$cell_type <- as.factor(colData(spe)$cell_type)
+spe$cellType <- spe$cell_type
+spe$cell_type <- as.factor(spe$cell_type)
 
 # note runtime: ~5 min
 spicyTestPair <- spicy(
@@ -106,14 +107,16 @@ metricRes <- calcMetricPerFov(
 First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-functional].
 
 ```{r, visualise, warning=FALSE, message=FALSE, fig.width=5}
-metricRes$ID <- paste0(
-  metricRes$patient_stage, "x", metricRes$patient_id, 
-  "x", metricRes$image_number
-)
+metricRes$ID <- paste0(sep="x",
+    metricRes$patient_stage, 
+    metricRes$patient_id, 
+    metricRes$image_number)
 
-# removing field of views that have as a curve only zeros - these are cases
-# where there are no cells of one type
-metricRes <- metricRes %>% dplyr::group_by(ID) %>% dplyr::filter(sum(rs) >= 1)
+# removing field of views that have as a curve only zeros;
+# these are cases where there are no cells of one type
+metricRes <- metricRes %>% 
+    dplyr::group_by(ID) %>% 
+    dplyr::filter(sum(rs) >= 1)
 
 # sqrt transform response
 metricRes$rs <- sqrt(metricRes$rs)
@@ -148,7 +151,7 @@ dat <- cbind(dat, splitData)
 dat <- dat |> drop_na()
 
 # calculate the fPCA
-pca <- functionalPCA(dat = dat, r = metricRes$r |> unique(), pve = 0.995)
+pca <- functionalPCA(dat = dat, r = unique(metricRes$r), pve = 0.995)
 evalues <- pca$evalues
 efunctions <- pca$efunctions
 
@@ -166,14 +169,14 @@ mm <- model.matrix(~ condition, data = dat)
 colnames(mm)[1] <- "Intercept"
 mm %>% head()
 
-r <- metricRes$r |> unique()
+r <- unique(metricRes$r)
 
 # fit the model
 mdl <- functionalGam(
     data = dat, x = r, 
     designmat = mm, weights = dat$npoints, 
     formula = formula(Y ~ 1 + conditionLong_duration + 
-                          conditionOnset + s(patient_id, bs = "re")), 
+            conditionOnset + s(patient_id, bs = "re")), 
     family = mgcv::scat(link = "log"), 
     algorithm = "gam"
 )
