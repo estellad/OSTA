@@ -99,7 +99,7 @@ plotCoords(vis, annotate = "log_sum") + ggtitle("log library size") +
 
 ```{r plt-mito-libsize, fig.width = 6, fig.height = 4}
 #| code-fold: true
-ggplot(colData(vis) %>% data.frame) + 
+ggplot(data.frame(colData(vis))) + 
   geom_point(aes(x=sum, y=subsets_mt_percent)) + 
   scale_x_log10() + 
   scale_y_sqrt()
