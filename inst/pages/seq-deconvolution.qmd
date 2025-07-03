@@ -65,7 +65,7 @@ rownames(vis) <- make.unique(rowData(vis)$Symbol)
 vis
 ```
 
-```{r plt-hne, echo = FALSE, fig.width = 9, fig.height = 3.5}
+```{r plt-hne, fig.width = 9, fig.height = 3.5}
 #| code-fold: true
 xy <- spatialCoords(vis) * scaleFactors(vis)
 xs <- range(xy[, 1])
@@ -78,14 +78,14 @@ plotVisium(vis, spots = FALSE, point_size = 0.75) + box +
     plot_layout(nrow = 1) & facet_null()
 ```
 
-Deconvolution is performed after quality control, as detailed in @sec-seq-quality-control, and is usually performed on unnormalized and untransformed (i.e. raw) counts. Here, we quickly check if any spot has a count of 0 and remove it.
+Deconvolution is performed after quality control, as detailed in @sec-seq-quality-control, and is usually performed on unnormalized and untransformed (i.e. raw) counts. Here, we quickly check some typically spot-level metrics.
 
 ```{r qcvis}
 sub <- list(mt = grep("^MT-", rownames(vis)))
 vis <- addPerCellQCMetrics(vis, subsets = sub)
 ```
 
-```{r plt-xy-qc, echo = FALSE, message = FALSE, fig.width = 6, fig.height = 2.5}
+```{r plt-xy-qc, message = FALSE, fig.width = 6, fig.height = 2.5}
 #| code-fold: true
 vis$log_sum <- log1p(vis$sum)
 plotCoords(vis, annotate = "log_sum") + ggtitle("log library size") + 
@@ -96,7 +96,22 @@ plotCoords(vis, annotate = "log_sum") + ggtitle("log library size") +
     scale_color_gradientn(colors = pals::jet())
 ```
 
-All spots have non-zero library sizes, so we can proceed without subsetting. We first visualize the spot-level cell type annotation provided by 10x Genomics.
+
+```{r plt-mito-libsize, fig.width = 6, fig.height = 4}
+#| code-fold: true
+ggplot(colData(vis) %>% data.frame) + 
+  geom_point(aes(x=sum, y=subsets_mt_percent)) + 
+  scale_x_log10() + 
+  scale_y_sqrt()
+```
+
+A few spots have low library sizes, and can be removed.
+```{r vis-filter, message = FALSE}
+#| code-fold: true
+vis <- vis[,vis$sum > 1000]
+```
+
+We first visualize the spot-level cell type annotation provided by 10x Genomics.
 
 ```{r visanno, message = FALSE, fig.width = 5.5, fig.height = 3.5}
 #| code-fold: true
