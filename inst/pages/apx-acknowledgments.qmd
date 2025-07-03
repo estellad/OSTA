@@ -21,6 +21,7 @@ The following individuals have contributed to developing the contents of this bo
 - Pratibha Panwar, University of Sydney, Sydney, Australia
 - [Davide Risso](https://drisso.github.io/), University of Padova, Italy
 - [Mark D. Robinson](https://robinsonlabuzh.github.io/), University of Zurich, Zurich, Switzerland
+- Callum Sargeant, Walter and Eliza Hall Institute, Melbourne, Australia
 - Jieran Sun, Lausanne University Hospital (CHUV) and University of Lausanne, Lausanne, Switzerland
 - [Michael Totty](https://github.com/MicTott), Johns Hopkins University, Baltimore, MD, United States
 - [Lukas M. Weber](https://lmweber.org/), Boston University, Boston, MA, United States
