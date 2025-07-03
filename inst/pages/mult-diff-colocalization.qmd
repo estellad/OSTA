@@ -106,10 +106,8 @@ metricRes <- calcMetricPerFov(
 First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-functional].
 
 ```{r, visualise, warning=FALSE, message=FALSE, fig.width=5}
-metricRes$ID <- paste0(sep="x",
-    metricRes$patient_stage, 
-    metricRes$patient_id, 
-    metricRes$image_number)
+metricRes$ID <- with(metricRes, paste(sep="x", 
+    patient_stage, patient_id, image_number)
 
 # removing field of views that have as a curve only zeros;
 # these are cases where there are no cells of one type
