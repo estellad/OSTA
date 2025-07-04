@@ -6,6 +6,6 @@ WORKDIR /opt/pkg
 
 # Install book package and build book
 RUN Rscript -e 'BiocManager::install(c("SpatialExperiment", "AUCell"), dependencies = TRUE, type = "source", force = TRUE)' && \
-    RUN R CMD INSTALL . && \
+    R CMD INSTALL . && \
     quarto install --quiet tinytex && \
     R CMD build --keep-empty-dirs --no-resave-data --no-manual .
