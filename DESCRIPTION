@@ -13,6 +13,10 @@ Authors@R:
              role=c("aut"), 
              email = "helena@crowell.eu", 
              comment = c(ORCID="0000-0002-4801-1767")), 
+      person("Mark D.", "Robinson",
+             role = c("aut"),
+             email = "mark.robinson@mls.uzh.ch",
+             comment = c(ORCID = "0000-0002-3048-5518")),
       person("Stephanie C.", "Hicks", 
              role = c("aut"), 
              email = "shicks19@jhu.edu", 
@@ -30,7 +34,7 @@ biocViews:
     GeneExpression, 
     Transcriptomics
 Depends: 
-    R (>= 4.3)
+    R (>= 4.5)
 Imports:
     AUCell,
     Banksy,
@@ -106,8 +110,7 @@ Suggests:
     quarto,
     scrapper,
     sessioninfo, 
-    xml2 
-Remotes: 
+    xml2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
