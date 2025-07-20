@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of near subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024].
+Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024].
 
 ## Dependencies {#sec-seq-workflow-visium-hd-load-data}
 
@@ -50,7 +50,7 @@ colnames(vhd8) <- vhd8$barcode # TODO: VisiumIO bug?
 vhd8
 ```
 
-These data come with bin-level annotations from deconvolution estimates by `RCTD`, implemented in `r BiocStyle::Githubpkg("ggrajeda/spacexr")`. Specifically, two sets of labels are available that correspond to the most and second most frequent of 38 cell types per bin, respectively:
+These data come with bin-level annotations from deconvolution estimates by `RCTD`, implemented in `r BiocStyle::Biocpkg("spacexr")`. Specifically, two sets of labels are available that correspond to the most and second most frequent of 38 cell types per bin, respectively:
 
 ```{r load-anno, message=FALSE, warning=FALSE}
 # retrieve annotations
@@ -292,13 +292,13 @@ k <- cluster_leiden(g, objective_function="modularity", resolution=1.2)
 table(.vhd16$Banksy <- factor(k$membership))
 ```
 
-Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-crs-spatially-variable. We also compute the cluster-wise mean expression of selected markers:
+Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-crs-signatures. We also compute the cluster-wise mean expression of selected markers:
 
 ```{r mgs}
 # differential gene expression analysis
 mgs <- findMarkers(.vhd16, groups=.vhd16$Banksy, direction="up")
 # select for a few markers per cluster
-top <- lapply(mgs, \(df) rownames(df)[df$Top <= 3])
+top <- lapply(mgs, \(df) rownames(df)[df$Top <= 2])
 top <- unique(unlist(top))
 # average expression by clusters
 pbs <- aggregateAcrossCells(.vhd16, 
@@ -308,7 +308,7 @@ pbs <- aggregateAcrossCells(.vhd16,
 
 The marker genes in each cluster can be visualized with a heatmap:
 
-```{r plt-mgs-hm, message=FALSE, fig.width=11, fig.height=3}
+```{r plt-mgs-hm, message=FALSE, fig.width=8, fig.height=3}
 #| code-fold: true
 # visualize averages z-scaled across clusters
 pheatmap(
@@ -471,7 +471,7 @@ Next, we can spatially visualize the deconvolution proportions estimates:
 ```{r plt-dec-est, message=FALSE, fig.width=9, fig.height=4}
 #| code-fold: true
 lapply(names(ws), \(.) 
-    plotCoords(.vhd16, annotate=., point_size=0.3, shape=15)) |>
+    plotCoords(.vhd16, annotate=., point_size=0.3, point_shape=15)) |>
     wrap_plots(nrow=2, guides="collect") & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
@@ -512,9 +512,9 @@ Let's visualize deconvolution result for 8 and 16 µm bins in the zoomed area:
 
 ```{r plt-dec-lab, fig.width=8, fig.height=3, message=FALSE}
 #| code-fold: true
-plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8, shape=22) + 
+plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8, point_shape=22) + 
   ggtitle("8 µm") + plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6, shape=22) + 
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6, point_shape=22) + 
   ggtitle("16 µm") +
 plot_layout(nrow=1, guides="collect", widths=c(1, 0.05, 1)) &
     guides(col=guide_legend(override.aes=list(size=2))) &
@@ -534,13 +534,13 @@ We can visualize the results spatially:
 
 ```{r plt-dec-clu-xy, fig.width=12, fig.height=3}
 #| code-fold: true
-plotVisium(.vhd16, annotate="cluster", zoom=TRUE, shape=22,
+plotVisium(.vhd16, annotate="cluster", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::kelly())) + 
     plot_spacer() +
-plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, shape=22,
+plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::kelly())) + 
     plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, shape=22,
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::trubetskoy())) +
 plot_layout(nrow=1, 
     widths=c(1, 0.05, 1, 0.05, 1)) & facet_null() &
@@ -619,7 +619,7 @@ We can also investigate the "cell-cell-marker" relationship based on the minimum
                       spatialCoords=names(xy), maxDist = 200, nCores=4)
 ```
 
-Here, we aim to determin whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot. 
+Here, we aim to determine whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot. 
 ```{r vhd8-ccm, fig.width=11, fig.height=5, message=FALSE, warning=FALSE}
 #| code-fold: true
 p <- plotStateChanges(cells = .vhd8, type = "distances", imageID = "sample_id",
@@ -637,13 +637,14 @@ The same analysis steps could be applied to the (unfiltered) 16 μm resolution d
 
 ## Conclusion
 
-In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm. Most methods and visualization techqniues developed for Visium can be applied to Visium HD. However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
+In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm. Most methods and visualization techniques developed for Visium can be applied to Visium HD. However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
+
+-   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells. 
+    - Space Ranger v4 now provides a segmented, cell-level count matrix under `segmented_outputs`, in parallel with the previous `binned_outputs` at 2, 8, and 16 µm, simplifying additional cell segmentation using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
 
 -   [GitHub repository of `bin2cell`](https://github.com/Teichlab/bin2cell) for H&E segmentation and obtaining cell boundaries.
 
 -   [Analysis pipeline](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd) by 10x Genomics (April 2024). The analysis consists of three steps: run `StarDist` nuclei segmentation in Python, sum gene expression into nuclei based on segmentation mask, and downstream analysis with `scanpy` and `anndata`.
-
--   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells.
 
 -   [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 

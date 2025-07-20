@@ -31,9 +31,10 @@ set.seed(8048)
 
 ### Load data
 
+<!--
 We will load the data directly from `ExperimentHub` and convert it into a `SpatialExperiment` object. To reduce runtime, we will subset the data to 15 images per patient.
 
-```{r, load-data-structs, message=FALSE, eval=FALSE}
+```{r, load-data-structs, message=FALSE, eval=FALSE, echo=FALSE}
 # load data from ExperimentHub and convert to SpatialExperiment
 # (not run due to computational limitations)
 
@@ -50,21 +51,28 @@ spe <- toSpatialExperiment(
 # remove assays (for smaller object size)
 assays(spe) <- list()
 ```
+-->
+
+An assay-free version of the dataset is available through our OSF repository
+(used here to reduce runtime as the following analyses do not require assay data):
 
 ```{r, load-data-sub-struct, message=FALSE}
 # load data from OSF repository (for smaller download)
 osf_repo <- osf_retrieve_node("https://osf.io/5n4q3/")
-osf_files <- osf_ls_files(osf_repo, path = "zzz", 
-                          pattern = "Damond_noAssays.rds", n_max = Inf)
+osf_files <- osf_ls_files(osf_repo, 
+    path = "zzz", n_max = Inf,
+    pattern = "Damond_noAssays.rds")
 dir.create(td <- tempfile())
 osf_download(osf_files, path = td)
 spe <- readRDS(file.path(td, list.files(td, ".rds")))
+
+table(spe$patient_id, spe$patient_stage)
 ```
 
 
 ## Visualize data
 
-Plot a few selected fields of view (FOV).
+First, we plot a few selected fields of view (FOV).
 
 ```{r, plot-data, fig.width=7}
 selPl <- sample(unique(spe$image_name), 4)
@@ -84,7 +92,7 @@ df |>
 
 ## Islet reconstrution
 
-Next we will reconstruct or segment the individual islet using a density-based approach implemented in `r BiocStyle::Biocpkg("sosta")`.
+Next, we will reconstruct or segment the individual islets using a density-based approach implemented in `r BiocStyle::Biocpkg("sosta")`.
 
 ```{r, estimate-params, fig.width=4.5}
 n <- estimateReconstructionParametersSPE(
@@ -181,7 +189,8 @@ patientData <- colData(spe) |>
   as_tibble() |> 
   group_by(image_name) |> 
   select(all_of(colsKeep)) |> 
-  mutate(patient_stage = factor(patient_stage, levels = lv)) |> 
+  mutate(patient_stage = factor(patient_stage, levels = lv),
+         patient_id = as.factor(patient_id)) |> 
   unique()
 
 allIslets <- allIslets |> 
@@ -233,6 +242,7 @@ allIslets |>
   geom_boxplot(aes(fill = NULL), width = 0.3) + 
   facet_wrap( ~ name, scales = "free") + 
   scale_x_discrete(guide = guide_axis(n.dodge = 2)) + 
+  #scale_y_sqrt() +
   guides(fill = "none") + 
   theme_bw() + 
   scale_fill_manual(values = unname(pals::tol(n = 3)))
@@ -246,22 +256,23 @@ allIslets |>
   select(patient_stage, patient_id,  rownames(isletMetrics)) |> 
   pivot_longer(-c(patient_stage, patient_id)) |> 
   filter(name %in% c("Area")) |> 
-  ggplot(aes(x = as.factor(patient_id), y = value^(1/4), fill = patient_stage)) + 
+  ggplot(aes(x = patient_id, y = value^(1/4), fill = patient_stage)) + 
   geom_violin() + 
   geom_boxplot(aes(fill = NULL), width = 0.3) + 
-  facet_wrap( ~ patient_stage, scales = "free") + 
-  #scale_x_discrete(guide = guide_axis(n.dodge = 2)) + 
+  geom_jitter(size = .5) +
+  facet_wrap( ~ patient_stage, scales = "free_x") + 
   guides(fill = "none") + 
   theme_bw() + 
+  ylab("Area") +
   scale_fill_manual(values = unname(pals::tol(n = 3)))
 ```
 
 
 ## Between-sample comparison using mixed effects models
 
-The individual structure metrics are not independent measurements. Therefore, we have to account for correlation between measurements. This correlation stems from repeated measurements on the patient and slide level.
+An important aspect to note is that the individual structure metrics are not independent measurements, since there are generally repeated measurments (i.e., multiple islets) per slide and per patient. Therefore, we need to account for this correlation between measurements.
 
-To account for this, we will use mixed linear models with random effects for the patient and the individual slides (image name). The `r BiocStyle::CRANpkg("lme4")` package will be use for fitting linear mixed effects models [@batesFittingLinearMixedEffects2015] and `r BiocStyle::CRANpkg("lmerTest")` for p-value calculation [@kuznetsovaLmerTestPackageTests2017].
+To account for this, we will use mixed linear models with random effects for the patient and the individual slides (image name). The `r BiocStyle::CRANpkg("lme4")` package will be use for fitting linear mixed effects models [@batesFittingLinearMixedEffects2015] and `r BiocStyle::CRANpkg("lmerTest")` for p-value calculations [@kuznetsovaLmerTestPackageTests2017].
 
 ```{r}
 mod <- lmer((Area)^(1/4) ~ patient_stage + (1 | patient_id) + (1 | image_name), 
@@ -313,7 +324,7 @@ qqline(resid(mod))
 summary(mod)
 ```
 
-From the fixed effects section in `summary(mod)` we note that there is a statistically significant difference in the transformed islet area of long-duration patients with respect to non-diabetic patients, while the effect for onset patients is not significant at the 5\% level. This results accounts for correlation at the patient and image level as modeled by random intercepts. The transformation (1/4-power) was chosen after inspection of the residual behavior in the model diagnostics for this dataset and feature of interest specifically.
+From the fixed effects section in `summary(mod)`, we note that there is a statistically significant difference in the transformed islet area of long-duration patients compared to non-diabetic patients, while the effect for onset patients is not significant at the 5\% level. This results accounts for correlation at the patient and image level as modeled by random intercepts. The transformation (1/4-power) was chosen after inspection of the residual behavior in the model diagnostics for this dataset and feature of interest specifically.
 
 
 ## Appendix
