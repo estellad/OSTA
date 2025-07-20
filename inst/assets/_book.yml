@@ -20,6 +20,7 @@ book:
         - pages/seq-workflow-dlpfc-spatiallibd.qmd
         - pages/seq-workflow-visium-crc.qmd
         - pages/seq-workflow-visium-hd.qmd
+        - pages/seq-workflow-visium-hd-cell.qmd
     - part: "Imaging-based platforms"
       chapters:
         - pages/img-introduction.qmd
