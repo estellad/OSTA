@@ -218,7 +218,7 @@ Next, we will show how FDA techniques can be used to make inferences from the fu
 ```{r, fGAM, fig.width=5.5}
 # create design matrix
 mm <- model.matrix(~ condition, data = dat)
-colnames(mm)[1] <- "Intercept"
+colnames(mm)[1] <- "(Intercept)"
 head(mm)
 
 r <- unique(metricRes$r)
