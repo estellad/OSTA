@@ -1,4 +1,6 @@
 ---
+title: "Orchestrating Spatial Transcriptomics Analysis with Bioconductor"
+package: OSTA
 vignette: >
   %\VignetteIndexEntry{Link to book}
   %\VignetteEngine{knitr::rmarkdown}
