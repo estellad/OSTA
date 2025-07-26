@@ -148,7 +148,7 @@ component analysis (PCA) on all `r nrow(spe)` RNA targets:
 # cell area-based normalization
 logcounts(sub) <- sweep(assay(sub), 2, sub$cell_area, `/`)
 # principal component analysis
-sub <- runPCA(sub, BPPARAM=bp)
+sub <- runPCA(sub) #, BPPARAM=bp)
 ```
 
 Let's visualize the expression of some genes in space; e.g., PIGR, IGHG3 and 
