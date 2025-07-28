@@ -6,7 +6,7 @@ book:
       chapters:
         - pages/bkg-introduction.qmd
         - pages/bkg-spatial-omics.qmd
-        - pages/bkg-interoperability.qmd
+        #- pages/bkg-interoperability.qmd
         - pages/bkg-infrastructure.qmd
         - pages/bkg-importing.qmd
         - pages/bkg-datasets.qmd
@@ -17,35 +17,35 @@ book:
         - pages/seq-quality-control.qmd
         - pages/seq-processing.qmd
         - pages/seq-deconvolution.qmd
-        - pages/seq-workflow-dlpfc-spatiallibd.qmd
-        - pages/seq-workflow-visium-crc.qmd
-        - pages/seq-workflow-visium-hd.qmd
-    - part: "Imaging-based platforms"
-      chapters:
-        - pages/img-introduction.qmd
-        - pages/img-segmentation.qmd
-        - pages/img-quality-control.qmd
-        - pages/img-processing.qmd
-        - pages/img-neighbors.qmd
-        - pages/img-cell-comm.qmd
-        - pages/img-workflow-xenium.qmd
+    #     - pages/seq-workflow-dlpfc-spatiallibd.qmd
+    #     - pages/seq-workflow-visium-crc.qmd
+    #     - pages/seq-workflow-visium-hd.qmd
+    # - part: "Imaging-based platforms"
+    #   chapters:
+    #     - pages/img-introduction.qmd
+    #     - pages/img-segmentation.qmd
+    #     - pages/img-quality-control.qmd
+    #     - pages/img-processing.qmd
+    #     - pages/img-neighbors.qmd
+    #     - pages/img-cell-comm.qmd
+    #     - pages/img-workflow-xenium.qmd
     - part: "Platform-independent analyses"
       chapters:
         - pages/crs-dimension-reduction.qmd
         - pages/crs-clustering.qmd
         - pages/crs-features.qmd
         - pages/crs-signatures.qmd
-        - pages/crs-spat-stat.qmd
-    - part: "Cross-platform analyses"
-      chapters:
-        - pages/crs-registration.qmd
-        - pages/crs-imputation.qmd
-        - pages/crs-workflow-xenvis.qmd
-    - part: "Multiple-sample analyses"
-      chapters:
-        - pages/mult-diff-spatial.qmd
-        - pages/mult-diff-colocalization.qmd
-        - pages/mult-structure-based.qmd
+    #     - pages/crs-spat-stat.qmd
+    # - part: "Cross-platform analyses"
+    #   chapters:
+    #     - pages/crs-registration.qmd
+    #     - pages/crs-imputation.qmd
+    #     - pages/crs-workflow-xenvis.qmd
+    # - part: "Multiple-sample analyses"
+    #   chapters:
+    #     - pages/mult-diff-spatial.qmd
+    #     - pages/mult-diff-colocalization.qmd
+    #     - pages/mult-structure-based.qmd
   appendices:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd

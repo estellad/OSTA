@@ -79,6 +79,10 @@ reducedDimNames(spe) <- c("PCA_tx", "PCA_sp")
 
 ## Uniform manifold approximation and projection (UMAP)
 
+We can also perform non-linear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The first two UMAP dimensions are often used for visualization purposes (although interpretation of the UMAP dimensions is difficult and can be misleading). In addition, the UMAP algorithm is stochastic, so the visual layout of the UMAP plot will change from one run to the next; setting a seed for random number generation ensures that the visualization is reproducible.
+
+Note that UMAP plots should be interpreted with caution [@Chari2023-specious]. Specifically, the UMAP algorithm can introduce misleading structure in a 2D plot, and the relative distances between points in the 2D plot are not meaningful. For this reason, we recommend using UMAP only for generating visualizations, not clustering -- any cluster labels shown on a UMAP plot should be generated using a separate clustering algorithm. Similar arguments also apply to the t-SNE algorithm, which may be used as an alternative to UMAP.
+
 The UMAP algorithm is often used for visualization purposes (although interpretation of the UMAP dimensions is difficult and can be misleading).
 
 Here, we run UMAP on both non-spatial and spatially aware PCs, retaining the first two UMAP components to be used for visualization:

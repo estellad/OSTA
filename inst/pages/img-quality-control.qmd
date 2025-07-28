@@ -14,13 +14,13 @@ These datasets can be accessed through the `r BiocStyle::Biocpkg("STexampleData"
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
-library(SpatialExperiment)
-library(STexampleData)
-library(scater)
 library(dplyr)
 library(tidyr)
+library(scater)
 library(ggplot2)
 library(patchwork)
+library(STexampleData)
+library(SpatialExperiment)
 ```
 
 
