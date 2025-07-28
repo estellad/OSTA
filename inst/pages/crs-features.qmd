@@ -110,10 +110,10 @@ pheatmap(mat = mtx, scale = "column")
 
 In addition, we can plot in x-y space, i.e. coloring spots by their expression of a given marker gene:
 
-```{r plt-deg-xy, fig.width=10, fig.height=6, message=FALSE}
+```{r plt-deg-xy, fig.width=10, fig.height=8, message=FALSE}
 #| code-fold: true
-# select top-4 markers for each cluster & get gene symbols
-gs <- unique(unlist(lapply(mgs, \(df) head(rownames(df), 4))))
+# select top-3 markers for each cluster & get gene symbols
+gs <- unique(unlist(lapply(mgs, \(df) head(rownames(df), 3))))
 gs <- rowData(spe)$gene_name[match(gs, rownames(spe))]
 # gene-wise spatial plots
 ps <- lapply(gs, \(.) {
