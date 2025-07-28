@@ -194,6 +194,7 @@ adata.var_names = adata.var['Symbol'].astype(str)
 sq.pl.spatial_scatter(adata,
                       color=["ERBB2"], 
                       img_res_key = "lowres")
+# plt.show()  # display plot if running code interactively
 ```
 
 ```{r, include=FALSE}
