@@ -25,7 +25,7 @@ book:
         - pages/img-introduction.qmd
         - pages/img-segmentation.qmd
         - pages/img-quality-control.qmd
-    #     - pages/img-processing.qmd
+        - pages/img-processing.qmd
     #     - pages/img-neighbors.qmd
     #     - pages/img-cell-comm.qmd
     #     - pages/img-workflow-xenium.qmd
