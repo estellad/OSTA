@@ -73,8 +73,8 @@ ys <- nrow(imgRaster(vis)) - range(xy[, 2])
 box <- geom_rect(
     xmin = xs[1], xmax = xs[2], ymin = ys[1], ymax = ys[2], 
     col = "black", fill = NA, linetype = 2, linewidth = 2/3)
-plotVisium(vis, spots = FALSE, point_size = 0.75) + box + 
-    plotVisium(vis, point_size = 0.75, zoom = TRUE) + 
+plotVisium(vis, spots = FALSE, point_size = 1) + box + 
+    plotVisium(vis, point_size = 1, zoom = TRUE) + 
     plot_layout(nrow = 1) & facet_null()
 ```
 
@@ -174,22 +174,7 @@ Next, we perform deconvolution with `r BiocStyle::Biocpkg("spacexr")` (also know
 [Note that RCTD can also be adapted to Visium HD data with `rctd_mode = "doublet"`, as demonstrated by [@Oliveira2024] and @sec-seq-workflow-visium-hd.]{.aside}
 By default, `runRctd()`'s `rctd_mode = "doublet"` specifies at most two subpopulations coexist in a data unit (i.e. within a spot); here, we set `rctd_mode = "full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
-To speed up runtime in this demo, we use only a subset of the Visium spots.
-
-<!-- Note for speeding up this chapter: subsetting the Visium spots speeds up CARD but not RCTD; subsetting the single-cell reference makes no difference to either -->
-
-```{r subsetting}
-# subset Visium spots for faster runtime in this demo
-# selecting region containing tumor and other tissue of interest
-keep_r <- colData(vis)$array_row > 10 & colData(vis)$array_row < 70
-keep_c <- colData(vis)$array_col > 10 & colData(vis)$array_col < 70
-vis <- vis[, keep_r & keep_c]
-```
-
 ```{r dec, message = FALSE, warning = FALSE}
-counts(vis) <- as(counts(vis), "dgCMatrix")
-counts(sce) <- as(counts(sce), "dgCMatrix")
-
 rctd_data <- createRctd(vis, sce, cell_type_col = "Annogrp")
 (res <- runRctd(rctd_data, max_cores = 4, rctd_mode = "full"))
 ```
@@ -216,7 +201,9 @@ Another method that can be used is `CARD`. First, we rename the columns of spati
 <!-- First, we realized delayed count matrices and rename spatial coordinate columns to make the input data compatible with CARD [Note: RCTD handles the conversion internally with spacexr::check_counts()]{.aside} -->
 
 ```{r}
-# realize the delayed matrices
+# realize the delayed matrices, as CARD do not support delayed matrix handling yet
+counts(sce) <- as(counts(sce), "sparseMatrix")
+counts(vis) <- as(counts(vis), "sparseMatrix")
 colnames(spatialCoords(vis)) <- c("x", "y")
 ```
 
@@ -232,7 +219,7 @@ CARD_obj <- CARD_deconvolution(
     spatial_count = NULL,
     spatial_location = NULL,
     ct_varname = "Annogrp",
-    ct_select = NULL,  # decon with all sce$Annogrp cell types
+    ct_select = NULL,       # decon with all sce$Annogrp cell types
     sample_varname = NULL,  # use all sce as one ref sample 
     mincountgene = 100,
     mincountspot = 5
@@ -247,7 +234,7 @@ ws_card[1:5, 1:5] |> round(2)
 
 ## Visualization
 
-First, we define a couple accessory functions.`
+First, we define a couple accessory functions.
 
 ```{r pltxy}
 #| code-fold: true
@@ -262,7 +249,7 @@ First, we define a couple accessory functions.`
 
 .plt_decon <- \(ws, vis){
     lapply(names(ws), \(.) 
-      .plt_xy(ws, vis, col = ., point_size = 0.4)) |> 
+      .plt_xy(ws, vis, col = ., point_size = 0.3)) |> 
       wrap_plots(nrow = 3) & theme(
       legend.key.width = unit(0.5, "lines"),
       legend.key.height = unit(1, "lines")) &
@@ -272,28 +259,28 @@ First, we define a couple accessory functions.`
 
 We can visualize deconvolution weights in x-y space, i.e. coloring by the proportion of a given cell type estimated to fall within a given spot:
 
-```{r plt-dec-xy-rctd, message = FALSE, fig.width = 12, fig.height = 5}
+```{r plt-dec-xy-rctd, message = FALSE, fig.width = 8, fig.height = 5}
 #| code-fold: true
 .plt_decon(ws = ws_rctd, vis)
 ```
 
-```{r plt-dec-xy-card, message = FALSE, fig.width = 12, fig.height = 5}
+```{r plt-dec-xy-card, message = FALSE, fig.width = 8, fig.height = 5}
 #| code-fold: true
 .plt_decon(ws = ws_card, vis)
 ```
             
 The deconvolution results can also be viewed as a heatmap, where rows = cells and columns = clusters:
 
-```{r heatmap, fig.width = 4.5, fig.height = 3}
+```{r heatmap, fig.width = 3.5, fig.height = 3}
 #| layout-ncol: 2
 #| code-fold: true
-plot_heat_ws <- function(ws){
-    p <- pheatmap(ws, show_rownames = FALSE, show_colnames = TRUE, 
+plot_heat_ws <- function(ws, string){
+    p <- pheatmap(ws, show_rownames = FALSE, show_colnames = TRUE, main=string,
                   cellwidth = 12, treeheight_row = 5, treeheight_col = 5)
     return(p)
 }
-plot_heat_ws(ws_rctd)
-plot_heat_ws(ws_card)
+plot_heat_ws(ws_rctd, string="RCTD") 
+plot_heat_ws(ws_card, string="CARD")
 ```
 
 In both methods, we see that more than half of the spots are estimated to have a stromal proportion of more than 50%. Few spots have an intense and distinct signal for cancerous subpopulations, DCIS1 and DCIS2. For the following analysis, we focus on `RCTD` as an example.
@@ -317,10 +304,10 @@ vis$RCTD_no_stroma <- factor(ids_no_stroma[colnames(vis)])
 
 We can visualize these three annotations spatially:
 
-```{r plt-clu-xy, message = FALSE, fig.width = 10, fig.height = 2.5}
+```{r plt-clu-xy, message = FALSE, fig.width = 9, fig.height = 2.5}
 #| code-fold: true
 lapply(c("anno", "RCTD", "RCTD_no_stroma"), 
-       \(.) plotCoords(vis, annotate=., point_size = 1)) |>
+       \(.) plotCoords(vis, annotate=.)) |>
     wrap_plots(nrow = 1) &
     theme(legend.key.size = unit(0, "lines")) &
     scale_color_manual(values = unname(pals::trubetskoy()))
@@ -348,21 +335,21 @@ ggplot(df, aes(Freq, RCTD, fill = anno)) + ggtitle("RCTD") +
 
 Next, we can investigate the agreement between the provided annotation against the two deconvolution majority vote labels.
 
-```{r dec-clu-nostroma, fig.width = 4.5, fig.height = 4}
+```{r dec-clu-nostroma, fig.width = 4, fig.height = 3}
 #| layout-ncol: 2
 #| code-fold: true
-hm <- \(.) pheatmap(
-    ., show_rownames = TRUE, show_colnames = TRUE,
+hm <- \(mat, string) pheatmap(
+    mat, show_rownames = TRUE, show_colnames = TRUE, main=string,
     cellwidth = 10, cellheight = 10, treeheight_row = 5, treeheight_col = 5)
-hm(prop.table(table(vis$anno, vis$RCTD), 2))
-hm(prop.table(table(vis$anno, vis$RCTD_no_stroma), 2))
+hm(prop.table(table(vis$anno, vis$RCTD), 2), string="RCTD")
+hm(prop.table(table(vis$anno, vis$RCTD_no_stroma), 2), string="RCTD_no_stroma")
 ```
 
 Overall, we observe agreement between the provided spot labels and the `RCTD` deconvolution derived annotations.
 Before cleaning up stromal, some immune cell types, such as dendritic and mast, never had a chance to have the highest cell type proportion. 
 On the left panel, among among all the spots annotated by `RCTD` as T cells, nearly all of them are from the "immune" type in the provided annotation. Strong agreements are also observed for spots with cell type of "DCIS1", "DCIS2", and "Invasive tumor".
 
-::: {.callout-note title = "PC regression" collapse = "true"}
+::: {.callout-note title="PC regression" collapse="true"}
 Next, we prepare the principal components (PCs) needed to perform PC regression:
 
 ```{r pca}
@@ -412,15 +399,16 @@ ggplot(pcr, aes(pc, r2, col=id)) +
 Let's inspect the key drivers of (expression) variability in terms of PCs. Considering deconvolution results from above, we can see that:
 
 -   PC1 distinguishes stromal, tumor, macrophage from the rest of the tissue;
--   PC3 clearly separates DCIS1;
--   PC4 captures T cells region;
--   PC8 separates DCIS2.
+-   PC2 clearly separates myoepi;
+-   PC3 captures T cells region;
+-   PC5 separates endothelial.
 
-```{r plt-pcs-xy, message = FALSE, fig.width = 11, fig.height = 5}
+
+```{r plt-pcs-xy, message = FALSE, fig.width = 5.5, fig.height = 4}
 #| code-fold: true
 pcs <- reducedDim(vis, "PCA")
 pcs <- pcs[rownames(ws), seq_len(10)]
-lapply(c("DCIS1", "T", "DCIS2", colnames(pcs)[c(3, 4, 8)]), 
+lapply(c("myoepi", "T", "endo", colnames(pcs)[c(2, 3, 5)]), 
        \(.) .plt_xy(cbind(ws, pcs), vis, col = ., point_size = 0.3) +
          scale_color_gradientn(., colors = pals::jet())) |>
     wrap_plots(nrow = 2) & theme(

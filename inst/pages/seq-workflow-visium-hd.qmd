@@ -68,14 +68,11 @@ colData(vhd8)[names(df)] <- df
 lab <- grep("Label", names(cd <- colData(vhd8)), value=TRUE)
 pal <- hcl.colors(length(unique(unlist(cd[lab]))), "Spectral")
 lapply(lab, \(.) {
-    p <- plotCoords(vhd8, annotate=., point_size=0.2) + ggtitle(.)
-    p$layers[[1]]$aes_params$shape <- 16
-    p$layers[[1]]$aes_params$stroke <- 0
-    p
+  plotCoords(vhd8, annotate=., point_size=0.2, point_shape = 15) + ggtitle(.)
 }) |>
-    wrap_plots(nrow=1, guides="collect") &
-    scale_color_manual(NULL, values=pal) &
-    theme(legend.key.size=unit(0, "lines"))
+  wrap_plots(nrow=1, guides="collect") &
+  scale_color_manual(NULL, values=pal) &
+  theme(legend.key.size=unit(0, "lines"))
 ```
 
 Another resolution of VisiumHD with 16 µm bin can be read in as follow:
@@ -109,17 +106,15 @@ Based on a [discussion](https://github.com/10XGenomics/HumanColonCancer_VisiumHD
 
 ```{r vhd16-empvis, fig.width=8, fig.height=2.5, message=FALSE, warning=FALSE}
 #| code-fold: true
-p1 <- plotVisium(vhd16, annotate="libsize", 
+p1 <- plotVisium(vhd16, annotate="libsize", point_shape = 22,
            zoom = TRUE, show_axes = TRUE, point_size = 1.3) + 
-    xlim(c(422, 442)) + ylim(c(318, 330)) + 
-    facet_null() + ggtitle("16 µm - original")
+    xlim(c(422, 442)) + ylim(c(318, 330)) + ggtitle("16 µm - original")
 
 vhd16 <- vhd16[, vhd16$libsize > 400]
 
-p2 <- plotVisium(vhd16, annotate="libsize", 
+p2 <- plotVisium(vhd16, annotate="libsize", point_shape = 22,
            zoom = TRUE, show_axes = TRUE, point_size = 1.3) + 
-    xlim(c(422, 442)) + ylim(c(318, 330)) + 
-    facet_null() + ggtitle("16 µm - after > 400 UMI QC")
+    xlim(c(422, 442)) + ylim(c(318, 330)) + ggtitle("16 µm - post > 400 UMI QC")
 
 p1 | p2
 ```
@@ -140,10 +135,10 @@ We can visualize the given clustering results at 8 µm and 16 µm resolutions. L
 
 ```{r clusvis, fig.width=12, fig.height=6, message=FALSE}
 #| code-fold: true
-(plotCoords(vhd8, annotate="cluster", point_size=0.05, 
+(plotCoords(vhd8, annotate="cluster", point_size=0.05, point_shape = 15,
             pal=unname(pals::kelly())) + ggtitle("8 µm")) |
 (plotCoords(vhd16[, !is.na(vhd16$cluster)], annotate="cluster", point_size=0.1, 
-            pal=unname(pals::kelly())) + ggtitle("16 µm")) 
+            point_shape = 15, pal=unname(pals::kelly())) + ggtitle("16 µm")) 
 ```
 
 To keep runtimes low, our downstream analysis will be performed on a subset area of 16 µm bins (1/64 of the data coverage area), which we read in here; there are no annotations available for this resolution in the public domain. [Note that 8 and 16 µm binned Visium HD data share the same full-resolution H&E image and scaling factor.]{.aside}
@@ -173,11 +168,12 @@ box <- .box(roi="box", lty=4, lwd=2/3, col="black")
 .lim <- \(spe) list(
     xlim(spe[["box"]][c(1, 2)]),
     ylim(spe[["box"]][c(4, 3)]))
-plotVisium(vhd8, spots=FALSE) + cov + box +
+
+plotVisium(vhd8, spots=FALSE, point_shape=22) + cov + box +
     ggtitle("grey: data coverage\n black: zoomed region") + 
-plotVisium(vhd8, point_size=0.8, zoom=TRUE) + .lim(vhd8r) +
+plotVisium(vhd8, point_size=0.8, zoom=TRUE, point_shape=22) + .lim(vhd8r) +
     ggtitle("8 µm bins in black box") + 
-plotVisium(vhd16, point_size=1.6, zoom=TRUE) + .lim(vhd8r) +
+plotVisium(vhd16, point_size=1.6, zoom=TRUE, point_shape=22) + .lim(vhd8r) +
     ggtitle("16 µm bins in black box") + 
 plot_layout(nrow=1, widths=c(1.5, 1, 1)) & facet_null() &
     theme(plot.title=element_text(hjust=0.5, vjust=0.5))
@@ -226,26 +222,31 @@ table(.vhd16$discard)
 
 ```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
 #| code-fold: true
-plotCoords(.vhd16, annotate="sum_log", point_size=0.2) + ggtitle("log-library size") +
-plotCoords(.vhd16, annotate="subsets_mt_percent", point_size=0.2) + ggtitle("% mitochondrial") +
-plot_layout(nrow=1) & theme(
+plotCoords(.vhd16, annotate="sum_log", point_size=0.2, point_shape=15) + 
+  ggtitle("log-library size") +
+  plotCoords(.vhd16, annotate="subsets_mt_percent", point_size=0.2, point_shape=15) + 
+  ggtitle("% mitochondrial") +
+  plot_layout(nrow=1) & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
-    scale_color_gradientn(colors=pals::jet())
+  scale_color_gradientn(colors=pals::jet())
 ```
 
 We can visualize the local outliers identified by `SpotSweeper` in space:
 
 ```{r qc-vis, fig.width=7.5, fig.height=2.5, message=FALSE}
 #| code-fold: true
-plotCoords(.vhd16, annotate="sum_outliers") + ggtitle("low_lib_size") +
-plotCoords(.vhd16, annotate="detected_outliers") + ggtitle("low_n_features") +
-plotCoords(.vhd16, annotate="discard") + ggtitle("discard") +
-plot_layout(nrow=1, guides="collect") & theme(
+plotCoords(.vhd16, annotate="sum_outliers", point_shape=15) + 
+  ggtitle("low_lib_size") +
+  plotCoords(.vhd16, annotate="detected_outliers", point_shape=15) + 
+  ggtitle("low_n_features") +
+  plotCoords(.vhd16, annotate="discard", point_shape=15) + 
+  ggtitle("discard") +
+  plot_layout(nrow=1, guides="collect") & theme(
     plot.title=element_text(hjust=0.5),
     legend.key.size=unit(0, "lines")) &
-    guides(col=guide_legend(override.aes=list(size=3))) & 
-    scale_color_manual("discard", values=c("lavender", "purple"))
+  guides(col=guide_legend(override.aes=list(size=3))) & 
+  scale_color_manual("discard", values=c("lavender", "purple"))
 ```
 
 Lastly, we subset the Visium HD 16 µm object to bins that passed QC:
@@ -291,7 +292,7 @@ k <- cluster_leiden(g, objective_function="modularity", resolution=1.2)
 table(.vhd16$Banksy <- factor(k$membership))
 ```
 
-Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-crs-deg. We also compute the cluster-wise mean expression of selected markers:
+Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-crs-signatures. We also compute the cluster-wise mean expression of selected markers:
 
 ```{r mgs}
 # differential gene expression analysis
@@ -307,7 +308,7 @@ pbs <- aggregateAcrossCells(.vhd16,
 
 The marker genes in each cluster can be visualized with a heatmap:
 
-```{r plt-mgs-hm, message=FALSE, fig.width=11, fig.height=3}
+```{r plt-mgs-hm, message=FALSE, fig.width=8, fig.height=3}
 #| code-fold: true
 # visualize averages z-scaled across clusters
 pheatmap(
@@ -320,11 +321,12 @@ Or, we can visualize the bin-wise expression of selected markers in space:
 ```{r plt-mgs-xy, fig.width=10, fig.height=3, message=FALSE}
 #| code-fold: true
 gs <- c("MMP2", "PIGR", "IGHG1")
-ps <- lapply(gs, \(.) plotCoords(.vhd16, annotate=., assay_name="logcounts"))
+ps <- lapply(gs, \(.) plotCoords(.vhd16, annotate=., point_shape=15, 
+                                 point_size=0.8, assay_name="logcounts"))
 wrap_plots(ps, nrow=1) & theme(
-    legend.key.width=unit(0.5, "lines"),
-    legend.key.height=unit(1, "lines")) &
-    scale_color_gradientn(colors=rev(hcl.colors(9, "Rocket")))
+  legend.key.width=unit(0.5, "lines"),
+  legend.key.height=unit(1, "lines")) &
+  scale_color_gradientn(colors=rev(hcl.colors(9, "Rocket")))
 ```
 
 ## Deconvolution
@@ -469,7 +471,7 @@ Next, we can spatially visualize the deconvolution proportions estimates:
 ```{r plt-dec-est, message=FALSE, fig.width=9, fig.height=4}
 #| code-fold: true
 lapply(names(ws), \(.) 
-    plotCoords(.vhd16, annotate=., point_size=0.1)) |>
+    plotCoords(.vhd16, annotate=., point_size=0.3, point_shape=15)) |>
     wrap_plots(nrow=2, guides="collect") & theme(
     legend.key.width=unit(0.5, "lines"),
     legend.key.height=unit(1, "lines")) &
@@ -510,8 +512,10 @@ Let's visualize deconvolution result for 8 and 16 µm bins in the zoomed area:
 
 ```{r plt-dec-lab, fig.width=8, fig.height=3, message=FALSE}
 #| code-fold: true
-plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8) + ggtitle("8 µm") + plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6) + ggtitle("16 µm") +
+plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8, point_shape=22) + 
+  ggtitle("8 µm") + plot_spacer() +
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6, point_shape=22) + 
+  ggtitle("16 µm") +
 plot_layout(nrow=1, guides="collect", widths=c(1, 0.05, 1)) &
     guides(col=guide_legend(override.aes=list(size=2))) &
     scale_fill_manual(values=unname(pals::trubetskoy())) & 
@@ -530,13 +534,13 @@ We can visualize the results spatially:
 
 ```{r plt-dec-clu-xy, fig.width=12, fig.height=3}
 #| code-fold: true
-plotVisium(.vhd16, annotate="cluster", zoom=TRUE, 
+plotVisium(.vhd16, annotate="cluster", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::kelly())) + 
     plot_spacer() +
-plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, 
+plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::kelly())) + 
     plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, 
+plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_shape=22,
     point_size=1.6, pal=unname(pals::trubetskoy())) +
 plot_layout(nrow=1, 
     widths=c(1, 0.05, 1, 0.05, 1)) & facet_null() &
@@ -635,11 +639,12 @@ The same analysis steps could be applied to the (unfiltered) 16 μm resolution d
 
 In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm. Most methods and visualization techniques developed for Visium can be applied to Visium HD. However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
 
+-   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells. 
+    - Space Ranger v4 now provides a segmented, cell-level count matrix under `segmented_outputs`, in parallel with the previous `binned_outputs` at 2, 8, and 16 µm, simplifying additional cell segmentation using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
+
 -   [GitHub repository of `bin2cell`](https://github.com/Teichlab/bin2cell) for H&E segmentation and obtaining cell boundaries.
 
 -   [Analysis pipeline](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd) by 10x Genomics (April 2024). The analysis consists of three steps: run `StarDist` nuclei segmentation in Python, sum gene expression into nuclei based on segmentation mask, and downstream analysis with `scanpy` and `anndata`.
-
--   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells.
 
 -   [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 
