@@ -259,12 +259,12 @@ First, we define a couple accessory functions.
 
 We can visualize deconvolution weights in x-y space, i.e. coloring by the proportion of a given cell type estimated to fall within a given spot:
 
-```{r plt-dec-xy-rctd, message = FALSE, fig.width = 7, fig.height = 5}
+```{r plt-dec-xy-rctd, message = FALSE, fig.width = 8, fig.height = 5}
 #| code-fold: true
 .plt_decon(ws = ws_rctd, vis)
 ```
 
-```{r plt-dec-xy-card, message = FALSE, fig.width = 7, fig.height = 5}
+```{r plt-dec-xy-card, message = FALSE, fig.width = 8, fig.height = 5}
 #| code-fold: true
 .plt_decon(ws = ws_card, vis)
 ```
