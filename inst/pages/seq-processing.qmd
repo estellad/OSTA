@@ -14,14 +14,13 @@ Following the processing steps, this chapter also includes short demonstrations 
 ### Dependencies
 
 ```{r load-libs, message=FALSE, warning=FALSE}
-library(SpatialExperiment)
-library(STexampleData)
-library(scater)
 library(scran)
-library(BayesSpace)
+library(scater)
 library(ggspavis)
-library(patchwork)
 library(pheatmap)
+library(patchwork)
+library(BayesSpace)
+library(SpatialExperiment)
 ```
 
 ```{r}
