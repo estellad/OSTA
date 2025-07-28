@@ -31,7 +31,7 @@ set.seed(123)
 
 ### Load data
 
-Here, we load 10x Genomics Visium data on a postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region, which has undergone quality control and filtering in the preceeding @sec-seq-quality-control.
+Here, we load 10x Genomics Visium data from one postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region [@Maynard2021], which has undergone quality control and filtering in the preceeding @sec-seq-quality-control.
 
 <!--
 Here, we load a 10x Genomics Visium dataset that will also be used in several of the following chapters. This dataset has previously been preprocessed using tools outside R and saved in `SpatialExperiment` format, and is available for download from the `r BiocStyle::Biocpkg("STexampleData")` package.
@@ -40,7 +40,7 @@ This dataset consists of one sample (Visium capture area) of postmortem human br
 -->
 
 ```{r load-data, message=FALSE}
-# load data from STexampleData package
+# load data saved in previous chapter
 (spe <- readRDS("seq-spe_qc.rds"))
 ```
 
@@ -78,7 +78,7 @@ assayNames(spe)
 
 ### Highly variable genes (HVGs)
 
-Identifying a set of top "highly variable genes" (HVGs) is a standard step for feature selection in many scRNA-seq workflows, which can also be used as a simple and fast baseline approach in spot-based data. This makes the simplified assumption that spots can be treated as equivalent to cells.
+Identifying a set of top "highly variable genes" (HVGs) is a standard step for feature selection in many scRNA-seq workflows, which can also be used as a simple and fast baseline approach in spot-based ST data. This makes the simplified assumption that spots can be treated as equivalent to cells.
 
 Here, we take a standard approach for selecting HVGs; see @sec-crs-hvg for more details. We first remove mitochondrial genes, since these tend to be very highly expressed and are not of main biological interest.
 
