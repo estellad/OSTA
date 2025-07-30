@@ -5,12 +5,6 @@
 Bioconductor provides several data classes for storing and manipulating spatial (transcript)omics datasets. 
 By relying on these consistent data structures, we can easily connect methods and packages developed by different research groups to build analysis workflows that include the latest state-of-the-art methods.
 
-<!--
-Many of the analysis steps typically performed for single-cell data are – directly or with alterations – applicable to and of potential interest for SO data. 
-However, while SO and single-cell data structures share similarities, there’s a need to accommodate specialized information such as spatial coordinates (of observations and/or molecules) and image-related metadata. 
-Thus, a container for SO data that extends (or 'inherits from') existing Bioc classes for single-cell data analysis is beneficial in that it can inter-operate with existing infrastructure, and allow technology-specific flexibility in future class and tool development.
--->
-
 Below, we describe the Bioconductor data classes used in this book.
 
 
@@ -58,7 +52,7 @@ For both types of data, observations are associated with additional metadata suc
 #### SingleCellExperiment
 
 Single-cell RNA-seq and analogous technologies quantify transcripts at single-cell resolution, yielding a transcripts-by-cells count matrix.
-In Bioconductor, the primary class for data from single-cell experiments is `r BiocStyle::Biocpkg("SingleCellExperiment")` [@Amezquita2020] (SCE).
+In Bioconductor, the primary class for data from single-cell experiments is `r BiocStyle::Biocpkg("SingleCellExperiment")` [@Amezquita2020-OSCA] (SCE).
 
 SCE extends the `r BiocStyle::Biocpkg("SummarizedExperiment")` (SE) class by a series of features specific to single-cell data.
 For instance, `reducedDims` for low-dimensional embeddings of observations such as PCA, t-SNE, and UMAP; `row`- and `colPairs` for relationships between genes (e.g. gene-to-gene correlations) and cells (e.g. cell-to-cell distances), respectively; and, data on alternative features from the same cells, such as those obtained via multi-modal assays, are stored as `altExps` (for 'alternative experiments').
@@ -66,7 +60,7 @@ For instance, `reducedDims` for low-dimensional embeddings of observations such 
 
 #### SpatialExperiment
 
-`r BiocStyle::Biocpkg("SpatialExperiment")` (SPE) [@Righelli2022] is the core data class used in this book. 
+`r BiocStyle::Biocpkg("SpatialExperiment")` (SPE) [@Righelli2022-SpatialExperiment] is the core data class used in this book. 
 This class allows us to store datasets at the spot or cell level, i.e. data from sequencing-based platforms at the spot level, or data from imaging-based platforms aggregated to the cell level.
 
 SPE extends SCE with additional customizations to store spatial information, such as spatial coordinates and image files.
@@ -96,12 +90,12 @@ Analyses at the aggregated cell level may, in turn, be carried out using an ME-d
 
 ### Non-Bioconductor-based
 
-There are several other frameworks outside Bioconductor that support spatially-aware analysis for both sequencing- and imaging-based platforms. `r BiocStyle::Githubpkg("satijalab/seurat")` and `scanpy` [@Wolf2018-scanpy] provide comprehensive single-cell analysis pipelines in R and Python, respectively, and incorporate features to visualize and analyze spatial omics datasets. Packages including `r BiocStyle::Githubpkg("drieslab/Giotto")` [@Chen2023-Giotto] (R), `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` (R) [@Manukyan2023-VoltRon], and `squidpy` (Python) [@Palla2022-squidpy] support all-in-one frameworks for analyzing spatial omics data and contain extensive sets of spatially-aware algorithms.
+There are several other frameworks outside Bioconductor that support spatially-aware analysis for both sequencing- and imaging-based platforms. `r BiocStyle::Githubpkg("satijalab/seurat")` and `scanpy` [@Wolf2018-Scanpy] provide comprehensive single-cell analysis pipelines in R and Python, respectively, and incorporate features to visualize and analyze spatial omics datasets. Packages including `r BiocStyle::Githubpkg("drieslab/Giotto")` [@Chen2023-Giotto-Suite; @Dries2021-Giotto] (R), `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` (R) [@Manukyan2023-VoltRon], and `squidpy` (Python) [@Palla2022-Squidpy] support all-in-one frameworks for analyzing spatial omics data and contain extensive sets of spatially-aware algorithms.
 
 
 #### Giotto
 
-`r BiocStyle::Githubpkg("drieslab/Giotto")` [@Chen2023-Giotto] (or Giotto Suite) provides tools to process, analyze and visualize spatial multi-omics data at multiple scales and resolutions. The package supports the analysis of an extensive set of sequencing- and imaging-based platforms with either transcriptomics and proteomics modailities such as Xenium, Visium HD and CODEX (Akoya). `Giotto` provides utilities to manipulate spatial objects and images, detect spatial patterns and spatially-aware clusters, and support database-based backed data using `r BiocStyle::Githubpkg("drieslab/dbverse")` for scalability.
+`r BiocStyle::Githubpkg("drieslab/Giotto")` [@Chen2023-Giotto-Suite; @Dries2021-Giotto] (or Giotto Suite) provides tools to process, analyze and visualize spatial multi-omics data at multiple scales and resolutions. The package supports the analysis of an extensive set of sequencing- and imaging-based platforms with either transcriptomics and proteomics modailities such as Xenium, Visium HD and CODEX (Akoya). `Giotto` provides utilities to manipulate spatial objects and images, detect spatial patterns and spatially-aware clusters, and support database-based backed data using `r BiocStyle::Githubpkg("drieslab/dbverse")` for scalability.
 
 
 #### VoltRon

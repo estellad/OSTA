@@ -1,4 +1,4 @@
-# Example datasets {#sec-bkg-datasets}
+# Example datasets {#sec-bkg-example-datasets}
 
 ## Introduction
 
@@ -46,7 +46,7 @@ Below, we briefly summarize the characteristics of each dataset, and note across
 
 In the underlying paper, the Xenium data (2 replicates) were accompanied by consecutive slices of Chromium and Visium data. Therefore, these replicates are expected to have nearly identical biological findings. By transferring Chromium cell type labels to spatial technologies, such as Visium (with full transcriptome) and Xenium (at single-cell resolution), we can combine analytical insights from different platforms.
 
-- @Janesick2023
+- @Janesick2023-high-res
 - source: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
 - annotations: [cell type worksheet](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast) (all platforms)
 - **Chromium**
@@ -65,7 +65,7 @@ In the underlying paper, the Xenium data (2 replicates) were accompanied by cons
 
 In the underlying paper, there are both normal adjacent tissue (NAT) and colorectal carcinoma (CRC) samples from 5 patients. The Visium HD data (P2 CRC) were accompanied by consecutive slices of Chromium, Visium, and Xenium data. Therefore, we can jointly analyze these modalities.
 
-- @Oliveira2024
+- @deOliveira2025-high-def
 - source: [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression/dataset-human-crc)
 - annotations: [repository](https://github.com/10XGenomics/HumanColonCancer_VisiumHD/tree/main/MetaData) (Chromium & VisiumHD deconvolution)
 - **Chromium**
