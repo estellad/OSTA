@@ -64,11 +64,11 @@ For instance, `reducedDims` for low-dimensional embeddings of observations such 
 This class allows us to store datasets at the spot or cell level, i.e. data from sequencing-based platforms at the spot level, or data from imaging-based platforms aggregated to the cell level.
 
 SPE extends SCE with additional customizations to store spatial information, such as spatial coordinates and image files.
-A schematic of the `SpatialExperiment` object structure is shown in @fig-spe. 
+A schematic of the `SpatialExperiment` object structure is shown in @fig-spatialexperiment. 
 Briefly, a SPE object consists of (i) `assays` containing expression counts, (ii) `rowData` containing information on features, i.e. genes, (iii) `colData` containing information on spots or cells, including non-spatial and spatial metadata, (iv) `spatialCoords` containing spatial coordinates, and (v) `imgData` containing image data. 
 For spot-based data, a single `assay` named `counts` is used.
 
-```{r fig-spe, echo = FALSE, out.width = "80%", fig.cap = "Overview of the `SpatialExperiment` data class for storing and manipulating spatial transcriptomics datasets within the Bioconductor framework."}
+```{r fig-spatialexperiment, echo = FALSE, out.width = "80%", fig.cap = "Overview of the `SpatialExperiment` data class for storing and manipulating spatial transcriptomics datasets within the Bioconductor framework."}
 knitr::include_graphics("../images/SpatialExperiment.png")
 ```
 
@@ -105,10 +105,10 @@ The `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` package incorporates a fram
 
 #### SpatialData
 
-The [`SpatialData`](https://spatialdata.scverse.org) [@Marconato2025-SpatialData] framework (@fig-spd) offers a suite of modules for loading, handling, as well as (static and interactive) visualization of diverse spatial omics data (spanning imaging- and sequencing-based data and different modalities).
+The [`SpatialData`](https://spatialdata.scverse.org) [@Marconato2025-SpatialData] framework (@fig-spatialdata) offers a suite of modules for loading, handling, as well as (static and interactive) visualization of diverse spatial omics data (spanning imaging- and sequencing-based data and different modalities).
 In essence, the container relies on 5 types of elements (images, labels, shapes, points, and tables), which are represented on-disk using standardized, OME-NGFF compliant file formats (*.zarr* for images, labels, and tables; *.parquet* for shapes and polygons), enabling unified and memory-efficient data representation and handling.
 
-```{r fig-spd, echo = FALSE, out.width = "80%", fig.cap = "Overview of the scverse/Python `SpatialData` framework."}
+```{r fig-spatialdata, echo = FALSE, out.width = "80%", fig.cap = "Overview of the scverse/Python `SpatialData` framework."}
 knitr::include_graphics("../images/SpatialData.png")
 ```
 

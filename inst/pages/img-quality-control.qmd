@@ -4,7 +4,7 @@
 
 ### Introduction
 
-The analyses demonstrated here will use a 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and a 1k-plex CosMx data (NanoString) of human non-small cell lung cancer (NSCLC).
+The analyses demonstrated here will use a 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023-high-res] and a 1k-plex CosMx data (NanoString) of human non-small cell lung cancer (NSCLC).
 
 In the first section, we demonstrate QC procedures applied to the Xenium dataset, and save the post-QC dataset for use in later chapters. In the second section, we demonstrate additional CosMx-specific QC procedures on the CosMx dataset.
 

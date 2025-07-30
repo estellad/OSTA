@@ -1,4 +1,4 @@
-# Neighborhood analysis {#sec-img-neighbors}
+# Neighborhood analysis {#sec-img-neighborhood-analysis}
 
 ## Preamble
 
@@ -170,7 +170,7 @@ plot_layout(nrow=1) &
 
 ## Co-localization
 
-`r BiocStyle::Biocpkg("hoodscanR")` [@Liu2024-hoodscanR] also relies on a (Euclidean) $k$NN graph to estimate the probability of each cell associating with its NNs.
+`r BiocStyle::Biocpkg("hoodscanR")` [@Liu2025-hoodscanR] also relies on a (Euclidean) $k$NN graph to estimate the probability of each cell associating with its NNs.
 The resulting probability matrix (rows=cells, columns=NNs) can, in turn, be used to assess co-occurrence of subpopulations. 
 
 ```{r hoodscanR-calc, message=FALSE}

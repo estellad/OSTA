@@ -47,7 +47,7 @@ This book is built using the [BiocBook](https://github.com/js2264/BiocBook) pack
 
 ## Additional acknowledgements and resources
 
-- This book is inspired by the [Orchestrating Single-Cell Analysis with Bioconductor (OSCA)](https://bioconductor.org/books/release/OSCA/) book [@Amezquita2020] on analysis workflows for single-cell data using R and Bioconductor.
+- This book is inspired by the [Orchestrating Single-Cell Analysis with Bioconductor (OSCA)](https://bioconductor.org/books/release/OSCA/) book [@Amezquita2020-OSCA] on analysis workflows for single-cell data using R and Bioconductor.
 
 - Details on data preprocessing procedures for 10x Genomics Visium data can be found in our related online book [Visium data preprocessing](https://lmweber.org/Visium-data-preprocessing/).
 

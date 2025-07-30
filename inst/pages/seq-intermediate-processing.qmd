@@ -1,4 +1,4 @@
-# Processing {#sec-seq-processing}
+# Intermediate processing {#sec-seq-intermediate-processing}
 
 ## Preamble
 
@@ -6,7 +6,7 @@
 
 This chapter demonstrates methods for several data processing steps -- normalization, feature selection, and dimensionality reduction -- that are required before downstream analysis methods can be applied.
 
-We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we discuss alternative spatially-aware methods, and provide links to later parts of the book where these methods are described in more detail.
+We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we discuss alternative spatially-aware methods, and provide links to later parts of the book where these methods are described in more detail.
 
 Following the processing steps, this chapter also includes short demonstrations for subsequent steps, including clustering and identification of marker genes. For more details on these steps, see the later analysis chapters or workflow chapters.
 
@@ -31,12 +31,12 @@ set.seed(123)
 
 ### Load data
 
-Here, we load 10x Genomics Visium data from one postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region [@Maynard2021], which has undergone quality control and filtering in the preceeding @sec-seq-quality-control.
+Here, we load 10x Genomics Visium data from one postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region [@Maynard2021-DLPFC], which has undergone quality control and filtering in the preceeding @sec-seq-quality-control.
 
 <!--
 Here, we load a 10x Genomics Visium dataset that will also be used in several of the following chapters. This dataset has previously been preprocessed using tools outside R and saved in `SpatialExperiment` format, and is available for download from the `r BiocStyle::Biocpkg("STexampleData")` package.
 
-This dataset consists of one sample (Visium capture area) of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region, measured with the 10x Genomics Visium platform. The dataset is described in @Maynard2021.
+This dataset consists of one sample (Visium capture area) of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region, measured with the 10x Genomics Visium platform. The dataset is described in @Maynard2021-DLPFC.
 -->
 
 ```{r load-data, message=FALSE}
@@ -45,13 +45,13 @@ This dataset consists of one sample (Visium capture area) of postmortem human br
 ```
 
 
-## Normalization {#sec-seq-processing-norm}
+## Normalization {#sec-seq-intermediate-processing-norm}
 
 ### Library size normalization
 
-A simple and fast approach for normalization is "library size normalization", which consists of calculating log-transformed normalized counts ("logcounts") using library size factors, treating each spot as equivalent to a single cell. This method is simple, fast, and generally provides a good baseline. It can be calculated using the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages.
+A simple and fast approach for normalization is "library size normalization", which consists of calculating log-transformed normalized counts ("logcounts") using library size factors, treating each spot as equivalent to a single cell. This method is simple, fast, and generally provides a good baseline. It can be calculated using the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] packages.
 
-However, library size normalization does not make use of any spatial information. In some datasets, the simplified assumption that each spot can be treated as equivalent to a single cell is not appropriate, and can create problems during analysis. (*"Library size confounds biology in spatial transcriptomics data"* [@Bhuva2024].)
+However, library size normalization does not make use of any spatial information. In some datasets, the simplified assumption that each spot can be treated as equivalent to a single cell is not appropriate, and can create problems during analysis. (*"Library size confounds biology in spatial transcriptomics data"* [@Bhuva2024-library-size].)
 
 Some alternative non-spatial methods from scRNA-seq workflows (e.g. normalization by deconvolution) are also less appropriate for spot-based ST data, since spots can contain multiple cells from one or more cell types, and datasets can contain multiple samples (e.g. multiple tissue sections), which may result in sample-specific clustering.
 
@@ -71,16 +71,16 @@ assayNames(spe)
 
 ### Spatially-aware normalization
 
-`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2024-SpaNorm] was developed specifically for ST data, using a gene-wise model (e.g. negative binomial) in which variation is decomposed into a library size-dependent (technical) and -independent (biological) component.
+`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2025-SpaNorm] was developed specifically for ST data, using a gene-wise model (e.g. negative binomial) in which variation is decomposed into a library size-dependent (technical) and -independent (biological) component.
 
 
-## Feature selection {#sec-seq-processing-feature}
+## Feature selection
 
 ### Highly variable genes (HVGs)
 
 Identifying a set of top "highly variable genes" (HVGs) is a standard step for feature selection in many scRNA-seq workflows, which can also be used as a simple and fast baseline approach in spot-based ST data. This makes the simplified assumption that spots can be treated as equivalent to cells.
 
-Here, we take a standard approach for selecting HVGs; see @sec-crs-hvg for more details. We first remove mitochondrial genes, since these tend to be very highly expressed and are not of main biological interest.
+Here, we take a standard approach for selecting HVGs; see @sec-ind-feature-selection-testing-hvgs for more details. We first remove mitochondrial genes, since these tend to be very highly expressed and are not of main biological interest.
 
 ```{r mt, results="hold"}
 # identify mitochondrial genes
@@ -107,12 +107,12 @@ length(sel)
 
 Alternatively, spatially-aware methods can be used to identify a set of "spatially variable genes" (SVGs). These methods take the spatial coordinates of the measurements into account, which can generate a more biologically informative ranking of genes associated with biological structure within the tissue area. The set of SVGs may then be used either instead of or complementary to HVGs in subsequent steps.
 
-A number of methods have been developed to identify SVGs. For more details and examples, see @sec-crs-svg.
+A number of methods have been developed to identify SVGs. For more details and examples, see @sec-ind-feature-selection-testing-svgs.
 
 
-## Dimensionality reduction {#sec-seq-processing-dimred}
+## Dimensionality reduction
 
-A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. Note that we have set a random seed at the start of the chapter for reproducibility. See @sec-crs-dimension-reduction for more details.
+A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. Note that we have set a random seed at the start of the chapter for reproducibility. See @sec-ind-dimensionality-reduction for more details.
 
 ```{r pca}
 spe <- runPCA(spe, subset_row = sel)
@@ -125,13 +125,13 @@ spe <- runUMAP(spe, dimred = "PCA")
 ```
 
 
-## Clustering {#sec-seq-processing-clustering}
+## Clustering {#sec-seq-intermediate-processing-clustering}
 
 Next, we demonstrate some short examples of downstream analysis steps, following the processing steps above.
 
 Here, we run a spatially-aware clustering algorithm, `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], to identify spatial domains. BayesSpace was developed specifically for sequencing-based ST data, and takes the spatial coordinates of the measurements into account.
 
-For more details on clustering, see @sec-crs-clustering.
+For more details on clustering, see @sec-ind-clustering.
 
 ```{r clu, message=FALSE}
 # run BayesSpace clustering
@@ -180,10 +180,10 @@ lapply(colnames(pcs), \(.) {
 
 ## Differential expression
 
-Having clustered our spots to identify spatial domains, we can test for genes that are differentially expressed (DE) between spatial domains, which can be interpreted as marker genes for the spatial domains; see also @sec-crs-deg.
+Having clustered our spots to identify spatial domains, we can test for genes that are differentially expressed (DE) between spatial domains, which can be interpreted as marker genes for the spatial domains; see also @sec-ind-feature-selection-testing-degs.
 
-Here, we will use pairwise t-tests and specifically test for upregulation (as opposed to downregulation), i.e. expression should be higher in the cluster for which a gene is reported to be a marker. See @sec-crs-clustering for additional details.
-[Alternatively, we could also test for spatially variable genes (SVGs) within domains to identify genes with spatial expression patterns that vary independently of the spatial arrangement of domains; see @sec-crs-svg for details.]{.aside}
+Here, we will use pairwise t-tests and specifically test for upregulation (as opposed to downregulation), i.e. expression should be higher in the cluster for which a gene is reported to be a marker. See @sec-ind-clustering for additional details.
+[Alternatively, we could also test for spatially variable genes (SVGs) within domains to identify genes with spatial expression patterns that vary independently of the spatial arrangement of domains; see @sec-ind-feature-selection-testing-svgs for details.]{.aside}
 
 ```{r mgs}
 # using scran package

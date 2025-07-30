@@ -4,7 +4,7 @@
 
 Imaging-based ST assays have gone from resolving 100s to 1000s of features.
 Their commercialization by Vizgen, NanoString, and 10x Genomics has made these data increasingly popular. 
-In general, imaging-based ST platforms rely on multiplexed error-robust fluorescence *in situ* hybridization (FISH), as originally proposed by @Moffitt2016-MERFISH.
+In general, imaging-based ST platforms rely on multiplexed error-robust fluorescence *in situ* hybridization (FISH), as originally proposed by @Chen2015-MERFISH.
 Briefly, targets are preassigned a barcode of (multi-color) 'on' and (no-color) 'off' bits, whereas barcodes are optimized to differ from each other by some bits as to minimize readout errors.
 After iterative imaging-bleaching, individual reporter binding events are identified computationally (spot calling).
 Aligning spots along the image z-stack then allows to identify individual targets based on a predefined barcoding scheme.
@@ -54,7 +54,7 @@ The NanoString CosMx platform gives an imageable area of 15x20 mm and allows up 
 
 ### MERSCOPE (Vizgen)
 
-The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluorescence-based targeted spatial transcriptomics platforms, allows the highest resolution (≤20 nm), while also providing a high capacity for multiplexing, with (customizable) panels containing up to 1000 genes, and an imageable area of 1 cm^2^. MERSCOPE was recently shown to be amongst the most sensitive in a recent head-to-head comparison [@Hartman2024] using mouse brain tissue.
+The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluorescence-based targeted spatial transcriptomics platforms, allows the highest resolution (≤20 nm), while also providing a high capacity for multiplexing, with (customizable) panels containing up to 1000 genes, and an imageable area of 1 cm^2^. MERSCOPE was recently shown to be amongst the most sensitive in a recent head-to-head comparison [@Hartman2024-comparative] using mouse brain tissue.
 
 <!--Davide:
 ## Pre-processing / understanding the input data structure

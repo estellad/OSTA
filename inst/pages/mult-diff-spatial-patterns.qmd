@@ -1,4 +1,4 @@
-# Differential spatial patterns {#sec-mult-diff-spatial}
+# Differential spatial patterns {#sec-mult-diff-spatial-patterns}
 
 ## Preamble
 
@@ -23,11 +23,11 @@ library(patchwork)
 
 ### Load data
 
-In this demo, we will analyze a Stereo-seq dataset from axolotl brain tissues collected at various stages of regeneration [@Wei2022-axolotl], which includes multiple samples (i.e. serial sections) measured under multiple experimental conditions (regeneration stages).
+In this demo, we will analyze a Stereo-seq dataset from axolotl brain tissues collected at various stages of regeneration [@Wei2022-Stereo-seq-axolotl], which includes multiple samples (i.e. serial sections) measured under multiple experimental conditions (regeneration stages).
 
 In the original dataset, which is publicly available through the [Spatial Transcript Omics DataBase](https://db.cngb.org/stomics/datasets/STDS0000056/data), there are 5 stages with multiple sections, totaling 16 samples (3 to 4 sections per stage).
 
-In this chapter, for computational reasons, we use 3 stages -- 2, 10, and 20 days post injury (DPI) -- and only two sections per stage. The analysis framework uses pre-computed spatial domains generated with `r BiocStyle::Biocpkg("Banksy")` [@Singhal2024-BANKSY]. For performing clustering with `Banksy`, refer to @sec-crs-clustering. For preprocessing details of this dataset, see the `r BiocStyle::Biocpkg("muSpaData")` Bioconductor package.
+In this chapter, for computational reasons, we use 3 stages -- 2, 10, and 20 days post injury (DPI) -- and only two sections per stage. The analysis framework uses pre-computed spatial domains generated with `r BiocStyle::Biocpkg("Banksy")` [@Singhal2024-BANKSY]. For performing clustering with `Banksy`, refer to @sec-ind-clustering. For preprocessing details of this dataset, see the `r BiocStyle::Biocpkg("muSpaData")` Bioconductor package.
 
 ```{r data, message=FALSE, warning=FALSE}
 spe <- Wei22_example()

@@ -6,7 +6,7 @@
 
 Spatial omics data further allow us to quantify various features that are related to tissue architecture. This allows us to perform comparisons of anatomical structure-derived features. We will refer to this type of analysis as **structure-based analysis**.
 
-We will use the `r BiocStyle::Biocpkg("sosta")` package to reconstruct and quantify pancreatic islets from human donors suffering different stages of diabetic type 1 (T1D) and healthy controls [@damondMapHumanType2019]. We will then compare some of the features between conditions.
+We will use the `r BiocStyle::Biocpkg("sosta")` package to reconstruct and quantify pancreatic islets from human donors suffering different stages of diabetic type 1 (T1D) and healthy controls [@Damond2019-IMC-diabetes]. We will then compare some of the features between conditions.
 
 
 ### Dependencies
@@ -272,7 +272,7 @@ allIslets |>
 
 An important aspect to note is that the individual structure metrics are not independent measurements, since there are generally repeated measurments (i.e., multiple islets) per slide and per patient. Therefore, we need to account for this correlation between measurements.
 
-To account for this, we will use mixed linear models with random effects for the patient and the individual slides (image name). The `r BiocStyle::CRANpkg("lme4")` package will be use for fitting linear mixed effects models [@batesFittingLinearMixedEffects2015] and `r BiocStyle::CRANpkg("lmerTest")` for p-value calculations [@kuznetsovaLmerTestPackageTests2017].
+To account for this, we will use mixed linear models with random effects for the patient and the individual slides (image name). The `r BiocStyle::CRANpkg("lme4")` package will be use for fitting linear mixed effects models [@Bates2015-lme4] and `r BiocStyle::CRANpkg("lmerTest")` for p-value calculations [@Kuznetsova2017-lmerTest].
 
 ```{r}
 mod <- lmer((Area)^(1/4) ~ patient_stage + (1 | patient_id) + (1 | image_name), 

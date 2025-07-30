@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This chapter provides details on how to import data into R as [Bioconductor-based data classes](@sec-bkg-data-infrastructure). First, we provide an overview of the raw data structure, followed by an explanation of how to read the raw data into R.
+This chapter provides details on how to import data into R as Bioconductor-based data classes (@sec-bkg-data-infrastructure). First, we provide an overview of the raw data structure, followed by an explanation of how to read the raw data into R.
 
 
 ## Flat file structure

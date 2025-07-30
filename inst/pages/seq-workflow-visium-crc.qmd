@@ -4,7 +4,7 @@
 
 ### Introduction
 
-In this demo, we will be analyzing Visium data on a human colorectal cancer biopsy from @Oliveira2024. Rather than recapitulating all possible analyses, our goal is to highlight those that might be of particular interest in the context of these data.
+In this demo, we will be analyzing Visium data on a human colorectal cancer biopsy from @deOliveira2025-high-def. Rather than recapitulating all possible analyses, our goal is to highlight those that might be of particular interest in the context of these data.
 
 ### Dependencies
 
@@ -305,7 +305,7 @@ length(gs)
 range(sapply(gs, length))
 ```
 
-[By definition, `AUCell` yields values in \[0,1\]. Larger sets (more genes) are more likely to achieve higher scores by chance (e.g., a gene set of *all* genes would score 1 in any dataset). It is thus unfair to compare them directly. However, spatial distribution, correlation, and relative comparisons between subpopulations etc. are still meaningful.]{.aside} Next, we will score these using `r BiocStyle::Biocpkg("AUCell")` [@Aibar2017-AUCell], which works in two steps: (i) rank genes for every observation (here, spots), and (ii) compute AUC values for each gene set. In essence, these represent the fraction of genes (within top-ranked genes; default 5%) that are in a given set; i.e., high values correspond to high activity (in terms of coordinated gene expression).
+[By definition, `AUCell` yields values in \[0,1\]. Larger sets (more genes) are more likely to achieve higher scores by chance (e.g., a gene set of *all* genes would score 1 in any dataset). It is thus unfair to compare them directly. However, spatial distribution, correlation, and relative comparisons between subpopulations etc. are still meaningful.]{.aside} Next, we will score these using `r BiocStyle::Biocpkg("AUCell")` [@Aibar2017-SCENIC], which works in two steps: (i) rank genes for every observation (here, spots), and (ii) compute AUC values for each gene set. In essence, these represent the fraction of genes (within top-ranked genes; default 5%) that are in a given set; i.e., high values correspond to high activity (in terms of coordinated gene expression).
 
 ```{r AUCell}
 # realize (sparse) gene expression matrix

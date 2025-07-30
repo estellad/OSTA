@@ -1,13 +1,13 @@
 ## Point Pattern Analysis
 
-Point pattern analysis is a subfield of spatial statistics that focuses on the representation of spatial locations of events or objects as points [@Baddeley2015 p. 3]. There are two main ways how to summarize cells as points [@Emons2024-pasta]:
+Point pattern analysis is a subfield of spatial statistics that focuses on the representation of spatial locations of events or objects as points [@Baddeley2015-book-point-patterns] (p. 3). There are two main ways how to summarize cells as points [@Emons2025-pasta]:
 
 - approximate the features (mRNAs) as points.
 - segment the cells and represent the centroids as points.
 
 The central `R` package to perform point pattern analysis is called `r BiocStyle::CRANpkg('spatstat')` [@Baddeley2005-spatstat]. The package `spatialFDA` creates an interface between `SpatialExperiment` objects and the `r BiocStyle::CRANpkg('spatstat')` library for easy integration into analysis workflows.
 
-Part of this vignette is based on the [pasta overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2024-pasta]
+Part of this vignette is based on the [pasta overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2025-pasta]
 
 ::: {.callout-note collapse="true" title="`ppp` object"}
 
@@ -23,7 +23,7 @@ a discrete cell type mark or a continuous gene expression mark
 
 :::
 
-In the following we will work with a Xenium dataset of breast cancer [@Janesick2023]. The representation of cells as points is done via cell centroids.
+In the following we will work with a Xenium dataset of breast cancer [@Janesick2023-high-res]. The representation of cells as points is done via cell centroids.
 
 ```{r loading pp, message=FALSE, warning=FALSE}
 spe <- sfe
@@ -48,7 +48,7 @@ $$
 \bar{\lambda}=\frac{n(x)}{|W|}
 $$
 
-The intensity of the points can be uniform in space which is called homogeneous. If the intensity is not uniform in space, it is called inhomogeneous. This distinction has important implications for the choice of the spatial metrics. Most metrics have a correction for inhomogeneous intensity of points [@Baddeley2015 pp. 157 ff.]. 
+The intensity of the points can be uniform in space which is called homogeneous. If the intensity is not uniform in space, it is called inhomogeneous. This distinction has important implications for the choice of the spatial metrics. Most metrics have a correction for inhomogeneous intensity of points [@Baddeley2015-book-point-patterns] (p. 157 onwards). 
 
 ::: {.callout-note collapse="true" title="Estimating intensity"}
 
@@ -61,13 +61,13 @@ pp <- .dfToppp(dfSpe, marks = "Cluster")
 density(x=pp, sigma = bw.diggle) |> plot()
 ```
 
-In the plot above we see that the intensity of all points is not uniform. This inhomogeneity of points has to be taken into accounts when interpreting spatial statistics metrics. For example, an indication of clustering in a point pattern can be due solely to an inhomogeneity of points. This is called the confounding between intensity and interaction [@Baddeley2015 pp. 151 ff.]. 
+In the plot above we see that the intensity of all points is not uniform. This inhomogeneity of points has to be taken into accounts when interpreting spatial statistics metrics. For example, an indication of clustering in a point pattern can be due solely to an inhomogeneity of points. This is called the confounding between intensity and interaction [@Baddeley2015-book-point-patterns] (p. 151 onwards). 
 
 :::
 
 ### Global Analysis
 
-Global analyses summarize a statistic across the entire field of view. This means it reflects an average statistic and might not be reflective of local heterogeneities [@Emons2024-pasta].
+Global analyses summarize a statistic across the entire field of view. This means it reflects an average statistic and might not be reflective of local heterogeneities [@Emons2025-pasta].
 
 #### Correlation
 
@@ -81,13 +81,13 @@ It is characterized by two key properties:
 - Homogeneity: The intensity of points is homogeneous in space.
 - Independence: The points in one region do not influence the distribution of points in another region.
 
-[@Baddeley2015 pp. 199 ff.]
+[@Baddeley2015-book-point-patterns] (p. 199 onwards)
 
 :::
 
 ##### Ripley's $K$
 
-Ripley's $K$ is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley's $K$ quantifies the average number of points that fall in a $r$-neighborhood of a chosen mark [@Ripley1976; @Baddeley2015 p. 132 ff.].
+Ripley's $K$ is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley's $K$ quantifies the average number of points that fall in a $r$-neighborhood of a chosen mark [@Ripley1976-second-order; @Baddeley2015-book-point-patterns] (p. 132 onwards).
 
 ```{r ripley, message = FALSE, warning = FALSE}
 #| fig-width: 15
@@ -116,7 +116,7 @@ This plot shows Ripley's $K$ function not corrected for inhomogeneities of the c
 
 #### Spacing
 
-A complementary approach to correlation analysis is spacing. There are three main distance types [@Baddeley2015 p. 255]:
+A complementary approach to correlation analysis is spacing. There are three main distance types [@Baddeley2015-book-point-patterns] (p. 255):
 
 - pairwise distances: distances between all pairs of points
 - nearest-neighbor distances: distance to the nearest point of the query point
@@ -124,7 +124,7 @@ A complementary approach to correlation analysis is spacing. There are three mai
 
 ##### Nearest-neighbor distance function $G$
 
-The nearest neighbor function $G$ quantifies the average nearest-neighbor distance over a radius range $r$ [@Baddeley2015 p. 262].
+The nearest neighbor function $G$ quantifies the average nearest-neighbor distance over a radius range $r$ [@Baddeley2015-book-point-patterns] (p. 262).
 
 ```{r nndist, message = FALSE, warning = FALSE}
 #| fig-width: 15
@@ -151,13 +151,13 @@ plotCrossMetricPerFov(
 
 In terms of spacing, the interpretation is a bit different. Still, the diagonal shows that all cell types are more clustered than expected if the patterns were completely spatially random. Comparing now DCIS 1 and DCIS 2 with invasive tumor cells, we see that both are more spaced than expect at random. However, the spacing is stronger for DCIS 1  and invasive tumor cells. At small radii, DCIS 2 and invasive tumor are distributed close to random.
 
-The analysis with Ripley's $K$ and the $G$ function are not contradictory. $G$ functions summarize shorter scale interactions than $K$ functions [@Baddeley2015 p. 295]. 
+The analysis with Ripley's $K$ and the $G$ function are not contradictory. $G$ functions summarize shorter scale interactions than $K$ functions [@Baddeley2015-book-point-patterns] (p. 295).
 
 ### Local Analysis
 
 #### Local indicators of spatial association
 
-The metrics shown before are an average over the entire window $W$. @Anselin1995 proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric [@Baddeley2015 p. 247].  This is a general concept not only for point pattern analysis but for lattice data analysis as well [@Anselin1995; @Anselin2019].
+The metrics shown before are an average over the entire window $W$. @Anselin1995-LISA proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric [@Baddeley2015-book-point-patterns] (p. 247). This is a general concept not only for point pattern analysis but for lattice data analysis as well [@Anselin1995-LISA; @Anselin2019-extending].
 
 ```{r localK-1, warning=FALSE, fig.width=6, fig.height=4}
 # subset to only Invasive tumor cells 

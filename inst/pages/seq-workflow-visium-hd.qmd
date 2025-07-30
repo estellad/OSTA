@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024].
+Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@deOliveira2025-high-def].
 
 ## Dependencies {#sec-seq-workflow-visium-hd-load-data}
 
@@ -27,7 +27,7 @@ library(tidyr)
 library(VisiumIO)
 ```
 
-In this demo, we perform deconvolution on 16 µm bins and compare the concordance with results on 8 µm bins, provided by 10x Genomics. [Here, we only demonstrate the analysis for patient 2 (P2). Other patients, such as P1 and P5, also have public Chromium, Visium HD, and Xenium data available for the CRC group (see @sec-bkg-datasets). It would be interesting to investigate the differences in malignant cells/bins (e.g., DEGs, pathways) between patients across different platforms.]{.aside}
+In this demo, we perform deconvolution on 16 µm bins and compare the concordance with results on 8 µm bins, provided by 10x Genomics. [Here, we only demonstrate the analysis for patient 2 (P2). Other patients, such as P1 and P5, also have public Chromium, Visium HD, and Xenium data available for the CRC group (see @sec-bkg-example-datasets). It would be interesting to investigate the differences in malignant cells/bins (e.g., DEGs, pathways) between patients across different platforms.]{.aside}
 
 ```{r load-vhd8, message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repo
@@ -258,7 +258,7 @@ dim(.vhd16)
 
 ## Clustering
 
-First, we identify highly variable genes (HVGs) in the target area: [Note that spatially variable genes (SVGs) could be used instead; c.f. @sec-seq-processing.]{.aside}
+First, we identify highly variable genes (HVGs) in the target area: [Note that spatially variable genes (SVGs) could be used instead; see @sec-seq-intermediate-processing.]{.aside}
 
 ```{r vhd16-hvg}
 .vhd16 <- logNormCounts(.vhd16)
@@ -266,7 +266,7 @@ dec <- modelGeneVar(.vhd16)
 hvg <- getTopHVGs(dec, n=3e3)
 ```
 
-As detailed in @sec-crs-clustering, `r BiocStyle::Biocpkg("Banksy")` utilizes a pair of spatial kernels to capture gene expression variation, followed by dimension reduction and graph-based clustering to identify spatial domains.
+As detailed in @sec-ind-clustering, `r BiocStyle::Biocpkg("Banksy")` utilizes a pair of spatial kernels to capture gene expression variation, followed by dimension reduction and graph-based clustering to identify spatial domains.
 
 ```{r Banksy, message=FALSE}
 # set seed for random number generation
@@ -292,7 +292,7 @@ k <- cluster_leiden(g, objective_function="modularity", resolution=1.2)
 table(.vhd16$Banksy <- factor(k$membership))
 ```
 
-Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-crs-signatures. We also compute the cluster-wise mean expression of selected markers:
+Next, we can perform differential gene expresison (DGE) analysis to identify markers for each cluster; c.f. @sec-ind-feature-set-signatures. We also compute the cluster-wise mean expression of selected markers:
 
 ```{r mgs}
 # differential gene expression analysis

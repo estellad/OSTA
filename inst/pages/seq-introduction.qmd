@@ -21,25 +21,25 @@ knitr::include_graphics("../images/Visium.png")
 
 Histology images generated from hematoxylin and eosin (H&E) staining can be used to identify anatomical and cell morphological features for each sample, including the number of cells per spot.
 
-An earlier version of the platform was originally developed by @Stahl2016, which was subsequently improved and commercialized as the 10x Genomics Visium platform.
+An earlier version of the platform was originally developed by @Stahl2016-ST, which was subsequently improved and commercialized as the 10x Genomics Visium platform.
 
 The [Visium CytAssist](https://www.10xgenomics.com/instruments/visium-cytassist) instrument provides streamlined experimental procedures, making the platform more accessible to new research labs.
 
 
 ### 10x Genomics Visium HD
 
-The [10x Genomics Visium HD](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression) platform provides higher spatial resolution. Capture area dimensions are 6.5 x 6.5 mm, with a continuous "lawn" of capture oligonucleotides arranged into a grid of 2 x 2 µm barcoded squares, which can be aggregated into 8 x 8 µm and 16 x 16 µm bins, or cells based on cell boundary polygon coordinates (e.g. using methods such as `Bin2cell` [@polanski2024bin2cell]) for downstream analyses. There are no gaps between the grid squares, and there are two capture areas per slide.
+The [10x Genomics Visium HD](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression) platform provides higher spatial resolution. Capture area dimensions are 6.5 x 6.5 mm, with a continuous "lawn" of capture oligonucleotides arranged into a grid of 2 x 2 µm barcoded squares, which can be aggregated into 8 x 8 µm and 16 x 16 µm bins, or cells based on cell boundary polygon coordinates (e.g. using methods such as `Bin2cell` [@Polanski2024-bin2cell]) for downstream analyses. There are no gaps between the grid squares, and there are two capture areas per slide.
 
 The high spatial resolution of the barcoded squares provides near-single-cell resolution, while the use of sequencing provides transcriptome-scale gene coverage. With its higher resolution and data coverage, increased sparsity is expected. Therefore, new computational challenges, such as quality control, imputation and denoising techniques, and longer computational time, should be considered when performing the analysis.
 
-A paper describing the platform and its application to human colorectal cancer samples is available from 10x Genomics [@Oliveira2024].
+A paper describing the platform and its application to human colorectal cancer samples is available from 10x Genomics [@deOliveira2025-high-def].
 
 <!-- To do: add a schematic, e.g. illustrating continuous "lawn" / bins arrangement -->
 
 
 ### Curio Seeker
 
-The [Curio Seeker](https://curiobioscience.com/product/) platform is a commercially available implementation and extension of the Slide-seqV2 platform originally developed by @Stickels2021.
+The [Curio Seeker](https://curiobioscience.com/product/) platform is a commercially available implementation and extension of the Slide-seqV2 platform originally developed by @Stickels2021-Slide-seqV2.
 
 The Curio Seeker platform captures mRNA molecules at a set of randomly placed spatial measurement locations (referred to as "beads") on a tissue slide (referred to as a "tile") at high spatial resolution. The tile dimensions are 3 mm x 3 mm, and the spatial resolution consists of tightly packed 10 µm diameter beads.
 

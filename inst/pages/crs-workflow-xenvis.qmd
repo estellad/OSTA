@@ -23,7 +23,7 @@ set.seed(194849)
 
 ### Introduction
 
-In this demo, we will rely on a dataset from @Janesick2023, which includes
+In this demo, we will rely on a dataset from @Janesick2023-high-res, which includes
 same-section Visium and Xenium measurements on human breast cancer tissue.
 
 ![H&E staining](../images/xenvis-visium.png){height=300px}
@@ -71,8 +71,8 @@ rownames(xen) <- make.unique(rowData(xen)$Symbol)
 
 To align Xenium and Visium sections, we use the affine transformation matrix 
 provided by 10x Genomics, which was obtained by registration of Xenium onto 
-Visium in Python with the Fiji [@10xGenomics2023-Fiji] Java plug-in; see
-@sec-crs-registration for details.
+Visium in Python with the [Fiji Java plug-in](https://www.10xgenomics.com/resources/analysis-guides/he-to-xenium-dapi-image-registration-with-fiji); see
+@sec-crs-spatial-registration for details.
 
 ```{r mtx}
 # affine matrix for aligning Xenium onto Visium
@@ -110,7 +110,7 @@ In general, it is possible to bin at the transcript-level (sub-cellular) or cell
 
 To aggregate single cell-level data from Xenium at the spot level, we first 
 carry out a fixed-radius neighborhood search using `r BiocStyle::CRANpkg("RANN")` 
-(c.f. @sec-img-neighbors) to identify, for ever spot, cells whose centroid lies 
+(see @sec-img-neighborhood-analysis) to identify, for ever spot, cells whose centroid lies 
 within a $\sim130$um distance (Visium spot diameter of 55um, divided by two 2, 
 divided by 0.2115 = Xenium px size in um):
 

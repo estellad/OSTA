@@ -15,9 +15,9 @@ book:
         - pages/seq-introduction.qmd
         - pages/seq-reads-to-counts.qmd
         - pages/seq-quality-control.qmd
-        - pages/seq-processing.qmd
+        - pages/seq-intermediate-processing.qmd
         - pages/seq-deconvolution.qmd
-        - pages/seq-workflow-dlpfc-spatiallibd.qmd
+        - pages/seq-workflow-dlpfc.qmd
         - pages/seq-workflow-visium-crc.qmd
         - pages/seq-workflow-visium-hd.qmd
     - part: "Imaging-based platforms"
@@ -25,25 +25,25 @@ book:
         - pages/img-introduction.qmd
         - pages/img-segmentation.qmd
         - pages/img-quality-control.qmd
-        - pages/img-processing.qmd
-        - pages/img-neighbors.qmd
-        - pages/img-cell-comm.qmd
+        - pages/img-intermediate-processing.qmd
+        - pages/img-neighborhood-analysis.qmd
+        - pages/img-cell-cell-communication.qmd
         - pages/img-workflow-xenium.qmd
     - part: "Platform-independent analyses"
       chapters:
-        - pages/crs-dimension-reduction.qmd
-        - pages/crs-clustering.qmd
-        - pages/crs-features.qmd
-        - pages/crs-signatures.qmd
-        - pages/crs-spat-stat.qmd
+        - pages/ind-dimensionality-reduction.qmd
+        - pages/ind-clustering.qmd
+        - pages/ind-feature-selection-testing.qmd
+        - pages/ind-feature-set-signatures.qmd
+        - pages/ind-spatial-statistics.qmd
     - part: "Cross-platform analyses"
       chapters:
-        - pages/crs-registration.qmd
+        - pages/crs-spatial-registration.qmd
         - pages/crs-imputation.qmd
         - pages/crs-workflow-xenvis.qmd
     - part: "Multiple-sample analyses"
       chapters:
-        - pages/mult-diff-spatial.qmd
+        - pages/mult-diff-spatial-patterns.qmd
         - pages/mult-diff-colocalization.qmd
         - pages/mult-structure-based.qmd
   appendices:

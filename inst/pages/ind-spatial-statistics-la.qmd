@@ -4,11 +4,11 @@
 
 In this chapter we will use `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` which is a Bioconductor package that integrates the `SpatialExperiment` with geometric annotations that are represented as Simple Features in the `r BiocStyle::CRANpkg("sf") `.
 
-Again, we will use the human breast cancer Xenium data set [@Janesick2023] in a `SpatialFeatureExperiment` object available through `r BiocStyle::Biocpkg("SFEData")`. 
+Again, we will use the human breast cancer Xenium data set [@Janesick2023-high-res] in a `SpatialFeatureExperiment` object available through `r BiocStyle::Biocpkg("SFEData")`. 
 
-We will use the `r BiocStyle::Biocpkg("Voyager")` package [@Moses2023-Voyager] which provides convenient wrappers around classic geospatial R packages such as `r BiocStyle::CRANpkg("spdep")` [@Pebesma2023]. For more details, please consult the authors' comprehensive [vignettes](https://pachterlab.github.io/voyager/index.html). 
+We will use the `r BiocStyle::Biocpkg("Voyager")` package [@Moses2023-Voyager] which provides convenient wrappers around classic geospatial R packages such as `r BiocStyle::CRANpkg("spdep")` [@Pebesma2023-book-spatial-data-science]. For more details, please consult the authors' comprehensive [vignettes](https://pachterlab.github.io/voyager/index.html). 
 
-This part is based on the following vignette of the [*pasta* resource](https://robinsonlabuzh.github.io/pasta/00-overview-latSOD.html) [@Emons2024-pasta].
+This part is based on the following vignette of the [*pasta* resource](https://robinsonlabuzh.github.io/pasta/00-overview-latSOD.html) [@Emons2025-pasta].
 
 ### The spatial weight matrix
 
@@ -25,7 +25,7 @@ Different methods for the construction of the weight matrix exist, such as
 
 A detailed overview can be found in the [documentation](https://r-spatial.github.io/spdep/articles/nb.html) of the `r BiocStyle::CRANpkg("spdep")` package.
 
-As different weight matrices influence downstream results, analysts should justify their choice of the weight matrix. A more detailed overview can be found in @Pebesma2023.
+As different weight matrices influence downstream results, analysts should justify their choice of the weight matrix. A more detailed overview can be found in @Pebesma2023-book-spatial-data-science.
 
 :::
 
@@ -46,11 +46,11 @@ plotColGraph(sfe,
 
 ### Spatial autocorrelation
 
-Spatial autocorrelation measures similarity between spatial units (e.g., cells) while recognize that the units are not independent due to their spatial context. Spatial autocorrelation metrics can be global (summarizing the entire study area) of view or local (provide statistic for each unit). In addition, there exist methods for univariate and multivariate comparisons of continuous and categorical data [@Pebesma2023].
+Spatial autocorrelation measures similarity between spatial units (e.g., cells) while recognize that the units are not independent due to their spatial context. Spatial autocorrelation metrics can be global (summarizing the entire study area) of view or local (provide statistic for each unit). In addition, there exist methods for univariate and multivariate comparisons of continuous and categorical data [@Pebesma2023-book-spatial-data-science].
 
 #### Univariate measures - Moran's $I$
 
-Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neighbors. The global value is a weighted average of the respective local values [@Moran1950].
+Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neighbors. The global value is a weighted average of the respective local values [@Moran1950-stochastic].
 
 ```{r calculate global moran, warning=FALSE}
 # get all gene probes
@@ -71,7 +71,7 @@ topGenes <- rownames(sfe)[order(rowData(sfe)$moran_sample01, decreasing = TRUE)[
 plotSpatialFeature(sfe, topGenes, ncol = 3)
 ```
 
-We can further visualize this using when calculating and plotting local Moran's $I$ values [@Anselin1995]. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell's neighbors. Negative values indicate local dissimilarity in expression.
+We can further visualize this using when calculating and plotting local Moran's $I$ values [@Anselin1995-LISA]. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell's neighbors. Negative values indicate local dissimilarity in expression.
  
 ```{r local moran, fig.width=25, fig.height=10}
 sfe <- runUnivariate(sfe,
@@ -110,7 +110,7 @@ plotLocalResult(sfe,
 
 Multivariate measures – Lee's L
 
-Lee's $L$ combines the Pearson correlation coefficient and Moran's $I$ [@Lee2001]. This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial) variable features.
+Lee's $L$ combines the Pearson correlation coefficient and Moran's $I$ [@Lee2001-bivariate]. This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial) variable features.
 
 ```{r lees l, warning=FALSE}
 hvgs <- getTopHVGs(sfe, n = 20)
@@ -154,7 +154,7 @@ plotLocalResult(
 
 ### Join count statistics
 
-Join count statistics can be used to quantify the arrangement of categorical marks on lattices. The join count statistic calculates how often a categorical mark appears next to itself or to another category within the pre-defined neighborhood. This values can then be compared against a theoretical or a permutation-based value test of the null hypothesis of random spatial allocation of the marks [@getis2009spatial].
+Join count statistics can be used to quantify the arrangement of categorical marks on lattices. The join count statistic calculates how often a categorical mark appears next to itself or to another category within the pre-defined neighborhood. This values can then be compared against a theoretical or a permutation-based value test of the null hypothesis of random spatial allocation of the marks [@Getis2009-spatial-weights].
 
 Here, we will use the this to quantify the tendency of clusters (non-spatial) to co-localize in their relative neighborhood. Note that the output contains z-scores and no p-values such that a user-defined threshold can be applied.
 
