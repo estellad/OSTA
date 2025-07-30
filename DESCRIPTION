@@ -49,6 +49,7 @@ Imports:
     DropletUtils,
     EBImage,
     ExperimentHub, 
+    ggfortify, 
     ggplot2, 
     ggrepel, 
     ggspavis, 
@@ -58,6 +59,8 @@ Imports:
     imcdatasets,
     imcRtools,
     jsonlite,
+    lme4,
+    lmerTest,
     msigdbr,
     muSpaData,
     nnSVG,
@@ -77,6 +80,7 @@ Imports:
     scuttle,
     SFEData,
     SingleR,
+    sosta,
     spacexr,
     SpatialExperiment,
     SpatialExperimentIO,
@@ -93,11 +97,7 @@ Imports:
     VisiumIO,
     Voyager,
     zellkonverter,
-    zoo,
-    sosta,
-    lme4,
-    lmerTest,
-    ggfortify
+    zoo
 Suggests: 
     BiocManager, 
     BiocStyle, 
