@@ -25,14 +25,14 @@ a discrete cell type mark or a continuous gene expression mark
 
 In the following we will work with a Xenium dataset of breast cancer [@Janesick2023-high-res]. The representation of cells as points is done via cell centroids.
 
-```{r loading pp, message=FALSE, warning=FALSE}
+```{r loading_pp, message=FALSE, warning=FALSE}
 spe <- sfe
 rm(sfe)
 ```
 
 In the plot below, the centroids of the cells are attributed with a discrete cell type mark. 
 
-```{r plot object, fig.width=12, fig.height=8, message=FALSE, warning=FALSE}
+```{r plot_object, fig.width=12, fig.height=8, message=FALSE, warning=FALSE}
 df <- data.frame(xy, colData(spe))
 ggplot(df, aes(x_centroid, y_centroid, col=Cluster)) +
     guides(col=guide_legend(override.aes=list(size=2))) +
@@ -52,7 +52,7 @@ The intensity of the points can be uniform in space which is called homogeneous.
 
 ::: {.callout-note collapse="true" title="Estimating intensity"}
 
-```{r estimating intensity, message=FALSE, warning=FALSE}
+```{r estimating_intensity, message=FALSE, warning=FALSE}
 # TODO: temporary fix
 spatialCoordsNames(spe) <- c("x", "y")
 dfSpe <- .speToDf(spe)
@@ -159,7 +159,7 @@ The analysis with Ripley's $K$ and the $G$ function are not contradictory. $G$ f
 
 The metrics shown before are an average over the entire window $W$. @Anselin1995-LISA proposed an alternative approach which is termed local indicators of spatial association (LISA). Instead of a global average LISA shows the local contributions of each point to the overall metric [@Baddeley2015-book-point-patterns] (p. 247). This is a general concept not only for point pattern analysis but for lattice data analysis as well [@Anselin1995-LISA; @Anselin2019-extending].
 
-```{r localK-1, warning=FALSE, fig.width=6, fig.height=4}
+```{r localK_1, warning=FALSE, fig.width=6, fig.height=4}
 # subset to only Invasive tumor cells 
 ppSub <- subset(pp, marks %in% "Invasive_Tumor")
 # restrict to a smaller window for computational reasons
@@ -168,7 +168,7 @@ Window(ppSub) <- owin(c(3500, 7524.087), c(1200, 5475.691))
 plot(ppSub)
 ```
 
-```{r localK-2, message=FALSE, fig.width=8, fig.height=3}
+```{r localK_2, message=FALSE, fig.width=8, fig.height=3}
 # calculate LISA K curves
 resLocal <- localK(ppSub, verbose=FALSE) 
 

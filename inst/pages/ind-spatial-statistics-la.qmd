@@ -29,7 +29,7 @@ As different weight matrices influence downstream results, analysts should justi
 
 :::
 
-```{r weight matrix, warning = FALSE, fig.width=25, fig.height=10}
+```{r weight_matrix, warning = FALSE, fig.width=25, fig.height=10}
 colGraph(sfe, "knn6") <-
   findSpatialNeighbors(
     sfe,
@@ -52,7 +52,7 @@ Spatial autocorrelation measures similarity between spatial units (e.g., cells) 
 
 Moran's $I$ can be interpreted as the Pearson correlation between the value at a certain location and the average values of its neighbors. The global value is a weighted average of the respective local values [@Moran1950-stochastic].
 
-```{r calculate global moran, warning=FALSE}
+```{r calculate_global_moran, warning=FALSE}
 # get all gene probes
 geneProbes <- rowData(sfe)[rowData(sfe)$Type == "Gene Expression", "Symbol"]
 
@@ -66,14 +66,14 @@ sfe <- runUnivariate(sfe,
 
 We can output and plot the three genes with highest Moran's $I$.
 
-```{r plot moran genes, fig.width=25, fig.height=10}
+```{r plot_moran_genes, fig.width=25, fig.height=10}
 topGenes <- rownames(sfe)[order(rowData(sfe)$moran_sample01, decreasing = TRUE)[1:3]]
 plotSpatialFeature(sfe, topGenes, ncol = 3)
 ```
 
 We can further visualize this using when calculating and plotting local Moran's $I$ values [@Anselin1995-LISA]. The interpretation is analogue to the global counterpart. The higher the value, the more similar the expression among a cell's neighbors. Negative values indicate local dissimilarity in expression.
  
-```{r local moran, fig.width=25, fig.height=10}
+```{r local_moran, fig.width=25, fig.height=10}
 sfe <- runUnivariate(sfe,
   type = "localmoran",
   features = topGenes,
@@ -95,7 +95,7 @@ plotLocalResult(sfe,
 
 During the interpretation of local autocorrelation measures, both the effect size (the value of the statistic) and the significance level should be considered. Because we calculate significance on each spot individually, values should be corrected for multiple testing.
 
-```{r local moran pvals, fig.width=25, fig.height=10}
+```{r local_moran_pvals, fig.width=25, fig.height=10}
 plotLocalResult(sfe,
                 name = "localmoran",
                 features = topGenes,
@@ -112,7 +112,7 @@ Multivariate measures – Lee's L
 
 Lee's $L$ combines the Pearson correlation coefficient and Moran's $I$ [@Lee2001-bivariate]. This unified metric allows to evaluate how two continuous variables are related while accounting for their spatial dependencies. We will calculate the global metric on the 20 most highly (non-spatial) variable features.
 
-```{r lees l, warning=FALSE}
+```{r lees_l, warning=FALSE}
 hvgs <- getTopHVGs(sfe, n = 20)
 
 res <- calculateBivariate(sfe,
@@ -124,7 +124,7 @@ res <- calculateBivariate(sfe,
 
 We will identify the gene pairs with highest Lee's $L$ value and then calculate and visualize the respective local measure.
 
-```{r select lees l}
+```{r select_lees_l}
 # select the 20 highest values in the res matrix
 genePairs <- which(res >= tail(sort(res), n=20)[1], arr.ind=TRUE)
 # take only pair of two genes
@@ -134,7 +134,7 @@ data.frame(i = rownames(res)[genePairs[,1]], j = colnames(res)[genePairs[,2]],
            val = res[genePairs])
 ```
 
-```{r local lees l, fig.width=20, fig.height=10}
+```{r local_lees_l, fig.width=20, fig.height=10}
 sfe <- runBivariate(
   sfe,
   "locallee",
@@ -185,7 +185,7 @@ plotSpatialFeature(sfe,
 )
 ```
 
-```{r join counts}
+```{r join_counts}
 resJc <- joincount.multi(as.factor(sfe$cluster), colGraph(sfe, "knn6"))
 resJc <- resJc[order(resJc[, "z-value"], decreasing=TRUE), ]
 head(resJc, n = 20)
