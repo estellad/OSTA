@@ -18,7 +18,7 @@ Platforms may be broadly grouped into "sequencing-based" and "imaging-based" tec
 
 In this book, we focus on commercially available platforms, since these are the most widely used and accessible. However, the data representations are often similar for other related platforms. The initial sections of the book are split into separate parts for sequencing-based and imaging-based platforms, since several analysis techniques are specific to each of these, followed by chapters for platform-independent and other analyses.
 
-In the sections below, we give a brief overview of several commercially available platforms. For more in-depth background, several recent reviews are available, covering available platforms, analysis methods, outstanding challenges, and additional topics [@Bressan2023-dawn; @Moses2022-museum; @Tian2022-vistas; @Lundberg2019-proteomics; @Gulati2024-profiling; @Paul2021-imaging; @Mund2022-unbiased; @Palla2022-components; @Moffitt2022-emerging; @Rao2021-exploring; @Cheng2023-comprehensive].
+In the sections below, we give a brief overview of several commercially available platforms. For more in-depth background, several recent reviews are available, covering available platforms, analysis methods, outstanding challenges, and additional topics [@Bressan2023-dawn; @Moses2022-museum; @Tian2023-vistas; @Lundberg2019-proteomics; @Gulati2024-profiling; @Paul2021-imaging; @Mund2022-unbiased; @Palla2022-components; @Moffitt2022-emerging; @Rao2021-exploring; @Cheng2023-comprehensive].
 
 
 ## Sequencing-based spatial transcriptomics
