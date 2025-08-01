@@ -101,7 +101,6 @@ Imports:
 Suggests: 
     BiocManager, 
     BiocStyle, 
-    doMC,
     BiocVersion, 
     downlit,
     glue, 
