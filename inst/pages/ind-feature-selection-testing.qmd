@@ -261,7 +261,7 @@ wrap_plots(ps, nrow=3) & theme(
 We can compare the ranks of the genes detected by each method and compute pairwise correlations, highlighting two known cortical layer-associated SVGs: *MOBP* and *SNAP25*.
 While all four methods - HVGs, DEGs, SVGs identified through `nnSVG` and `DESpace` - yield similar gene ranks, each method captures distinct aspects of gene expression, with varying pairwise correlations between them.
 
-```{r plt-data, message=FALSE}
+```{r plt-data, message=FALSE, warning=FALSE}
 #| code-fold: true
 # subset data for the 113 genes nnSVG is based on
 sub_gene <- rowData(sub)$gene_id
@@ -288,7 +288,7 @@ rank_all <- do.call(cbind, lapply(res_all, `[[`, "rank"))
 rank_all <- data.frame(gene_id = sub_gene, rank_all)
 ```
 
-```{r plt-scatter-nnsvg, message=FALSE, fig.width=10, fig.height=7}
+```{r plt-scatter-nnsvg, message=FALSE, warning=FALSE, fig.width=10, fig.height=7}
 #| code-fold: true
 # known SVGs for this data
 known_genes <- c("MOBP", "SNAP25")
