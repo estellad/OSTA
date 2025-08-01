@@ -7,7 +7,7 @@ Description: This package contains source files for the "Orchestrating Spatial
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
 Version: 0.99.5
-Date: `r date()`
+Date: 2025-08-01
 Authors@R: 
     c(person("Helena L.", "Crowell", 
              role=c("aut"), 
