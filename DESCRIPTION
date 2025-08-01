@@ -28,7 +28,6 @@ Authors@R:
 URL: https://github.com/lmweber/OSTA
 BugReports: https://github.com/lmweber/OSTA
 biocViews: 
-    Book, 
     Spatial, 
     SingleCell, 
     GeneExpression, 
