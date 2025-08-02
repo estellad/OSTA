@@ -1,7 +1,7 @@
 import os
 
-# Define output directory
-output_dir = "docs"
+# Define output directory (where empty directories remain, not main output dir)
+output_dir = "doc"
 
 # Walk through directory tree from bottom up
 for dirpath, dirnames, filenames in os.walk(output_dir, topdown=False):
