@@ -1,7 +1,7 @@
 project:
   type: book
   output-dir: docs
-  post-render: "python clean_dirs.py"
+  post-render: "clean_dirs.sh"
 
 metadata-files:
   - assets/_book.yml
