@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Define output directory (where empty directories may remain, i.e. "inst/")
+# Define output directory (where to search for empty directories)
 OUTPUT_DIR="."
 
 # Find all empty directories and delete them, starting from the deepest level

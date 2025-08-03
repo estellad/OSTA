@@ -1,6 +1,6 @@
 import os
 
-# Define output directory (where empty directories may remain, i.e. "inst/")
+# Define output directory (where to search for empty directories)
 output_dir = "."
 
 # Walk through directory tree from bottom up
