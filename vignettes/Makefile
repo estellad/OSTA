@@ -5,4 +5,4 @@ render:
 	mkdir -p ../inst/doc && mv ../inst/docs ../inst/doc/book
 
 cleanup: 
-	find ../inst/doc -type d -empty -delete
+	find ../inst/doc -depth -type d -empty -delete
