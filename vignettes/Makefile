@@ -1,4 +1,4 @@
-all: render cleanup
+all: render
 
 render: 
 	quarto render ../inst/
