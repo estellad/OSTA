@@ -1,7 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
-^.*\.png$
 ^inst/\.quarto$
 ^\.quarto$
 ^Dockerfile$
