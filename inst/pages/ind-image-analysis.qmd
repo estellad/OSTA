@@ -1,4 +1,4 @@
-# Image Analysis
+# Image Analysis {#sec-ind-image-analysis}
 
 ## Preamble
 
@@ -8,7 +8,7 @@ Biomedical image analysis encompasses a wide range of imaging modalities, includ
 
 The R and Bioconductor ecosystems offer several tools and workflows to work with digital pathology data. However, a central question remains: what constitutes the most valuable information in these images? Is it the image itself, or the biological and clinical insights that can be computationally extracted from it?
 
-In previous chapters, spatial transcriptomics and its power in linking gene expression to tissue architecture is discussed. Here, we continue along this line by exploring how histopathological images can be leveraged to extract meaningful features—both handcrafted and learned—that serve as input for integrative analyses in cancer research and beyond.
+In previous chapters, spatial transcriptomics and its power in linking gene expression to tissue architecture is discussed. Here, we continue along this line by exploring how histopathological images can be leveraged to extract meaningful features that serve as input for integrative analyses in cancer research and beyond.
 
 ### Dependencies
 
@@ -39,7 +39,11 @@ The scanner brands and their respective file formats commonly encountered in dig
    *  Generic tiled TIFF: .tif
 
 
-Each scanner uses a unique tiling scheme and metadata structure to support rapid visualization and efficient storage. For instance, Aperio's .svs format uses a pyramidal tiling strategy with multiple image resolutions stored within a single file as shown in Fig.. 
+Each scanner uses a unique tiling scheme and metadata structure to support rapid visualization and efficient storage. For instance, Aperio's .svs format uses a pyramidal tiling strategy with multiple image resolutions stored within a single file.
+
+```{r fig-pyr_str, echo = FALSE, out.width = "80%", fig.cap= "The pyramidal structure of WSI, resulting from different levels of resolution"}
+knitr::include_graphics("../images/pyramidal_structure.png")
+```
 
 Several publicly available repositories, such as The Cancer Genome Atlas (TCGA) and The Cancer Imaging Archive (TCIA), provide free access to large-scale genomic and imaging datasets. In the following sections, we will explore these resources in more detail.
 
@@ -85,7 +89,9 @@ By combining interpretable features with latent embeddings, researchers can achi
 `r BiocStyle::Biocpkg("imageTCGA")` is an R package designed to provide an interactive Shiny application for exploring the TCGA Diagnostic Image Database. This
 application allows users to filter and visualize metadata, geographic
 distribution, and other relevant statistics related to TCGA diagnostic
-images.
+images. 
+
+In the near future, the package will also provide direct access to the features described in the previous section, allowing users to download them without additional preprocessing steps. Until then, users interested in these datasets are encouraged to contact the maintainers of the package.  
 
 After installing the package, you can run the Shiny application by
 executing the following command in R:
