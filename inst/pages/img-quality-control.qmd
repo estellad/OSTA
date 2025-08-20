@@ -207,7 +207,7 @@ spatialCoordsNames(spe) <- c("x", "y")
 
 ### FOV effects
 
-Imaging-based ST data are acquired through iterative imaging of predefined rectangular regions, so-called fields of view (FOV).
+Imaging-based ST data from CosMx are acquired through iterative imaging of predefined rectangular regions, so-called fields of view (FOV).
 
 ```{r cosmx-plot-xy, fig.width=3, fig.height=2, message=FALSE, warning=FALSE}
 #| code-fold: true
