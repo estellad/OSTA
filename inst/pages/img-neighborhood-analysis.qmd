@@ -125,7 +125,7 @@ Spatial niche analysis aims at identifying regions of homogeneous composition by
 To this end, methods such as `r BiocStyle::Biocpkg("imcRtools")` [@Windhager2023-imcRtools] rely on a $k$-nearest-neighbor ($k$NN) graph (based on Euclidean cell-to-cell distances), and clustering cells using common clustering algorithms (according to their neighborhood's subpopulation frequencies).
 
 Here, we demonstrate how to identify spatial contexts based on $k$-means clustering on cluster frequencies among (Euclidean) $k$NNs.
-We recommend readers consult `imcRtools`' documentation for a much wider range of visualizations and downstream analyses in this context.
+We recommend readers consult the `imcRtools` documentation for a much wider range of visualizations and downstream analyses in this context.
 
 ```{r imcRtools-calc, message=FALSE}
 library(imcRtools)

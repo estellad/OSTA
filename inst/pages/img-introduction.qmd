@@ -37,7 +37,7 @@ Depending on the barcoding scheme (number of bits, Hamming weight/distance), a n
 
 ### Xenium (10x Genomics)
 
-10x Genomics [Xenium platform](https://www.10xgenomics.com/platforms/xenium) employs rolling circle amplification (RCA) to boost fluorescent signals from reporter-binding events, thereby improving overall spot calling sensitivity.
+The [10x Genomics Xenium](https://www.10xgenomics.com/platforms/xenium) platform employs rolling circle amplification (RCA) to boost fluorescent signals from reporter-binding events, thereby improving overall spot calling sensitivity.
 
 <!-- Early [panels](https://www.10xgenomics.com/products/xenium-panels) were low-plex (100s of targets) while allowing for flexible (and relatively affordable) customization; more recently, a 5,000-plex panel has become available. -->
 
@@ -46,7 +46,7 @@ Xenium gives an imageable area of 12mm x 24 mm, although slightly less to avoid 
 
 ### CosMx (NanoString)
 
-Unlike Xenium, CosMx [@He2022-CosMx] does not rely on RCA. As a result, CosMx tends to be less sensitive than Xenium (albeit higher-plex at present). Furthermore, segmentation is performed separately for each FOV (without stitching). This results in a variety of technical artefacts, such as fractured and possibly duplicated cells near FOV borders.
+Unlike Xenium, [CosMx](https://nanostring.com/products/cosmx-spatial-molecular-imager/single-cell-imaging-overview/) [@He2022-CosMx] does not rely on RCA. As a result, CosMx tends to be less sensitive than Xenium (albeit higher-plex at present). Furthermore, segmentation is performed separately for each FOV (without stitching). This results in a variety of technical artefacts, such as fractured and possibly duplicated cells near FOV borders.
 
 <!-- The platform currently supports universal 1,000- and 6,000-plex [panels](https://nanostring.com/products/cosmx-spatial-molecular-imager/cosmx-rna-assays), as well as 1,000-plex panels tailored to human immuno-oncology and mouse neuronal tissue; a whole-transcriptome (~18,000-plex) panel is underway. -->
 
@@ -54,7 +54,7 @@ The NanoString CosMx platform gives an imageable area of 15x20 mm and allows up 
 
 ### MERSCOPE (Vizgen)
 
-The [Vizgen MERSCOPE platform](https://vizgen.com/products/), among the fluorescence-based targeted spatial transcriptomics platforms, allows the highest resolution (≤20 nm), while also providing a high capacity for multiplexing, with (customizable) panels containing up to 1000 genes, and an imageable area of 1 cm^2^. MERSCOPE was recently shown to be amongst the most sensitive in a recent head-to-head comparison [@Hartman2024-comparative] using mouse brain tissue.
+The [Vizgen MERSCOPE](https://vizgen.com/products/) platform, among the fluorescence-based targeted spatial transcriptomics platforms, allows the highest resolution (≤20 nm), while also providing a high capacity for multiplexing, with (customizable) panels containing up to 1000 genes, and an imageable area of 1 cm^2^. MERSCOPE was recently shown to be amongst the most sensitive in a recent head-to-head comparison [@Hartman2024-comparative] using mouse brain tissue.
 
 <!--Davide:
 ## Pre-processing / understanding the input data structure

@@ -4,9 +4,9 @@
 
 ### Introduction
 
-In this demo, we will continue on processing Xenium data on a human breast cancer biopsy section from @Janesick2023-high-res, which has already undergone quality control and minimal filtering; see @sec-img-quality-control.
+In this demo, we will continue processing the Xenium dataset from a human breast cancer biopsy section collected by @Janesick2023-high-res, which has already undergone quality control and minimal filtering; see @img-quality-control.
 The processing steps carried out here -- namely, normalization, dimension reduction, and clustering -- lay the foundating for a variety of downstream analysis tasks that will be covered in the next chapters.
-Here, we will run standard non-spatial and spatially aware approaches; for a more comprehensive overview of methodology and tools, see @sec-ind-dimensionality-reduction on dimension reduction and @sec-ind-clustering on clustering. 
+Here, we will run standard non-spatial and spatially-aware approaches; for a more comprehensive overview of methodology and tools, see @ind-dimensionality-reduction on dimension reduction and @ind-clustering on clustering. 
 
 ### Dependencies
 
@@ -47,7 +47,7 @@ spe$Label <- df$Annotation[cs]
 
 ## Normalization
 
-Library size-based normalization as is typical for scRNA-seq data has been shown to be problematic for ST data, especially so for targeted panels underlying current commercial imaging-based ST platforms [@Atta2024-gene-count; @Bhuva2024-library-size].
+Library size-based normalization, as typical used for scRNA-seq data, has been shown to be problematic for ST data, especially so for targeted panels underlying current commercial imaging-based ST platforms [@Atta2024-gene-count; @Bhuva2024-library-size].
 For lack of a better approach, we here use standard log-library size normalization.
 We caution readers, however, to keep an eye out in the literature for attempts to provide a better strategy.
 
@@ -57,7 +57,7 @@ spe <- logNormCounts(spe)
 
 ## Feature selection
 
-At this stage, we would typically perform selection of (e.g., highly variable) features; see @sec-seq-intermediate-processing.
+At this stage, we would typically perform selection of (e.g., highly variable) features; see @seq-intermediate-processing.
 The dataset at hand, however, is targeted and relatively low-plex, so that features have already been selected by design (e.g., different targets will be included in immuno-oncology and neuroscience panels).
 
 ## Dimension Reduction
@@ -68,7 +68,7 @@ As a baseline, we will perform principal component analysis (PCA), which underli
 spe <- runPCA(spe, ncomponents=20)
 ```
 
-For comparison, we will also perform spatially-aware dimension reduction with `r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY]; see @sec-ind-dimensionality-reduction.
+For comparison, we will also perform spatially-aware dimension reduction with `r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY]; see @ind-dimensionality-reduction.
 
 ```{r dr-sp, message=FALSE}
 spe <- computeBanksy(spe, assay_name="logcounts")
