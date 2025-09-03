@@ -1,8 +1,3 @@
----
-output: html_document
-editor_options: 
-  chunk_output_type: console
----
 # Python interoperability {#sec-bkg-python-interoperability}
 
 ## Introduction
@@ -45,8 +40,8 @@ env <- BasiliskEnvironment(
 )
 
 
-# use_virtualenv(obtainEnvironmentPath(env))
-use_condaenv(obtainEnvironmentPath(env))
+use_virtualenv(obtainEnvironmentPath(env))
+#use_condaenv(obtainEnvironmentPath(env))
 ```
 
 
