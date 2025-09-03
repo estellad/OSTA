@@ -6,7 +6,7 @@ Cell-cell communication analyses aim to investigate how cells or cell types inte
 
 Here, we demonstrate a short example using `COMMOT` [@Cang2023-COMMOT], an optimal transport-based approach that models competition between sender and receiver signals, considers physical distances, and easily links to public databases.
 
-Since `COMMOT` is available as a Python package, we can access it using `r BiocStyle::Biocpkg("reticulate")` / `r BiocStyle::Biocpkg("basilisk")` (see @bkg-python-interoperability).
+Since `COMMOT` is available as a Python package, we can access it using `r BiocStyle::Biocpkg("reticulate")` / `r BiocStyle::Biocpkg("basilisk")` (see @sec-bkg-python-interoperability).
 
 
 ## Example
