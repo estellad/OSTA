@@ -36,7 +36,7 @@ env <- BasiliskEnvironment(
   pkgname = "base", 
   channels = c("conda-forge", "bioconda", "pytorch"), 
   packages = c("python=3.11", "Dask=2024.12.1"), 
-  pip = c("squidpy==1.6.2")
+  pip = c("ome-zarr==0.10.2", "zarr==2.18.7", "squidpy==1.6.2")
 )
 
 use_virtualenv(obtainEnvironmentPath(env))
