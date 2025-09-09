@@ -1,4 +1,4 @@
-# Image Analysis {#sec-ind-image-analysis}
+# Image analysis {#sec-ind-image-analysis}
 
 ## Preamble
 
