@@ -4,6 +4,7 @@
 
 The following individuals have contributed to developing the contents of this book (in alphabetical order):
 
+- Ilaria Billato, University of Padova, Italy
 - Peiying Cai, University of Zurich, Zurich, Switzerland
 - [Leonardo Collado-Torres](https://lcolladotor.github.io/), Lieber Institute for Brain Development, Baltimore, MD, United States
 - [Helena L. Crowell](https://helenalc.github.io/), National Center for Genomic Analysis, Barcelona, Spain
