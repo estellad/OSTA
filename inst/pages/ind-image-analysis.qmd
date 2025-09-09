@@ -43,7 +43,7 @@ The scanner brands and their respective file formats commonly encountered in dig
 
 Each scanner uses a unique tiling scheme and metadata structure to support rapid visualization and efficient storage. For instance, Aperio's .svs format uses a pyramidal tiling strategy with multiple image resolutions stored within a single file.
 
-```{r fig-pyr_str, echo = FALSE, out.width = "80%", fig.cap= "The pyramidal structure of WSI, resulting from different levels of resolution"}
+```{r fig-pyr_str, echo = FALSE, out.width = "50%", fig.cap= "The pyramidal structure of WSI, resulting from different levels of resolution"}
 knitr::include_graphics("../images/pyramidal_structure.png")
 ```
 
