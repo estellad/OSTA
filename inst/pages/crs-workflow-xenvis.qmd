@@ -110,7 +110,7 @@ In general, it is possible to bin at the transcript-level (sub-cellular) or cell
 
 To aggregate single cell-level data from Xenium at the spot level, we first 
 carry out a fixed-radius neighborhood search using `r BiocStyle::CRANpkg("RANN")` 
-(see @sec-img-neighborhood-analysis) to identify, for ever spot, cells whose centroid lies 
+(see @sec-img-neighborhood-analysis) to identify, for every spot, cells whose centroid lies 
 within a $\sim130$um distance (Visium spot diameter of 55um, divided by two 2, 
 divided by 0.2115 = Xenium px size in um):
 
