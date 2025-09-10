@@ -10,12 +10,6 @@ The R and Bioconductor ecosystems offer several tools and workflows to work with
 
 In previous chapters, spatial transcriptomics and its power in linking gene expression to tissue architecture is discussed. Here, we continue along this line by exploring how histopathological images can be leveraged to extract meaningful features that serve as input for integrative analyses in cancer research and beyond.
 
-### Dependencies
-
-```{r load-libs, message=FALSE, warning=FALSE, eval=FALSE}
-library(imageTCGA)
-library(TCIAAPI)
-```
 
 ## Background
 
