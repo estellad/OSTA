@@ -1,15 +1,20 @@
 # Cell-cell communication {#sec-img-cell-cell-communication}
 
-## Introduction
+## Preamble
 
-Cell-cell communication analyses aim to investigate how cells or cell types interact with each other through signaling mechanisms within tissues.
+### Introduction
+
+Cell-cell communication analyses aim to investigate how cells interact within tissues through signaling pathways and communication networks.
+
+Several methods have been developed for these types of analyses. In general, these methods require annotated cell types, spatial coordinates, and curated lists of ligand-receptor (L-R) pairs (and optionaly pathway or target gene sets) as inputs. Ligand-receptor pairs can be accessed from databases including `OmniPath`, `CellChatDB`, `CellPhoneDB`, and others.
+
+
+### Example
 
 Here, we demonstrate a short example using `COMMOT` [@Cang2023-COMMOT], an optimal transport-based approach that models competition between sender and receiver signals, considers physical distances, and easily links to public databases.
 
-Since `COMMOT` is available as a Python package, we can access it using `r BiocStyle::Biocpkg("reticulate")` / `r BiocStyle::Biocpkg("basilisk")` (see @sec-bkg-python-interoperability).
+Since `COMMOT` is available as a Python package, we can access it from R using `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")` (see @sec-bkg-python-interoperability).
 
-
-## Example
 
 ```{r eval=FALSE}
 # dependencies
@@ -20,24 +25,46 @@ suppressPackageStartupMessages({
     library(zellkonverter)
     library(SingleCellExperiment)
     library(basilisk)
+    library(OSTA.data)
+    library(SpatialExperimentIO)
 })
 
 # setup
 bp <- MulticoreParam(4)
 
 env <- BasiliskEnvironment(
-  envname = "commot", 
+  envname = "img-ccc", 
   pkgname = "base", 
-  channels = c("conda-forge", "bioconda", "pytorch"), 
   packages = c("python=3.11"), 
   pip = c("commot==0.0.3")
 )
 
-use_condaenv(obtainEnvironmentPath(env))
-# . <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=.)
+use_virtualenv(obtainEnvironmentPath(env))
+
+
+#env_path <- obtainEnvironmentPath(env)
+#py <- file.path(env_path, "bin", "python")
+#libdir <- file.path(env_path, "lib")
+
+#Sys.setenv(
+#  DYLD_LIBRARY_PATH          = libdir,
+#  DYLD_FALLBACK_LIBRARY_PATH = libdir,
+#  RETICULATE_PYTHON          = py
+#)
+
+#use_python(py, required = TRUE)
+#py_config()
+
 
 # loading
+# retrieve dataset from OSF repository
+#id <- "CosMx6k_HumanBrain"
+#pa <- OSTA.data_load(id)
+#dir.create(td <- tempfile())
+#unzip(pa, exdir=td)
+#(spe <- readCosmxSXE(td, addTx=FALSE))
+
+
 sce <- readRDS(...)
 sce <- logNormCounts(sce, BPPARAM=bp)
 
@@ -47,8 +74,8 @@ reducedDim(sce, "spatial") <- xy
 
 # run 'COMMOT'
 ad <- import("anndata")
-ct <- import("commot")
 pd <- import("pandas")
+ct <- import("commot")
 
 # retrieve LR interaction from CellChatDB & filter for 
 # those that are fully covered by the 1k-plex CosMx panel
