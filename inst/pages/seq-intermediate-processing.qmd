@@ -4,9 +4,9 @@
 
 ### Introduction
 
-This chapter demonstrates methods for several data processing steps -- normalization, feature selection, and dimensionality reduction -- that are required before downstream analysis methods can be applied.
+This chapter demonstrates methods for several intermediate processing steps -- normalization, feature selection, and dimensionality reduction -- that are required before downstream analysis methods can be applied.
 
-We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we discuss alternative spatially-aware methods, and provide links to later parts of the book where these methods are described in more detail.
+We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] Bioconductor packages, which were originally developed for scRNA-seq data, with the (simplified) assumption that these methods can be applied to spot-based ST data by treating spots as equivalent to cells. In addition, we discuss alternative spatially-aware methods, and provide links to later parts of the book where these methods are described in more detail.
 
 Following the processing steps, this chapter also includes short demonstrations for subsequent steps, including clustering and identification of marker genes. For more details on these steps, see the later analysis chapters or workflow chapters.
 
@@ -25,13 +25,13 @@ library(SpatialExperiment)
 
 ```{r}
 # set seed for reproducibility
-set.seed(123)
+set.seed(100)
 ```
 
 
 ### Load data
 
-Here, we load 10x Genomics Visium data from one postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region [@Maynard2021-DLPFC], which has undergone quality control and filtering in the preceeding @sec-seq-quality-control.
+Here, we load 10x Genomics Visium data from one postmortem human brain tissue section from the dorsolateral prefrontal cortex (DLPFC) brain region [@Maynard2021-DLPFC], which has previously undergone quality control and filtering (see also @sec-seq-quality-control).
 
 <!--
 Here, we load a 10x Genomics Visium dataset that will also be used in several of the following chapters. This dataset has previously been preprocessed using tools outside R and saved in `SpatialExperiment` format, and is available for download from the `r BiocStyle::Biocpkg("STexampleData")` package.
@@ -40,7 +40,7 @@ This dataset consists of one sample (Visium capture area) of postmortem human br
 -->
 
 ```{r load-data, message=FALSE}
-# load data saved in previous chapter
+# load data
 (spe <- readRDS("seq-spe_qc.rds"))
 ```
 
@@ -55,7 +55,7 @@ However, library size normalization does not make use of any spatial information
 
 Some alternative non-spatial methods from scRNA-seq workflows (e.g. normalization by deconvolution) are also less appropriate for spot-based ST data, since spots can contain multiple cells from one or more cell types, and datasets can contain multiple samples (e.g. multiple tissue sections), which may result in sample-specific clustering.
 
-```{r logcounts, message=FALSE, fig.height=3.5}
+```{r logcounts, message=FALSE, fig.width=5, fig.height=4}
 # calculate library size factors
 spe <- computeLibraryFactors(spe)
 
@@ -71,7 +71,7 @@ assayNames(spe)
 
 ### Spatially-aware normalization
 
-`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2025-SpaNorm] was developed specifically for ST data, using a gene-wise model (e.g. negative binomial) in which variation is decomposed into a library size-dependent (technical) and -independent (biological) component.
+`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2025-SpaNorm] was developed for ST data, using a gene-wise model (e.g. negative binomial) in which variation is decomposed into a library size-dependent (technical) and -independent (biological) component.
 
 
 ## Feature selection
@@ -93,9 +93,13 @@ spe <- spe[!mt, ]
 
 Next, apply methods from `r BiocStyle::Biocpkg("scran")`. This gives a list of top HVGs, which can be used as the input for subsequent steps. The parameter `prop` defines the proportion of HVGs to select -- for example, `prop = 0.1` returns the top 10%. (Alternatively, argument `n` can be used to selected a fixed number of top HVGs, say 1000 or 2000.)
 
-```{r hvgs, message=FALSE, fig.width=6, fig.height=5}
+```{r hvgs, message=FALSE, fig.width=5.5, fig.height=4.5}
 # fit mean-variance relationship
 dec <- modelGeneVar(spe)
+# plot
+plot(dec$mean, dec$total, xlab = "mean (logexpr)", ylab = "variance (logexpr)")
+curve(metadata(dec)$trend(x), add = TRUE, col = "dodgerblue")
+
 # select top HVGs
 sel <- getTopHVGs(dec, prop = 0.1)
 # number of HVGs selected
@@ -112,24 +116,28 @@ A number of methods have been developed to identify SVGs. For more details and e
 
 ## Dimensionality reduction
 
-A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. Note that we have set a random seed at the start of the chapter for reproducibility. See @sec-ind-dimensionality-reduction for more details.
+A standard next step is to perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs (or SVGs). The set of top principal components (PCs) can then be used as the input for subsequent steps. See @sec-ind-dimensionality-reduction for more details.
+
+Note that we have set a random seed at the start of the chapter for reproducibility, since the fast implementation in `scater::runPCA()` uses a random initialization.
 
 ```{r pca}
 spe <- runPCA(spe, subset_row = sel)
 ```
 
-In addition, we can perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The first two UMAP dimensions can then be used for visualization purposes by plotting them on the x and y axes.
+In addition, we can perform nonlinear dimensionality reduction using the UMAP algorithm, applied to the set of top PCs (default 50). The first two UMAP dimensions can be used for visualization purposes by plotting them on the x and y axes.
 
-```{r umap, eval=FALSE}
+```{r umap}
 spe <- runUMAP(spe, dimred = "PCA")
 ```
 
 
 ## Clustering {#sec-seq-intermediate-processing-clustering}
 
-Next, we demonstrate some short examples of downstream analysis steps, following the processing steps above.
+<!-- To do: consider moving sections from here onwards into later chapters (either workflows or downstream steps) - or new workflow chapter (before DLPFC) -->
 
-Here, we run a spatially-aware clustering algorithm, `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], to identify spatial domains. BayesSpace was developed specifically for sequencing-based ST data, and takes the spatial coordinates of the measurements into account.
+After completing the intermediate processing steps above, we next demonstrate some short examples of downstream analysis steps.
+
+Here, we run a spatially-aware clustering algorithm, `r BiocStyle::Biocpkg("BayesSpace")` [@Zhao2021-BayesSpace], to identify spatial domains. BayesSpace was developed for sequencing-based ST data, and takes the spatial coordinates of the measurements into account.
 
 For more details on clustering, see @sec-ind-clustering.
 
@@ -224,6 +232,7 @@ wrap_plots(ps, nrow = 2) &
         legend.key.height = unit(0.8, "lines")) & 
   scale_color_gradientn(colors = rev(hcl.colors(9, "Rocket")))
 ```
+
 
 ## Appendix
 

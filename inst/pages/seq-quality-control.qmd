@@ -92,6 +92,11 @@ spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
 head(colData(spe))
 ```
 
+```{r}
+# keep copy of object to save later
+spe_save <- spe
+```
+
 
 ## Global outlier detection {#sec-seq-quality-control-global}
 
@@ -542,7 +547,10 @@ However, here we make a distinction between quality control and feature selectio
 Save data object for re-use within later chapters.
 
 ```{r}
-saveRDS(spe, file = "seq-spe_qc.rds")
+# filter genes: remove zeros
+spe_save <- spe_save[rowSums(counts(spe_save)) != 0, ]
+# save object
+saveRDS(spe_save, file = "seq-spe_qc.rds")
 ```
 
 
