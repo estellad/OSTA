@@ -4,8 +4,8 @@
 
 ### Introduction
 
-In this demo, we will continue processing the Xenium dataset from a human breast cancer biopsy section collected by @Janesick2023-high-res, which has already undergone quality control and minimal filtering; see @sec-img-quality-control.
-The processing steps carried out here -- namely, normalization, dimension reduction, and clustering -- lay the foundating for a variety of downstream analysis tasks that will be covered in the next chapters.
+In this Chapter, we will continue processing the Xenium dataset from a human breast cancer biopsy section collected by @Janesick2023-high-res, which has already undergone quality control and minimal filtering; see @sec-img-quality-control.
+The processing steps carried out here -- namely, normalization, dimension reduction, and clustering -- lay the foundations for a variety of downstream analysis tasks that will be covered in the next chapters.
 Here, we will run standard non-spatial and spatially-aware approaches; for a more comprehensive overview of methodology and tools, see @sec-ind-dimensionality-reduction on dimension reduction and @sec-ind-clustering on clustering. 
 
 ### Dependencies
@@ -47,7 +47,12 @@ spe$Label <- df$Annotation[cs]
 
 ## Normalization
 
-Library size-based normalization, as typically used for scRNA-seq data, has been shown to be problematic for ST data, especially so for targeted panels underlying current commercial imaging-based ST platforms [@Atta2024-gene-count; @Bhuva2024-library-size].
+It is tempting to apply standard normalization approaches developed for single-cell RNA-seq data, such as library size normalization, to imaging-based ST. However, this needs to be done with caution. In fact, while imaging-based ST technologies yield count data similar to sequencing-based methods, the underlying data generation processes differs substantially. Indeed, even the reference to the "library size" is misleading in this context, as the total amount of counts in probe-based methods is not driven by sequencing depth but rather by the number of probes that successfully hybridize to their target transcripts within each cell and it is less clear that this leads to the same compositional biases as in sequencing platforms.
+
+One important consideration is that imaging-based ST technologies often employ targeted gene panels, which are designed to capture specific biological signals of interest. These panels may include marker genes that are highly expressed in certain cell types or tissue regions, enhancing the resolution for identifying cells of interest. This leads to a structural confounding between the real biological diversity (differences in gene expression between cells) and the total detected counts, a phenomenon that is much more pronounced than in sequencing assays, where thousands of genes are measured more uniformly across cells.
+
+[@Atta2024-gene-count; @Bhuva2024-library-size] have demonstrated that normalization by library size or total counts can systematically introduce errors, generating false positives/negatives in differential expression analyses and in the identification of spatially variable genes, precisely because of this confounding.
+
 For lack of a better approach, we here use standard log-library size normalization.
 We caution readers, however, to keep an eye out in the literature for attempts to provide a better strategy.
 
