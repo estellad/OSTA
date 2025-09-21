@@ -13,11 +13,11 @@ welcome <- tryCatch(
 
 ::: {style="float:right; margin-left:5px; width:33%"}
 
-```{r}
+<!-- get 'images/carousel/*.png' & shuffle them randomly for display via 'inst/carousel.R' -->
+
+```{r "carousel"}
 #| warning: false
 #| echo: false
-# get 'images/carousel/*.png' & shuffle them 
-# randomly for display via 'inst/carousel.R'
 source("carousel.R")
 dir <- file.path("images", "carousel")
 img <- list.files(dir, full.names=TRUE)
