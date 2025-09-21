@@ -51,7 +51,7 @@ book:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd
     - pages/apx-session-info.qmd
-  cover-image: assets/cover.png
+  #cover-image: assets/cover.png
   favicon: assets/favicon.png
   sidebar: 
     title: "OSTA"
