@@ -11,7 +11,7 @@ welcome <- tryCatch(
 
 `r welcome`
 
-::: {style="float:right; margin-left:5px; width:33%"}
+::: {style="float:right; margin-left:5px; width:32%"}
 
 <!-- get 'images/carousel/*.png' & shuffle them randomly for display via 'inst/carousel.R' -->
 
