@@ -81,7 +81,7 @@ SPE has been extended through `r BiocStyle::Biocpkg("SpatialFeatureExperiment")`
 
 There are several other frameworks outside Bioconductor that support spatially-aware analysis for both sequencing- and imaging-based platforms.
 
-In particular, [Seurat](https://satijalab.org/seurat/) [@Hao2023-Seurat] and [Scanpy](https://scanpy.readthedocs.io/) [@Wolf2018-Scanpy] provide comprehensive single-cell analysis pipelines in R and Python, respectively, and incorporate features to visualize and analyze spatial omics datasets. Packages including [Giotto](https://giottosuite.com/) [@Chen2023-Giotto-Suite; @Dries2021-Giotto] (R), `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` (R) [@Manukyan2023-VoltRon], and [Squidpy](http://squidpy.readthedocs.io/) (Python) [@Palla2022-Squidpy] support all-in-one frameworks for analyzing spatial omics data and contain extensive sets of spatially-aware algorithms.
+In particular, [Seurat](https://satijalab.org/seurat/) [@Hao2023-Seurat] and [Scanpy](https://scanpy.readthedocs.io/) [@Wolf2018-Scanpy] provide comprehensive single-cell analysis pipelines in R and Python, respectively, and incorporate features to visualize and analyze spatial omics datasets. Packages including [Giotto](https://giottosuite.com/) [@Chen2023-Giotto-Suite; @Dries2021-Giotto] and `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` [@Manukyan2023-VoltRon] (R), as well as [Squidpy](http://squidpy.readthedocs.io/) [@Palla2022-Squidpy] (Python)  support all-in-one frameworks for analyzing spatial omics data and contain extensive sets of spatially-aware algorithms.
 
 
 #### Giotto
@@ -91,7 +91,7 @@ In particular, [Seurat](https://satijalab.org/seurat/) [@Hao2023-Seurat] and [Sc
 
 #### VoltRon
 
-The `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` package incorporates a framework that allows spatially-aware alignment between datasets with observations that span across regions of interest (ROIs) and image tiles in addition to cells, spots, and molecules. `Shiny` applications are provided to conduct both automated and manual spatial alignment across adjacent tissue sections where users can interactively manage images and choose landmark points for co-registration. `VoltRon` is also an end-to-end spatial omics analysis package, and support on-disk representations of spatially-resolved datasets using *.zarr* and *.h5* backed `r BiocStyle::Biocpkg("DelayedArray")` objects.
+The `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` [@Manukyan2023-VoltRon] package incorporates a framework that allows spatially-aware alignment between datasets with observations that span across regions of interest (ROIs) and image tiles in addition to cells, spots, and molecules. `Shiny` applications are provided to conduct both automated and manual spatial alignment across adjacent tissue sections where users can interactively manage images and choose landmark points for co-registration. `VoltRon` is also an end-to-end spatial omics analysis package, and support on-disk representations of spatially-resolved datasets using *.zarr* and *.h5* backed `r BiocStyle::Biocpkg("DelayedArray")` objects.
 
 
 #### SpatialData
