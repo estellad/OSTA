@@ -118,12 +118,17 @@ knitr::include_graphics("../images/SpatialData.png")
 
 ## Interactive visualization
 
+- *napari* [@Sofroniew2025-napari] is a fast, interactive, multi-dimensional image viewer for Python. It's designed for browsing, annotating, and analyzing large multi-dimensional images. It's built on top of Qt (for the GUI), vispy (for performant GPU-based rendering), and the scientific Python stack (numpy, scipy).
+[For CosMx data, see also Bruker's [CosMx Analysis Scratch Space](https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/#category=napari) for tutorials on working with the `napari-cosmx` plugin.]{.aside}
+
 - `r BiocStyle::Biocpkg("iSEE")` [@Albrecht2018-iSEE], for "interactive `SummarizedExperiment` (SE) explorer", is not (yet) designed for spatial data, but provides a Shiny-based interface to visualize SE and SE-derived objects, which includes `SingleCellExperiment` and `Spatial(Feature)Experiment`s. `iSEE` pays special attention to single-cell data with visualization of dimensionality reduction results, so that spatial coordinates could be stored as a `reducedDim` entry to render spatial plots. There is support for:
+
   - interactive or programmatic initialization
   - transmission of selections between panels
   - code tracking and preservation of app state 
   - extensibility to custom panel types
   - deployment using Shiny Server
+  
 
 ## Appendix
 
