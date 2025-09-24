@@ -29,6 +29,15 @@ Tabular data (e.g. segmentation boundaries, molecule locations) may arrive in th
 *.zarr* stores can be used to store N-dimensional arrays as a grid of "chunks", enabling parallelizable accession. For (bio)imaging data, different image scales (or resolutions) can be stored as different layers of a "pyramid", where the base/tip represents the full/lowest resolution. R interfaces to *.zarr* are provided through `r BiocStyle::Biocpkg("Rarr")` (Bioconductor) and `r BiocStyle::CRANpkg("pizzarr")` (CRAN).
 
 
+### `alabaster`
+
+`r BiocStyle::Biocpkg("alabaster.base")` [@Lun2023-alabaster] aims to save Bioconductor data structures into **programming language agnostic** file artifacts, and load them back into memory. This is a more robust and portable alternative to serialization of such objects into .rds files. Each artifact is associated with metadata for further interpretation, which may be enriched with context-specific properties by downstream appications. Notable derivatives of the package include the following. (See next section for more details on these classes.)
+
+- `r BiocStyle::Biocpkg("alabaster.se")` for `SummarizedExperiment`s
+- `r BiocStyle::Biocpkg("alabaster.sce")` for `SingleCellExperiment`s
+- `r BiocStyle::Biocpkg("alabaster.spatial")` for `SpatialExperiments`s
+
+
 ## Data classes
 
 In sequencing-based spatial transcriptomics data, measurements come in the form of a transcripts-by-spots count matrix, where each spot is additionally associated with spatial coordinates.
@@ -106,6 +115,15 @@ knitr::include_graphics("../images/SpatialData.png")
 
 - Vizgen's [Visualizer](https://vizgen.com/vizualizer-software/) software is included with the MERSCOPE instrument purchase. It allows for interactive visualization of segmentation boundaries, transcripts, and proteins; can incorporate external analysis results (e.g. clustering, dimensionality reduction); and, supports annotating and exporting regions of interest for downstream analysis.
 
+
+## Interactive visualization
+
+- `r BiocStyle::Biocpkg("iSEE")` [@Albrecht2018-iSEE], for "interactive `SummarizedExperiment` (SE) explorer", is not (yet) designed for spatial data, but provides a Shiny-based interface to visualize SE and SE-derived objects, which includes `SingleCellExperiment` and `Spatial(Feature)Experiment`s. `iSEE` pays special attention to single-cell data with visualization of dimensionality reduction results, so that spatial coordinates could be stored as a `reducedDim` entry to render spatial plots. There is support for:
+  - interactive or programmatic initialization
+  - transmission of selections between panels
+  - code tracking and preservation of app state 
+  - extensibility to custom panel types
+  - deployment using Shiny Server
 
 ## Appendix
 
