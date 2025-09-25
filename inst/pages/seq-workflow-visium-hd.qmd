@@ -236,17 +236,15 @@ We can visualize the local outliers identified by `SpotSweeper` in space:
 
 ```{r qc-vis, fig.width=7.5, fig.height=2.5, message=FALSE}
 #| code-fold: true
-plotCoords(.vhd16, annotate="sum_outliers", point_shape=15) + 
-  ggtitle("low_lib_size") +
-  plotCoords(.vhd16, annotate="detected_outliers", point_shape=15) + 
-  ggtitle("low_n_features") +
-  plotCoords(.vhd16, annotate="discard", point_shape=15) + 
-  ggtitle("discard") +
-  plot_layout(nrow=1, guides="collect") & theme(
-    plot.title=element_text(hjust=0.5),
-    legend.key.size=unit(0, "lines")) &
-  guides(col=guide_legend(override.aes=list(size=3))) & 
-  scale_color_manual("discard", values=c("lavender", "purple"))
+plotCoords(.vhd16, point_shape=15, annotate="discard") + ggtitle("discard") +
+plotCoords(.vhd16, point_shape=15, annotate="sum_outliers") + ggtitle("low_lib_size") +
+plotCoords(.vhd16, point_shape=15, annotate="detected_outliers") + ggtitle("low_n_features") +
+plot_layout(nrow=1, guides="collect") & 
+    theme(
+        plot.title=element_text(hjust=0.5),
+        legend.key.size=unit(0, "lines")) &
+    guides(col=guide_legend(override.aes=list(size=3))) & 
+    scale_color_manual("discard", values=c("lavender", "purple"))
 ```
 
 Lastly, we subset the Visium HD 16 µm object to bins that passed QC:
@@ -446,7 +444,7 @@ As expected, the number of 8 µm bins is about 4 times the number of 16 µm bins
 We also assume there are at most two cell types in a 16 µm bin as in 8 µm, and thus we would expect a smaller proportion of singlets.
 
 ```{r RCTD, message=FALSE, warning=FALSE, results="hide"}
-# downsample to at most 4,000 cells per cluster for sce
+# downsample to at most 4,000 cells per cluster for 'sce'
 # (this is done only to keep runtime/memory low)
 cs <- split(seq_len(ncol(sce)), sce$Level1)
 cs <- lapply(cs, \(.) sample(., min(length(.), 4e3)))
@@ -512,10 +510,15 @@ Let's visualize deconvolution result for 8 and 16 µm bins in the zoomed area:
 
 ```{r plt-dec-lab, fig.width=8, fig.height=3, message=FALSE}
 #| code-fold: true
-plotVisium(.vhd8, annotate=".DeconLabel1", zoom =TRUE, point_size=0.8, point_shape=22) + 
-  ggtitle("8 µm") + plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_size=1.6, point_shape=22) + 
-  ggtitle("16 µm") +
+plotVisium(.vhd8, 
+    annotate=".DeconLabel1", zoom=TRUE, 
+    point_size=0.8, point_shape=22) + 
+    ggtitle("8 µm") + 
+plot_spacer() +
+plotVisium(.vhd16, 
+    annotate=".DeconLabel1", zoom=TRUE, 
+    point_size=1.6, point_shape=22) + 
+    ggtitle("16 µm") +
 plot_layout(nrow=1, guides="collect", widths=c(1, 0.05, 1)) &
     guides(col=guide_legend(override.aes=list(size=2))) &
     scale_fill_manual(values=unname(pals::trubetskoy())) & 
@@ -534,17 +537,22 @@ We can visualize the results spatially:
 
 ```{r plt-dec-clu-xy, fig.width=12, fig.height=3}
 #| code-fold: true
-plotVisium(.vhd16, annotate="cluster", zoom=TRUE, point_shape=22,
-    point_size=1.6, pal=unname(pals::kelly())) + 
-    plot_spacer() +
-plotVisium(.vhd16, annotate="Banksy", zoom=TRUE, point_shape=22,
-    point_size=1.6, pal=unname(pals::kelly())) + 
-    plot_spacer() +
-plotVisium(.vhd16, annotate=".DeconLabel1", zoom=TRUE, point_shape=22,
-    point_size=1.6, pal=unname(pals::trubetskoy())) +
-plot_layout(nrow=1, 
-    widths=c(1, 0.05, 1, 0.05, 1)) & facet_null() &
-    theme(legend.key.size=unit(0, "lines"))
+plotVisium(.vhd16, 
+    annotate="cluster", zoom=TRUE, 
+    point_shape=22, point_size=1.6, 
+    pal=unname(pals::kelly())) + 
+plot_spacer() +
+plotVisium(.vhd16, 
+    annotate="Banksy", zoom=TRUE, 
+    point_shape=22, point_size=1.6, 
+    pal=unname(pals::kelly())) + 
+plot_spacer() +
+plotVisium(.vhd16, 
+    annotate=".DeconLabel1", zoom=TRUE, 
+    point_shape=22, point_size=1.6, 
+    pal=unname(pals::trubetskoy())) +
+plot_layout(nrow=1, widths=c(1, 0.05, 1, 0.05, 1)) & 
+    facet_null() & theme(legend.key.size=unit(0, "lines"))
 ```
 
 We observe that Banksy delineates tissue borders very well, while deconvolution provides direct biological insight into the underlying clusters. Their concordance can be visualized using a heatmap:
@@ -559,16 +567,16 @@ From the above heatmap, cluster 5 and 7 are mostly immune cells; cluster 9 match
 
 ## Neighborhood analysis
 
-Here, we want to quantify the abundance between *T cells*, *B cells*, or *Myeloid* bins to *Fibroblast* or *Tumor* bins in 8 µm zoomed region. We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` to calculate, for each bin, the abundance of other cell types within a radius of 200 px; the resulting (bins $\times$ types) matrix is stored as `reducedDim` slot `"abundances"`.
+Here, we want to quantify the abundance between *T cells*, *B cells*, or *Myeloid* bins to *Fibroblast* or *Tumor* bins in 8 µm zoomed region. We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` [@Ameen2024-Kontextual] to calculate, for each bin, the abundance of other cell types within a radius of 200 px; the resulting (bins $\times$ types) matrix is stored as `reducedDim` slot `"abundances"`.
 
 ```{r Statial}
 .vhd8 <- .vhd8[, !is.na(.vhd8$.DeconLabel1)]
 xy <- data.frame(spatialCoords(.vhd8))
 colData(.vhd8)[names(xy)] <- xy
 .vhd8 <- getAbundances(.vhd8, 
+    spatialCoords=names(xy),
     cellType=".DeconLabel1", 
     imageID="sample_id", 
-    spatialCoords=names(xy),
     r=200, nCores=4)
 ```
 
@@ -614,22 +622,30 @@ plot_layout(nrow=1, guides="collect") &
 After correction, we see amplified differences in the relative abundance of fibroblast bins compared to tumor bins around each immune cell type in the zoomed region.
 
 We can also investigate the "cell-cell-marker" relationship based on the minimum distance between two cell types within a given radius. The matrix of minimum distance between all pairwise cell types is stored in the reduced dimension, similar to how the abundance matrix was previously stored. 
+
 ```{r vhd8-getdis}
-.vhd8 <- getDistances(.vhd8, cellType=".DeconLabel1", imageID="sample_id",
-                      spatialCoords=names(xy), maxDist = 200, nCores=4)
+# NOTE: temporary bug fix
+tmp <- as(.vhd8, "SingleCellExperiment")
+tmp <- getDistances(tmp, 
+    cellType=".DeconLabel1", imageID="sample_id",
+    spatialCoords=names(xy), maxDist=200, nCores=4)
+reducedDim(.vhd8, "distances") <- reducedDim(tmp, "distances")
 ```
 
-Here, we aim to determine whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot. 
+Here, we aim to determine whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot.
+
 ```{r vhd8-ccm, fig.width=11, fig.height=5, message=FALSE, warning=FALSE}
 #| code-fold: true
-p <- plotStateChanges(cells = .vhd8, type = "distances", imageID = "sample_id",
-                      image = "sample01", cellType = ".DeconLabel1",
-                      from = "Tumor", to = "Fibroblast", marker = "FTH1",
-                      spatialCoords = c("array_col", "array_row"),
-                      size = 1, shape = 19, interactive = FALSE,
-                      plotModelFit = FALSE, method = "lm")
-
-p$image + facet_null() | p$scatter + facet_null()
+p <- plotStateChanges(
+    cells=.vhd8, 
+    image="sample01", 
+    from="Tumor", 
+    to="Fibroblast",
+    marker="FTH1", 
+    cellType=".DeconLabel1", 
+    imageID="sample_id",
+    spatialCoords=c("array_col", "array_row"))
+p$image + facet_null() | p$scatter 
 ```
 
 The same analysis steps could be applied to the (unfiltered) 16 μm resolution data with the corresponding deconvolution results.
@@ -639,14 +655,13 @@ The same analysis steps could be applied to the (unfiltered) 16 μm resolution d
 
 In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm. Most methods and visualization techniques developed for Visium can be applied to Visium HD. However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
 
--   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells. 
-    - Space Ranger v4 now provides a segmented, cell-level count matrix under `segmented_outputs`, in parallel with the previous `binned_outputs` at 2, 8, and 16 µm, simplifying additional cell segmentation using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
+- 10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells. Notably, Space Ranger v4 provides a segmented, cell-level count matrix under `segmented_outputs`, in addition to the previous `binned_outputs` at 2, 8, and 16 µm, simplifying additional cell segmentation using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
 
--   [GitHub repository of `bin2cell`](https://github.com/Teichlab/bin2cell) for H&E segmentation and obtaining cell boundaries.
+- [GitHub repository of `bin2cell`](https://github.com/Teichlab/bin2cell) for H&E segmentation and obtaining cell boundaries.
 
--   [Analysis pipeline](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd) by 10x Genomics (April 2024). The analysis consists of three steps: run `StarDist` nuclei segmentation in Python, sum gene expression into nuclei based on segmentation mask, and downstream analysis with `scanpy` and `anndata`.
+- [Analysis pipeline](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd) by 10x Genomics (April 2024). The analysis consists of three steps: run `StarDist` nuclei segmentation in Python, sum gene expression into nuclei based on segmentation mask, and downstream analysis with `scanpy` and `anndata`.
 
--   [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
+- [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 
 
 ## Appendix
