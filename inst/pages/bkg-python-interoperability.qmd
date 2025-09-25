@@ -89,7 +89,7 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ## SpatialExperiment
 
-Since the `SpatialExperiment` class extends `SingleCellExperiment` (see @sec-bkg-data-infrastructure), conversion operations that we discussed above are also applicable to `SpatialExperiment`. However, to accomplish a full conversion from the `AnnData` object, we need to manually insert the spatial information using `reticulate` directly.
+Since the `SpatialExperiment` class extends `SingleCellExperiment` (see @sec-bkg-infrastructure), conversion operations that we discussed above are also applicable to `SpatialExperiment`. However, to accomplish a full conversion from the `AnnData` object, we need to manually insert the spatial information using `reticulate` directly.
 
 
 ### Starting with R
