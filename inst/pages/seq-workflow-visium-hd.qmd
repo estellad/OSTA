@@ -4,7 +4,7 @@
 
 Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@deOliveira2025-high-def].
 
-## Dependencies {#sec-seq-workflow-visium-hd-load-data}
+## Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
 library(Banksy)
@@ -50,7 +50,7 @@ colnames(vhd8) <- vhd8$barcode # TODO: VisiumIO bug?
 vhd8
 ```
 
-These data come with bin-level annotations from deconvolution estimates by `RCTD`, implemented in `r BiocStyle::Biocpkg("spacexr")`. Specifically, two sets of labels are available that correspond to the most and second most frequent of 38 cell types per bin, respectively:
+These data come with bin-level annotations from deconvolution estimates by `RCTD` [@Cable2022-RCTD], implemented in `r BiocStyle::Biocpkg("spacexr")`. Specifically, two sets of labels are available that correspond to the most and second most frequent of 38 cell types per bin, respectively:
 
 ```{r load-anno, message=FALSE, warning=FALSE}
 # retrieve annotations
@@ -131,14 +131,16 @@ colData(vhd8)$cluster <- factor(dfs[[1]][colnames(vhd8), "cluster"])
 colData(vhd16)$cluster <- factor(dfs[[2]][colnames(vhd16), "cluster"])
 ```
 
-We can visualize the given clustering results at 8 µm and 16 µm resolutions. Later, we will compare the clustering result at 16 µm with that from Banksy.
+We can visualize the given clustering results at 8 µm and 16 µm resolutions. Later, we will compare the clustering result at 16 µm with that from `Banksy`.
 
 ```{r clusvis, fig.width=12, fig.height=6, message=FALSE}
 #| code-fold: true
-(plotCoords(vhd8, annotate="cluster", point_size=0.05, point_shape = 15,
-            pal=unname(pals::kelly())) + ggtitle("8 µm")) |
-(plotCoords(vhd16[, !is.na(vhd16$cluster)], annotate="cluster", point_size=0.1, 
-            point_shape = 15, pal=unname(pals::kelly())) + ggtitle("16 µm")) 
+(plotCoords(vhd8, 
+    annotate="cluster", point_size=0.05, point_shape=15,
+    pal=unname(pals::kelly())) + ggtitle("8 µm")) |
+(plotCoords(vhd16[, !is.na(vhd16$cluster)], 
+    annotate="cluster", point_size=0.1, point_shape=15, 
+    pal=unname(pals::kelly())) + ggtitle("16 µm")) 
 ```
 
 To keep runtimes low, our downstream analysis will be performed on a subset area of 16 µm bins (1/64 of the data coverage area), which we read in here; there are no annotations available for this resolution in the public domain. [Note that 8 and 16 µm binned Visium HD data share the same full-resolution H&E image and scaling factor.]{.aside}
@@ -264,7 +266,7 @@ dec <- modelGeneVar(.vhd16)
 hvg <- getTopHVGs(dec, n=3e3)
 ```
 
-As detailed in @sec-ind-clustering, `r BiocStyle::Biocpkg("Banksy")` utilizes a pair of spatial kernels to capture gene expression variation, followed by dimension reduction and graph-based clustering to identify spatial domains.
+As detailed in @sec-ind-clustering, `r BiocStyle::Biocpkg("Banksy")` [@Singhal2024-BANKSY] utilizes a pair of spatial kernels to capture gene expression variation, followed by dimension reduction and graph-based clustering to identify spatial domains.
 
 ```{r Banksy, message=FALSE}
 # set seed for random number generation
@@ -529,9 +531,7 @@ plot_layout(nrow=1, guides="collect", widths=c(1, 0.05, 1)) &
 
 We observe clear agreement in deconvolution at both 8 µm and 16 µm resolutions; however, the 8 µm resolution better captures fine structures, such as the string-like shape of endothelial and fibroblast bins extending into the upper left tumor region.
 
-## Downstream
-
-### Concordance of clustering & deconvolution
+## Concordance of results
 
 We can visualize the results spatially:
 
@@ -624,9 +624,13 @@ After correction, we see amplified differences in the relative abundance of fibr
 We can also investigate the "cell-cell-marker" relationship based on the minimum distance between two cell types within a given radius. The matrix of minimum distance between all pairwise cell types is stored in the reduced dimension, similar to how the abundance matrix was previously stored. 
 
 ```{r vhd8-getdis}
-.vhd8 <- getDistances(.vhd8, 
+# NOTE: conversion to SCE is a temporary fix for a 'Statial' bug 
+# reported here: https://github.com/SydneyBioX/Statial/issues/16
+tmp <- as(.vhd8, "SingleCellExperiment")
+tmp <- getDistances(tmp, 
     cellType=".DeconLabel1", imageID="sample_id",
     spatialCoords=names(xy), maxDist=200, nCores=4)
+reducedDim(.vhd8, "distances") <- reducedDim(tmp, "distances")
 ```
 
 Here, we aim to determine whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot.
@@ -646,7 +650,6 @@ p$image + facet_null() | p$scatter
 ```
 
 The same analysis steps could be applied to the (unfiltered) 16 μm resolution data with the corresponding deconvolution results.
-
 
 ## Conclusion
 
