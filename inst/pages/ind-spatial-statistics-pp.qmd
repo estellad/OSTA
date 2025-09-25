@@ -7,7 +7,7 @@ Point pattern analysis is a subfield of spatial statistics that focuses on the r
 
 The central R package to perform point pattern analysis is called `r BiocStyle::CRANpkg('spatstat')` [@Baddeley2005-spatstat]. The package `spatialFDA` creates an interface between `SpatialExperiment` objects and the `r BiocStyle::CRANpkg('spatstat')` library for easy integration into analysis workflows.
 
-Part of this vignette is based on the [*pasta* overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2025-pasta]
+Part of this vignette is based on the [*pasta* overview vignette](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2025-pasta]
 
 ::: {.callout-note collapse="true" title="`ppp` object"}
 
@@ -68,7 +68,7 @@ One option in point pattern analysis is to analyse the correlation of marks. Lik
 
 ::: {.callout-note collapse="true" title="Complete spatial randomness"}
 
-Complete spatial randomness is the null scenario for a point pattern. 
+Complete spatial randomness (CSR) is the null scenario for a point pattern. 
 It is characterized by two key properties:
 
 - Homogeneity: The intensity of points is homogeneous in space.
@@ -106,7 +106,7 @@ plotCrossMetricPerFov(
     imageId="sample_id")
 ```
 
-We note that all cell types, ductal carcinoma in situ 1 (DCIS 1),  ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighborhood.  
+We note that all cell types, ductal carcinoma in situ 1 (DCIS 1), ductal carcinoma in situ 2 (DCIS 2), and invasive tumor cells show a clear interaction among themselves. DCIS 1 and invasive tumor cells show spacing, meaning there are fewer invasive tumor cells found in DCIS 1 than expect under complete spatial randomness (CSR). However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighborhood.  
 
 #### Spacing
 
