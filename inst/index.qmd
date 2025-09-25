@@ -21,7 +21,7 @@ welcome <- tryCatch(
 source("carousel.R")
 dir <- file.path("images", "carousel")
 img <- list.files(dir, full.names=TRUE)
-img <- lapply(sample(img), \(.) list(image=.))
+img <- lapply(img, \(.) list(image=.))
 carousel("gallery-carousel", 3333, img)
 ```
 
