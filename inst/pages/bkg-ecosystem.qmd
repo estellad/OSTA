@@ -110,7 +110,7 @@ ggplot(gg, aes(date, n, col=biocViews)) +
 # will be added in the next release
 ```
 
-To get an idea of the projects' "growth" in this space, we can regress the 
+To get an idea of the project's "growth" in this space, we can regress the 
 number of packages against time using a linear model (LM). We here skip 
 dates at which very few packages were availabile/being developed:
 
@@ -140,7 +140,7 @@ Finally, we can inspect the "lifetime" of packages, i.e., how long they remain
 (installable) on Bioconductor:
 
 ::: aside
-A package will be depracated if it fails to build and/or pass checks on the 
+A package will be deprecated if it fails to build and/or pass checks on the 
 Bioconductor Build System (BBS), provided its maintainer is unresponsive and 
 does not take action to fix the package before the next (six-monthly) release. 
 :::
