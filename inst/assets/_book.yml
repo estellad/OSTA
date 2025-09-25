@@ -6,7 +6,7 @@ book:
       chapters:
         - pages/bkg-introduction.qmd
         - pages/bkg-spatial-omics.qmd
-        - pages/bkg-data-infrastructure.qmd
+        - pages/bkg-infrastructure.qmd
         - pages/bkg-ecosystem.qmd
         - pages/bkg-importing-data.qmd
         - pages/bkg-example-datasets.qmd
