@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This chapter is not directly aimed at users, but aims at exploring the space of 
-packages available through Bioconductor that revolve around spatial and single
-cell omics data. We deliberately include the latter, since many tools developed
-for single cell data are either applicable to, or lay the foundation for tools
-developed for spatial data.
+This chapter provides additional background about the Bioconductor ecosystem
+by exploring the space of packages that revolve around spatial and single cell
+omics data. We deliberately include the latter, since many tools developed for
+single cell data are either directly applicable to, or lay the foundation for 
+tools developed for spatial data.
 
 Here, we will rely on `r BiocStyle::Biocpkg("biocViews")` [@Carey2006-BiocViews] 
 that are provided in the `DESCRIPTION` of each package. These may be browsed 
