@@ -5,9 +5,9 @@ Point pattern analysis is a subfield of spatial statistics that focuses on the r
 - approximate the features (mRNAs) as points.
 - segment the cells and represent the centroids as points.
 
-The central `R` package to perform point pattern analysis is called `r BiocStyle::CRANpkg('spatstat')` [@Baddeley2005-spatstat]. The package `spatialFDA` creates an interface between `SpatialExperiment` objects and the `r BiocStyle::CRANpkg('spatstat')` library for easy integration into analysis workflows.
+The central R package to perform point pattern analysis is called `r BiocStyle::CRANpkg('spatstat')` [@Baddeley2005-spatstat]. The package `spatialFDA` creates an interface between `SpatialExperiment` objects and the `r BiocStyle::CRANpkg('spatstat')` library for easy integration into analysis workflows.
 
-Part of this vignette is based on the [pasta overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2025-pasta]
+Part of this vignette is based on the [*pasta* overview vignette ](https://robinsonlabuzh.github.io/pasta/00-overview-ppSOD.html) and [another vignette](https://robinsonlabuzh.github.io/pasta/01-imaging-univar-ppSOD.html) [@Emons2025-pasta]
 
 ::: {.callout-note collapse="true" title="`ppp` object"}
 
@@ -23,21 +23,17 @@ a discrete cell type mark or a continuous gene expression mark
 
 :::
 
-In the following we will work with a Xenium dataset of breast cancer [@Janesick2023-high-res]. The representation of cells as points is done via cell centroids.
-
-```{r loading_pp, message=FALSE, warning=FALSE}
-spe <- sfe
-rm(sfe)
-```
+In the following we will work with a Xenium dataset of breast cancer [@Janesick2023-high-res]. 
+The representation of cells as points is done via cell centroids.
 
 In the plot below, the centroids of the cells are attributed with a discrete cell type mark. 
 
-```{r plot_object, fig.width=12, fig.height=8, message=FALSE, warning=FALSE}
-df <- data.frame(xy, colData(spe))
+```{r plot_object, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+df <- data.frame(xy, colData(sfe))
 ggplot(df, aes(x_centroid, y_centroid, col=Cluster)) +
     guides(col=guide_legend(override.aes=list(size=2))) +
     theme_xy + theme(legend.key.size=ggplot2::unit(0, "pt")) +
-    geom_point(size=0.05) 
+    geom_point(shape=16, size=0.1) 
 ```
 
 ### Intensity
@@ -53,12 +49,9 @@ The intensity of the points can be uniform in space which is called homogeneous.
 ::: {.callout-note collapse="true" title="Estimating intensity"}
 
 ```{r estimating_intensity, message=FALSE, warning=FALSE}
-# TODO: temporary fix
-spatialCoordsNames(spe) <- c("x", "y")
-dfSpe <- .speToDf(spe)
-pp <- .dfToppp(dfSpe, marks = "Cluster")
-
-density(x=pp, sigma = bw.diggle) |> plot()
+df <- .speToDf(sfe)
+pp <- .dfToppp(df, marks="Cluster")
+plot(density(x=pp, sigma=bw.diggle))
 ```
 
 In the plot above we see that the intensity of all points is not uniform. This inhomogeneity of points has to be taken into accounts when interpreting spatial statistics metrics. For example, an indication of clustering in a point pattern can be due solely to an inhomogeneity of points. This is called the confounding between intensity and interaction [@Baddeley2015-book-point-patterns] (p. 151 onwards). 
@@ -89,30 +82,31 @@ It is characterized by two key properties:
 
 Ripley's $K$ is a well established function to assess correlation in a point pattern. It can be calculated within a mark or across marks. In essence, Ripley's $K$ quantifies the average number of points that fall in a $r$-neighborhood of a chosen mark [@Ripley1976-second-order; @Baddeley2015-book-point-patterns] (p. 132 onwards).
 
-```{r ripley, message = FALSE, warning = FALSE}
+```{r ripley, results="hide", message=FALSE, warning=FALSE}
 #| fig-width: 15
 #| fig-height: 10
-
 resCross <- calcCrossMetricPerFov(
-  spe,
-  selection = c("DCIS_1", "DCIS_2", "Invasive_Tumor"),
-  subsetby = 'sample_id',
-  fun = 'Kcross',
-  marks = 'Cluster',
-  rSeq = seq(0, 500, length.out = 100),
-  by = c("sample_id")
-)
-
-plotCrossMetricPerFov(
-  resCross,
-  theo = TRUE,
-  correction = "border",
-  x = "r",
-  imageId = 'sample_id'
-)
+    sfe,
+    selection=c("DCIS_1", "DCIS_2", "Invasive_Tumor"),
+    subsetby="sample_id",
+    fun="Kcross",
+    marks="Cluster",
+    rSeq=seq(0, 500, l=100),
+    by="sample_id")
 ```
 
-This plot shows Ripley's $K$ function not corrected for inhomogeneities of the chosen marks. The diagonal is Ripley's $K$ function among the three cell types themselves and the off diagonal plots show the cross type combinations. We note that all cell types, ductal carcinoma in situ 1 (DCIS 1),  ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighborhood.  
+We can plot Ripley's $K$ function not corrected for inhomogeneities of the chosen marks. Here, the diagonal is Ripley's $K$ function among the three cell types themselves and the off diagonal plots show the cross type combinations.
+
+```{r fig.width=12, fig.height=8}
+plotCrossMetricPerFov(
+    metricDf=resCross, 
+    theo=TRUE,
+    correction="border", 
+    x="r", 
+    imageId="sample_id")
+```
+
+We note that all cell types, ductal carcinoma in situ 1 (DCIS 1),  ductal carcinoma in situ 2 (DCIS 2) and invasive tumor cells show a clear interaction among themselves. DCIS 1 and invasive tumor cells show spacing, meaning there are less invasive tumor cells found in DCIS 1 than expect under CSR. However, DCIS 2 and invasive tumor cells show a distribution that is completely spatially random in a $500 µm$ $r$-neighborhood.  
 
 #### Spacing
 
@@ -126,27 +120,21 @@ A complementary approach to correlation analysis is spacing. There are three mai
 
 The nearest neighbor function $G$ quantifies the average nearest-neighbor distance over a radius range $r$ [@Baddeley2015-book-point-patterns] (p. 262).
 
-```{r nndist, message = FALSE, warning = FALSE}
-#| fig-width: 15
-#| fig-height: 10
-
+```{r nndist, message=FALSE, warning=FALSE, fig.width=12, fig.height=8}
 resCross <- calcCrossMetricPerFov(
-  spe,
-  selection = c("DCIS_1", "DCIS_2", "Invasive_Tumor"),
-  subsetby = 'sample_id',
-  fun = 'Gcross',
-  marks = 'Cluster',
-  rSeq = seq(0, 100, length.out = 100),
-  by = c("sample_id")
-)
-
+    sfe,
+    selection=c("DCIS_1", "DCIS_2", "Invasive_Tumor"),
+    subsetby="sample_id",
+    fun="Gcross",
+    marks="Cluster",
+    rSeq=seq(0, 100, l=100),
+    by="sample_id")
 plotCrossMetricPerFov(
-  resCross,
-  theo = TRUE,
-  correction = "km",
-  x = "r",
-  imageId = 'sample_id'
-)
+    resCross,
+    theo=TRUE,
+    correction="km",
+    x="r",
+    imageId="sample_id")[[1]]
 ```
 
 In terms of spacing, the interpretation is a bit different. Still, the diagonal shows that all cell types are more clustered than expected if the patterns were completely spatially random. Comparing now DCIS 1 and DCIS 2 with invasive tumor cells, we see that both are more spaced than expect at random. However, the spacing is stronger for DCIS 1  and invasive tumor cells. At small radii, DCIS 2 and invasive tumor are distributed close to random.
@@ -175,18 +163,18 @@ resLocal <- localK(ppSub, verbose=FALSE)
 # code adapted from 
 # https://robinsonlabuzh.github.io/
 # pasta/01-imaging-univar-ppSOD.html
-
 df <- resLocal |>
     as.data.frame() |>
     pivot_longer(
         iso0001:iso1327, 
         names_to="curve") 
 
-sel <- df %>% 
-    filter(r > 700.5630 & r < 702.4388) %>%
-    mutate(sel=value) %>% select(curve, sel)
+sel <- df |>
+    filter(r > 700.5630 & r < 702.4388) |>
+    mutate(sel=value) |> 
+    select(curve, sel)
 
-df <- df %>% left_join(sel)
+df <- left_join(df, sel)
 
 thm <- list(
     theme_light(),
@@ -203,9 +191,9 @@ df <- data.frame(
     x=ppSub$x, y=ppSub$y, 
     sel=unique(sel)$sel)
 
-q <- ggplot(df, aes(x, y, col = sel)) +
+q <- ggplot(df, aes(x, y, col=sel)) +
     coord_equal(expand=FALSE) +
-    geom_point(size = 1) + 
+    geom_point(size=1) + 
     thm
  
 p | q
