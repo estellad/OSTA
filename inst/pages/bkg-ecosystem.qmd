@@ -14,9 +14,9 @@ online -- in a non-programmatic manner -- on the [Bioconductor BiocViews
 website](https://www.bioconductor.org/packages/release/BiocViews.html).
 
 ::: aside
-Note that the data reported herein are likely inaccurate, since packages might
+Note that the data reported herein may be inaccurate, since packages might
 provide inaccurate/incomplete `biocViews`. Especially the "Spatial" term relied 
-upon here was added fairly recently and might be missing from elderly packages.
+upon here was added fairly recently and might be missing from older packages.
 :::
 
 ### Exploratory
@@ -68,7 +68,7 @@ focusing specifically on "SingleCell" and "Spatial" packages.
 
 ::: aside
 Note that we here rely on the first and last date at which a package was
-available through Bioconductor; some packages might have been depracated
+available through Bioconductor; some packages might have been deprecated
 at one point or another.
 :::
 
@@ -175,15 +175,15 @@ ggplot(gg, aes(years, fill=biocViews)) +
 
 #### Subterms
 
-Finally, let's investigate more specific `biocViews`, e.g., the type work tasks 
+Finally, let's investigate more specific `biocViews`, e.g., the type of work tasks 
 different packages cover. We will first count the number of packages that list
-specific terms that might be of interesting in the context of single cell and
+specific terms that might be of interest in the context of single cell and
 spatial omics data analysis. Secondly, we will visualize their co-occurence.
 
 ::: aside
 
-Note that packages can list an arbitary number of terms so that packages can 
-counted in more then one category; e.g., "Visualization" appears in *most*.
+Note that packages can list an arbitary number of terms so that packages can be 
+counted in more than one category; e.g., "Visualization" appears in *most*.
 
 :::
 
@@ -222,7 +222,7 @@ Because there are yet very few "Spatial" packages, we will pool "Spatial" and
 "SingleCell" tools when counting the number of times different terms appear
 together; i.e., `biocViews` contain "Spatial" OR "SingleCell", together with
 "Clustering" AND "Visualization", etc. (For concise labeling, we abbreviate
-`biocViews` to captial letters only; e.g., "BatchEffects" becomes "BE".)
+`biocViews` to capital letters only; e.g., "BatchEffects" becomes "BE".)
 
 ```{r fig.width=5, fig.height=4}
 #| code-fold: true
@@ -254,4 +254,3 @@ ggplot(gg, aes(n, j)) +
 ## Appendix
 
 ### References {.unnumbered}
-
