@@ -563,7 +563,7 @@ fq <- prop.table(table(.vhd16$Banksy, .vhd16$.DeconLabel1), 1)
 pheatmap(fq, cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 ```
 
-From the above heatmap, cluster 5 and 7 are mostly immune cells; cluster 9 maps to endothelia; cluster 1 and 13 correspond to intestinal epithelial and smooth muscle cells, respectively; fibroblasts map to cluster 10; tumor spans clusters 3, 11 and 12.
+From the above heatmap, cluster 5 and 7 are mostly immune cells; cluster 9 maps to endothelial; cluster 1 and 13 correspond to intestinal epithelial and smooth muscle cells, respectively; fibroblasts map to cluster 10; tumor spans clusters 3, 11 and 12.
 
 ## Neighborhood analysis
 
