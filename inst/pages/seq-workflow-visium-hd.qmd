@@ -624,12 +624,9 @@ After correction, we see amplified differences in the relative abundance of fibr
 We can also investigate the "cell-cell-marker" relationship based on the minimum distance between two cell types within a given radius. The matrix of minimum distance between all pairwise cell types is stored in the reduced dimension, similar to how the abundance matrix was previously stored. 
 
 ```{r vhd8-getdis}
-# NOTE: temporary bug fix
-tmp <- as(.vhd8, "SingleCellExperiment")
-tmp <- getDistances(tmp, 
+.vhd8 <- getDistances(.vhd8, 
     cellType=".DeconLabel1", imageID="sample_id",
     spatialCoords=names(xy), maxDist=200, nCores=4)
-reducedDim(.vhd8, "distances") <- reducedDim(tmp, "distances")
 ```
 
 Here, we aim to determine whether the expression level of the tumor marker changes in proximity to fibroblast. Using FTH1 as an example, we observe a decrease in FTH1 expression in tumor bins as the distance to fibroblast increase. This trend could be visualized using a scatter plot.
