@@ -2,56 +2,56 @@ book:
   title: "Orchestrating Spatial Transcriptomics Analysis with Bioconductor"
   chapters:
     - index.qmd
-#     - part: "Background"
-#       chapters:
-#         - pages/bkg-introduction.qmd
-#         - pages/bkg-spatial-omics.qmd
-#         - pages/bkg-infrastructure.qmd
-#         - pages/bkg-ecosystem.qmd
-#         - pages/bkg-importing-data.qmd
-#         - pages/bkg-example-datasets.qmd
-#         - pages/bkg-python-interoperability.qmd
-#     - part: "Sequencing-based platforms"
-#       chapters:
-#         - pages/seq-introduction.qmd
-#         - pages/seq-reads-to-counts.qmd
-#         - pages/seq-quality-control.qmd
-#         - pages/seq-intermediate-processing.qmd
-#         - pages/seq-deconvolution.qmd
-#         - pages/seq-workflow-dlpfc.qmd
-#         - pages/seq-workflow-visium-crc.qmd
-#         - pages/seq-workflow-visium-hd.qmd
-#     - part: "Imaging-based platforms"
-#       chapters:
-#         - pages/img-introduction.qmd
-#         - pages/img-segmentation.qmd
-#         - pages/img-quality-control.qmd
-#         - pages/img-intermediate-processing.qmd
-#         - pages/img-neighborhood-analysis.qmd
-# #        - pages/img-cell-cell-communication.qmd
-#         - pages/img-workflow-xenium.qmd
-#     - part: "Platform-independent analyses"
-#       chapters:
-#         - pages/ind-dimensionality-reduction.qmd
-#         - pages/ind-clustering.qmd
-#         - pages/ind-feature-selection-testing.qmd
-#         - pages/ind-feature-set-signatures.qmd
-#         - pages/ind-spatial-statistics.qmd
-#         - pages/ind-image-analysis.qmd
+    - part: "Background"
+      chapters:
+        - pages/bkg-introduction.qmd
+        - pages/bkg-spatial-omics.qmd
+        - pages/bkg-infrastructure.qmd
+        - pages/bkg-ecosystem.qmd
+        - pages/bkg-importing-data.qmd
+        - pages/bkg-example-datasets.qmd
+        - pages/bkg-python-interoperability.qmd
+    - part: "Sequencing-based platforms"
+      chapters:
+        - pages/seq-introduction.qmd
+        - pages/seq-reads-to-counts.qmd
+        - pages/seq-quality-control.qmd
+        - pages/seq-intermediate-processing.qmd
+        - pages/seq-deconvolution.qmd
+        - pages/seq-workflow-dlpfc.qmd
+        - pages/seq-workflow-visium-crc.qmd
+        - pages/seq-workflow-visium-hd.qmd
+    - part: "Imaging-based platforms"
+      chapters:
+        - pages/img-introduction.qmd
+        - pages/img-segmentation.qmd
+        - pages/img-quality-control.qmd
+        - pages/img-intermediate-processing.qmd
+        - pages/img-neighborhood-analysis.qmd
+#        - pages/img-cell-cell-communication.qmd
+        - pages/img-workflow-xenium.qmd
+    - part: "Platform-independent analyses"
+      chapters:
+        - pages/ind-dimensionality-reduction.qmd
+        - pages/ind-clustering.qmd
+        - pages/ind-feature-selection-testing.qmd
+        - pages/ind-feature-set-signatures.qmd
+        - pages/ind-spatial-statistics.qmd
+        - pages/ind-image-analysis.qmd
     - part: "Multiple-sample analyses"
       chapters:
         - pages/mult-diff-spatial-patterns.qmd
         - pages/mult-diff-colocalization.qmd
         - pages/mult-structure-based.qmd
-  #   - part: "Cross-platform analyses"
-  #     chapters:
-  #       - pages/crs-spatial-registration.qmd
-  #       - pages/crs-imputation.qmd
-  #       - pages/crs-workflow-xenvis.qmd
-  # appendices:
-  #   - pages/apx-acknowledgments.qmd
-  #   - pages/apx-related-resources.qmd
-  #   - pages/apx-session-info.qmd
+    - part: "Cross-platform analyses"
+      chapters:
+        - pages/crs-spatial-registration.qmd
+        - pages/crs-imputation.qmd
+        - pages/crs-workflow-xenvis.qmd
+  appendices:
+    - pages/apx-acknowledgments.qmd
+    - pages/apx-related-resources.qmd
+    - pages/apx-session-info.qmd
   #cover-image: assets/cover.png
   favicon: assets/favicon.png
   sidebar: 
