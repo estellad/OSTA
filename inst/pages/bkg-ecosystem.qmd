@@ -72,7 +72,8 @@ available through Bioconductor; some packages might have been deprecated
 at one point or another.
 :::
 
-```{r echo=FALSE, message=FALSE, fig.width=5, fig.height=4}
+```{r message=FALSE, results="hide"}
+#| code-fold: true
 # dependencies
 library(dplyr)
 library(ggplot2)
@@ -96,6 +97,12 @@ gg <- lapply(ids, \(id) {
     # get cumulative number of packages available each month
     ys |> group_by(date) |> count()
 }) |> bind_rows(.id="biocViews")
+# NOTE: 'getYearsInBioc()' function 
+# will be added in the next release
+```
+
+```{r message=FALSE, fig.width=5, fig.height=4}
+#| code-fold: true
 ggplot(gg, aes(date, n, col=biocViews)) + 
     geom_line(linewidth=0.8) +
     geom_smooth(data=filter(gg, n >= 5), 
@@ -106,8 +113,6 @@ ggplot(gg, aes(date, n, col=biocViews)) +
         aspect.ratio=1, 
         panel.grid.minor=element_blank(),
         axis.text.x=element_text(angle=45, hjust=1))
-# NOTE: 'getYearsInBioc()' function 
-# will be added in the next release
 ```
 
 To get an idea of the project's "growth" in this space, we can regress the 
