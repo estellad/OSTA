@@ -256,19 +256,16 @@ An important aspect to note is that the individual structure metrics are not ind
 
 To account for this, we will use mixed linear models with random effects for the patient and the individual slides (image name). The `r BiocStyle::CRANpkg("lme4")` package will be use for fitting linear mixed effects models [@Bates2015-lme4] and `r BiocStyle::CRANpkg("lmerTest")` for p-value calculations [@Kuznetsova2017-lmerTest].
 
-```{r mod}
-mod <- lmer(Area^(1/4) ~ patient_stage + (1|patient_id) + (1|image_name), data=allIslets)
-```
-
 ::: {style="max-height:500px; overflow-y: auto;"}
 
-```{r mod-summary}
-summary(mod)
+```{r mod}
+f <- Area^(1/4) ~ patient_stage + (1|patient_id) + (1|image_name)
+summary(mod <- lmer(formula=f, data=allIslets))
 ```
 
 :::
 
-From the fixed effects section in `summary(mod)`, we note that there is a statistically significant difference in the transformed islet area of long-duration patients compared to non-diabetic patients, while the effect for onset patients is not significant at the 5\% level. This result accounts for correlation at the patient and image level as modeled by random intercepts. The transformation (1/4-power) was chosen after inspection of the residual behavior in the model diagnostics for this dataset and feature of interest specifically.
+From the fixed effects section in the model `summary` above, we note that there is a statistically significant difference in the transformed islet area of long-duration patients compared to non-diabetic patients, while the effect for onset patients is not significant at the 5\% level. This result accounts for correlation at the patient and image level as modeled by random intercepts. The transformation (1/4-power) was chosen after inspection of the residual behavior in the model diagnostics for this dataset and feature of interest specifically.
 
 ::: {.callout-note collapse="true" title="Model diagnostics"}
 
