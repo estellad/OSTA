@@ -72,7 +72,8 @@ available through Bioconductor; some packages might have been deprecated
 at one point or another.
 :::
 
-```{r echo=FALSE, message=FALSE, results="hide"}
+```{r message=FALSE, results="hide"}
+#| code-fold: true
 # dependencies
 library(dplyr)
 library(ggplot2)
@@ -100,7 +101,8 @@ gg <- lapply(ids, \(id) {
 # will be added in the next release
 ```
 
-```{r echo=FALSE, message=FALSE, fig.width=5, fig.height=4}
+```{r message=FALSE, fig.width=5, fig.height=4}
+#| code-fold: true
 ggplot(gg, aes(date, n, col=biocViews)) + 
     geom_line(linewidth=0.8) +
     geom_smooth(data=filter(gg, n >= 5), 
