@@ -2,8 +2,17 @@
 #| echo: false
 welcome <- tryCatch(
     {
+        description <- packageDescription("OSTA")
+        pkg <- description$Package
+        version <- description$Version
         date <- format(Sys.time(), "%B %e, %Y")
-        glue::glue("**Published:** {date}<br/>")
+        glue::glue(
+            "**Package:** {pkg}<br/>\n", 
+            "**Package version:** {version}<br/>\n", 
+            "**R version:** {R.version.string}<br/>\n", 
+            "**Bioconductor version:** {BiocManager::version()}<br/>\n", 
+            "**Date:** {date}<br/>"
+        )
     }, 
     error = function(e) {"Local preview"}
 )
