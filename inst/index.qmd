@@ -11,7 +11,7 @@ welcome <- tryCatch(
             "**Package version:** {version}<br/>\n", 
             "**R version:** {R.version.string}<br/>\n", 
             "**Bioconductor version:** {BiocManager::version()}<br/>\n", 
-            "**Date:** {date}<br/>"
+            "**Date compiled:** {date}<br/>"
         )
     }, 
     error = function(e) {"Local preview"}
