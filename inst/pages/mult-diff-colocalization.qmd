@@ -148,42 +148,83 @@ https://www.bioconductor.org/packages/devel/bioc/vignettes/spicyR/inst/doc/spicy
 ## spatialFDA
 
 The `r BiocStyle::Biocpkg("spatialFDA")` package computes spatial summaries 
-as functions (e.g., Ripley's K function) and compares them using tools from 
+as functions (e.g., Ripley's $K$ function) and compares them using tools from 
 functional data analysis (FDA). We will consider the colocalization (spacing) 
 of alpha cells in the islet and cytoxic T-cells, which are important in the 
 destruction of islet cells in T1D [@Damond2019-IMC-diabetes].
 
 This example is adapted from the [spatialFDA vignette](
-https://bioconductor.org/packages/devel/bioc/vignettes/spatialFDA/inst/doc/DiabetesIsletExample.html).
+https://bioconductor.org/packages/devel/bioc/vignettes/spatialFDA/inst/doc/DiabetesIsletExampleBrief.html).
 
-```{r, spatialFDA-calc, results="hide"}
-metricRes <- calcMetricPerFov(
-    spe=spe, 
-    selection=c("alpha", "Tc"), 
-    subsetby="image_name", 
-    fun="Gcross", 
-    marks="cell_type", 
-    rSeq=seq(0, 50, l=50), 
-    by=c("patient_stage", "patient_id", "image_name"), 
-    ncores=1)
+```{r, spatialFDA-calc, results="hide", message = FALSE, warning = FALSE}
+colData(spe)[["patient_stage"]] <- factor(colData(spe)[["patient_stage"]])
+#relevel to have non-diabetic as the reference category
+colData(spe)[["patient_stage"]] <- relevel(colData(spe)[["patient_stage"]],
+"Non-diabetic")
+
+#run the spatial statistics inference
+resLs <- crossSpatialInference(
+    spe, 
+    selection = c("alpha", "Tc", "Th"),
+    subsetby = "image_name", 
+    fun = "Gcross", 
+    marks = "cell_type",
+    rSeq = seq(0, 50, length.out = 50), 
+    correction = "rs",
+    sample_id = "patient_id",
+    transformation = "Fisher",
+    eps = 1e-3,
+    delta = "minNnDist",
+    family = mgcv::scat(link = "log"),
+    image_id = "image_name", 
+    condition = "patient_stage",
+    ncores = 1,
+    algorithm = "bam"
+)
+
+names(resLs)
 ```
 
-First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-boxplots].
+The convenience function `crossSpatialInference` calculates first the spatial statistics
+functions and then compares these with a functional additive mixed model across all cell types indicated in `selection`. [@Baddeley2015-book-point-patterns; @Baddeley2005-spatstat; @Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. The result is a list of lists containing the results across all cell types. 
+
+We can plot the overall picture of the interactions by performing an $F$-test on all functional models and plotting both the $p$-value of the tests as well as the mean coefficient over the domain $r$.
+
+```{r, spatialFDA-bubbleplot, warning=FALSE, message=FALSE, fig.width=8, fig.height=4, results='hide'}
+p <- plotCrossHeatmap(resLs, coefficientsToPlot = c("conditionLong_duration(x)",
+                                                    "conditionOnset(x)"), 
+                      QCThreshold = 0, QCMetric = "medianMinIntensity")
+
+p <- p + guides(shape = "none") + 
+  facet_wrap(~factor(coefficient, 
+                     levels = c("conditionOnset(x)", "conditionLong_duration(x)"), 
+                     labels = c("conditionOnset(x)" = "Onset", 
+                                "conditionLong_duration(x)" = "Long-Duration")))
+
+p
+```
+
+
+We will focus on the cell type pair $\alpha$-cytotoxic T cells in more detail below.
+
+```{r, spatialFDA-results-selection, warning=FALSE, message=FALSE, fig.width=4, fig.height=4}
+res <- resLs$alpha_Tc
+names(res)
+```
+
+Each cell type pair then contains the transformed functions (`metricRes`), the untransformed functions (`metricResRaw`), the design matrix used to fit the model (`designmat`), the actual functional model (`mdl`) and some QC metrics of the statistical inference (`curveFittingQC`).
+
+First, we will plot the functional box plot of the transformed spatial statistics functions [@Sun2011-boxplots].
 
 ```{r, spatialFDA-plot, warning=FALSE, message=FALSE, fig.width=4, fig.height=4}
 #| layout-ncol: 3
+#| 
+# extract the metric dataframe
+metricRes <- res$metricRes
+
 # make unique identifiers
 metricRes$ID <- with(metricRes, paste(sep="x", 
     patient_stage, patient_id, image_name))
-
-# removing field of views that have as a curve only zeros;
-# these are cases where there are no cells of one type
-metricRes <- metricRes |>
-    group_by(ID) |>
-    filter(sum(rs) >= 1)
-
-# sqrt transform response
-metricRes$rs <- sqrt(metricRes$rs)
 
 # functional boxplot of spatial statistics curves
 collector <- plotFbPlot(metricRes, "r", "rs", "patient_stage")
@@ -201,10 +242,6 @@ standard PCA in that it decomposes the functional data into the main modes of
 variation. Here, we decompose into eigenfunctions [@Goldsmith2024-refund-package].
 
 ```{r, spatialFDA-fPCA, fig.width=8, fig.height=3}
-# filter out all rows that have 
-# a constant zero part (r ≤ 10)
-metricRes <- filter(metricRes, r > 10)
-
 # prepare 'data.frame' from 'calcMetricRes' 
 # to be in the correct format for FDA
 dat <- prepData(metricRes, "r", "rs")
@@ -231,20 +268,9 @@ from 'Onset' patients is larger than the other two groups.
 Next, we will show how FDA techniques can be used to make inferences from the functional spatial summaries. We use a generalized additive mixed model with a functional response [@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. In such models, some parameters are functional and some are constants (see below).
 
 ```{r, spatialFDA-fGAM, message=FALSE, warning=FALSE, results="hide", fig.width=6}
-# create design matrix
-mm <- model.matrix(~ condition, data=dat)
-head(mm)
+mdl <- res$mdl
+mm <- res$designmat
 
-# fit the model
-mdl <- functionalGam(
-    data=dat, 
-    x=unique(metricRes$r), 
-    designmat=mm, 
-    weights=dat$npoints, 
-    formula=formula(Y ~ 1 + conditionLong_duration + 
-            conditionOnset + s(patient_id, bs="re")), 
-    family=mgcv::scat(link="log"), 
-    algorithm="gam")
 summary(mdl)
 
 lapply(colnames(mm), \(x) {
@@ -260,8 +286,8 @@ to 'Non-diabetic' patients) but also the strength of the effect at each scale.
 The Q-Q plot indicates a reasonable model fit, although not perfect.
 
 ```{r, spatialFDA-qq, fig.width=5}
-qqnorm(resid(mdl), pch=16)
-qqline(resid(mdl), col="red")
+qqnorm(mdl$residuals, pch=16)
+qqline(mdl$residuals, col="red")
 ```
 
 
