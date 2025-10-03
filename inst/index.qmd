@@ -1,24 +1,23 @@
-```{r "welcome"}
+```{r "version_info"}
 #| echo: false
-welcome <- tryCatch(
+version_info <- tryCatch(
     {
         description <- packageDescription("OSTA")
         pkg <- description$Package
         version <- description$Version
         date <- format(Sys.time(), "%B %e, %Y")
         glue::glue(
-            "**Package:** {pkg}<br/>\n", 
-            "**Package version:** {version}<br/>\n", 
-            "**R version:** {R.version.string}<br/>\n", 
-            "**Bioconductor version:** {BiocManager::version()}<br/>\n", 
-            "**Date compiled:** {date}<br/>"
+            "**Version:** {pkg} {version}, ", 
+            "compiled using R {R.version$major}.{R.version$minor} ", 
+            "and Bioconductor {BiocManager::version()}<br/>\n", 
+            "**Date:** {date}<br/>"
         )
     }, 
     error = function(e) {"Local preview"}
 )
 ```
 
-`r welcome`
+`r version_info`
 
 ::: {style="float:right; margin-left:5px; width:32%"}
 
