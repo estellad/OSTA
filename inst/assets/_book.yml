@@ -32,6 +32,7 @@ book:
         - pages/img-workflow-xenium.qmd
     - part: "Platform-independent analyses"
       chapters:
+        - pages/ind-normalization.qmd
         - pages/ind-dimensionality-reduction.qmd
         - pages/ind-clustering.qmd
         - pages/ind-feature-selection-testing.qmd
