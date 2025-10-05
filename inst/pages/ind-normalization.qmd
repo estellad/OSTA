@@ -26,7 +26,6 @@ library(ggspavis)
 library(patchwork)
 library(OSTA.data)
 library(SpatialExperiment)
-library(SpaNorm)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(20000229)
