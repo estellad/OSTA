@@ -3,10 +3,10 @@ desc <- packageDescription("OSTA")
 ```
 
 <i style="color:#0087af">
-This is OSTA v`r desc$Version`, 
-compiled `r format(Sys.time(), "%B %e %Y")`
-using R v`r paste(R.version$major, R.version$minor, sep=".")` 
-and Bioconductor v`r BiocManager::version()`.
+OSTA v`r desc$Version`, 
+compiled on `r format(Sys.time(), "%e %b %Y")`,
+using Bioconductor v`r BiocManager::version()`
+with R v`r paste(R.version$major, R.version$minor, sep=".")`.
 </i>
 
 ::: {style="float:right; margin-left:5px; width:32%"}
