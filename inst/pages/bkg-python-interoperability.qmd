@@ -191,17 +191,34 @@ adata.var_names = adata.var['Symbol'].astype(str)
 sq.pl.spatial_scatter(adata, 
                       color = ["ERBB2"], 
                       img_res_key = "lowres")
-
-# plt.show()  # needed to display plot if running code interactively
+# plt.show() # needed to display plot if running code interactively
 ```
 
-Clean up by removing the `spe.h5ad` file (R code):
-
 ```{r, include=FALSE}
+# clean up by removing the `spe.h5ad` file
 file.remove("spe.h5ad")
 ```
 
 
 ## Appendix
+
+Following are links to several key packages and tools relating to 
+R-Python interoperability, which were mentioned in the sections above:
+
+- `r BiocStyle::Githubpkg("scverse/anndataR")` [@Deconinck2025-anndataR]: 
+R package and community project to work with `AnnData` objects in R, including 
+conversion to and from `SingleCell/SpatialExperiment` and `Seurat` objects
+
+- `r BiocStyle::Biocpkg("zellkonverter")` [@Zappia2020-zellkonverter]: 
+R package to convert between `AnnData` and `SingleCellExperiment` objects, 
+as well as reading from and writing to H5AD
+
+- [reticulate](https://rstudio.github.io/reticulate/) [@Ushey2017-reticulate]: 
+R package and framework to call Python and run Python code in R, translate 
+between R and Python objects, and manage virtual and Conda environments
+
+- `r BiocStyle::Biocpkg("basilisk")` [@Lun2022-basilisk]: 
+R package to install and manage Python environments in R packages and sessions
+
 
 ### References {.unnumbered}
