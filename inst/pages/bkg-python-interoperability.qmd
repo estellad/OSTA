@@ -191,13 +191,11 @@ adata.var_names = adata.var['Symbol'].astype(str)
 sq.pl.spatial_scatter(adata, 
                       color = ["ERBB2"], 
                       img_res_key = "lowres")
-
-# plt.show()  # needed to display plot if running code interactively
+# plt.show() # needed to display plot if running code interactively
 ```
 
-Clean up by removing the `spe.h5ad` file (R code):
-
 ```{r, include=FALSE}
+# clean up by removing the `spe.h5ad` file
 file.remove("spe.h5ad")
 ```
 
