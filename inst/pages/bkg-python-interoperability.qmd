@@ -204,14 +204,23 @@ file.remove("spe.h5ad")
 
 ## Appendix
 
-### Summary of links to key packages and tools
+Following are links to several key packages and tools relating to 
+R-Python interoperability, which were mentioned in the sections above:
 
-Following are links to several key packages and tools relating to R-Python interoperability, which were mentioned in the sections above:
+- `r BiocStyle::Githubpkg("scverse/anndataR")` [@Deconinck2025-anndataR]: 
+R package and community project to work with `AnnData` objects in R, including 
+conversion to and from `SingleCell/SpatialExperiment` and `Seurat` objects
 
-- [anndataR](https://github.com/scverse/anndataR) [@Deconinck2025-anndataR]: R package and community project to work with `AnnData` objects in R, including conversion to and from `SingleCellExperiment`/`SpatialExperiment` and `Seurat` objects
-- `r BiocStyle::Biocpkg("zellkonverter")`: R package to convert between `AnnData` and `SingleCellExperiment` objects
-- [reticulate](https://rstudio.github.io/reticulate/): R package and framework to call Python and run Python code in R, translate between R and Python objects, and manage virtual environments and Conda environments
-- `r BiocStyle::Biocpkg("basilisk")`: R package to install and manage Python environments in R packages and sessions
+- `r BiocStyle::Biocpkg("zellkonverter")` [@Zappia2020-zellkonverter]: 
+R package to convert between `AnnData` and `SingleCellExperiment` objects, 
+as well as reading from and writing to H5AD
+
+- [reticulate](https://rstudio.github.io/reticulate/) [@Ushey2017-reticulate]: 
+R package and framework to call Python and run Python code in R, translate 
+between R and Python objects, and manage virtual and Conda environments
+
+- `r BiocStyle::Biocpkg("basilisk")` [@Lun2022-basilisk]: 
+R package to install and manage Python environments in R packages and sessions
 
 
 ### References {.unnumbered}
