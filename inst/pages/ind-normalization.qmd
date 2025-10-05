@@ -1,4 +1,4 @@
-# Normalization {#sec-crs-normalization}
+# Normalization {#sec-ind-normalization}
 
 ## Preamble
 
@@ -8,15 +8,15 @@ Normalization is a critical step in the analysis of transcriptomics and other hi
 
 In single-cell RNA sequencing, normalization aims at removing differences in sequencing coverage between libraries (cells). Such differences in _library size_ are typically accounted for by scaling the counts in each cell by a size factor, which is often computed as the total number of counts for that cell (or a robust variant thereof); see [OSCA](https://bioconductor.org/books/release/OSCA.basic/normalization.html).
 
-Single-cell normalization methods have been widely used for the analysis of ST data, given the similarity between the two technologies, which both yield count data. While this is justifiable for sequencing-based ST technologies, it is less clear that this is appropriate for imaging-based ones.
+Single-cell normalization methods have been widely used for the analysis of spatial transcriptomics (ST) data, given the similarity between the two technologies, which both yield count data. While this is justifiable for sequencing-based ST technologies, it is less clear that this is appropriate for imaging-based ones.
 
-In fact, in imaging-based ST the total number of counts is driven by the number of probes that successfully hybridize to their target transcripts within each cell and not by the sequencing coverage, and it is less clear that this leads to the same compositional biases as in sequencing platforms. Moreover, these technologies often employ targeted gene panels rather than whole-transcriptome profiling, which may lead to confounding between total counts and biology, as shown by @Atta2024-gene-count and @Bhuva2024-library-size.
+In fact, in imaging-based ST, the total number of counts is driven by the number of probes that successfully hybridize to their target transcripts within each cell and not by the sequencing coverage. It is hence less clear that this leads to the same compositional biases as in sequencing platforms. Moreover, these technologies often employ targeted gene panels rather than whole-transcriptome profiling, which may lead to confounding between total counts and biology, as shown by @Atta2024-gene-count and @Bhuva2024-library-size.
 
 Here, we will review both scaling normalization methods and spatially-aware normalization methods that have been specifically developed for ST data.
 
 ### Dependencies
 
-```{r deps, message=FALSE, warning=FALSE}
+```{r load-deps, message=FALSE, warning=FALSE}
 library(scran)
 library(scater)
 library(igraph)
@@ -27,7 +27,6 @@ library(patchwork)
 library(OSTA.data)
 library(SpatialExperiment)
 library(SpaNorm)
-
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(20000229)
@@ -36,7 +35,7 @@ set.seed(20000229)
 (spe <- readRDS("img-spe_qc.rds"))
 ```
 
-```{r load-anno}
+```{r load-data}
 # get annotations from 'BiocFileCache'
 # (data has been retrieved already)
 id <- "Xenium_HumanBreast1_Janesick"
@@ -51,30 +50,14 @@ spe$Label <- df$Annotation[cs]
 
 ## Scaling normalization
 
-As a baseline, we will apply log-library size normalization, as implemented in the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017-scater].
+As a baseline, we will apply log-library size normalization, as implemented in the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017-scater]. 
+Note that the `logNormCounts` function adds a new assay named `logcounts` to the `spe` object, which contains the normalized expression values on the log scale. 
 
-```{r log}
+```{r norm-log}
 spe$library_size <- librarySizeFactors(spe)
-spe <- logNormCounts(spe, size.factors = spe$library_size)
-spe
+spe <- logNormCounts(spe, size.factors=spe$library_size)
+assayNames(spe)
 ```
-
-Note that the `logNormCounts` function adds a new assay named `logcounts` to the `spe` object, which contains the normalized expression values on the log scale. We can check the distribution of size factors across cell types, to highlight any potential confounding.
-
-```{r plot-size-factors, collapse=TRUE}
-#| code-fold: true
-
-df <- data.frame(colData(spe), spatialCoords(spe))
-ggplot(df, aes(x = Label, y = library_size)) +
-  geom_boxplot() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Distribution of size factors across cell types",
-       x = "Cell type",
-       y = "Size factor")
-```
-
-We can clearly see that the size factors of tumor cells are systematically higher than those of other cell types, which is a sign of confounding between library size and biology.
 
 An alternative that has been suggested is normalization by cell area (or volume). In principle, this is equivalent to assuming a constant transcription rate across cells and focusing on transcript density, rather than transcript counts, as a measure of gene expression.
 
@@ -82,43 +65,58 @@ Nevertheless, it is important to highlight that cell area itself is not known a 
 
 To compute area-derived size factors, we can use the `cell_area` column in the `colData` of the `spe` object, which contains the area of each cell as estimated by the segmentation.
 
-```{r}
+```{r norm-area}
 sizeFactors(spe) <- spe$cell_area / median(spe$cell_area)
-
 spe <- logNormCounts(spe, name="normalized_by_area")
 ```
 
-We can compare the area-derived scaling factors, with the library size factors.
+We can check the distribution of library and area-derived size factors across cell types, to highlight any potential confounding:
 
-```{r plot-size-factors-area, collapse=TRUE}
+```{r plot-size-factors-boxplot, fig.width=9, fig.height=5}
 #| code-fold: true
 df <- data.frame(colData(spe), spatialCoords(spe))
-
-ggplot(df, aes(x = Label, y = sizeFactor)) +
-  geom_boxplot() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Distribution of area-derived factors across cell types",
-       x = "Cell type",
-       y = "Area-derived factor")
-
-ggplot(df, aes(x = sizeFactor, y = library_size, color = Label)) +
-  geom_point() +
-  theme_bw() +
-  labs(title = "Relation between area-derived and library size factors",
-       x = "Area-derived factor",
-       y = "Library size factor")
+p1 <- ggplot(df, aes(y=library_size)) + ggtitle("Library size factors") 
+p2 <- ggplot(df, aes(y=sizeFactor)) + ggtitle("Area-derived factors") 
+(p1 + p2) &
+    geom_boxplot(aes(Label, fill=Label)) &
+    labs(x="Cell type", y="Size factor") &
+    scale_fill_manual(values=unname(pals::tableau20())) &
+    theme_bw() & theme(
+        aspect.ratio=1,
+        legend.position="none",
+        panel.grid.minor=element_blank(),
+        plot.title=element_text(hjust=0.5),
+        axis.text.x=element_text(angle=45, hjust=1))
 ```
 
-While there is a general correlation between total counts and cell area, the relationship is cell-type specific, with tumor cells showing systematically higher counts for a given area, and with stromal cells showing generally larger areas. This suggests that the choice of normalization may have a significant impact on downstream analyses, and should be carefully considered in the context of the specific dataset and biological questions at hand.
+We can clearly see that library size factors of tumor cells are systematically higher than those of other cell types, which is a sign of confounding between library size and biology.
 
-We next look at the difference in normalized expression values between the two normalization methods and select the top 10 genes that show the largest differences.
+We can also compare the area-derived scaling factors with the library size factors:
+
+```{r plot-size-factors-scatter, fig.width=6, fig.height=6}
+#| code-fold: true
+ggplot(df, aes(sizeFactor, library_size)) + 
+    geom_point(shape=16, stroke=0, size=0.4) +
+    geom_abline(linewidth=0.4, col="blue") + 
+    facet_wrap(~Label) +
+    labs(x="Area-derived factor", y="Library size factor") + 
+    ggtitle("Relation between area-derived and library size factors") +
+    coord_equal() + theme_bw() + theme(
+        panel.grid.minor=element_blank(),
+        plot.title=element_text(hjust=0.5))
+```
+
+While there is a general correlation between total counts and cell area, the relationship is cell-type specific, with tumor cells showing systematically higher counts for a given area, and stromal cells showing generally larger areas.
+
+This suggests that the choice of normalization may have a significant impact on downstream analyses, and should be carefully considered in the context of the specific dataset and biological questions at hand.
+
+We next look at the difference in normalized expression values between the two normalization methods, and select the top 10 genes that show the largest differences.
 
 ```{r top-genes}
 mean_libs <- rowMeans(assays(spe)$logcounts)
 mean_area <- rowMeans(assays(spe)$normalized_by_area)
 diff <- abs(mean_libs - mean_area)
-ord <- order(diff, decreasing = TRUE)
+ord <- order(diff, decreasing=TRUE)
 top_diff <- diff[ord[1:10]]
 names(top_diff)
 ```
@@ -127,60 +125,48 @@ By looking at the top genes, we can see several epithelial cell markers, such as
 
 Interestingly, looking at the expression of EPCAM across the tissue, we can see that area normalization enhances the contrast between tumor and non-tumor regions, while library size normalization yields a more diffuse expression pattern.
 
-```{r plot-genes, collapse=TRUE}
+```{r plot-genes, fig.height=4, fig.width=10}
 #| code-fold: true
+cd <- data.frame(colData(spe), spatialCoords(spe))
 
-df_ls <- data.frame(colData(spe), spatialCoords(spe), as.matrix(t(logcounts(spe)[ord[1:10],])))
-df_area <- data.frame(colData(spe), spatialCoords(spe), as.matrix(t(assay(spe, "normalized_by_area")[ord[1:10],])))
+mx <- logcounts(spe)[ord[1:10], ]
+df_ls <- cbind(cd, as.matrix(t(mx)))
 
-p1 <- ggplot(df_ls, aes(x = x_centroid, y = y_centroid)) +
-  geom_point(aes(color = EPCAM), shape=16, stroke=0, size=0.4) +
-  scale_color_viridis_c() +
-  coord_equal() +
-  theme_void() +
-  labs(title = "Library size normalization") +
-  theme(legend.position = "bottom")
+mx <- assay(spe, "normalized_by_area")[ord[1:10], ]
+df_area <- cbind(cd, as.matrix(t(mx)))
 
-p2 <- ggplot(df_area, aes(x = x_centroid, y = y_centroid)) +
-  geom_point(aes(color = EPCAM), shape=16, stroke=0, size=0.4) +
-  scale_color_viridis_c() +
-  coord_equal() +
-  theme_void() +
-  labs(title = "Area normalization") +
-  theme(legend.position = "bottom")
+p1 <- ggplot(df_ls) + labs(title="Library size normalization")
+p2 <- ggplot(df_area) + labs(title="Area normalization") 
 
-p1 + p2
+(p1 + p2) & 
+    geom_point(
+        aes(x_centroid, y_centroid, col=EPCAM), 
+        shape=16, stroke=0, size=0.4) &
+    scale_color_viridis_c() & coord_equal() & 
+    theme_void() & theme(legend.position="bottom")
 ```
 
 This is even clearer when looking at the expression of EPCAM stratified by cell type.
 
-```{r plot-genes-box, collapse=TRUE}
+```{r plot-genes-box, fig.width=9, fig.height=6}
 #| code-fold: true
-
-p3 <- ggplot(df_ls, aes(x = Label, y = EPCAM)) +
-  geom_boxplot() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Library size normalization",
-       x = "Cell type",
-       y = "log-normalized expression")
-
-p4 <- ggplot(df_area, aes(x = Label, y = EPCAM)) +
-  geom_boxplot() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Area normalization",
-       x = "Cell type",
-       y = "log-normalized expression")
-
-p3 + p4
+(p1 + p2) &
+    geom_boxplot(
+        aes(Label, EPCAM, fill=Label), 
+        outlier.shape=16, outlier.stroke=0) &
+    scale_fill_manual(values=unname(pals::tableau20())) &
+    labs(x="Cell type", y="EPCAM expression") &
+    theme_bw() & theme(
+        aspect.ratio=1,
+        legend.position="none",
+        panel.grid.minor=element_blank(),
+        plot.title=element_text(hjust=0.5),
+        axis.text.x=element_text(angle=45, hjust=1))
 ```
 
 ## Spatially-aware normalization
 
-`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2025-SpaNorm] is a spatially-aware normalization method that uses spatial information alongside gene expression to decompose spatially-smoothed variation into a technical and biological component. Using generalized linear models and percentile-invariant adjusted counts, SpaNorm provides normalized expression values for downstream analyses.
-
-Given the high computational cost of SpaNorm, we do not run it here; we refer to the package vignette for details.
+`r BiocStyle::Biocpkg("SpaNorm")` [@Salim2025-SpaNorm] is a spatially-aware normalization method that uses spatial information alongside gene expression to decompose spatially-smoothed variation into a technical and biological component. Using generalized linear models and percentile-invariant adjusted counts, `SpaNorm` provides normalized expression values for downstream analyses. [Given the high computational cost of `SpaNorm`, we do not run it here; we refer to the package vignette for details.]{.aside}
 
 ## Appendix
 
