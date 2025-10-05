@@ -1,27 +1,18 @@
-```{r "version_info"}
-#| echo: false
-version_info <- tryCatch(
-    {
-        description <- packageDescription("OSTA")
-        pkg <- description$Package
-        version <- description$Version
-        date <- format(Sys.time(), "%B %e, %Y")
-        glue::glue(
-            "**Version:** {pkg} {version}, ", 
-            "compiled using R {R.version$major}.{R.version$minor} ", 
-            "and Bioconductor {BiocManager::version()}<br/>\n", 
-            "**Date:** {date}<br/>"
-        )
-    }, 
-    error = function(e) {"Local preview"}
-)
+```{r echo=FALSE}
+desc <- packageDescription("OSTA")
 ```
 
-`r version_info`
+<i style="color:#0087af">
+This is OSTA v`r desc$Version`, 
+compiled `r format(Sys.time(), "%B %e %Y")`
+using R v`r paste(R.version$major, R.version$minor, sep=".")` 
+and Bioconductor v`r BiocManager::version()`.
+</i>
 
 ::: {style="float:right; margin-left:5px; width:32%"}
 
-<!-- get 'images/carousel/*.png' & shuffle them randomly for display via 'inst/carousel.R' -->
+<!-- get 'images/carousel/*.png' & display them alphabetically, 
+flipping with a 3.333 second delay via 'inst/carousel.R' -->
 
 ```{r "carousel"}
 #| warning: false
