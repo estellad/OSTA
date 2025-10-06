@@ -156,30 +156,39 @@ destruction of islet cells in T1D [@Damond2019-IMC-diabetes].
 This example is adapted from the [spatialFDA vignette](
 https://bioconductor.org/packages/devel/bioc/vignettes/spatialFDA/inst/doc/DiabetesIsletExampleBrief.html).
 
+The first important question is in what range we want to consider cell type interactions. We provide a generalisation of a guideline for the maximum radius of @Baddeley2015-book-point-patterns. This guideline is to not consider any radii beyond $1/2$ of the bounding-circle radius of an image as else effects at the border of a field-of-view become too extreme. The histogram of all bounding-circle radii across all images and $1/2$ of the smallest bin of this histogram as a heuristic are shown below. 
+
+```{r, rMaxHeuristic, results="hide", message = FALSE, warning = FALSE, fig.width=8, fig.height=4}
+p <- rMaxHeuristic(spe,
+    subsetby="image_number", marks="cell_type"
+)
+p
+```
+
+We will consider a radius of $50 \mu m$ to be a) below the heurstic of $91 \mu m$ defined above and consider shorter range interactions in our data. With a cell diameter of $\sim 10 \mu m$ the `rMax` of $50 \mu m$ results in interactions across 5 cell pairs. 
+
+Apart from the radius we have to define some other parameters as well. Important are: `selection` to define the cell types to consider (if `NULL` it will compare all), `fun` to specify the spatial function, `marks` to specify the cell type annotation in the `colData`, `correction` to specify which border correction to compare in the functional model, `transformation` if a variance-stabilising transformation shall be applied. The parameters `sample_id, image_id, condition` are important for the statistical inference. All other parameters can be specified to achieve better results but there are defaults specified as well. 
+
 ```{r, spatialFDA-calc, results="hide", message = FALSE, warning = FALSE}
-colData(spe)[["patient_stage"]] <- factor(colData(spe)[["patient_stage"]])
 #relevel to have non-diabetic as the reference category
-colData(spe)[["patient_stage"]] <- relevel(colData(spe)[["patient_stage"]],
-"Non-diabetic")
+spe$patient_stage <- relevel(factor(spe$patient_stage), "Non-diabetic")
 
 #run the spatial statistics inference
 resLs <- crossSpatialInference(
     spe, 
-    selection = c("alpha", "Tc", "Th"),
-    subsetby = "image_name", 
-    fun = "Gcross", 
-    marks = "cell_type",
-    rSeq = seq(0, 50, length.out = 50), 
-    correction = "rs",
-    sample_id = "patient_id",
-    transformation = "Fisher",
-    eps = 1e-3,
-    delta = "minNnDist",
-    family = mgcv::scat(link = "log"),
-    image_id = "image_name", 
-    condition = "patient_stage",
-    ncores = 1,
-    algorithm = "bam"
+    selection=c("alpha", "Tc", "Th"),
+    fun="Gcross", 
+    marks="cell_type",
+    rSeq=seq(0, 50, length.out = 50), 
+    correction="rs",
+    transformation="Fisher",
+    eps=1e-3,
+    delta="minNnDist",
+    family=mgcv::scat(link = "log"),
+    sample_id="patient_id",
+    image_id="image_name", 
+    condition="patient_stage",
+    algorithm="bam"
 )
 
 names(resLs)
@@ -204,8 +213,7 @@ p <- p + guides(shape = "none") +
 p
 ```
 
-
-We will focus on the cell type pair $\alpha$-cytotoxic T cells in more detail below.
+This plot highlights an increased co-localisation of T-cell types with pancreatic $\alpha$ cells in Onset diabetes but not in Long-duration diabetes. This is an interesting overall finding and we will focus on the cell type pair $\alpha$-cytotoxic T cells in more detail below.
 
 ```{r, spatialFDA-results-selection, warning=FALSE, message=FALSE, fig.width=4, fig.height=4}
 res <- resLs$alpha_Tc
@@ -239,7 +247,8 @@ than those from 'Non-diabetic' or 'Long-duration' patients.
 
 Another exploratory technique is functional PCA (FPCA). FPCA is similar to 
 standard PCA in that it decomposes the functional data into the main modes of 
-variation. Here, we decompose into eigenfunctions [@Goldsmith2024-refund-package].
+variation. Here, we decompose the functional data into eigenfunctions 
+and can plot the first two principal components as a biplot [@Goldsmith2024-refund-package].
 
 ```{r, spatialFDA-fPCA, fig.width=8, fig.height=3}
 # prepare 'data.frame' from 'calcMetricRes' 
@@ -280,7 +289,7 @@ lapply(colnames(mm), \(x) {
 ```
 
 With the functional GAM, we see not only the effect (e.g., increased 
-colocalization of alpha and cytotoxic T cells in 'Onset' patients compared
+colocalization of $\alpha$ and cytotoxic T cells in 'Onset' patients compared
 to 'Non-diabetic' patients) but also the strength of the effect at each scale.
 
 The Q-Q plot indicates a reasonable model fit, although not perfect.
@@ -290,6 +299,11 @@ qqnorm(mdl$residuals, pch=16)
 qqline(mdl$residuals, col="red")
 ```
 
+In summary we have seen that there is increased co-localisation of T-cell types
+to the pancreatic islets early in the disease and that this recruitment is absent
+later in the disease. This increased co-localisation in onset diabetes is happening
+at shorter scales around $\alpha$ cells indicating that effects close to the 
+pancreatic islets are more affected than those further away.
 
 ## Appendix
 
