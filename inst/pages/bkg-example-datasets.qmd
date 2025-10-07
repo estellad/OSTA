@@ -1,8 +1,8 @@
-# Example datasets {#sec-bkg-datasets}
+# Example datasets {#sec-bkg-example-datasets}
 
 ## Introduction
 
-For the examples in this book, we will rely on a set of publicly available datasets that cover different sequencing-based and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics), and CosMx (NanoString).
+For the examples in this book, we will rely on a set of publicly available datasets that cover different sequencing-based and imaging-based platforms, namely: Visium, Visium HD, Xenium (10x Genomics), and CosMx (Bruker).
 
 This chapter provides an overview of the example datasets used in the code examples in the later chapters.
 
@@ -11,7 +11,7 @@ This chapter provides an overview of the example datasets used in the code examp
 
 ### OSF repository and OSTA.data
 
-These datasets have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` package. For convenience, we have implemented the `r BiocStyle::Biocpkg("OSTA.data")` package to:
+These datasets have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` CRAN package. For convenience, we have implemented the `r BiocStyle::Biocpkg("OSTA.data")` Bioconductor package to:
 
 - list and retrieve datasets available through our OSF node
 - cache data as a *.zip* archive using `r BiocStyle::Biocpkg("BiocFileCache")`
@@ -27,28 +27,30 @@ OSTA.data_list()
 
 ### STexampleData
 
-In addition, several datasets are available from the `r BiocStyle::Biocpkg("STexampleData")` package as pre-formatted `SpatialExperiment` and `SingleCellExperiment` formats. These data objects are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and can be loaded within R code examples by querying `ExperimentHub` or using loader functions provided in the `STexampleData` package.
+In addition, several datasets are available from the `r BiocStyle::Biocpkg("STexampleData")` Bioconductor package as pre-formatted `SpatialExperiment` and `SingleCellExperiment` formats. These data objects are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and can be loaded in R by querying `ExperimentHub` or using loader functions provided in the `STexampleData` package.
 
-```{r list-stexampledata, message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+```{r list-stexampledata, message=FALSE, warning=FALSE}
 library(STexampleData)
-?STexampleData
+
+# show help file listing datasets
+# ?STexampleData
 ```
 
 
 ## Datasets
 
-Below, we briefly summarize the characteristics of each dataset, and note across which parts of the book each dataset is being used.
+Below, we briefly summarize the characteristics of several key datasets, and note across which parts of the book these are being used.
 
 
 ### HumanBreast_Janesick
 
-In the underlying paper, the Xenium data (2 replicates) were accompanied by consecutive slices of Chromium and Visium data. Therefore, these replicates are expected to have nearly identical biological findings. By transferring Chromium cell type labels to spatial technologies, such as Visium (with full transcriptome) and Xenium (at single-cell resolution), we can combine analytical insights from different platforms.
+In the underlying paper [@Janesick2023-high-res], the Xenium data (2 replicates) were accompanied by consecutive slices of Chromium and Visium data. Therefore, these replicates are expected to have nearly identical biological findings. By transferring Chromium cell type labels to spatial technologies, such as Visium (with full transcriptome) and Xenium (at single-cell resolution), we can combine analytical insights from different platforms.
 
-- @Janesick2023
+- reference: @Janesick2023-high-res
 - source: [10x Genomics](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
 - annotations: [cell type worksheet](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast) (all platforms)
 - **Chromium**
-  - source: [GSM7782698](https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast)
+  - source: [GSM7782698](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7782698)
   - 18,082 genes x 30,365 cells
 - **Visium**
   - source: [GSM7782699](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7782699)
@@ -63,21 +65,21 @@ In the underlying paper, the Xenium data (2 replicates) were accompanied by cons
 
 In the underlying paper, there are both normal adjacent tissue (NAT) and colorectal carcinoma (CRC) samples from 5 patients. The Visium HD data (P2 CRC) were accompanied by consecutive slices of Chromium, Visium, and Xenium data. Therefore, we can jointly analyze these modalities.
 
-- @Oliveira2024
+- reference: @deOliveira2025-high-def
 - source: [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression/dataset-human-crc)
 - annotations: [repository](https://github.com/10XGenomics/HumanColonCancer_VisiumHD/tree/main/MetaData) (Chromium & VisiumHD deconvolution)
 - **Chromium**
-    -   18,082 genes x 279,609 cells
-        -   P2, P3, P5 NAT
-        -   P1-5 CRC
+    - 18,082 genes x 279,609 cells
+        - P2, P3, P5 NAT
+        - P1-5 CRC
 - P2 CRC:
   - **Visium**
     - 18,085 genes x 4,269 spots
   - **VisiumHD**
     - 18,085 genes x
-      - 8,731,400 bins (2um)
-        - 545,913 bins (8um)
-        - 137,051 bins (16um)
+      - 8,731,400 bins (2µm)
+      - 545,913 bins (8µm)
+      - 137,051 bins (16µm)
   - **Xenium**
     - 422 RNA targets x 340,837 cells
 
@@ -86,7 +88,7 @@ In the underlying paper, there are both normal adjacent tissue (NAT) and colorec
 
 There are two sections from the CosMx mouse brain sample, namely "coronal hemisphere" (sample 1) and "coronal hippocampus and cortex" (sample 2).
 
-- source: [NanoString](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/cosmx-smi-mouse-brain-ffpe-dataset/)
+- source: [Bruker](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/cosmx-smi-mouse-brain-ffpe-dataset/)
 - 950 RNA targets x
   - 48,556 cells (coronal hemisphere)
   - 38,996 cells (coronal hippocampus and cortex)
@@ -96,7 +98,7 @@ There are two sections from the CosMx mouse brain sample, namely "coronal hemisp
 
 The CosMx human prefrontal cortex sample has a larger gene panel of \~6,000 RNA targets.
 
-- source: [NanoString](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-frontal-cortex-ffpe-dataset/)
+- source: [Bruker](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-frontal-cortex-ffpe-dataset/)
 - 6,278 RNA targets x 188,686 cells
 
 

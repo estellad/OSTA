@@ -4,7 +4,7 @@
 
 ### Introduction
 
-The analyses demonstrated here will use a 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023] and a 1k-plex CosMx data (NanoString) of human non-small cell lung cancer (NSCLC).
+The analyses demonstrated here will use a 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section [@Janesick2023-high-res] and a 1k-plex CosMx data (NanoString) of human non-small cell lung cancer (NSCLC).
 
 In the first section, we demonstrate QC procedures applied to the Xenium dataset, and save the post-QC dataset for use in later chapters. In the second section, we demonstrate additional CosMx-specific QC procedures on the CosMx dataset.
 
@@ -14,13 +14,13 @@ These datasets can be accessed through the `r BiocStyle::Biocpkg("STexampleData"
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
-library(SpatialExperiment)
-library(STexampleData)
-library(scater)
 library(dplyr)
 library(tidyr)
+library(scater)
 library(ggplot2)
 library(patchwork)
+library(STexampleData)
+library(SpatialExperiment)
 ```
 
 
@@ -34,10 +34,10 @@ xen <- Janesick_breastCancer_Xenium_rep1()
 
 Plot the x-y coordinates.
 
-```{r plot-xy-xenium, echo=FALSE, out.width="66%", fig.align="center"}
+```{r plot-xy-xenium, echo=TRUE, out.width="66%", fig.align="center"}
 par(mar = rep(0, 4))
-plot(spatialCoords(xen), cex = 0.1, pch = 16, asp = 1, axes = FALSE, 
-     xlab = "", ylab = "")
+plot(spatialCoords(xen), cex = 0.1, pch = 16, asp = 1, 
+     axes = FALSE, xlab = "", ylab = "")
 ```
 
 
@@ -69,7 +69,7 @@ Imaging-based ST data relies on imaging a 2D tissue section. Cells thus represen
 
 When we inspect total counts and cell areas as separate (univariate) distributions, both appear to follow approximate log-normal distributions.
 
-```{r plot-qc-1d, fig.width=6, fig.height=2}
+```{r plot-qc-1d, fig.width=6, fig.height=2, warning=FALSE}
 #| code-fold: true
 fd <- pivot_longer(df, c("cell_area", "total_counts"))
 mu <- summarise_at(group_by(fd, name), "value", median)
@@ -107,7 +107,7 @@ ggplot(fd, aes(x_centroid, y_centroid, col = value)) +
 
 In a bivariate setting, however, we observe a bimodal distribution with subsets of cells having more or less than 1 count per $\mu m^2$ (diagonal line).
 
-```{r plot-qc-2d-one, fig.width=3, fig.height=3}
+```{r plot-qc-2d-one, fig.width=3, fig.height=3, warning=FALSE}
 #| code-fold: true
 df <- data.frame(colData(spe), spatialCoords(spe))
 
@@ -116,12 +116,13 @@ ggplot(df, aes(cell_area, total_counts)) +
   geom_abline(intercept = 0, slope = 1, col = "blue") + 
   scale_x_continuous(trans = "log10") + 
   scale_y_continuous(trans = "log10") + 
+  geom_density2d() +
   theme_minimal() + 
   theme(aspect.ratio = 1, 
         panel.grid.minor = element_blank())
 ```
 
-In some cases, a peculiar count-area distribution might be indicative of segmentation faults. When groups of cells are merged together, for example, we might observe fewer counts than expected for a given area (when they are far apart, i.e., empty space is being segmented).
+In some cases, a peculiar count-area distribution might be indicative of segmentation problems. When groups of cells are merged together, for example, we might observe fewer counts than expected for a given area (when they are far apart, i.e., empty space is being segmented).
 
 Considering the spatial organization of cells falling above / below 1 count per $\mu m^2$ here, it is reasonable to assume that they represent distinct transcriptional states (not technical artefacts).
 
@@ -206,7 +207,7 @@ spatialCoordsNames(spe) <- c("x", "y")
 
 ### FOV effects
 
-Imaging-based ST data are acquired through iterative imaging of predefined rectangular regions, so-called fields of view (FOV).
+Imaging-based ST data from CosMx are acquired through iterative imaging of predefined rectangular regions, so-called fields of view (FOV).
 
 ```{r cosmx-plot-xy, fig.width=3, fig.height=2, message=FALSE, warning=FALSE}
 #| code-fold: true

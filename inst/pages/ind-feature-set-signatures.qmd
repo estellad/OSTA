@@ -1,4 +1,4 @@
-# Feature-set signatures {#sec-crs-signatures}
+# Feature-set signatures {#sec-ind-feature-set-signatures}
 
 ## Preamble
 
@@ -62,7 +62,7 @@ length(gs)
 range(sapply(gs, length)) 
 ```
 
-Next, we score these with `r BiocStyle::Biocpkg("AUCell")` [@Aibar2017-AUCell],
+Next, we score these with `r BiocStyle::Biocpkg("AUCell")` [@Aibar2017-SCENIC],
 a rank-based approach that (i) ranks genes for every observation (here, cells), 
 and (ii) compute AUC values for each gene set. These represent the fraction of 
 genes among top-ranked genes (default 5%) that are contained in a given set; 

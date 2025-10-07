@@ -1,17 +1,17 @@
-# Registration {#sec-crs-registration}
+# Spatial registration {#sec-crs-spatial-registration}
 
 ## Preamble
 
 ### Introduction
 
-Spatial **registation** is defined as the task of mapping features or spatial locations of observations from a **query** to a **reference** assay (@Friston1995, @Lewis2021, @Rajewsky2019-novoSpaRc). 
+Spatial registation is defined as the task of mapping features or spatial locations of observations from a *query* to a *reference* assay [@Friston1995-registration; @Lewis2021-spatial-omics; @Nitzan2019-novoSpaRc]. 
 Here, the reference is a spatially-resolved dataset whereas the query could be an assay with or without spatial resolution. 
 
 In this chapter, we demonstrate methods that are available in R/Bioconductor for aligning (or registering) spatially-resolved datasets, where the utility and function of the alignment method is defined by the modality of the query dataset. 
 
 We will touch upon two cases: 
-**(1) alignment**, where both reference and query data are spatially resolved; and, 
-**(2) reconstruction**, where spatial information is inferred from non-spatial data.
+(1) *alignment*, where both reference and query data are spatially resolved; and, 
+(2) *reconstruction*, where spatial information is inferred from non-spatial data.
 
 ### Dependencies
 
@@ -22,7 +22,7 @@ library(SpatialExperiment)
 library(SpatialExperimentIO)
 ```
 
-In this demo, we will use the Xenium data generated from a human breast cancer biopsy [@Janesick2023], which is available from `r BiocStyle::Biocpkg("OSTA.data")` (see @sec-bkg-datasets):
+In this demo, we will use the Xenium data generated from a human breast cancer biopsy [@Janesick2023-high-res], which is available from `r BiocStyle::Biocpkg("OSTA.data")` (see @sec-bkg-example-datasets):
 
 ```{r load-data, message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repo
@@ -44,8 +44,8 @@ Image alignment and registration methods provide transformations to map spatial 
 
 Strategies and approaches for aligning spatial omic assays differ depending on the modalility and/or instrument used to generate these data. 
 These methods could be categorized into two classes, where some incorporate 
-**(i)** the morphology of microscopy images (*image registration*) of reference and query data [@Friston1995] and others that rely on the
-**(ii)** spatial locations of observations (cells or spots) and the distribution of omic profiles (*omics coverage*) [@Kiessling2024].
+**(i)** the morphology of microscopy images (*image registration*) of reference and query data [@Friston1995-registration] and others that rely on the
+**(ii)** spatial locations of observations (cells or spots) and the distribution of omic profiles (*omics coverage*) [@Kiessling2024-spatial-multi-omics].
 
 ### Image-based
 
@@ -110,51 +110,6 @@ p + geom_point(
     shape=16, stroke=0, size=0.2, alpha=0.4, 
     col="red", inherit.aes=FALSE) 
 ```
-
-<!--
-
-We will use `VoltRon` to align the Xenium data with the post Xenium H&E image captured from the same tissue section following the Xenium in situ experiment. 
-We define a `VoltRon` object from an H&E image using the `importImageData()` function, but first select a resolution from the `ome.tiff` file of the H&E:
-
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-hne_tif <- read.image("GSM7780153_Post-Xenium_HE_Rep1.ome.tif", resolution=7)
-hne_png <- "Xenium_H&E_res7.png"
-EBImage::writeImage(hne_tif, files=hne_png, type="png")
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-hne_png <- "../images/crs-registration-Xenium_H&E_res7.png"
-```
-
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-hne <- importImageData(image=hne_png)
-```
-
-Before executing the automated registration, we have to convert the `SpatialExperiment` into a `VoltRon` object. 
-Here, the `assay_type` argument defines the spatial entity type of the `SpatialExperiment`, which is `cell` for spatial datasets in single cell resolution.
-
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-vol <- as.VoltRon(xen, assay_type="cell", assay_name="Xenium")
-```
-
-The `registerSpatialData` function performs the registration using a Shiny application which allows the user to manipulate images of both modalities. 
-We first select the `Automated` option for non-manual registration. 
-We choose `Homography` method for registration which incorporates the **SIFT** method for detecting landmark points across two images which are paired by the **FLANN** method later [@Lowe2004-SIFT]. 
-
-Before executing alignment, we can use the interface to negate the DAPI image (this step is needed to transform the DAPI image to make it similar to an H&E image). 
-We then flip the DAPI image horizontally flip to synchronize the perspective of both images before automated alignment with SIFT and FLANN. 
-These prior transformations help SIFT to find better landmarks.
-
-```{r eval=FALSE, message=FALSE, warning=FALSE}
-reg <- registerSpatialData(
-    reference_spatdata=hne, 
-    query_spatdata=vol)
-```
-
-The returning value of the function will have a list of `VoltRon` objects that includes the query spatial data that is registered to the reference. 
-We can also convert the registered Xenium data using the `as.SpatialExperiment` function available in `VoltRon`.
-
--->
 
 At this stage, one may use `VoltRon` (or another tool) in order to register the query spatial data onto the reference (in this example, query = cell centroids, reference = H&E staining).
 
@@ -241,7 +196,7 @@ A number of R/Python frameworks can be used to automatically or manually align m
 
 ![](../images/crs-registration-alignment.png){width="75%" fig-align="center" alt="The Shiny application interface for alignment Spatial datasets stored in VoltRon objects"}
 
-- `r BiocStyle::CRANpkg("RNiftyReg")` [@Clayden2015-RNiftyReg] is an R wrapper package, and can be combined with `r BiocStyle::CRANpkg("mmand")` for automated image registration using both rigid and non-rigid approaches. Users can extract and apply the resulting transformation matrix on spatial coordinates of a `SpatialExperiment` object. However, the automation does not work well on images with very different orientation, scale, and intensity (e.g., Xenium and Visium; see also @sec-crs-workflow-xenvis). Here is a demonstration with external data, before and after registration of the two slices:
+- `r BiocStyle::CRANpkg("RNiftyReg")` is an R wrapper package, and can be combined with `r BiocStyle::CRANpkg("mmand")` for [automated image registration](https://user2015.math.aau.dk/presentations/46.pdf) using both rigid and non-rigid approaches. Users can extract and apply the resulting transformation matrix on spatial coordinates of a `SpatialExperiment` object. However, the automation does not work well on images with very different orientation, scale, and intensity (e.g., Xenium and Visium; see also @sec-crs-workflow-xenvis). Here is a demonstration with external data, before and after registration of the two slices:
 
 <center>
 ![](../images/xenvis-RNiftyReg1.png){width=66%}
@@ -264,7 +219,7 @@ Spatial alignment approaches that depend only on the spatial distribution of omi
 are mostly available in Python frameworks which could be used in R through packages 
 such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`.
 
-- **PASTE** is a Python-based framework [@Zeira2022-paste] that perform pairwise alignment 
+- **PASTE** is a Python-based framework [@Zeira2022-PASTE] that perform pairwise alignment 
 between serial sections by solving a fused Gromov–Wasserstein optimal transport problem. 
 The solution finds a mapping between each pair of adjacent slices by minimizing a transport 
 cost that depends on both gene expression profiles and distance between spots of each slice.
@@ -272,7 +227,7 @@ cost that depends on both gene expression profiles and distance between spots of
 ![](../images/crs-registration-PASTE.png){width="75%" fig-align="center" alt="The Shiny application interface for alignmening spatial datasets stored in `VoltRon` objects."}
 
 - **SLAT** is another alternative provided as a Python module 
-[scSLAT](https://github.com/gao-lab/SLAT) [@Xia2023-slat] that jointly models 
+[scSLAT](https://github.com/gao-lab/SLAT) [@Xia2023-SLAT] that jointly models 
 spatial coordinates and omics features using spatial graph with node embeddings. 
 Here, the node embeddings are generated by batch-corrected embeddings of omics features 
 whereas the graph is constructed using edges detected by either kNN or radial neighbors. 
@@ -290,7 +245,7 @@ single-cell profiles. Some of these methods could be used through R using packag
 
 - `r BiocStyle::Githubpkg("QihuangZhang/CeLEry")` [@Zhang2023-CeLEry] incorporates a supervised deep neural network model to learn the relationship between spot/cell profiles of spatial omics data and associated localization information, and then uses this model to predict the localization of single cell profiles by using the scRNAseq data as input.
 
-- `r BiocStyle::Githubpkg("lambdamoses/novoSpaRc")` [@Rajewsky2019-novoSpaRc] utilizes optimal transport (OT) to find a probabilistic embedding between expression space and physical space of single cells that minimizes the discrepancy between the pairwise graph-based distances in both of these spaces.
+- `r BiocStyle::Githubpkg("rajewsky-lab/novosparc")` [@Nitzan2019-novoSpaRc] utilizes optimal transport (OT) to find a probabilistic embedding between expression space and physical space of single cells that minimizes the discrepancy between the pairwise graph-based distances in both of these spaces.
 
 - `r BiocStyle::Githubpkg("zcang/SpaOTsc")` [@Cang2020-SpaOTsc] also reconstructs the spatial localization of single-cell profiles by solving an OT problem. Three distance matrices are calculated which are associated with the dissimilarities between spot/cell profiles within and across two datasets, where one is a scRNAseq and the other is a spatial omics dataset. The solution to the unbalanced and structured OT problems returns an OT plan for mapping single-cell profiles to spatial locations.
 

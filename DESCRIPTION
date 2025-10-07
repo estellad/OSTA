@@ -6,13 +6,17 @@ Description: This package contains source files for the "Orchestrating Spatial
     analysis workflows for spatial transcriptomics data using Bioconductor in 
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
-Version: 0.99.0
-Date: `r date()`
+Version: 0.99.26
+Date: 2025-10-01
 Authors@R: 
     c(person("Helena L.", "Crowell", 
              role=c("aut"), 
              email = "helena@crowell.eu", 
              comment = c(ORCID="0000-0002-4801-1767")), 
+      person("Mark D.", "Robinson",
+             role = c("aut"),
+             email = "mark.robinson@mls.uzh.ch",
+             comment = c(ORCID = "0000-0002-3048-5518")),
       person("Stephanie C.", "Hicks", 
              role = c("aut"), 
              email = "shicks19@jhu.edu", 
@@ -24,13 +28,12 @@ Authors@R:
 URL: https://github.com/lmweber/OSTA
 BugReports: https://github.com/lmweber/OSTA
 biocViews: 
-    Book, 
     Spatial, 
     SingleCell, 
     GeneExpression, 
     Transcriptomics
 Depends: 
-    R (>= 4.3)
+    R (>= 4.5)
 Imports:
     AUCell,
     Banksy,
@@ -45,6 +48,7 @@ Imports:
     DropletUtils,
     EBImage,
     ExperimentHub, 
+    ggfortify, 
     ggplot2, 
     ggrepel, 
     ggspavis, 
@@ -54,6 +58,8 @@ Imports:
     imcdatasets,
     imcRtools,
     jsonlite,
+    lme4,
+    lmerTest,
     msigdbr,
     muSpaData,
     nnSVG,
@@ -73,6 +79,7 @@ Imports:
     scuttle,
     SFEData,
     SingleR,
+    sosta,
     spacexr,
     SpatialExperiment,
     SpatialExperimentIO,
@@ -89,15 +96,11 @@ Imports:
     VisiumIO,
     Voyager,
     zellkonverter,
-    zoo,
-    sosta,
-    lme4,
-    lmerTest,
-    ggfortify
+    zoo
 Suggests: 
     BiocManager, 
+    BiocPkgTools,
     BiocStyle, 
-    doMC,
     BiocVersion, 
     downlit,
     glue, 
@@ -107,7 +110,6 @@ Suggests:
     scrapper,
     sessioninfo, 
     xml2 
-Remotes: 
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book

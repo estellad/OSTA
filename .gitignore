@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-**/*html
+*.Rproj
 **/.DS_Store
+**/*html
 inst/site_libs/
 inst/pages/*cache/
 inst/pages/*files/

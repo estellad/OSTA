@@ -4,11 +4,11 @@
 
 ### Introduction
 
-This workflow analyzes a 10x Genomics Visium dataset consisting of one sample (Visium capture area) of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) region, originally described by @Maynard2021.
+This workflow analyzes a 10x Genomics Visium dataset consisting of one sample (Visium capture area) of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) region, originally described by @Maynard2021-DLPFC.
 
 The original full dataset contains 12 samples in total, from 3 donors, with 2 pairs of spatially adjacent replicates (serial sections) per donor (4 samples per donor). Each sample spans several cortical layers plus white matter in a tissue section. The examples in this workflow use a single representative sample, labeled 151673, which is often illustrated in various method papers in spatial omics data analysis.
 
-For more details on the dataset, see @Maynard2021. The full dataset is publicly available through the `r BiocStyle::Biocpkg("spatialLIBD")` Bioconductor package [@Pardo2022]. The dataset can also be explored interactively through the [spatialLIBD Shiny web app](http://spatial.libd.org/spatialLIBD/).
+For more details on the dataset, see @Maynard2021-DLPFC. The full dataset is publicly available through the `r BiocStyle::Biocpkg("spatialLIBD")` Bioconductor package [@Pardo2022-spatialLIBD]. The dataset can also be explored interactively through the [spatialLIBD Shiny web app](http://spatial.libd.org/spatialLIBD/).
 
 
 ### Dependencies
@@ -51,7 +51,7 @@ plotCoords(spe)
 
 ### Quality control (QC)
 
-We calculate quality control (QC) metrics using the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017], and apply simple global thresholding-based QC methods to identify any low-quality spots, as described in @sec-seq-qc-global. More details, including more advanced QC approaches, are described in @sec-seq-quality-control.
+We calculate quality control (QC) metrics using the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017-scater], and apply simple global thresholding-based QC methods to identify any low-quality spots, as described in @sec-seq-quality-control-global. More details, including more advanced QC approaches, are described in @sec-seq-quality-control.
 
 ```{r}
 # subset to keep only spots over tissue
@@ -66,7 +66,7 @@ table(is_mito)
 rowData(spe)$gene_name[is_mito]
 ```
 
-Calculate QC metrics using `r BiocStyle::Biocpkg("scater")` [@McCarthy2017].
+Calculate QC metrics using `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater].
 
 ```{r}
 # calculate per-spot QC metrics and store in colData
@@ -145,7 +145,7 @@ dim(spe)
 
 ### Normalization
 
-Calculate log-transformed normalized counts (logcounts) using library size normalization, as described in @sec-seq-processing-norm. We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017] and `r BiocStyle::Biocpkg("scran")` [@Lun2016] packages, making the simplified assumption that spots can be treated as equivalent to single cells. For more details and other options, see @sec-seq-processing.
+Calculate log-transformed normalized counts (logcounts) using library size normalization, as described in @sec-seq-intermediate-processing-norm. We use methods from the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] packages, making the simplified assumption that spots can be treated as equivalent to single cells. For more details and other options, see @sec-seq-intermediate-processing.
 
 ```{r, fig.height=3.5}
 # calculate library size factors
@@ -163,9 +163,9 @@ assayNames(spe)
 
 ### Feature selection (HVGs)
 
-Apply feature selection methods to identify a set of top highly variable genes (HVGs). We use methods from the `r BiocStyle::Biocpkg("scran")` [@Lun2016] package, again making the simplified assumption that spots can be treated as equivalent to single cells. We also first remove mitochondrial genes, since these tend to be very highly expressed and are not of main biological interest. For more details, see @sec-seq-processing.
+Apply feature selection methods to identify a set of top highly variable genes (HVGs). We use methods from the `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] package, again making the simplified assumption that spots can be treated as equivalent to single cells. We also first remove mitochondrial genes, since these tend to be very highly expressed and are not of main biological interest. For more details, see @sec-seq-intermediate-processing.
 
-For details on alternative feature selection methods to identify spatially variable genes (SVGs) instead of HVGs, for example using the `r BiocStyle::Biocpkg("nnSVG")` [@Weber2023-nnSVG] or other packages, see @sec-crs-svg.
+For details on alternative feature selection methods to identify spatially variable genes (SVGs) instead of HVGs, for example using the `r BiocStyle::Biocpkg("nnSVG")` [@Weber2023-nnSVG] or other packages, see @sec-ind-feature-selection-testing-svgs.
 
 ```{r}
 # remove mitochondrial genes
@@ -190,9 +190,9 @@ length(top_hvgs)
 
 Next, we perform dimensionality reduction using principal component analysis (PCA), applied to the set of top HVGs. We retain the top 50 principal components (PCs) for further downstream analyses. This is done both to reduce noise and to improve computational efficiency. We also run UMAP on the set of top 50 PCs and retain the top 2 UMAP components for visualization purposes.
 
-We use the computationally efficient implementation of PCA from the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017], which uses randomization and therefore requires setting a random seed for reproducibility.
+We use the computationally efficient implementation of PCA from the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017-scater], which uses randomization and therefore requires setting a random seed for reproducibility.
 
-See @sec-seq-processing and @sec-crs-dimension-reduction for more details.
+See @sec-seq-intermediate-processing and @sec-ind-dimensionality-reduction for more details.
 
 ```{r}
 # using scater package
@@ -213,11 +213,11 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 <!-- To do: maybe flip with seq-processing chapter - move graph-based clustering example to seq-processing chapter, and move BayesSpace example here, since this is more informative for a workflow -->
 
-Next, we apply a clustering algorithm to identify cell types or spatial domains. Note that we are using only molecular features (gene expression) as the input for clustering in this example. Alternatively, we could use a spatially-aware clustering algorithm, as demonstrated in the example in @sec-seq-processing-clustering.
+Next, we apply a clustering algorithm to identify cell types or spatial domains. Note that we are using only molecular features (gene expression) as the input for clustering in this example. Alternatively, we could use a spatially-aware clustering algorithm, as demonstrated in the example in @sec-seq-intermediate-processing-clustering.
 
 Here, we use graph-based clustering using the Walktrap method implemented in `r BiocStyle::Biocpkg("scran")`, applied to the top 50 PCs calculated on the set of top HVGs from above.
 
-For more details on clustering, see @sec-crs-clustering.
+For more details on clustering, see @sec-ind-clustering.
 
 ```{r}
 # graph-based clustering
@@ -257,9 +257,9 @@ plotDimRed(spe, plot_type = "UMAP", annotate = "label",
 
 Identify marker genes for each cluster or spatial domain by testing for differentially expressed genes using pairwise t-tests, specifically testing for upregulation for each cluster or spatial domain.
 
-We use the `r BiocStyle::Biocpkg("scran")` package [@Lun2016] to calculate the differential tests. We use a binomial test, which is a more stringent test than the default pairwise t-tests, and tends to select genes that are easier to interpret and validate experimentally.
+We use the `r BiocStyle::Biocpkg("scran")` package [@Lun2016-scran] to calculate the differential tests. We use a binomial test, which is a more stringent test than the default pairwise t-tests, and tends to select genes that are easier to interpret and validate experimentally.
 
-See @sec-seq-processing or @sec-crs-clustering for more details.
+See @sec-seq-intermediate-processing or @sec-ind-clustering for more details.
 
 ```{r}
 # using scran package
@@ -287,17 +287,17 @@ pheatmap(mat = mtx, scale = "column")
 
 ## spatialLIBD
 
-The examples above demonstrated a streamlined analysis workflow for the Visium DLPFC dataset [@Maynard2021]. In this section, we will use the `r BiocStyle::Biocpkg("spatialLIBD")` package [@Pardo2022] to continue analyzing this dataset by creating an interactive `Shiny` website to visualize the data.
+The examples above demonstrated a streamlined analysis workflow for the Visium DLPFC dataset [@Maynard2021-DLPFC]. In this section, we will use the `r BiocStyle::Biocpkg("spatialLIBD")` package [@Pardo2022-spatialLIBD] to continue analyzing this dataset by creating an interactive `Shiny` website to visualize the data.
 
 
 ### Why use spatialLIBD?
 
-The `spatialLIBD` package has a function, `spatialLIBD::run_app(spe)`, which will create an interactive website using a `SpatialExperiment` object (`spe`). The interactive website it creates has several features that were initially designed for the DLPFC dataset [@Maynard2021] and later made flexible for any dataset [@Pardo2022]. These features include panels to visualize Visium spots:
+The `spatialLIBD` package has a function, `spatialLIBD::run_app(spe)`, which will create an interactive website using a `SpatialExperiment` object (`spe`). The interactive website it creates has several features that were initially designed for the DLPFC dataset [@Maynard2021-DLPFC] and later made flexible for any dataset [@Pardo2022-spatialLIBD]. These features include panels to visualize Visium spots:
 
 * for one tissue section at a time, either with interactive or static versions 
 * for multiple tissue sections at a time, either interactively or statically
 
-Both options work with continuous and discrete variables such as the gene expression and clusters, respectively. The interactive version for discrete variables such as clusters is useful if you want to manually annotate Visium spots, as in @Maynard2021. `spatialLIBD` allows users to download the annotated spots and resume your spot annotation work later.
+Both options work with continuous and discrete variables such as the gene expression and clusters, respectively. The interactive version for discrete variables such as clusters is useful if you want to manually annotate Visium spots, as in @Maynard2021-DLPFC. `spatialLIBD` allows users to download the annotated spots and resume your spot annotation work later.
 
 ```{r, echo=FALSE, out.width = "80%", fig.align="center", fig.cap="Screenshot of the 'clusters (interactive)' section of the 'spot-level data' panel created with the full spatialLIBD dataset. The website was created with `spatialLIBD::run_app(spatialLIBD::fetch_data('spe'))` version 1.4.0 and then using the lasso selection, we selected a set of spots in the UMAP interactive plot colored by the estimated number of cells per spot (`cell_count`) on the bottom left, which automatically updated the other three plots."}
 knitr::include_graphics("https://raw.githubusercontent.com/lmweber/OSTA-resources/main/images/spatialLIBD_interactive_cluster.png")
@@ -320,9 +320,9 @@ For more details about `spatialLIBD`, please check the [spatialLIBD Bioconductor
 * [Introduction to spatialLIBD](https://research.libd.org/spatialLIBD/articles/spatialLIBD.html)
 * [Using spatialLIBD with 10x Genomics public datasets](https://research.libd.org/spatialLIBD/articles/TenX_data_download.html)
 
-You can also read more about `spatialLIBD` in the associated publication @Pardo2022.
+You can also read more about `spatialLIBD` in the associated publication @Pardo2022-spatialLIBD.
 
-If you prefer to watch videos, recorded presentations related to the dataset [@Maynard2021] and `spatialLIBD` [@Pardo2022] are also available [here](https://github.com/LieberInstitute/spatialLIBD/blob/master/inst/app/www/documentation_spe.md#slides-and-videos).
+If you prefer to watch videos, recorded presentations related to the dataset [@Maynard2021-DLPFC] and `spatialLIBD` [@Pardo2022-spatialLIBD] are also available [here](https://github.com/LieberInstitute/spatialLIBD/blob/master/inst/app/www/documentation_spe.md#slides-and-videos).
 
 
 ### Code prerequisites

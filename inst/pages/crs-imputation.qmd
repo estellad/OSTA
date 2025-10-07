@@ -24,7 +24,7 @@ library(SpatialExperimentIO)
 
 ## Data import
 
-The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section and the Chromium Single Cell Gene Expression Flex applied to FFPE tissues (scFFPE-Seq) assay with around 18,000 features [@Janesick2023].
+The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a human breast cancer biopsy section and the Chromium Single Cell Gene Expression Flex applied to FFPE tissues (scFFPE-Seq) assay with around 18,000 features [@Janesick2023-high-res].
 
 ### Xenium
 
@@ -263,11 +263,11 @@ fq(head(gs)) # low corr.
 
 ## Other methods
 
-Alternatively, we can use other R/Python frameworks to integrate imaging-based ST assays with scRNA-seq datasets, and impute missing features. Some of these methods could be used through R using packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`; see @sec-bkg-interoperability.
+Alternatively, we can use other R/Python frameworks to integrate imaging-based ST assays with scRNA-seq datasets, and impute missing features. Some of these methods could be used through R using packages such as `r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")`; see @sec-bkg-python-interoperability.
 
-- **Tangram**: is available as a Python module through [scvi-tools](https://docs.scvi-tools.org/en/latest/user_guide/models/tangram.html) [@biancalani2021-tangram]. The tool performs a softmax optimization to generate a probabilistic mapping between cells of scRNA-seq data and voxels (cells or spots) of ST data, which is then used to transfer labels or feature profiles across datasets.
+- **Tangram**: is available as a Python module through [scvi-tools](https://docs.scvi-tools.org/en/latest/user_guide/models/tangram.html) [@Biancalani2021-Tangram]. The tool performs a softmax optimization to generate a probabilistic mapping between cells of scRNA-seq data and voxels (cells or spots) of ST data, which is then used to transfer labels or feature profiles across datasets.
 
-- **LIGER**: is available in R via `r BiocStyle::CRANpkg("rliger")` [@welch2019-liger], and incorporates a similar workflow performed in this chapter using `r BiocStyle::Biocpkg("harmony")`. The only difference between these approaches is how the joint embedding is obtained; here, LIGER uses non-negative matrix factorization (NMF). LIGER has been originally proposed to perform this task for scRNA-seq and scATAC-seq assays.
+- **LIGER**: is available in R via `r BiocStyle::CRANpkg("rliger")` [@Welch2019-LIGER], and incorporates a similar workflow performed in this chapter using `r BiocStyle::Biocpkg("harmony")`. The only difference between these approaches is how the joint embedding is obtained; here, LIGER uses non-negative matrix factorization (NMF). LIGER has been originally proposed to perform this task for scRNA-seq and scATAC-seq assays.
 
 
 ## Appendix

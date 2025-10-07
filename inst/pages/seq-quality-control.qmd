@@ -28,18 +28,18 @@ Low library size or low number of expressed features can indicate poor mRNA capt
 
 ### QC challenges in sequencing-based ST
 
-The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for ST data as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based ST data** [@Bhuva2024; @Totty2024-SpotSweeper].
+The first three characteristics listed above are the standard QC metrics used in scRNA-seq data, and they are often valid for ST data as well. However, **caution must be taken in interpreting these metrics as they tend to be confounded by biology in sequencing-based ST data** [@Bhuva2024-library-size; @Totty2025-SpotSweeper].
 
 For example, in the brain, neuronal cell bodies reside in gray matter, whereas white matter is made up almost entirely of neuronal processes. This naturally leads to regions of gray matter containing much higher numbers of genes detected and overall transcripts captured relative to white matter. Moreover, white matter tends to show a higher proportion of mitochondrial reads than gray matter. Without this biological context, one might mistakenly assume that the white matter regions are of low quality and should be removed before downstream analyses.
 
 
 ### Structure of this chapter
 
-In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-qc-global and @sec-seq-qc-local.
+In this chapter, we will start with introducing some methods to identify low-quality spots using various strategies, including 1) standard methods developed for single-nucleus RNA-seq (snRNA-seq) via global thresholding, and 2) more recent methods that aim to mediate bias in QC attributed to spatial confounding. Diagnostic visualizations and strategies are further introduced in @sec-seq-quality-control-global and @sec-seq-quality-control-local.
 
-In the advanced topics section (@sec-seq-qc-adv-topic), we will visit some novel and unique challenges in QC of ST data, including identifying histological artifacts, i.e. regional artifacts and QC based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all datasets.
+In the advanced topics section (@sec-seq-quality-control-adv-topic), we will visit some novel and unique challenges in QC of ST data, including identifying histological artifacts, i.e. regional artifacts and QC based on number of cells identified in each spot. While these methods are very useful, these procedures are not necessary for all datasets.
 
-To note, the current chapter focuses on QC at the spot level. In some datasets, it may also be appropriate to apply QC procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between QC and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in the @sec-seq-processing chapter.
+To note, the current chapter focuses on QC at the spot level. In some datasets, it may also be appropriate to apply QC procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses. However, here we make a distinction between QC and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in @sec-seq-intermediate-processing..
 
 
 ### Dependencies
@@ -60,7 +60,7 @@ library(patchwork)
 
 Next, we import a 10x Genomics Visium dataset that will be used in several of the following chapters. This dataset has previously been preprocessed using data preprocessing procedures with tools outside R and saved in `SpatialExperiment` format, and is available for download from the `r BiocStyle::Biocpkg("STexampleData")` package.
 
-The dataset consists of one sample (Visium capture area) from one donor, consisting of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region; it is described in @Maynard2021.
+The dataset consists of one sample (Visium capture area) from one donor, consisting of postmortem human brain tissue from the dorsolateral prefrontal cortex (DLPFC) brain region; it is described in @Maynard2021-DLPFC.
 
 ```{r load-data, message=FALSE}
 (spe <- Visium_humanDLPFC())
@@ -69,7 +69,7 @@ The dataset consists of one sample (Visium capture area) from one donor, consist
 
 ## Calculate QC metrics
 
-We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. We can then use these metrics to identify low-quality spots.
+We calculate the QC metrics described above with a combination of methods from the `scater` [@McCarthy2017-scater] package (for metrics that are also used for scRNA-seq data, where we treat spots as equivalent to cells) and our own functions. We can then use these metrics to identify low-quality spots.
 
 The QC metrics from `scater` can be calculated and added to the `SpatialExperiment` object's column data using the `addPerCellQC` function. The `sum` column contains the total number of unique molecular identifiers (UMIs) for each spot, the `detected` column contains the number of unique genes detected per spot, and `subsets_mito_percent` contains the percentage (or proportion) of transcripts mapping to mitochondrial genes per spot.
 
@@ -92,8 +92,13 @@ spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
 head(colData(spe))
 ```
 
+```{r}
+# keep copy of object to save later
+spe_save <- spe
+```
 
-## Global outlier detection {#sec-seq-qc-global}
+
+## Global outlier detection {#sec-seq-quality-control-global}
 
 Many commonly used QC methods currently applied to ST were adapted from snRNA-seq workflows, such as **global outlier detection**. The simplest option for identifying potential low-quality spots is to apply fixed thresholds to each QC metric across the entire sample, and remove any spots that do not meet the thresholds for one or more metrics.
 
@@ -199,7 +204,7 @@ p3 <-
 p1 | p2 | p3
 ```
 
-Looking at the flagged spots versus the manually annotated layers, it is clear that setting a library size threshold of 2000 UMIs is flagging more spots in layers 1 and 6 relative to other layers or spatial domains. In other words, library size is confounded with biology, as has been previously demonstrated [@Bhuva2024; @Totty2024-SpotSweeper].
+Looking at the flagged spots versus the manually annotated layers, it is clear that setting a library size threshold of 2000 UMIs is flagging more spots in layers 1 and 6 relative to other layers or spatial domains. In other words, library size is confounded with biology, as has been previously demonstrated [@Bhuva2024-library-size; @Totty2025-SpotSweeper].
 
 We can additionally use violin plots to visualize the distribution of the QC metrics, with outliers annotated. This can help us determine if the thresholds we have chosen are appropriate or are excluding too many spots.
 
@@ -225,11 +230,11 @@ p1 | p2 | p3
 ```
 
 
-## Local outlier detection {#sec-seq-qc-local}
+## Local outlier detection {#sec-seq-quality-control-local}
 
 One of the key assumptions of global outlier detection in single cell and spatial transcriptomics is that the QC metrics are independent of natural biology. Otherwise, cell or spots with naturally low library size or higher mitochondrial ratio will be more likely to be removed as outliers. For snRNA-seq, this assumption is rarely or only mildly violated, resulting in negligible impacts on downstream analyses. However, as demonstrated above, this assumption is more commonly violated in sequencing-based ST due to the biological heterogeneity in the tissue being sampled for each spot.
 
-One strategy to address this issue is to look for outliers within their local biological neighborhood. Here, we will implement **local outlier detection** using the `localOutliers()` function from the [SpotSweeper](https://bioconductor.org/packages/SpotSweeper) Bioconductor package [@Totty2024-SpotSweeper]. This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of its nearest neighbors. By default, `localOutliers()` uses `k = 36` nearest neighbors, which equates to third-order neighbors (i.e. three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g. STOmics), third-order neighbors would be `k = 48`.
+One strategy to address this issue is to look for outliers within their local biological neighborhood. Here, we will implement **local outlier detection** using the `localOutliers()` function from the [SpotSweeper](https://bioconductor.org/packages/SpotSweeper) Bioconductor package [@Totty2025-SpotSweeper]. This function detects local outliers by comparing the number of unique detected genes, total library size, and mitochondrial percentage of each spot to that of its nearest neighbors. By default, `localOutliers()` uses `k = 36` nearest neighbors, which equates to third-order neighbors (i.e. three concentric rings of neighbors around each spot) in Visium's hexagonal spot arrangement. However, for sequencing-based methods that uses square grid arrangements (e.g. STOmics), third-order neighbors would be `k = 48`.
 
 Similar to the adaptive thresholds used above, these methods assume a normal distribution, so we will use the log-transformed `sum` of the total counts and the log-transformed number of `detected` genes. We will not log-transform the mitochondrial percentage as it tends to follow a normal distribution.
 
@@ -364,7 +369,7 @@ dim(spe)
 ```
 
 
-## Advanced topics {#sec-seq-qc-adv-topic}
+## Advanced topics {#sec-seq-quality-control-adv-topic}
 
 ### Histological artifact detection
 
@@ -372,7 +377,7 @@ dim(spe)
 
 When working with ST datasets, ensuring high-quality data is essential for accurate downstream analyses. One common issue researchers face is the presence of technical artifacts. Here, we will demonstrate how to detect and remove "hangnail" artifacts from Visium datasets.
 
-Hangnails artifacts arise during tissue preparation, and most commonly occur when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2024-SpotSweeper. Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** such as mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as spatial domain detection, if not properly identified and addressed @Totty2024-SpotSweeper.
+Hangnails artifacts arise during tissue preparation, and most commonly occur when smaller areas, such as distinct brain regions, are dissected from larger structures like whole human brain sections @Totty2025-SpotSweeper. Tissue dissection can cause mechanical damage, leading to areas with artificially low biological heterogeneity. This manifests as regions with **low variance in QC metrics** such as mitochondrial percentage. Such artifacts can significantly impact downstream analyses, such as spatial domain detection, if not properly identified and addressed @Totty2025-SpotSweeper.
 
 
 #### Loading data and adding QC metrics
@@ -521,7 +526,7 @@ prop_cells_per_spot[1:13]
 
 Only 6% of spots contain a single cell. If we restricted the analysis to these spots only, we would be discarding most of the data.
 
-Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In @Maynard2021, the authors explored the transcriptomic profile of these neuropil spots.
+Removing the spots containing zero cells (2% of spots) would also be problematic, since these spots can also contain biologically meaningful information. For example, in this brain dataset, the regions between cell bodies consists of neuropil (dense networks of axons and dendrites). In @Maynard2021-DLPFC, the authors explored the transcriptomic profile of these neuropil spots.
 
 
 <!-- deleted during SpotSweeper merge - move to feature selection chapter instead
@@ -530,7 +535,7 @@ Removing the spots containing zero cells (2% of spots) would also be problematic
 
 The sections above consider quality control at the spot level. In some datasets, it may also be appropriate to apply quality control procedures or filtering at the gene level. For example, certain genes may be biologically irrelevant for downstream analyses.
 
-However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in @sec-seq-processing.
+However, here we make a distinction between quality control and feature selection. Removing biologically uninteresting genes (such as mitochondrial genes) may also be considered as part of feature selection, since there is no underlying experimental procedure that has failed. Therefore, we will discuss gene-level filtering in @sec-seq-intermediate-processing.
 
 -->
 
@@ -542,7 +547,10 @@ However, here we make a distinction between quality control and feature selectio
 Save data object for re-use within later chapters.
 
 ```{r}
-saveRDS(spe, file = "seq-spe_qc.rds")
+# filter genes: remove zeros
+spe_save <- spe_save[rowSums(counts(spe_save)) != 0, ]
+# save object
+saveRDS(spe_save, file = "seq-spe_qc.rds")
 ```
 
 

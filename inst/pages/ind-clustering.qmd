@@ -1,4 +1,4 @@
-# Clustering {#sec-crs-clustering}
+# Clustering {#sec-ind-clustering}
 
 ## Preamble
 
@@ -46,7 +46,7 @@ spe <- readRDS("img-spe_cl.rds")
 ### Non-spatial
 
 As a baseline, we will perform a standard graph-based clustering approach developed for scRNA-seq data, using molecular features (gene expression) only.
-Specifically, we construct a shared nearest neighbor (SNN) graph based on non-spatial PCs (`reducedDim` slot `"PCA_tx"`), and use the Leiden algorithm for community detection [@Traag2018-Leiden].
+Specifically, we construct a shared nearest neighbor (SNN) graph based on non-spatial PCs (`reducedDim` slot `"PCA_tx"`), and use the Leiden algorithm for community detection [@Traag2019-Louvain-to-Leiden].
 [The `resolution` parameter used here was selected in order to obtain a similar number of clusters annotated by the authors.]
 
 ```{r clu-Leiden}
@@ -84,7 +84,7 @@ table(vis$BayesSpace <- factor(.vis$spatial.cluster))
 #### Neighborhood-based
 
 `r BiocStyle::Biocpkg("BANKSY")` [@Singhal2024-BANKSY] embeds cells in a product space of their own and their local neighborhood's (average) transcriptome, representing cell state and microenvironment.
-We have already computed `Banksy` PCs in @sec-crs-dimension-reduction (`reducedDim` slot `PCA_sp`) so that here, we perform SNN graph-based Leiden clustering on said PCs in order to obtain spatially-aware cluster assignments:
+We have already computed `Banksy` PCs in @sec-ind-dimensionality-reduction (`reducedDim` slot `PCA_sp`) so that here, we perform SNN graph-based Leiden clustering on said PCs in order to obtain spatially-aware cluster assignments:
 [Note that we are using a lower `resolution` here, as `Banksy` PCs tend to yield more clusters on the data at hand.]{.aside}
 
 ```{r clu-Banksy, message=FALSE}
@@ -174,7 +174,6 @@ spe$CellCharter <- unlist(py$label_df)
 <!--
 #### Other methods: Probability statistics-based methods 
 
-* See more example in @sec-seq-clustering-de
 * BASS
 * DR.SC
 -->
@@ -305,13 +304,13 @@ pheatmap(mat=t(assay(pbs)), scale="column", breaks=seq(-2, 2, length=101))
 
 ### Reviews {.unnumbered}
 
-* [https://doi.org/10.1093/bfgp/elae040](@Wang2024) categorize ST clustering approaches into probability statistics-, graph neural network- and contrastive learning-based approaches, and review their advantages and limitations for clustering of data from seq- and img-based assays.
+* @Wang2024-review-spatial-domain categorize ST clustering approaches into probability statistics-, graph neural network- and contrastive learning-based approaches, and review their advantages and limitations for clustering of data from seq- and img-based assays.
 
 
 ### Benchmarks {.unnumbered}
 
-* [https://doi.org/10.1186/s13059-024-03361-0](@Hu2024) compare 16 graph- and statistic-based approaches, including `BayesSpace` and `BANKSY`, across 10 (mostly seq-based) datasets.
-* [https://doi.org/10.1016/j.csbj.2023.11.055](@Liu2024) compare eight GNN-based approaches, including `SpaceFlow`, across four seq- and one img-based dataset.
+* @Hu2024-benchmark-clustering compare 16 graph- and statistic-based approaches, including `BayesSpace` and `BANKSY`, across 10 (mostly seq-based) datasets.
+* @Liu2024-network-clustering compare eight GNN-based approaches, including `SpaceFlow`, across four seq- and one img-based dataset.
 
 
 ### References {.unnumbered}

@@ -1,10 +1,7 @@
-^inst/\.quarto$
-^\.png$
-^\.quarto$
-^\.github$
-^LICENSE\.md$
-^NOTES\.md$
-^README\.Rmd$
-^Dockerfile$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.github$
+^inst/\.quarto$
+^\.quarto$
+^Dockerfile$
+^README\.Rmd$
