@@ -50,7 +50,6 @@ vhd8 <- TENxVisiumHD(
 # use gene symbols as feature names
 gs <- rowData(vhd8)$Symbol
 rownames(vhd8) <- make.unique(gs)
-colnames(vhd8) <- vhd8$barcode # TODO: VisiumIO bug?
 vhd8
 ```
 
@@ -93,7 +92,6 @@ vhd16 <- TENxVisiumHD(
 # use symbols as feature names
 gs <- rowData(vhd16)$Symbol
 rownames(vhd16) <- make.unique(gs)
-colnames(vhd16) <- vhd16$barcode # TODO: VisiumIO bug?
 vhd16
 ```
 
