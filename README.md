@@ -1,4 +1,4 @@
-<img src="inst/images/carousel/OSTA.png" width="25%" align="right"/> 
+<img src="inst/images/carousel/02_OSTA.png" width="25%" align="right"/> 
 
 # Orchestrating Spatial Transcriptomics Analysis with Bioconductor
 
