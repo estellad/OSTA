@@ -672,13 +672,13 @@ As of June, 2025, Visium HD enables direct output of H&E-segmented cell-level da
 
 The morphology-driven, nucleus-based segmentation produces polygons representing nuclei and cells across the entire tissue, as illustrated in the schematics provided by 10x Genomics.
 
-```{r fig-pyr_str, echo = FALSE, out.width = "50%", fig.cap= "Two approaches for binning the 2x2 µm barcode squares in Visium HD data"}
+```{r fig-10x-vhdseg, echo = FALSE, out.width = "50%", fig.cap= "Two approaches for binning the 2x2 µm barcode squares in Visium HD data"}
 knitr::include_graphics("../images/VisiumHD_nuclei_segmentation_binning_10x.png")
 ```
 
 Compared to binned analysis, Visium HD with cell-level segmentation is more similar to Xenium data, but with full-transcriptome coverage. Most analytical methods are transferable; however, at single-cell resolution, deconvolving each data point into multiple cell types should be adapted using label transfer or unsupervised clustering to assign single-cell type labels. For example, after clustering, we identified three differentially expressed genes:
 
-```{r fig-pyr_str, echo = FALSE, out.width = "50%", fig.cap= "Differential marker gene expressions spatially visualized as polygons"}
+```{r fig-vhdcell-ge, echo = FALSE, out.width = "50%", fig.cap= "Differential marker gene expressions spatially visualized as polygons"}
 knitr::include_graphics("../images/VisiumHD_gene_expression_polygon.png")
 ```
 
