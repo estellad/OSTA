@@ -2,28 +2,32 @@
 
 ## Introduction
 
-Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024].
+Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide full transcriptome spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@Oliveira2024].
 
 ## Dependencies {#sec-seq-workflow-visium-hd-load-data}
 
 ```{r deps, message=FALSE, warning=FALSE}
 library(Banksy)
 library(BiocParallel)
+library(dplyr)
 library(DropletUtils)
 library(ggplot2)
 library(ggspavis)
 library(igraph)
+library(magick)
 library(OSTA.data)
 library(patchwork)
 library(pheatmap)
 library(scater)
 library(scran)
 library(scuttle)
+library(sf)
 library(spacexr)
 library(SpatialExperiment)
 library(SpotSweeper)
 library(Statial)
 library(tidyr)
+library(tidyverse)
 library(VisiumIO)
 ```
 
@@ -634,13 +638,171 @@ p$image + facet_null() | p$scatter + facet_null()
 
 The same analysis steps could be applied to the (unfiltered) 16 μm resolution data with the corresponding deconvolution results.
 
-
-## Conclusion
-
-In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm. Most methods and visualization techniques developed for Visium can be applied to Visium HD. However, more sparsity is expected, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some resources and news for Visium HD to consider and incorporate into your pipeline:
+## Cell-level analysis
 
 -   10x Genomics [news](https://www.prnewswire.com/news-releases/10x-genomics-unveils-innovation-roadmap-at-agbt-general-meeting-advancing-leadership-in-large-scale-single-cell-and-spatial-analysis-302382827.html) on morphology-driven segmentation from H&E enabled in CytAssist for Visium HD, by assigning transcripts to individual cells. 
     - Space Ranger v4 now provides a segmented, cell-level count matrix under `segmented_outputs`, in parallel with the previous `binned_outputs` at 2, 8, and 16 µm, simplifying additional cell segmentation using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
+
+```{r load-other-vhdcell, message=FALSE, warning=FALSE}
+# Read the GeoJSON file of cell segmentation
+geo_data <- st_read("~/Desktop/cell_segmentations.geojson")
+scalef <- rjson::fromJSON(file = "~/Desktop/scalefactors_json.json")
+image <- image_read(file.path("~/Desktop/tissue_hires_image.png"))
+info <- image_info(image)
+```
+First, we need to scale the coordinates to match the high resolution image. In addition, the y-axis coordinates should be flipped, as R uses a different origin than the image coordinate system. While `ggspavis` manages this internally for Visium, we will proceed with a manual plotting approach for Visium HD polygons (rather than cell centroid x and y) to maintain clarity.
+```{r scale-flip-polygons, message=FALSE, warning=FALSE}
+# Multiply all coordinates by the scaling factor of high resolution image
+st_geometry(geo_data) <- st_geometry(geo_data) * scalef$tissue_hires_scalef
+
+# Flip axis by flip y coordinates with image height  - y axis
+st_geometry(geo_data) <- st_sfc( 
+    lapply(st_geometry(geo_data), function(geom) {
+      coords <- st_coordinates(geom)
+      coords[, 2] <- info$height - coords[, 2]
+      st_polygon(list(matrix(coords[, 1:2], ncol = 2)))
+    }),
+    crs = st_crs(geo_data)
+)
+```
+
+We subset to the exact same region as before, yet with high resolution image for better visualization quality. 
+```{r subset-polygons, message=FALSE, warning=FALSE}
+# Get data coverage and subsetted bounding box
+.rng <- \(geo_data) {
+    cov <- st_bbox(geo_data)
+    xs <- cov[c(1, 3)]; ys <- cov[c(2, 4)]
+    x1 <- xs[1] + 4*(xs[2]-xs[1])/8; x2 <- xs[2] - 3*(xs[2]-xs[1])/8
+    y1 <- ys[1] + 4*(ys[2]-ys[1])/8; y2 <- ys[2] - 3*(ys[2]-ys[1])/8
+    list(box=c(x1, x2, y1, y2), cov=c(xs, ys))
+}
+geo_data_rng <- .rng(geo_data)
+
+# Subset the GeoJSON to geometries that intersect with the bounding box
+bbox_polygon <- st_as_sfc(st_bbox(geo_data_rng$box, crs = st_crs(geo_data)))
+subset_data <- geo_data[st_intersects(geo_data, bbox_polygon, sparse = FALSE), ]
+subset_data$cell_id <- as.character(subset_data$cell_id)
+head(subset_data)
+```
+Plot cell polygons overlay H&E image for this subset region. Here is an overview of the subset of tissue section that we will visualize on:
+```{r plt-subset-he-polygon, fig.width=12, fig.height=4, message=FALSE}
+#| code-fold: true
+# Plot raster
+p0 <- ggplot() +
+    annotation_raster(image, 
+                      xmin = 0, xmax = info$width, ymin = 0, ymax = info$height) +
+    coord_fixed(expand = FALSE,
+                xlim = geo_data_rng$box[1:2], ylim = geo_data_rng$box[3:4]) 
+
+# Add sf layer
+p <- p0 +
+    geom_sf(data = subset_data, fill = NA, color = "white", size = 0.3) + 
+    theme(axis.text = element_blank(),
+          axis.ticks = element_blank())
+
+# Just polygons
+p1 <- ggplot(subset_data) +
+    geom_sf(fill = "lightblue", color = "white") +
+    theme_void()
+
+# Show plots
+(p0 + ggtitle("H&E region") |
+    p + ggtitle("Overlayed with cell boundaries") |
+    p1 + ggtitle("Cells")) +
+    plot_layout(nrow=1) & theme(plot.title = element_text(hjust = 0.5))
+```
+Note that the analysis steps in bin-wise section - e.g. clustering, calculating reduced dimensions, spatial statistics - can all be migrated to cell-level data here. To avoid redundancy, however, we will use the UMAP reduced dimension and the clustering result from SpaceRanger output for visualization. Note that in your actual analysis pipeline, you should always generate your own clustering and reduced dimension. 
+
+We first read in the clustering result and merge it to the subset `sf` object. We also merge clustering result to the subset of UMAP. [Note that you always need to re-run normalization, PCA, to derive reduced dimensions after subset your data. Here we skipped these steps because our focus is on visualization. You can refer to the previous sections for proper analysis steps]{.aside}
+```{r clus-merge-sf-umap-merge-clus, warning=FALSE, message=FALSE}
+clus <- read.csv("~/Desktop/clusters.csv")
+clus$cell_id <- gsub("^cellid_0*([1-9][0-9]*|0)-1$", "\\1", clus$Barcode)
+clus$Cluster <- as.factor(clus$Cluster)
+
+subset_data <- subset_data %>% 
+   left_join(clus %>% select(cell_id, Cluster))
+
+umap <- read.csv("~/Desktop/projection.csv")
+umap$cell_id <- gsub("^cellid_0*([1-9][0-9]*|0)-1$", "\\1", clus$Barcode)
+umap <- umap[umap$cell_id %in% subset_data$cell_id, ]
+
+umap <- umap %>% 
+   left_join(clus %>% select(cell_id, Cluster))
+```
+
+Now we can visualize clustering result spatially and on UMAP. 
+```{r clus-spa-umap, fig.width=7, fig.height=3.5, warning=FALSE, message=FALSE}
+#| code-fold: true
+# helper
+plotPolygons <- function(objsf, annotate = "Cluster"){
+    ggplot(objsf) +
+      geom_sf(aes(fill = get(annotate)), color = "grey", linewidth = 0.1) +
+      labs(fill = annotate) + 
+      theme_void() + 
+      theme(axis.text = element_blank(),
+            axis.ticks = element_blank())
+}
+
+pp <- plotPolygons(subset_data, annotate = "Cluster") + 
+    scale_fill_manual(values = unname(pals::kelly())) + 
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5)) + 
+    ggtitle("Cluster")
+pu <- ggplot(umap, aes(x = UMAP.1, y = UMAP.2)) +
+    geom_point(aes(color = Cluster), size = 0.5) +
+    scale_color_manual(values = unname(pals::kelly())) +
+    labs(color = "Cluster") + 
+    guides(col=guide_legend(override.aes=list(size=3))) +
+    theme_classic()
+pp | pu
+```
+
+We can also visualize some marker genes, by reading in the the count data first
+```{r load-counts-vhdcell, message=FALSE, warning=FALSE}
+## VHD cell
+countmat_file <- "~/Desktop/filtered_feature_cell_matrix.h5"
+vhdcellsce <- DropletUtils::read10xCounts(countmat_file, col.names = TRUE)
+
+# Fix colnames or cell_id in colData
+vhdcellsce$cell_id <- colnames(vhdcellsce) <- 
+    gsub("^cellid_0*([1-9][0-9]*|0)-1$", "\\1", colnames(vhdcellsce))
+
+# Subset to region in sf
+vhdcellsce <- vhdcellsce[, colnames(vhdcellsce) %in% subset_data$cell_id]
+
+# Update gene and cell names
+rownames(vhdcellsce) <- rowData(vhdcellsce)$Symbol
+rownames(vhdcellsce) <- make.unique(rownames(vhdcellsce))
+
+# Get log normalized counts for plotting
+vhdcellsce <- logNormCounts(vhdcellsce)
+```
+
+We can merge in gene expression data of selected markers to the subset `sf` object.
+```{r plt-mgs-xy, fig.width=10, fig.height=3, message=FALSE}
+#| code-fold: true
+gs <- c("MMP2", "PIGR", "IGHG1")
+ge <- t(logcounts(vhdcellsce)[rownames(vhdcellsce) %in% gs, ]) %>%
+    as.data.frame() %>% rownames_to_column(var = "cell_id")
+# sanity check of ordering of cell ids
+all(ge$cell_id == subset_data$cell_id)
+
+subset_data <- subset_data %>% 
+    left_join(ge)
+
+ps <- lapply(gs, \(.) 
+             plotPolygons(subset_data, annotate=.))
+wrap_plots(ps, nrow=1) & theme(
+    legend.key.width=unit(0.5, "lines"),
+    legend.key.height=unit(1, "lines")) &
+    scale_fill_gradientn(colors=rev(hcl.colors(9, "Rocket")))
+```
+
+For a more detailed cell-level analysis on Visium HD, please refer to the EuroBioC2025 OSTA workshop content available at <TODO>.
+
+## Conclusion
+
+In this workflow, we demonstrated how to perform a standard analysis pipeline on a subset of Visium HD data binned at 16 µm and at cell-level. Most methods and visualization techniques developed for Visium or Xenium can be applied to Visium HD. However, more sparsity is expected at bin-level, as each data point (e.g. 2, 8, or 16 µm) has smaller area compared to Visium (55 µm). Each bin cannot be interpreted as a cell, but rather, a segmentation-free approach is applied here. Below are some other resources for Visium HD could be incorporated into your pipeline:
 
 -   [GitHub repository of `bin2cell`](https://github.com/Teichlab/bin2cell) for H&E segmentation and obtaining cell boundaries.
 

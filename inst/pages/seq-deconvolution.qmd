@@ -23,19 +23,19 @@ In this section, we will demonstrate deconvolution of cell types per spot, using
 ## Dependencies {#sec-seq-deconvolution-load-data}
 
 ```{r deps, message = FALSE, warning = FALSE}
-library(OSTA.data)
-library(VisiumIO)
-library(SpatialExperiment)
-library(ggspavis)
-library(spacexr)
-library(CARDspa)
-library(ggplot2)
-library(patchwork)
-library(DropletUtils)
 library(BiocParallel)
+library(CARDspa)
+library(DropletUtils)
+library(ggplot2)
+library(ggspavis)
+library(OSTA.data)
+library(patchwork)
+library(pheatmap)
 library(scran)
 library(scater)
-library(pheatmap)
+library(spacexr)
+library(SpatialExperiment)
+library(VisiumIO)
 ```
 
 In this example of Visium breast cancer data [@Janesick2023], we perform cell type deconvolution without a single-cell (Chromium) reference and compare the concordance with the provided Visium annotation provided by 10x Genomics.
