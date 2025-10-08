@@ -80,6 +80,7 @@ Imports:
     SFEData,
     SingleR,
     sosta,
+    SpaceTrooper,
     spacexr,
     SpatialExperiment,
     SpatialExperimentIO,
