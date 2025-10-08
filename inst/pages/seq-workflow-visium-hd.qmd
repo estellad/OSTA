@@ -676,11 +676,31 @@ The morphology-driven, nucleus-based segmentation produces polygons representing
 knitr::include_graphics("../images/VisiumHD_nuclei_segmentation_binning_10x.png")
 ```
 
+You can read in the data 
+
+```{r vhdcellsegread}
+id <- "VisiumHD_HumanColon_Oliveira"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+vhdcell <- TENxVisiumHD(
+    format = "h5",
+    segmented_outputs = file.path(td,"segmented_outputs"),
+    images = "hires")|>
+    import()
+rownames(vhdcell) <- make.unique(rowData(vhdcell)$Symbol)
+vhdcell
+```
+```{r vhdcellplot}
+
+```
+
 Compared to binned analysis, Visium HD with cell-level segmentation is more similar to Xenium data, but with full-transcriptome coverage. Most analytical methods are transferable; however, at single-cell resolution, deconvolving each data point into multiple cell types should be adapted using label transfer or unsupervised clustering to assign single-cell type labels. For example, after clustering, we identified three differentially expressed genes:
 
 ```{r fig-vhdcell-ge, echo = FALSE, out.width = "50%", fig.cap= "Differential marker gene expressions spatially visualized as polygons"}
 knitr::include_graphics("../images/VisiumHD_gene_expression_polygon.png")
 ```
+
 
 For detailed cell-level Visium HD workflow, please refer to the EuroBioC2025 OSTA workshop [tutorial page](https://estellad.github.io/EuroBioC2025OSTAWorkshop/index.html).
 
