@@ -27,7 +27,6 @@ library(SpatialExperiment)
 library(SpotSweeper)
 library(Statial)
 library(tidyr)
-library(tidyverse)
 library(VisiumIO)
 ```
 
