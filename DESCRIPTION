@@ -93,6 +93,7 @@ Imports:
     STexampleData, 
     Statial,
     tidyr,
+    tidyverse,
     VisiumIO,
     Voyager,
     zellkonverter,
