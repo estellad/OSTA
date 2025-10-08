@@ -664,7 +664,6 @@ In this workflow, we demonstrated how to perform a standard analysis pipeline on
 
 - [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 
-
 ## Cell-level Visium HD analysis
 
 As of June, 2025, Visium HD enables direct output of H&E-segmented cell-level data, in addition to the previous `binned_outputs` at 2, 8, and 16 µm, from [SpaceRanger v4](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd). This update simplifies the additional cell segmentation required when using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
@@ -681,7 +680,7 @@ Compared to binned analysis, Visium HD with cell-level segmentation is more simi
 knitr::include_graphics("../images/VisiumHD_gene_expression_polygon.png")
 ```
 
-For detailed cell-level Visium HD workflow, please refer to the EuroBioC2025 OSTA workshop [tutorial page](https://estellad.github.io/EuroBioC2025OSTAWorkshop/index.html).
+For detailed cell-level Visium HD workflow, please refer to the [EuroBioC2025 OSTA workshop](https://estellad.github.io/EuroBioC2025OSTAWorkshop/index.html).
 
 ## Appendix
 
