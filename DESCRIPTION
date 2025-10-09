@@ -38,6 +38,7 @@ Imports:
     AUCell,
     Banksy,
     basilisk,
+    BayesSpace,
     BiocFileCache,
     BiocParallel,
     CARDspa,
