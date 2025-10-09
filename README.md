@@ -1,3 +1,5 @@
+<img src="inst/images/carousel/02_OSTA.png" width="25%" align="right"/> 
+
 # Orchestrating Spatial Transcriptomics Analysis with Bioconductor
 
 [![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/biocbook.yml?label=Book%20build)](https://github.com/lmweber/OSTA/actions/workflows/biocbook.yml)  

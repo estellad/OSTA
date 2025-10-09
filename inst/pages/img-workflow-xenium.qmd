@@ -1,21 +1,16 @@
----
-output: html_document
-editor_options: 
-  chunk_output_type: inline
----
 # Workflow: Xenium {#sec-img-workflow-xenium}
 
 ## Preamble
 
 ### Introduction
 
-In this demo, we will analyze 313-plex Xenium data on human breast cancer tissue
-[@Janesick2023]. Following very basic quality control and preprocessing, we will 
+In this demo, we will analyze a 313-plex Xenium dataset on human breast cancer tissue
+[@Janesick2023-high-res]. Following very basic quality control and preprocessing, we will 
 perform both (non-spatial) unsupervised clustering as well as fully supervised 
-label-transfer based on scRNA-seq reference data; then compare the obtained 
+label-transfer based on scRNA-seq reference data, and then compare the obtained 
 cluster assignments to those provided by the authors.
 
-### Dependencies
+### Dependencies {#sec-img-workflow-xenium-load-data}
 
 ```{r load-libs, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -34,7 +29,7 @@ library(DropletUtils)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
 # set parallelization
-bp <- MulticoreParam(10)
+bp <- MulticoreParam(4)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(112358)
@@ -153,7 +148,7 @@ component analysis (PCA) on all `r nrow(spe)` RNA targets:
 # cell area-based normalization
 logcounts(sub) <- sweep(assay(sub), 2, sub$cell_area, `/`)
 # principal component analysis
-sub <- runPCA(sub, BPPARAM=bp)
+sub <- runPCA(sub) #, BPPARAM=bp)
 ```
 
 Let's visualize the expression of some genes in space; e.g., PIGR, IGHG3 and 
@@ -213,9 +208,9 @@ ncol(sce) # overall number of cells
 ```
 
 [Note that we filter the reference data to contain only cells from the same patient. This is not strictly necessary, assuming that clusters are transcriptionally stable across patients, but is done here to reduce runtime.]{.aside}
-Here, we run `SingleR` using high-res. annotations (`Level2`) and with argument
+Here, we run `SingleR` using `Level2` (high-resolution) annotations and with argument
 `aggr.ref=TRUE`, such that reference profiles will be aggregated (per cluster)
-prior to annotation. In this way, every single Xenium cell will be assigned a
+prior to annotation. In this way, every Xenium cell will be assigned a
 label based on which pseudo-bulk scRNA-seq profile represents the best match.
 
 ```{r lv2}
@@ -240,7 +235,7 @@ res <- SingleR(
 sub$Level2 <- factor(res$pruned.labels)
 ```
 
-Based on these predictions, we can also propagate low-res. annotations (`Level1`):
+Based on these predictions, we can also propagate `Level1` (low-resolution) annotations:
 
 ```{r lv1}
 idx <- match(sub$Level2, sce$Level2)
@@ -300,7 +295,7 @@ visualize selected markers as a heatmap of (z-scaled) average expression.
 It's comforting to see that we pick up on many classics, e.g., endothelia 
 are marked by VWF and PECAM1, T cells by CD2 and TRAC, etc.
 
-```{r mgs, fig.width=3, fig.height=6}
+```{r mgs, fig.width=3.5, fig.height=7}
 # test for differential expression between clusters
 mgs <- findMarkers(sub, groups=sub$Level1, direction="up")
 # select top-ranked genes for every cluster
@@ -310,4 +305,7 @@ plotGroupedHeatmap(sub,
     scale=TRUE, center=TRUE, fontsize=6)
 ```
 
-## References {.unnumbered}
+
+## Appendix
+
+### References {.unnumbered}

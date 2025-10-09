@@ -6,13 +6,17 @@ Description: This package contains source files for the "Orchestrating Spatial
     analysis workflows for spatial transcriptomics data using Bioconductor in 
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
-Version: 0.99.0
-Date: `r date()`
+Version: 0.99.28
+Date: 2025-10-05
 Authors@R: 
     c(person("Helena L.", "Crowell", 
              role=c("aut"), 
              email = "helena@crowell.eu", 
              comment = c(ORCID="0000-0002-4801-1767")), 
+      person("Mark D.", "Robinson",
+             role = c("aut"),
+             email = "mark.robinson@mls.uzh.ch",
+             comment = c(ORCID = "0000-0002-3048-5518")),
       person("Stephanie C.", "Hicks", 
              role = c("aut"), 
              email = "shicks19@jhu.edu", 
@@ -22,66 +26,71 @@ Authors@R:
              email = "lmweb012@gmail.com", 
              comment = c(ORCID = "0000-0002-3282-1730")))
 URL: https://github.com/lmweber/OSTA
-BugReports: https://github.com/lmweber/OSTA
+BugReports: https://github.com/lmweber/OSTA/issues
 biocViews: 
-    Book, 
     Spatial, 
     SingleCell, 
     GeneExpression, 
     Transcriptomics
 Depends: 
-    R (>= 4.3)
+    R (>= 4.5)
 Imports:
     AUCell,
     Banksy,
     basilisk,
     BayesSpace,
-    BiocFileCache, 
+    BiocFileCache,
     BiocParallel,
     CARDspa,
     DESpace,
     doMC,
-    dplyr, 
+    dplyr,
     DropletUtils,
     EBImage,
     ExperimentHub, 
+    ggfortify, 
     ggplot2, 
     ggrepel, 
     ggspavis, 
     harmony, 
     hoodscanR,
-    igraph, 
-    imcRtools, 
-    jsonlite, 
-    lobstr,
+    igraph,
+    imcdatasets,
+    imcRtools,
+    jsonlite,
+    lme4,
+    lmerTest,
     msigdbr,
-    nnSVG, 
+    muSpaData,
+    nnSVG,
     openxlsx,
     osfr,
     OSTA.data,
-    pals, 
-    patchwork, 
-    pheatmap, 
+    pals,
+    patchwork,
+    pheatmap,
     RANN,
     RColorBrewer,
     reticulate,
-    rtracklayer, 
-    scales, 
-    scater, 
+    rtracklayer,
+    scales,
+    scater,
     scran,
     scuttle,
     SFEData,
     SingleR,
+    sosta,
     SpaceTrooper,
     spacexr,
-    SpatialExperiment, 
-    SpatialExperimentIO, 
+    SpatialExperiment,
+    SpatialExperimentIO,
     spatialFDA,
-    SpatialFeatureExperiment, 
+    SpatialFeatureExperiment,
     spatialLIBD,
     spatstat,
     spdep,
-    SpotSweeper (>= 1.3.3),
+    spicyR,
+    SpotSweeper,
     STexampleData, 
     Statial,
     tidyr,
@@ -91,18 +100,17 @@ Imports:
     zoo
 Suggests: 
     BiocManager, 
+    BiocPkgTools,
     BiocStyle, 
-    doMC,
     BiocVersion, 
     downlit,
     glue, 
     knitr,
+    markdown,
+    quarto,
     scrapper,
     sessioninfo, 
     xml2 
-Remotes: 
-    edward130603/BayesSpace, 
-    drisso/SpaceTrooper@devel_spatialBook
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 BiocType: Book
