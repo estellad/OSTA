@@ -20,10 +20,12 @@ cell boundaries, field of view placement, etc. that allow us to demonstrate
 more intricate quality control metrics using the `SpaceTroper` package.
 :::
 
-Throughout this chapter, we will switch between Xenium (`xen`) and CosMx (`cos`)
-datasets in order to showcase quality control (QC) metrics that are standard for 
-scRNA-seq data, or specific to different types of imaging-based ST data. Lastly,
-we will save the post-QC Xenium dataset for use in later chapters.
+Throughout this chapter, we will switch between both Xenium (`xen` object) 
+and CosMx (`cos` objext) datasets to showcase quality control (QC) metrics 
+that are standard for scRNA-seq data (using `r BiocStyle::Biocpkg("scuttle")`), 
+and ones that are more specific to some imaging-based ST data types (using 
+`r BiocStyle::Biocpkg("SpaceTrooper")`).
+Lastly, we will save the post-QC Xenium dataset for use in later chapters.
 
 ### Dependencies
 
@@ -121,7 +123,7 @@ see comments in the following code chunks.
 
 ::: {.aside}
 See @sec-img-introduction for details on the three main types 
-of barcodes: RNA targets, negative probes, and system controls.]
+of barcodes: RNA targets, negative probes, and system controls.
 :::
 
 ```{r load-data-cos, message=FALSE, warning=FALSE}
@@ -195,7 +197,10 @@ We start out by computing QC metrics that are standard for scRNA-seq data,
 using the `r BiocStyle::Biocpkg("scuttle")` package. Here, `use.altexps=TRUE`
 allows quantification across alternative features, such as negative probes, 
 in addition to RNA targets, which are contain in the primary object's `assay`.
-[See also @sec-seq-quality-control.]{.aside}
+
+::: {.aside}
+See also @sec-seq-quality-control.
+:::
 
 ```{r scuttle-qc}
 # compute standard scRNA-seq QC metrics for the Xenium dataset (e.g.,
@@ -252,7 +257,7 @@ cos <- spatialPerCellQC(cos, use_altexps="NegPrb")
 setdiff(names(colData(cos)), old)
 ```
 
-### Counts per area
+### Counts \& area
 
 Imaging-based ST data relies on imaging a 2D tissue section. Cells thus represent 
 a slice through a 3D system, and we expect a tight relationship between a cell's 
@@ -366,7 +371,7 @@ ggplot(ns, aes(fov, n_cells)) +
     scale_x_discrete(breaks=c(1, seq(5, max(cos$fov), 5))) +
     scale_y_continuous(limits=c(0, 1e3), n.breaks=4) +
     labs(x="field of view (FOV)", y="# cells") +
-    geom_col(fill="blue", alpha=2/3) +
+    geom_col(fill="grey", alpha=2/3) +
     coord_cartesian(expand=FALSE) +
     theme_bw()
 ```
@@ -376,7 +381,7 @@ Of course, such effects will also be driven by differences in subpopulation comp
 However, gross differences in detection efficacy, IF staining, spot calling, segmentation, etc. often still manifest in FOV-level shifts in IF stains and/or RNA target, negative probe, system control counts.
 A simple spot-check is the following type of visualization, but more thorough investigation is advisable 'in the wild', especially so in challenging types of tissue:
 
-```{r cos-plot-qc, warning=FALSE, fig.width=12, fig.height=5}
+```{r cos-plot-qc, warning=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
 df <- data.frame(colData(cos))
 ys <- c("detected", "total", "Area_um", "log2CountArea")
@@ -595,7 +600,7 @@ Whenever possible, we advice readers to cross-check visualizations like the
 following with a corresponding H&E stain of the tissue, considering possible 
 experimental faults as well as their prior knowledge on tissue pathology.
 
-```{r plot-ex, echo=FALSE, fig.width=12, fig.height=6}
+```{r plot-ex, echo=FALSE, fig.width=11, fig.height=5}
 # 'ggspavis' complains about duplicated entries
 i <- setdiff(
     names(cd <- colData(cos)), 
@@ -603,14 +608,12 @@ i <- setdiff(
 colData(cos) <- cd[i] 
 # add for visualization
 xen$ex <- ex; cos$ex <- cos$low_qscore
-plotCoords(xen, annotate="ex") +
-plotCoords(cos, annotate="ex") +
+plotCoords(xen, annotate="ex", point_size=0) + ggtitle("Xenium") +
+plotCoords(cos, annotate="ex", point_size=0) + ggtitle("CosMx") +
     plot_layout(guides="collect") &
+    theme(legend.key.size=unit(0, "pt")) &
     scale_color_manual(values=c("lavender", "blue")) &
-    guides(col=guide_legend(override.aes=list(size=2))) &
-    theme_void() & theme(
-        legend.key.size=unit(0, "pt"),
-        plot.title=element_text(hjust=0.5))
+    guides(col=guide_legend(override.aes=list(size=2)))
 xen$ex <- cos$ex <- NULL # drop for saving
 ```
 
@@ -619,7 +622,7 @@ xen$ex <- cos$ex <- NULL # drop for saving
 ### Save data
 
 ```{r save-data}
-# save filtered Xenium data
+# save post-QC Xenium data
 # for consecutive chapters
 saveRDS(xen[, !ex], "img-spe_qc.rds")
 ```
