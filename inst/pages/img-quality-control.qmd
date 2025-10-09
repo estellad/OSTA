@@ -1,9 +1,5 @@
 # Quality control {#sec-img-quality-control}
 
-```{r include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
-```
-
 ## Preamble
 
 ### Introduction
