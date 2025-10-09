@@ -77,15 +77,15 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
 ```{r env, message=FALSE, warning=FALSE}
-bin <- "~/software/mambaforge/bin/conda"
-options(reticulate.conda_binary=bin)
-use_condaenv("commot")
-# env <- BasiliskEnvironment(
-#     pkgname="base", 
-#     envname="img-ccc", 
-#     pip="commot==0.0.3",
-#     packages="python=3.11")
-# use_virtualenv(obtainEnvironmentPath(env))
+# bin <- "~/software/mambaforge/bin/conda"
+# options(reticulate.conda_binary=bin)
+# use_condaenv("commot")
+env <- BasiliskEnvironment(
+    envname="ccc",
+    pkgname="base",
+    pip="commot==0.0.3",
+    packages="python=3.11")
+use_virtualenv(obtainEnvironmentPath(env))
 ```
 
 ### LR retrieval
@@ -287,7 +287,7 @@ of spatially resolved data with non-spatial approaches.
 
 - `r BiocStyle::Githubpkg("CellChat")` [@Jin2025-CellChat] quantifies CCC signalling probability between two groups of cells using a simplified mass action-based model, which incorporates core LR interaction with potential multimeric structure and modulation by cofactors.
 
-- `r BiocStyle::Githubpkg("StatBiomed/SpatialDM")` [@Li2023-SpatialDM] uses a bivariate extension of Moran's $I$ [@Moran1950] -- a measure of spatial autocorrelation -- to test LR pairs in close-range distance against independence.
+- `r BiocStyle::Githubpkg("StatBiomed/SpatialDM")` [@Li2023-SpatialDM] uses a bivariate extension of Moran's $I$ -- a measure of spatial autocorrelation (cf., @sec-ind-spatial-statistics) -- to test LR pairs in close-range distance against independence.
 
 - `r BiocStyle::Githubpkg("zcang/SpaOTsc")` [@Cang2020-SpaOTsc] relies on optimal transport to segregate signal in a spatial region into LRs and their downstream genes, yielding information on regulatory flows between cells. 
 
