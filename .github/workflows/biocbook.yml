@@ -12,11 +12,6 @@ on:
     paths-ignore:
       - 'README.md' 
       - 'deps.Dockerfile'
-  pull_request:
-    branches:
-      - sandbox
-    paths-ignore:
-      - 'deps.Dockerfile'
 
 jobs:
   build:
