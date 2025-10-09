@@ -38,6 +38,9 @@ Several methods have been developed for these types of analyses. In general, the
 ```{r deps, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
+library(scater)
+library(scuttle)
+library(CCPlotR)
 library(ggplot2)
 library(ggspavis)
 library(basilisk)
@@ -156,6 +159,8 @@ dim(sub <- sub[, cs])
 
 We now perform run CCC inference, using `r BiocStyle::Biocpkg("zellkonverter")`'s 
 `SCE2AnnData` function to convert our `spe` in R to an `AnnData` object in Python.
+Note that in real settings (e.g., lots of interactions across lots of cells), 
+this can be parallelized, e.g., across fields of view (FOVs) or tissue sections.
 [For documentation on parameter meaning and choices, see the
 [tutorial](https://commot.readthedocs.io/en/latest/notebooks/
 visium-mouse_brain.html#Spatial-communication-inference).]{.aside}
@@ -176,10 +181,11 @@ ct$tl$spatial_communication(ad,
     heteromeric_delimiter="_")
 # extract 'data.frame's containing
 # sender & receiver CCC estimates
-s <- ad$obsm["commot-CellChatDB-sum-sender"]
-r <- ad$obsm["commot-CellChatDB-sum-receiver"]
+ccc <- list(
+    s=ad$obsm["commot-CellChatDB-sum-sender"],
+    r=ad$obsm["commot-CellChatDB-sum-receiver"])
 # add CCC inference results as cell metadata
-for (df in list(s, r)) colData(sub)[names(df)] <- df
+for (df in ccc) colData(sub)[names(df)] <- df
 ```
 
 ::: {.callout-note title="Distance threshold" collapse="true"}
@@ -211,11 +217,6 @@ text(d+1, 12e3, adj=c(0,1), round(d, 2), col="red")
 :::
 
 ## Visualization
-
-### In general
-
-The `r BiocStyle::Biocpkg("CCPlotR")` [@Ennis2023-CCPlotR] package provides a 
-visualization suit for CCC analysis results, including graphs and circos plots.
 
 ### In space
 
@@ -261,17 +262,92 @@ This makes sense, knowing that `COMMOT` considers physical cell-cell distances.
 I.e., some cells express CXCL12/CXCR4, but are too distant from cells expressing CXCR4/CXCL12, and are thus deemed to *not* be involved in signalling. 
 Meanwhile, there is a penalty on signalling in proportion to the distance between sender and receiver cells, as well as competition between proximal cells, yielding non-zero but lower-than-expression values.
 
+:::
+
+### In general
+
 From a biological perspective, we might be interested in which particular
-subpopulations are involved here. For example, we can summarize CCC results 
-at the subpopulation level either separately for sender/receiver estimates,
-or across them for a given interaction. This way, we can obtain heatmaps for
-sender/receiver and interaction estimates across subpopulations, respectively.
+subpopulations are involved here. In order to more easily investigate this,
+we can reformat estimates for sender and receiver signals from CCC inference
+into a `SingleCellExperiment` where rows = interactions and columns = cells.
 
-```{r viz-hm}
-
+```{r sce}
+# construct SCE from CCC results;
+# assays = s(ender) & r(eceiver)
+as <- lapply(ccc, \(.) {
+    names(.) <- gsub("^(s|r)-", "", names(.))
+    as(t(as.matrix(.)), "dgCMatrix")
+})
+(sce <- SingleCellExperiment(as, colData=colData(sub)))
 ```
 
-:::
+Next, we summarize CCC results for each subpopulation (separately for sender
+and receiver estimates) and visualize subpopulation-level results in a heatmap,
+using SCE-friendly functions for aggregation and visualization available through
+packages like `r BiocStyle::Biocpkg("scuttle")` and `r BiocStyle::Biocpkg("scater")`.
+
+```{r viz-hm, fig.width=5, fig.height=4}
+#| layout-ncol: 2
+# aggregate estimates by cluster
+# (separately for sender/receiver)
+mu <- aggregateAcrossCells(sce, 
+    ids=sce$Leiden, 
+    statistics="mean",
+    use.assay.type=assayNames(sce))
+
+# visualize scales values across clusters
+for (. in assayNames(mu)) {
+    plotHeatmap(mu, exprs_values=.,
+        features=grep("-", rownames(sce)),
+        show_colnames=TRUE, center=TRUE, scale=TRUE)
+}
+```
+
+The `r BiocStyle::Biocpkg("CCPlotR")` [@Ennis2023-CCPlotR] package provides a 
+visualization suit for CCC analysis results, including graphs and circos plots.
+These rely on a generic format, where each row contains the source and target
+cluster, sender and receiver feature, as well as an interaction score.
+It is not straightforward how to best arrive at the latter; naively, we can
+simply average across sender and receiver estimates, either at the single cell-
+or cluster-level, to obtain such a score:
+
+```{r CCPlotR-df}
+# average across cluster-level sender/receiver 
+# averages to obtain i(nteraction) scores
+ks <- expand.grid(ks <- colnames(mu), ks)
+cs <- split(colnames(sce), sce$Leiden)
+lr <- grepl("-", rownames(sce))
+lr <- lr & !grepl("total", rownames(sce))
+ss <- strsplit(rownames(sce), "-")
+l <- sapply(ss, .subset, 1)
+r <- sapply(ss, .subset, 2)
+df <- mapply(
+    i=ks[, 1], j=ks[, 2],
+    SIMPLIFY=FALSE, \(i, j) {
+        source <- sce[lr, cs[[i]]]
+        target <- sce[lr, cs[[j]]]
+        sr <- cbind(
+            rowMeans(assay(source, "s")),
+            rowMeans(assay(target, "r")))
+        data.frame(
+            source=paste(i), target=paste(j),
+            ligand=l[lr], receptor=r[lr],
+            score=rowMeans(sr))
+    }) |> do.call(what=rbind)
+rownames(df) <- NULL
+head(df)
+```
+
+We are now set to generate a range of visualizations using `CCPlotR`, e.g.,
+a circos plot where the width of the links represents the total number of 
+interactions between clusters. However, because this is only a toy example
+(few genes and cells), we will refrain from any biological interpretation.
+
+```{r CCPlotR-viz, fig.width=5, fig.height=5}
+cc_circos(df, n_top_ints=100)
+```
+
+<!-- Conclusion -->
 
 On a final note, inference is arguably much more complex (and results less straightforward to interpret) when a higher-plex panel is being considered; i.e., when overlapping and multimeric interactions are involved, which did not apply in the example provided here.
 Nevertheless, we hope that readers can appreciate the conceptual difference between expression data and CCC results, and will be able to implement similar `reticulate` approaches to incorporate methods living in Python into their analysis pipelines.
