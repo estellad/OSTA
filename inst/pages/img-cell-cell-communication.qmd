@@ -79,10 +79,14 @@ https://commot.readthedocs.io/en/latest/installation.html)
 for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
+<!--
+# this is faster for local run:
+bin <- "~/software/mambaforge/bin/conda"
+options(reticulate.conda_binary=bin)
+use_condaenv("commot")
+-->
+
 ```{r env, message=FALSE, warning=FALSE}
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-# use_condaenv("commot")
 env <- BasiliskEnvironment(
     envname="ccc",
     pkgname="base",
