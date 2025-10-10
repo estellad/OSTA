@@ -266,10 +266,21 @@ Meanwhile, there is a penalty on signalling in proportion to the distance betwee
 
 ### In general
 
-From a biological perspective, we might be interested in which particular
-subpopulations are involved here. In order to more easily investigate this,
-we can reformat estimates for sender and receiver signals from CCC inference
-into a `SingleCellExperiment` where rows = interactions and columns = cells.
+From a biological perspective, we might be less interested signaling at the
+single cell-level. Instead, could explore (for example but not limited to):
+
+- Which subpopulations are signaling to one another?
+- How does signaling at the subpopulation-level compare across niches
+(i.e., different spatial contexts) or pathologies (e.g., healthy/tumor)
+- How does signaling compare across different sections (e.g., patients)
+
+In essence, CCC results correspond to another `assay`, and we can compare them
+the same way we would compare gene expression across subpopulations, niches, 
+regions of interest, sections, etc. 
+
+In order to more easily investigate this, we can reformat estimates for sender 
+and receiver signals from CCC inference into a `SingleCellExperiment` object
+where rows = interactions and columns = cells.
 
 ```{r sce}
 # construct SCE from CCC results;
