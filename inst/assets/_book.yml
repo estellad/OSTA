@@ -23,13 +23,13 @@ book:
         - pages/seq-workflow-visium-hd.qmd
     - part: "Imaging-based platforms"
       chapters:
-         - pages/img-introduction.qmd
-         - pages/img-segmentation.qmd
-         - pages/img-quality-control.qmd
-         - pages/img-intermediate-processing.qmd
-         - pages/img-neighborhood-analysis.qmd
-         - pages/img-cell-cell-communication.qmd
-         - pages/img-workflow-xenium.qmd
+        - pages/img-introduction.qmd
+        - pages/img-segmentation.qmd
+        - pages/img-quality-control.qmd
+        - pages/img-intermediate-processing.qmd
+        - pages/img-neighborhood-analysis.qmd
+        - pages/img-cell-cell-communication.qmd
+        - pages/img-workflow-xenium.qmd
     - part: "Platform-independent analyses"
       chapters:
         - pages/ind-normalization.qmd
