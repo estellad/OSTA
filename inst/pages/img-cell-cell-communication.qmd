@@ -79,14 +79,16 @@ https://commot.readthedocs.io/en/latest/installation.html)
 for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
-<!--
+
+```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
 # this is faster for local run:
 bin <- "~/software/mambaforge/bin/conda"
 options(reticulate.conda_binary=bin)
 use_condaenv("commot")
--->
+```
 
-```{r env, message=FALSE, warning=FALSE}
+
+```{r env, message=FALSE, warning=FALSE, eval=FALSE}
 env <- BasiliskEnvironment(
     envname="ccc",
     pkgname="base",
@@ -231,15 +233,26 @@ will be restricted to where ligand and receptor-expressing cells co-localize.
 For simplicity, we pick a single interaction (CXCL12-CXCR4 signalling); 
 here, `s` and `r` correspond to sender and receiver signal, respectively:
 
-```{r viz-xy, message=FALSE, fig.width=11, fig.height=3}
+```{r viz-xy, message=FALSE, fig.width=12, fig.height=4}
 #| code-fold: true
-sub$in_tissue <- 1
-f <- \(s, r) c(s, paste(c("s", "r"), s, r, sep="-"), r)
-lapply(f("CXCL12", "CXCR4"), \(.) plotCoords(sub, 
-    annotate=., assay_name="logcounts") + ggtitle(.)) |>
+# specify colors for sender/receiver signals
+pal <- list(
+    s=c("grey90", "gold", "black"), 
+    r=c("grey90", "turquoise", "black"))
+
+# get variables names of the form: x, s-x-y, r-x-y, y
+.f <- \(i, j) c(i, paste(c("s","r"), i,j, sep="-"), j)
+xs <- .f("CXCL12", "CXCR4")
+
+# visualize expression & signaling side-by-side
+lapply(seq_along(xs), \(.) {
+    typ <- ifelse(. < 3, "s", "r")
+    plotCoords(sub, point_size=0.5,
+        annotate=xs[.], assay_name="logcounts") + 
+        scale_color_gradientn(typ, colors=pal[[typ]])
+}) |>
     wrap_plots(nrow=1, guides="collect")  &
-    theme(legend.key.width=unit(0.5, "lines")) &
-    scale_color_gradientn(colors=rev(hcl.colors(9, "PuRd")))
+    theme(legend.key.width=unit(0.5, "lines"))
 ```
 
 ::: {.callout-note title="CCC vs. expression" collapse="true"}
@@ -271,12 +284,12 @@ Meanwhile, there is a penalty on signalling in proportion to the distance betwee
 ### In general
 
 From a biological perspective, we might be less interested signaling at the
-single cell-level. Instead, could explore (for example but not limited to):
+single cell-level. Instead, we could explore (for example but not limited to):
 
 - Which subpopulations are signaling to one another?
 - How does signaling at the subpopulation-level compare across niches
-(i.e., different spatial contexts) or pathologies (e.g., healthy/tumor)
-- How does signaling compare across different sections (e.g., patients)
+(i.e., different spatial contexts) or pathologies (e.g., healthy/tumor)?
+- How does signaling compare across different sections (e.g., patients)?
 
 In essence, CCC results correspond to another `assay`, and we can compare them
 the same way we would compare gene expression across subpopulations, niches, 
@@ -314,6 +327,7 @@ mu <- aggregateAcrossCells(sce,
 for (. in assayNames(mu)) {
     plotHeatmap(mu, exprs_values=.,
         features=grep("-", rownames(sce)),
+        main=switch(., s="sender", r="receiver"),
         show_colnames=TRUE, center=TRUE, scale=TRUE)
 }
 ```
