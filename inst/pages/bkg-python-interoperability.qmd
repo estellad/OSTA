@@ -244,7 +244,7 @@ Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and mana
 
 In this example, we use `r BiocStyle::Biocpkg("basilisk")` to create an environment containing a Python installation and all necessary dependencies for this chapter, and then use the resulting environment with `reticulate`, as above.
 
-```{r env, warning=FALSE, message=FALSE, results="hide"}
+```{r env, warning=FALSE, message=FALSE, results="hide", eval=FALSE}
 # set up environment using basilisk
 env_basilisk <- BasiliskEnvironment(
   envname = "env-basilisk", 
@@ -262,7 +262,7 @@ use_virtualenv(obtainEnvironmentPath(env_basilisk))
 
 Now that we have set up the Python environment using `basilisk`, we can run R commands using `reticulate` in the same way as in the previous example. For example, using the same code as above:
 
-```{r load-sce-basilisk}
+```{r load-sce-basilisk, eval=FALSE}
 anndata <- import("anndata")
 
 example_h5ad <- system.file("extdata", "krumsiek11.h5ad", 
