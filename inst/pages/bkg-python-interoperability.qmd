@@ -36,14 +36,16 @@ In the first example, we install [Miniconda](https://www.anaconda.com/docs/getti
 
 First, we install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda.
 
-Note that we also need to set some environment variables in R using `Sys.setenv()` to run the installation programmatically.
+Note that we also need to set some environment variables in R using `Sys.setenv()` to run the installation programmatically. Setting the environment variables can be skipped if you are following this example interactively.
 
-```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
-# install Miniconda
+```{r set-env-vars}
 # set environment variables to accept terms of service
 Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
 Sys.setenv(CI = "true")
+```
 
+```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
+# install Miniconda
 install_miniconda()
 ```
 
