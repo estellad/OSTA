@@ -127,7 +127,7 @@ To this end, methods such as `r BiocStyle::Biocpkg("imcRtools")` [@Windhager2023
 Here, we demonstrate how to identify spatial contexts based on $k$-means clustering on cluster frequencies among (Euclidean) $k$NNs.
 We recommend readers consult the `imcRtools` documentation for a much wider range of visualizations and downstream analyses in this context.
 
-```{r imcRtools-calc, message=FALSE}
+```{r imcRtools-calc, message=FALSE, eval=FALSE}
 library(imcRtools)
 # construct kNN-graph based on Euclidean distances
 sqe <- buildSpatialGraph(spe, 
@@ -146,14 +146,14 @@ table(sqe$ctx <- factor(ctx$cluster))
 
 Let's quickly view the subpopulation composition of each spatial context:
 
-```{r imcRtools-show}
+```{r imcRtools-show, eval=FALSE}
 df <- data.frame(spatialCoords(sqe), colData(sqe))
 round(100*with(df, prop.table(table(k, ctx), 2)), 2)
 ```
 
 Secondly, let's visualize the obtained spatial contexts in space:
 
-```{r imcRtools-plot, fig.width=9, fig.height=3, fig.cap="Tissue plot with cells colored by cluster (left) and spatial context (right) based on $k$-means clustering of cluster frequencies among each cell's (Euclidean) $k$NNs."}
+```{r imcRtools-plot, fig.width=9, fig.height=3, fig.cap="Tissue plot with cells colored by cluster (left) and spatial context (right) based on $k$-means clustering of cluster frequencies among each cell's (Euclidean) $k$NNs.", eval=FALSE}
 #| code-fold: true
 pal_k <- unname(pals::trubetskoy(nlevels(df$k)))
 pal_c <- c("blue", "cyan", "gold", "magenta", "maroon")
