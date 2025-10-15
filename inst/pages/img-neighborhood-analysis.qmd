@@ -222,7 +222,7 @@ ggplot(fd, aes(x_centroid, y_centroid, col=value)) +
 
 Stratifying these values by subpopulation, we can observe that clusters forming distinct aggregates in space are lowest in entropy/perplexity (i.e., the most homogeneous locally):
 
-```{r hoodscanR-plot-mets-k, fig.width=7, fig.height=2.5, fig.cap="Boxplot of entropy and perplexity, stratified by cluster assignment and z-scaled across cells (capped at 2 SDs)."}
+```{r hoodscanR-plot-mets-k, fig.width=7, fig.height=2.5, fig.cap="Boxplot of entropy and perplexity, stratified by cluster assignment and z-scaled across cells (capped at 2 SDs).", eval=FALSE}
 #| code-fold: true
 ggplot(fd, aes(k, value, fill=k)) +
     facet_wrap(~name) + 
