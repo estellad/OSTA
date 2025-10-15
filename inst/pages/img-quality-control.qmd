@@ -212,6 +212,12 @@ of a set of immunofluorescence (IF) markers for, e.g., nuclei and cell surface
 Here, we show the distribution of mean IF intensities across the CosMx sample.
 [Values are arcsinh-transformed with a cofactor of 10 for visual purposes]{.aside}
 
+```{r gc-1, include=FALSE}
+# garbage collection
+# to reduce memory usage for building book with GitHub Actions
+gc()
+```
+
 ```{r plot-cos-xy-dapi, message=FALSE, fig.width=12, fig.height=4}
 #| code-fold: true
 flu <- grepv("^Mean", names(colData(cos)))
@@ -224,6 +230,12 @@ lapply(flu, \(.) {
         legend.position="bottom", 
         legend.key.height=unit(0.4, "lines")) &
     scale_color_gradientn(colors=pals::jet())
+```
+
+```{r gc-2, include=FALSE}
+# garbage collection
+# to reduce memory usage for building book with GitHub Actions
+gc()
 ```
 
 ### Morphology
