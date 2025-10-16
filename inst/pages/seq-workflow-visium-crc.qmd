@@ -47,7 +47,7 @@ unzip(pa, exdir=td)
 ```{r spe}
 # read into 'SpatialExperiment'
 obj <- TENxVisium(
-    spacerangerOut=td, 
+    spacerangerOut=file.path(td, "outs"), 
     format="h5", 
     images="lowres")
 (spe <- import(obj))
