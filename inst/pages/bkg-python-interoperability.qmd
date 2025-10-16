@@ -27,24 +27,23 @@ library(zellkonverter)
 ```
 
 
-## Miniconda, Conda environment, and reticulate
+## Conda environment and reticulate
 
-In the first example, we install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), set up a Conda environment, and interact with Python `anndata` objects in R using [reticulate](https://rstudio.github.io/reticulate/). This is the simplest option, and is the recommended starting point for most users. Note that we are using functions from the `reticulate` package.
+In the first example, we set up a Conda environment and use [reticulate](https://rstudio.github.io/reticulate/) to interact with Python `anndata` objects in R. This is the simplest option, and is the recommended starting point for most users. Note that we are using functions from the `reticulate` package in the code below.
+
+To set up the Conda environment, we also need to specify which Python installation to use. In order to run this example programmatically to compile this book chapter, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main). However, if you are following this example on a laptop or another system, it is easier to specify an existing Python installation to use. This will help avoid cluttering your system with additional Python installations. This option is noted in the code comments below.
 
 
 ### Install Miniconda
 
-First, we install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda.
+_Note: skip this section if you are using an existing Python installation instead._
 
-Note that we also need to set some environment variables in R using `Sys.setenv()` to run the installation programmatically. Setting the environment variables can be skipped if you are following this example interactively.
+In order to build this book chapter programmatically, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda. Note that we also need to set some environment variables in R using `Sys.setenv()` to accept the terms of service prompt programmatically, which can also be skipped if you are installing Miniconda interactively.
 
-```{r set-env-vars}
+```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
 # set environment variables to accept terms of service
 Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
 Sys.setenv(CI = "true")
-```
-
-```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
 # install Miniconda
 install_miniconda()
 ```
@@ -54,10 +53,13 @@ install_miniconda()
 
 Next, we create a Conda environment and install some key dependencies.
 
+If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
+
 ```{r conda-create, warning=FALSE, message=FALSE, results="hide"}
 # create conda environment
 env <- "py-interop"
-conda_create(env, packages = "python=3.11")
+conda_create(env, packages = "python=3.11")  # include 'conda = ...' argument to 
+                                             # use an existing Python installation
 use_condaenv(env, required = TRUE)
 ```
 
@@ -66,7 +68,7 @@ use_condaenv(env, required = TRUE)
 conda_list()$name
 ```
 
-The following dependencies are needed in some of the following chapters, and need to be installed from `conda-forge`. This can be skipped if you are only running the examples in this chapter.
+The following dependencies are needed in some of the following chapters, and need to be installed from `conda-forge`. This can also be skipped if you are only running the examples in this chapter. We install these dependencies here so that we can re-use this Conda environment again in later chapters.
 
 ```{r deps-conda-forge, warning=FALSE, message=FALSE, results="hide"}
 # install dependencies that need to be installed from conda-forge 
@@ -239,7 +241,7 @@ file.remove("spe.h5ad")
 
 ## basilisk
 
-Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to installing Python using Miniconda and setting up a Conda environment as demonstrated above. Using `basilisk` provides a higher level of reproducibility with regard to the Python environment setup, and is especially useful within package development for advanced users. However, setup may be more challenging in some cases.
+Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation or a new installation of Miniconda, as demonstrated above. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is also especially useful for package development by advanced users. However, setup may be more challenging in some cases.
 
 
 ### Configuring Python
