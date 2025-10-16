@@ -6,8 +6,8 @@ Description: This package contains source files for the "Orchestrating Spatial
     analysis workflows for spatial transcriptomics data using Bioconductor in 
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
-Version: 0.99.28
-Date: 2025-10-05
+Version: 0.99.29
+Date: 2025-10-16
 Authors@R: 
     c(person("Helena L.", "Crowell", 
              role=c("aut"), 
