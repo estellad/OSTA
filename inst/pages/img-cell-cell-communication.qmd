@@ -70,7 +70,7 @@ Since `COMMOT` is available as a Python package, we can access it from R using
 
 ### Python setup
 
-We first setup a corresponding Python environment using `basilisk`:
+<!-- We first setup a corresponding Python environment using `basilisk`: -->
 
 ::: {.aside}
 Alternatively, one could set up a `conda` environment (or similar) 
@@ -81,21 +81,41 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 
 
 ```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
-# this is faster for local run:
-bin <- "~/software/mambaforge/bin/conda"
-options(reticulate.conda_binary=bin)
-use_condaenv("commot")
+# # this is faster for local run:
+# bin <- "~/software/mambaforge/bin/conda"
+# options(reticulate.conda_binary=bin)
+# use_condaenv("commot")
 ```
 
 
 ```{r env, message=FALSE, warning=FALSE, eval=FALSE}
-env <- BasiliskEnvironment(
-    envname="ccc",
-    pkgname="base",
-    pip="commot==0.0.3",
-    packages="python=3.11")
-use_virtualenv(obtainEnvironmentPath(env))
+# env <- BasiliskEnvironment(
+#     envname="ccc",
+#     pkgname="base",
+#     pip="commot==0.0.3",
+#     packages="python=3.11")
+# use_virtualenv(obtainEnvironmentPath(env))
 ```
+
+
+We first set up a Python environment. Here, we do this by re-using the environment created in @sec-bkg-python-interoperability, in order to speed up the book build time. Alternatively, a new environment could also be set up instead (see @sec-bkg-python-interoperability).
+
+We also install the `commot` package and additional dependencies from PyPI.
+
+```{r env-ccc, message=FALSE, warning=FALSE}
+# re-use environment from Python interoperability chapter
+env <- "env-ccc"
+conda_clone(env, clone = "py-interop")
+use_condaenv(env, required = TRUE)
+
+# install additional Python packages from PyPI
+conda_install(
+  envname = env, 
+  packages = c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2"), 
+  pip = TRUE
+)
+```
+
 
 ### LR retrieval
 
