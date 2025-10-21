@@ -42,6 +42,7 @@ Imports:
     BiocFileCache,
     BiocParallel,
     CARDspa,
+    CCPlotR,
     DESpace,
     doMC,
     dplyr,
