@@ -45,6 +45,48 @@ knitr::include_graphics("../images/pyramidal_structure.png")
 
 Several publicly available repositories, such as The Cancer Genome Atlas (TCGA) and The Cancer Imaging Archive (TCIA), provide free access to large-scale genomic and imaging datasets. In the following sections, we will explore these resources in more detail.
 
+
+### Immunofluorescence markers
+
+Immunofluorescence (IF) is a microscopy-based technique that leverages the specificity of antibodies conjugated with fluorescent dyes to visualize the distribution and abundance of target proteins within cells or tissue sections. Compared to hematoxylin and eosin (H&E) staining, which provides morphological context, immunofluorescence offers molecular specificity by enabling the simultaneous detection of multiple biomarkers. This makes IF particularly powerful for studying cellular phenotypes, spatial relationships, and microenvironmental organization.
+
+In multiplex immunofluorescence (mIF) or multispectral imaging, multiple fluorophores with distinct excitation and emission spectra are used to label different antigens within the same tissue section. These methods allow for a detailed characterization of complex cellular ecosystems, such as tumor microenvironments, by quantifying the co-localization and spatial arrangement of different immune and stromal cell types. Advances in imaging technologies, such as confocal and spinning disk microscopy, as well as spectral unmixing algorithms, have further enhanced the resolution and sensitivity of IF-based analyses [@gerdes2013highly; @lin2023multiplex].
+
+The choice of markers depends on the biological question, commonly including:
+
+- Nuclear markers (e.g., DAPI) for cell nuclei visualization.
+
+- Cytoplasmic or membrane markers to identify cell types or states, such as cytokeratins for epithelial cells or CD45 for immune cells.
+
+- Functional markers indicating proliferation (e.g., Ki-67), apoptosis, or signaling pathway activation.
+
+- Tumor microenvironment markers to characterize immune infiltration or stromal components.
+
+
+Quantitative analysis of IF images typically involves several steps:
+
+Image preprocessing, including illumination correction and background subtraction;
+
+Segmentation, to delineate nuclei, cytoplasm, or membrane regions;
+
+Feature extraction, capturing intensity, co-localization, and texture metrics;
+
+Spatial analysis, to measure cell–cell interactions and neighborhood structures.
+
+Modern open-source software platforms such as QuPath
+ [@bankhead2017qupath] and Napari
+ provide powerful tools for the visualization, annotation, and quantitative analysis of both H&E and immunofluorescence images.
+
+
+Open-source software like QuPath (an interactive platform for digital pathology with support for multiplexed IF image analysis) and Napari (a Python-based multidimensional image viewer with plugins for bioimage analysis) facilitate visualization, annotation, and quantitative analysis of IF data at scale.
+
+QuPath offers user-friendly workflows for cell segmentation, marker quantification, and batch processing of large slide collections. It supports both brightfield and fluorescence imaging and can be extended through Groovy or Python scripting.
+
+Napari, a fast, interactive, multi-dimensional image viewer for Python, is particularly suited for high-dimensional fluorescence data. It allows plugin-based integration with analysis frameworks such as scikit-image, cellpose, and stardist, facilitating interactive and reproducible image analysis pipelines.
+
+Together, these platforms enable the reproducible and scalable quantification of protein expression and spatial context in tissue samples, bridging the gap between classical histology and molecular imaging. The integration of immunofluorescence data with transcriptomic or morphological features extracted from H&E slides holds great promise for advancing spatially resolved, multimodal studies in cancer biology.
+
+## Public Dataset
 ### TCGA Data
 
 [The Cancer Genome Atlas (TCGA)](https://cancer.gov/ccg/research/genome-sequencing/tcga) includes a collection of 11,765 diagnostic whole-slide images from 9,640 patients across 33 cancer types [@tomczak2015review]. These histopathological images represent only one component of TCGA's broader multi-omics repository. Alongside WSIs, TCGA provides a rich array of molecular and clinical data, including gene expression (RNA-Seq), somatic mutation profiles (whole-exome sequencing), DNA methylation, copy number alterations, protein expression (RPPA), and comprehensive clinical annotations. This multidimensional dataset facilitates integrative analyses that connect tissue morphology with molecular alterations and clinical outcomes.
