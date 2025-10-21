@@ -1,19 +1,18 @@
-```{r "welcome"}
-#| echo: false
-welcome <- tryCatch(
-    {
-        date <- format(Sys.time(), "%B %e, %Y")
-        glue::glue("**Published:** {date}<br/>")
-    }, 
-    error = function(e) {"Local preview"}
-)
+```{r echo=FALSE}
+desc <- packageDescription("OSTA")
 ```
 
-`r welcome`
+<i style="color:#0087af">
+OSTA v`r desc$Version`, 
+compiled on `r format(Sys.time(), "%e %b %Y")`,
+using Bioconductor v`r BiocManager::version()`
+with R v`r paste(R.version$major, R.version$minor, sep=".")`.
+</i>
 
 ::: {style="float:right; margin-left:5px; width:32%"}
 
-<!-- get 'images/carousel/*.png' & shuffle them randomly for display via 'inst/carousel.R' -->
+<!-- get 'images/carousel/*.png' & display them alphabetically, 
+flipping with a 3.333 second delay via 'inst/carousel.R' -->
 
 ```{r "carousel"}
 #| warning: false

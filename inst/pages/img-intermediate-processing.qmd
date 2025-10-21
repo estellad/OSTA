@@ -50,6 +50,7 @@ spe$Label <- df$Annotation[cs]
 Library size-based normalization, as typically used for scRNA-seq data, has been shown to be problematic for ST data, especially so for targeted panels underlying current commercial imaging-based ST platforms [@Atta2024-gene-count; @Bhuva2024-library-size].
 For lack of a better approach, we here use standard log-library size normalization.
 We caution readers, however, to keep an eye out in the literature for attempts to provide a better strategy.
+[See also @sec-ind-normalization.]{.aside}
 
 ```{r log}
 spe <- logNormCounts(spe)

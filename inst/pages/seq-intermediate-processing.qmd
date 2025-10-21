@@ -50,6 +50,7 @@ This dataset consists of one sample (Visium capture area) of postmortem human br
 ### Library size normalization
 
 A simple and fast approach for normalization is "library size normalization", which consists of calculating log-transformed normalized counts ("logcounts") using library size factors, treating each spot as equivalent to a single cell. This method is simple, fast, and generally provides a good baseline. It can be calculated using the `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater] and `r BiocStyle::Biocpkg("scran")` [@Lun2016-scran] packages.
+[See also @sec-ind-normalization.]{.aside}
 
 However, library size normalization does not make use of any spatial information. In some datasets, the simplified assumption that each spot can be treated as equivalent to a single cell is not appropriate, and can create problems during analysis. (*"Library size confounds biology in spatial transcriptomics data"* [@Bhuva2024-library-size].)
 

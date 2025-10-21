@@ -6,8 +6,8 @@ Description: This package contains source files for the "Orchestrating Spatial
     analysis workflows for spatial transcriptomics data using Bioconductor in 
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
-Version: 0.99.25
-Date: 2025-08-06
+Version: 0.99.29
+Date: 2025-10-16
 Authors@R: 
     c(person("Helena L.", "Crowell", 
              role=c("aut"), 
@@ -26,7 +26,7 @@ Authors@R:
              email = "lmweb012@gmail.com", 
              comment = c(ORCID = "0000-0002-3282-1730")))
 URL: https://github.com/lmweber/OSTA
-BugReports: https://github.com/lmweber/OSTA
+BugReports: https://github.com/lmweber/OSTA/issues
 biocViews: 
     Spatial, 
     SingleCell, 
@@ -42,12 +42,14 @@ Imports:
     BiocFileCache,
     BiocParallel,
     CARDspa,
+    CCPlotR,
     DESpace,
     doMC,
     dplyr,
     DropletUtils,
     EBImage,
     ExperimentHub, 
+    GenomeInfoDb, 
     ggfortify, 
     ggplot2, 
     ggrepel, 
@@ -80,6 +82,7 @@ Imports:
     SFEData,
     SingleR,
     sosta,
+    SpaceTrooper,
     spacexr,
     SpatialExperiment,
     SpatialExperimentIO,
