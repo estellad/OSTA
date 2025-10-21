@@ -204,6 +204,12 @@ See also @sec-seq-quality-control.
 xen <- addPerCellQCMetrics(xen, use.altexps=TRUE)
 ```
 
+```{r gc-1, include=FALSE}
+# garbage collection
+# to reduce memory usage for building book with GitHub Actions
+gc()
+```
+
 ### IF staining
 
 CosMx outputs, for instance, typically include the min/max/mean intensities 
@@ -224,6 +230,12 @@ lapply(flu, \(.) {
         legend.position="bottom", 
         legend.key.height=unit(0.4, "lines")) &
     scale_color_gradientn(colors=pals::jet())
+```
+
+```{r gc-2, include=FALSE}
+# garbage collection
+# to reduce memory usage for building book with GitHub Actions
+gc()
 ```
 
 ### Morphology
@@ -251,6 +263,12 @@ old <- names(colData(cos))
 cos <- spatialPerCellQC(cos, use_altexps="NegPrb")
 # the following cell metadata are newly available:
 setdiff(names(colData(cos)), old)
+```
+
+```{r gc-3, include=FALSE}
+# garbage collection
+# to reduce memory usage for building book with GitHub Actions
+gc()
 ```
 
 ### Counts \& area

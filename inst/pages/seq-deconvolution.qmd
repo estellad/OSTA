@@ -49,7 +49,7 @@ unzip(pa, exdir=td)
 
 # read into 'SpatialExperiment'
 vis <- TENxVisium(
-    spacerangerOut=td, 
+    spacerangerOut=file.path(td, "outs"), 
     processing="filtered", 
     format="h5", 
     images="lowres") |> 
