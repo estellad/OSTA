@@ -15,7 +15,7 @@ However, incorporating spatial information should enrich this type of analysis b
 Methods developed for CCI/C analysis of spatial (transcript)omics data consider cellular distances to adjust interactions predicted from expression, and typically aim at quantifying spatial co-expression of LRs (that is, between proximal cells). 
 Such analyses need not be limited to LRs, however.
 
-In principle, and CCC tool may be turned into a spatial one by:
+In principle, any CCC tool may be turned into a spatial one by:
 
 1. **pre-filtering:** select a spatial neighborhood,  
 and apply CCC inference to selected observations.
@@ -24,7 +24,7 @@ and apply CCC inference to selected observations.
 and filter results based on spatial proximity.
 
 The reason we might choose to take one of these approaches is because CCC 
-modelling frameworks designed for single cell data are typically less complex.
+modeling frameworks designed for single cell data are typically less complex.
 Consequently, they tend to be more interpretable, easier and faster to run.
 
 <!--
@@ -43,7 +43,6 @@ library(scuttle)
 library(CCPlotR)
 library(ggplot2)
 library(ggspavis)
-library(basilisk)
 library(patchwork)
 library(reticulate)
 library(BiocParallel)
@@ -65,12 +64,14 @@ receiver signals, can account for multimeric interactions, considers cell-cell
 distances, and is linked to databases of signalling interactions and pathways. 
 
 Since `COMMOT` is available as a Python package, we can access it from R using 
-`r BiocStyle::Biocpkg("reticulate")` and `r BiocStyle::Biocpkg("basilisk")` 
-(see @sec-bkg-python-interoperability).
+`r BiocStyle::Biocpkg("reticulate")` with a Conda environment (see 
+@sec-bkg-python-interoperability).
 
 ### Python setup
 
-<!-- We first setup a corresponding Python environment using `basilisk`: -->
+We first set up a Python environment. Here, we do this by re-using the Conda environment created in @sec-bkg-python-interoperability, in order to speed up the book build time. Alternatively, a new environment could also be set up instead (see @sec-bkg-python-interoperability).
+
+We also install the `commot` package and additional dependencies from PyPI.
 
 ::: {.aside}
 Alternatively, one could set up a `conda` environment (or similar) 
@@ -80,30 +81,9 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
 
-```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
-# # this is faster for local run:
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-# use_condaenv("commot")
-```
-
-
-```{r env, message=FALSE, warning=FALSE, eval=FALSE}
-# env <- BasiliskEnvironment(
-#     envname="ccc",
-#     pkgname="base",
-#     pip="commot==0.0.3",
-#     packages="python=3.11")
-# use_virtualenv(obtainEnvironmentPath(env))
-```
-
-
-We first set up a Python environment. Here, we do this by re-using the environment created in @sec-bkg-python-interoperability, in order to speed up the book build time. Alternatively, a new environment could also be set up instead (see @sec-bkg-python-interoperability).
-
-We also install the `commot` package and additional dependencies from PyPI.
-
 ```{r env-ccc, message=FALSE, warning=FALSE}
 # re-use environment from Python interoperability chapter
+# using reticulate functions
 env <- "env-ccc"
 conda_clone(env, clone = "py-interop")
 use_condaenv(env, required = TRUE)
@@ -115,6 +95,29 @@ conda_install(
   pip = TRUE
 )
 ```
+
+
+<!--
+
+We first setup a corresponding Python environment using `basilisk`:
+
+```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
+# # this is faster for local run:
+# bin <- "~/software/mambaforge/bin/conda"
+# options(reticulate.conda_binary=bin)
+# use_condaenv("commot")
+```
+
+```{r env, message=FALSE, warning=FALSE, eval=FALSE}
+# env <- BasiliskEnvironment(
+#     envname="ccc",
+#     pkgname="base",
+#     pip="commot==0.0.3",
+#     packages="python=3.11")
+# use_virtualenv(obtainEnvironmentPath(env))
+```
+
+-->
 
 
 ### LR retrieval
