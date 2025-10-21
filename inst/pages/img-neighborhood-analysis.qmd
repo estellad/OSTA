@@ -240,7 +240,7 @@ ggplot(fd, aes(k, value, fill=k)) +
 
 ## Spatial density-based analysis
 
-`r BiocStyle::Biocpkg("scider")` [CITATION] defines spatial domains as regions of interest (ROIs) while preserving the tissue structure though spatial density analysis. 
+`r BiocStyle::Biocpkg("scider")` [@Li2025-scider] defines spatial domains as regions of interest (ROIs) while preserving the tissue structure though spatial density analysis. 
 Kernel density estimation (KDE) is used to describe the spatial distributions of cells, and ROIs are identified based on the spatial density of some cell types of interest (COIs).
 One can also calculate the spatial density of transcript expression of a gene or a gene set, so that gene (set)-specific ROIs can be identified. 
 ROIs can then be used for downstream analysis such as cell type co-localization, cell type composition and differential expression (DE) analysis. 
@@ -251,16 +251,18 @@ Using the Xenium breast carcinoma dataset, we demonstrate a standard `r BiocStyl
 #| message: false
 
 library(scider)
+library(OSTA.data)
+library(SpatialExperimentIO)
 
 pa <- OSTA.data_load("Xenium_HumanBreast1_Janesick")
 td <- tempfile()
 dir.create(td)
 unzip(pa, exdir = td)
-spe <- SpatialExperimentIO::readXeniumSXE(td)
+spe <- readXeniumSXE(td)
 ```
 
 In this example, we define ROIs based on the celluar density of tumor cells, that is, DCIS_1, DCIS_2 and invasive tumor cells are considered as the COI. 
-Firstly, we need to add cell type annotations to `colData`, where cell type annotations were obtained from the original publication [CITATION-Janesick2023]. 
+Firstly, we need to add cell type annotations to `colData`, where cell type annotations were obtained from the original publication [@Janesick2023-high-res]. 
 
 ```{r scider-cell-type-annotation}
 #| fig-width: 5
@@ -270,14 +272,14 @@ Firstly, we need to add cell type annotations to `colData`, where cell type anno
 anno <- read.csv(file.path(td, "annotation.csv"))
 colData(spe)[['cell_type']] <- anno$Annotation[match(spe$cell_id, anno$Barcode)]
 
-plotSpatial(spe, group = "cell_type", pt.alpha = 1)
+scider::plotSpatial(spe, group = "cell_type", pt.alpha = 1)
 ```
 
 We first estimate the spatial density of each cell type using the `gridDensity()` function. 
 
-```{r scider-cal-denstiy}
+```{r scider-cal-density}
 spe <- gridDensity(spe, grid.length.x = 50, bandwidth = 25)
-spe@metadata$grid_density[1:4, 1:8]
+metadata(spe)$grid_density[1:4, 1:8]
 ```
 
 The density value represents the expected number of COI cells on each grid, and can be visualized by the `plotDensity()` function. 
@@ -289,11 +291,11 @@ For example, here we visualize the density of COI cells:
 #| fig-cap: "Heatmap of the spatial density of COI cells."
 
 coi <- c("DCIS_1", "DCIS_2", "Invasive_Tumor")
-plotDensity(spe, coi = coi, probs = 0.5) +
+scider::plotDensity(spe, coi = coi, probs = 0.5) +
   ggtitle("Spatial density of tumour cells")
 ```
 
-ROI detection is performed using a graph-based approach as described in Li et al (2025) [CITATION]. 
+ROI detection is performed using a graph-based approach as described in @Li2025-scider. 
 Only grids with $\geq 1$ expected COI cell (estimated COI density $\geq 1$) are retained in ROI detection. 
 
 ```{r scider-roi-detection}
@@ -303,7 +305,7 @@ Only grids with $\geq 1$ expected COI cell (estimated COI density $\geq 1$) are 
 #| message: false
 
 spe <- findROI(spe, coi = coi, min.density = 1)
-plotROI(spe, roi = coi) + 
+scider::plotROI(spe, roi = coi) + 
   ggtitle("Tumour cell-based ROIs")
 ```
 
@@ -321,7 +323,7 @@ Here as an example, we demonstrate an ROI-level cell type co-localization analys
 #| message: false
 
 spe_cor <- corDensity(spe)
-plotCorHeatmap(spe_cor)
+scider::plotCorHeatmap(spe_cor)
 ```
 
 We see that immune and stromal cells are positively colocalized within their respective groups, whereas myoepithelial, DCIS, and invasive tumor populations form distinct, negatively correlated clusters.
@@ -337,7 +339,7 @@ Additionally, contour levels can be calculated from the estimated COI density, w
 #| message: false
 
 spe <- getContour(spe, coi = coi, bins = 10)
-plotContour(spe, coi = coi, line.width = 0.5)
+scider::plotContour(spe, coi = coi, line.width = 0.5)
 ```
 
 We can then assign each cell to its corresponding contour level according to their spatial coordinates, and visualize the cell type composition at each COI contour level using the `plotCellCompo()` function. 
@@ -349,7 +351,7 @@ We can then assign each cell to its corresponding contour level according to the
 #| message: false
 
 spe <- allocateCells(spe, contour = coi, to.roi = TRUE)
-plotCellCompo(spe, contour = coi, self.included = FALSE)
+scider::plotCellCompo(spe, contour = coi, self.included = FALSE)
 ```
 
 For example, we see a decreasing proportion of stromal cells, and an increasing proportion of unlabeled cells as tumor cell density increases. 
@@ -362,34 +364,16 @@ It is also useful to investigate how cell type composition changes to COI densit
 #| fig-cap: "Cell type composition at each contour level of COI cells within each ROI."
 #| message: false
 
-plotCellCompo(spe, contour = coi, self.included = FALSE, roi = coi)
+scider::plotCellCompo(spe, contour = coi, self.included = FALSE, roi = coi)
 ```
 
 ROIs can also be used to perform other types of downstream analysis, such as gene expression clustering, DE analysis and pathway analysis by pseudo-bulking cells located within each ROI, using the `spe2PB()` function. 
 Given the pseudo-bulk samples, `r BiocStyle::Biocpkg("scider")` is fully compatible with all `r BiocStyle::Biocpkg("limma")` and `r BiocStyle::Biocpkg("edgeR")` functionalities, allowing arbitrarily complex experimental design to answer various biological questions.
-We recommend to perform such DE analyses using the `voomLmFit()` pipeline [CITATION BELOW] or the quasi-likelihood pipeline in `r BiocStyle::Biocpkg("edgeR")` [CITE EDGER4.0].
-Examples of DE and pathway analyses can be found in Li et al (2025) [CITATION]. 
+We recommend to perform such DE analyses using the `voomLmFit()` pipeline [@Baldoni2025-diffSplice] or the quasi-likelihood pipeline in `r BiocStyle::Biocpkg("edgeR")` [@Chen2025-edgeR-v4].
+Examples of DE and pathway analyses can be found in @Li2025-scider. 
 More case studies will also be available at https://github.com/ChenLaboratory/scider. 
-
-### REFERENCES (TO DELETE)
-
-scider - 
-Li, M., Liu, N., Nguyen, Q.H. and Chen, Y., 2025. Preserving tissue structure through density-based spatial analysis with scider. bioRxiv, pp.2025-09.
-
-voomLmFit - 
-Baldoni, P.L., Chen, L., Li, M., Chen, Y. and Smyth, G.K., 2025. Dividing out quantification uncertainty enables assessment of differential transcript usage with diffSplice. bioRxiv, pp.2025-04.
-
-edgeR - 
-Chen, Y., Chen, L., Lun, A.T., Baldoni, P.L. and Smyth, G.K., 2025. edgeR v4: powerful differential analysis of sequencing data with expanded functionality and improved support for small counts and larger datasets. Nucleic Acids Research, 53(2), p.gkaf018.
-
-limma - 
-Ritchie, M.E., Phipson, B., Wu, D.I., Hu, Y., Law, C.W., Shi, W. and Smyth, G.K., 2015. limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic acids research, 43(7), pp.e47-e47.
-
-Janesick data -
-Janesick, A., Shelansky, R., Gottscho, A.D., Wagner, F., Williams, S.R., Rouault, M., Beliakoff, G., Morrison, C.A., Oliveira, M.F., Sicherman, J.T. and Kohlway, A., 2023. High resolution mapping of the tumor microenvironment using integrated single-cell, spatial and in situ analysis. Nature communications, 14(1), p.8353.
 
 
 ## Appendix
-
 
 ### References {.unnumbered}
