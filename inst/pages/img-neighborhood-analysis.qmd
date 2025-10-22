@@ -240,7 +240,7 @@ ggplot(fd, aes(k, value, fill=k)) +
 
 ## Spatial density-based analysis
 
-`r BiocStyle::Biocpkg("scider")` [@Li2025-scider] defines spatial domains as regions of interest (ROIs) while preserving the tissue structure though spatial density analysis. 
+`r BiocStyle::Biocpkg("scider")` [@Li2025-scider] defines spatial domains as regions of interest (ROIs) while preserving the tissue structure through spatial density analysis. 
 Kernel density estimation (KDE) is used to describe the spatial distributions of cells, and ROIs are identified based on the spatial density of some cell types of interest (COIs).
 One can also calculate the spatial density of transcript expression of a gene or a gene set, so that gene (set)-specific ROIs can be identified. 
 ROIs can then be used for downstream analysis such as cell type co-localization, cell type composition and differential expression (DE) analysis. 
