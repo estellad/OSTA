@@ -81,7 +81,7 @@ The following dependencies are needed in some of the following chapters, and nee
 conda_install(
   envname = env, 
   packages = c("libcxx", "llvm-openmp", "llvmlite", "numba"), 
-  channel = "conda-forge"
+  channel = c("conda-forge", "nodefaults")
 )
 ```
 
