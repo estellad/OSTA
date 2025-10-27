@@ -48,9 +48,9 @@ Several publicly available repositories, such as The Cancer Genome Atlas (TCGA) 
 
 ### Immunofluorescence markers
 
-Immunofluorescence (IF) is a microscopy-based technique that leverages the specificity of antibodies conjugated with fluorescent dyes to visualize the distribution and abundance of target proteins within cells or tissue sections. Compared to hematoxylin and eosin (H&E) staining, which provides morphological context, immunofluorescence offers molecular specificity by enabling the simultaneous detection of multiple biomarkers. This makes IF particularly powerful for studying cellular phenotypes, spatial relationships, and microenvironmental organization.
+Immunofluorescence (IF) is a microscopy-based technique that leverages the specificity of antibodies conjugated with fluorescent dyes to visualize the distribution and abundance of target proteins within cells or tissue sections. Compared to hematoxylin and eosin (H&E) staining, which provides morphological context, immunofluorescence offers molecular specificity by enabling the simultaneous detection of multiple biomarkers. This makes IF particularly powerful for studying cellular phenotypes, spatial relationships, and microenvironmental organization. [@bisht2022protocols @miller1995immunofluorescence]
 
-In multiplex immunofluorescence (mIF) or multispectral imaging, multiple fluorophores with distinct excitation and emission spectra are used to label different antigens within the same tissue section. These methods allow for a detailed characterization of complex cellular ecosystems, such as tumor microenvironments, by quantifying the co-localization and spatial arrangement of different immune and stromal cell types. Advances in imaging technologies, such as confocal and spinning disk microscopy, as well as spectral unmixing algorithms, have further enhanced the resolution and sensitivity of IF-based analyses [@gerdes2013highly; @lin2023multiplex].
+In multiplex immunofluorescence (mIF) or multispectral imaging, multiple fluorophores with distinct excitation and emission spectra are used to label different antigens within the same tissue section. These methods allow for a detailed characterization of complex cellular ecosystems, such as tumor microenvironments, by quantifying the co-localization and spatial arrangement of different immune and stromal cell types. Advances in imaging technologies, such as confocal and spinning disk microscopy, as well as spectral unmixing algorithms, have further enhanced the resolution and sensitivity of IF-based analyses [@gerdes2013highly; @giesen2014highly].
 
 The choice of markers depends on the biological question, commonly including:
 
@@ -65,20 +65,15 @@ The choice of markers depends on the biological question, commonly including:
 
 Quantitative analysis of IF images typically involves several steps:
 
-Image preprocessing, including illumination correction and background subtraction;
+- Image preprocessing, including illumination correction and background subtraction;
 
-Segmentation, to delineate nuclei, cytoplasm, or membrane regions;
+- Segmentation, to delineate nuclei, cytoplasm, or membrane regions;
 
-Feature extraction, capturing intensity, co-localization, and texture metrics;
+- Feature extraction, capturing intensity, co-localization, and texture metrics;
 
-Spatial analysis, to measure cell–cell interactions and neighborhood structures.
+- Spatial analysis, to measure cell–cell interactions and neighborhood structures.
 
-Modern open-source software platforms such as QuPath
- [@bankhead2017qupath] and Napari
- provide powerful tools for the visualization, annotation, and quantitative analysis of both H&E and immunofluorescence images.
-
-
-Open-source software like QuPath (an interactive platform for digital pathology with support for multiplexed IF image analysis) and Napari (a Python-based multidimensional image viewer with plugins for bioimage analysis) facilitate visualization, annotation, and quantitative analysis of IF data at scale.
+Modern open-source software platforms such as QuPath [@bankhead2017qupath] and Napari [@chiu2022napari] provide powerful tools for the visualization, annotation, and quantitative analysis of both H&E and immunofluorescence images.
 
 QuPath offers user-friendly workflows for cell segmentation, marker quantification, and batch processing of large slide collections. It supports both brightfield and fluorescence imaging and can be extended through Groovy or Python scripting.
 
