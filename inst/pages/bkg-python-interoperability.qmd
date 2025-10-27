@@ -44,8 +44,13 @@ In order to build this book chapter programmatically, we install a new Python in
 # set environment variables to accept terms of service
 Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
 Sys.setenv(CI = "true")
-# install Miniconda
-install_miniconda()
+
+# install Miniconda (or update if already installed)
+if (dir.exists(miniconda_path())) {
+  miniconda_update()
+} else {
+  install_miniconda()
+}
 ```
 
 
