@@ -1,0 +1,179 @@
+# Workflow: CosMX {#sec-img-workflow-cosmx}
+
+## Preamble
+
+### Introduction
+
+In this demo, we will analyze a 1k-plex CosMx data (Nanostring) of a mouse brain sample.
+Following quality control and preprocessing, we will 
+perform cell type annotation, gene-set enrichment analysis, and cell-cell interaction analysis.
+
+### Dependencies {#sec-img-workflow-cosmx-load-data}
+
+```{r load-libs, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(patchwork)
+library(pheatmap)
+library(scater)
+library(scRNAseq)
+library(SingleR)
+library(scrapper)
+library(OSTA.data)
+library(SpatialExperiment)
+library(SpatialExperimentIO)
+library(SpaceTrooper)
+library(DESpace)
+library(BiocParallel)
+# set parallelization
+bp <- MulticoreParam(th <- 4)
+# set seed for random number generation
+# in order to make results reproducible
+set.seed(112358)
+```
+
+```{r load-cos, message=FALSE, warning=FALSE}
+# retrieve CosMx dataset from OSF repo
+id <- "CosMx1k_MouseBrain2"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+
+cos <- readCosmxSXE(td)
+
+## add metadata and polygons
+cos <- updateCosmxSPE(cos, td, sampleName="CosMx")
+cos <- readAndAddPolygonsToSPE(cos)
+cos$in_tissue <- TRUE
+
+cos
+```
+
+## Quality control
+
+We can have an overview of the data, by plotting the spatial distribution of the cells, represented by their centroids. This is useful to have a global bird’s-eye-view of the tissue.
+
+```{r plot-xy}
+plotCentroids(cos)
+```
+
+Unlike, Xenium and MERSCOPE, CosMx does not stitch fields of view (FOVs) in a single image, but rather treats each FOV independently. It is therefore useful to visualize a map of the FOVs to understand their spatial arrangement.
+
+```{r plot-fov-map, out.width="66%", fig.align="center"}
+plotCellsFovs(cos)
+```
+
+ @sec-img-quality-control gives a thorough overview of quality control steps for imaging-based spatial transcriptomics data, including CosMX-specific metrics. Here, we will simply compute `r BiocStyle::Biocpkg("SpaceTrooper")`'s aggregated QC score and keep the cells that pass the threshold.
+
+```{r qc-cosmx}
+cos <- spatialPerCellQC(cos, rmZeros=TRUE,
+       negProbList=c("NegPrb", "Negative", "SystemControl"))
+
+cos <- computeQCScore(cos)
+
+plotCentroids(cos, colourBy="QC_score")
+```
+
+```{r filter-qc-cosmx}
+cos <- computeQCScoreFlags(cos, qsThreshold=0.5)
+
+plotCentroids(cos, colourBy="low_qcscore")
+
+cos <- cos[, !cos$low_qcscore]
+```
+
+## Processing
+
+For the sake of runtime, we will perform downstream analyses only on
+a small portion of the tissue, defined by the following FOVs:
+
+```{r subset-fovs-cosmx}
+plotZoomFovsMap(cos, fovs=c(72:74, 90:92, 97:99, 114:116))
+
+sub <- cos[, cos$fov %in% c(72:74, 90:92, 97:99, 114:116)]
+```
+
+Next, we'll log-normalize counts by area, and perform principal 
+component analysis (PCA) on all `r nrow(cos)` RNA targets:
+
+```{r pro}
+# cell area-based normalization
+logcounts(sub) <- sweep(assay(sub), 2, sub$Area, `/`)
+# principal component analysis
+sub <- runPCA(sub)
+```
+
+Let's visualize the expression of the first two principal components (PCs) in the spatial context.
+
+```{r plt-gs-xy, fig.width=8, fig.height=3}
+sub$PC1 <- reducedDim(sub, "PCA")[, 1]
+sub$PC2 <- reducedDim(sub, "PCA")[, 2]
+
+plotCentroids(sub, colourBy="PC1") +
+  plotCentroids(sub, colourBy="PC2")
+```
+
+## Annotation
+
+Here, we use the @zeisel2015cell dataset as a reference to annotate the cell types with `r BiocStyle::Biocpkg("SingleR")`.
+
+```{r load-ref-cosmx}
+sceZ <- ZeiselBrainData()
+sceZ <- logNormCounts(sceZ)
+```
+
+```{r annot-cosmx}
+pred <- SingleR(test=sub, ref=sceZ, labels=sceZ$level1class, de.method="wilcox")
+sub$SingleR_label <- factor(pred$pruned.labels)
+
+pal <- hcl.colors(nlevels(sub$SingleR_label), "Spectral")
+
+plotPolygons(sub, colourBy="SingleR_label") +
+    scale_fill_manual(values=pal)
+```
+
+Note that the annotation performed here is a transfer label from a reference dataset that only partially matches with the tissue under study and purposely annotated at a coarse level (level 1).
+
+A different, often preferable, approach consists in using, in addition to the gene expression profiles, the image data and the spatial context of the cells. `r BiocStyle::Githubpkg("Nanostring-Biostats/InSituType", "InSituType")` [@danaher2022insitutype] provides a framework to perform such analysis in unsupervised, semi-supervised, or supervised manners. Please refer to its documentation for more details.
+
+### Marker genes
+
+Here, we identify cluster-related spatially-variable genes using the `r BiocStyle::Biocpkg("DESpace")` package [@ai2024-DESpace]. In this workflow, we use this as a way to identify marker genes for the cell types annotated above.
+
+```{r svg-cosmx}
+results <- svg_test(spe = sub, cluster_col = "SingleR_label")
+head(results$gene_results)
+```
+
+We focus on the genes with the smallest p-values, and compute the average expression of each gene in each cell type. We can visualize this with a heatmap.
+
+```{r plt-svg, fig.width=8, fig.height=10}
+geneidx <- results$gene_results[results$gene_results$PValue==0,1]
+means <- t(apply(counts(sub)[geneidx,], 1, tapply, sub$SingleR_label, mean))
+
+pheatmap(means, cluster_rows=TRUE, cluster_cols=TRUE, scale="row",
+         main="Average expression of top SVGs per cell type")
+```
+
+We can also visualize the spatial distribution of some of these genes, e.g., Mbp that marks oligodendrocytes, and Snap25, Calm1, and Calm2 that marks different subsets of neurons. Note also how some genes show a difference of expression within the pyramidal neuron population, suggesting the presence of subtypes.
+
+```{r plt-svg-genes, fig.width=10, fig.height=10}
+sub$Mbp <- logcounts(sub)["Mbp", ]
+sub$Snap25 <- logcounts(sub)["Snap25", ]
+sub$Calm1 <- logcounts(sub)["Calm1", ]
+sub$Calm2 <- logcounts(sub)["Calm2", ]
+
+plotPolygons(sub, colourBy="Mbp") + ggtitle("Mpb") +
+    plotPolygons(sub, colourBy="Snap25") + ggtitle("Snap25") +
+    plotPolygons(sub, colourBy="Calm1") + ggtitle("Calm1") +
+    plotPolygons(sub, colourBy="Calm2") + ggtitle("Calm2")
+```
+
+### Cell-cell interactions
+
+```{r cci-cosmx}
+
+```
+
+## Appendix
+
+### References {.unnumbered}
