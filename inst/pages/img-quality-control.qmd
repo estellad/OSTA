@@ -65,47 +65,6 @@ xen$in_tissue <- TRUE
 xen$sample_id <- "Xenium"
 ```
 
-```{r load-data-xen-hide, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
-# retrieve Xenium dataset from OSF repo
-id <- "Xenium_HumanBreast1_Janesick"
-pa <- OSTA.data_load(id)
-dir.create(td <- tempfile())
-unzip(pa, exdir=td)
-xen <- readXeniumSXE(td)
-
-# add cell boundary polygons
-pol <- metadata(xen)$cell_boundaries
-pol <- readPolygonsXenium(pol, "parquet")
-pol <- pol[match(xen$cell_id, pol$cell_id), ]
-xen$polygons <- pol
-
-# compute cell aspect ratios
-xen$AspectRatio <- apply(pol, 1, \(.) {
-    if (.$is_multi) return(NA)
-    xy <- .$global[[1]]
-    rng <- colRanges(xy)
-    dxy <- rowDiffs(rng)
-    dxy[2]/dxy[1]
-})
-
-# retrieve FOV information
-mol <- metadata(xen)$transcripts
-mol <- read_parquet(mol, as_data_frame=FALSE)
-idx <- pull(mol, "cell_id")
-idx <- match(xen$cell_id, idx)
-fov <- pull(mol[idx, ], "fov")
-
-# add metadata for 'ggspavis' & 'SpaceTrooper'
-xen$in_tissue <- TRUE
-xen$sample_id <- "Xenium"
-metadata(xen)$technology <- "10x_Xenium"
-
-# altExp = negative & blank codes, metadata include
-# transcripts = molecule coordinates (.pq file)
-# cell/nucleus_boundaries = segmentation (.pq files)
-xen
-```
-
 ### From CosMx
 
 To load the CosMx data into a `SpatialExperiment` object, 
@@ -130,18 +89,10 @@ dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 cos <- readCosmxSXE(td)
 
-# add cell boundary polygons
-pol <- metadata(cos)$polygons
-pol <- readPolygonsCosmx(pol, "parquet")
-idx <- sprintf("f%s_c%s", cos$fov, cos$cell_ID)
-cos$polygons <- pol[match(idx, pol$cell_id), ]
-
-# add metadata for 'ggspavis' & 'SpaceTrooper'
+cos <- updateCosmxSPE(cos, td, sampleName="CosMx")
+cos <- readAndAddPolygonsToSPE(cos)
+# add metadata for 'ggspavis'
 cos$in_tissue <- TRUE
-cos$sample_id <- "CosMx"
-cos$cell_id <- colnames(cos)
-metadata(cos)$technology <- "Nanostring_CosMx"
-metadata(cos)$fov_dim <- c(xdim=4256, ydim=4256)
 
 # altExp = negative probes, metadata include:
 # transcripts = molecule coordinates (.pq file)
@@ -161,8 +112,8 @@ This is useful to have a global bird's-eye-view of the tissue.
 ```{r plot-xy, fig.width=10, fig.height=5}
 # spatial plots for datasets acquired through
 # Xenium & CosMx (points = cell centroids)
-plotCoords(xen, point_size=0) + ggtitle("Xenium") +
-plotCoords(cos, point_size=0) + ggtitle("CosMx") 
+plotCoords(xen, point_size=0) + ggtitle(xen$sample_id) +
+plotCoords(cos, point_size=0) + ggtitle(cos$sample_id)
 ```
 
 ## General QC metrics
@@ -529,10 +480,9 @@ to the input SPE's `colData`; the latter flags low-quality cells.
 ```{r SpaceTrooper-calc-score, message=FALSE}
 # compute quality scores & flag cell's that
 # fall below specified percentile threshold
-cos <- computeQScore(cos)
-cos <- computeQScoreFlags(cos, 
-    qsThreshold=0.1, 
-    useQSQuantiles=TRUE)
+cos <- computeQCScore(cos)
+cos <- computeQCScoreFlags(cos, 
+    qsThreshold=0.5)
 
 # the following slots have now been 
 # added to the object's cell metadata
@@ -547,8 +497,8 @@ head(colData(cos)[sco])
 thm <- list(
     theme_void(), ggtitle(""), 
     coord_equal(), scale_y_reverse())
-plotCentroids(cos, colourBy="quality_score") + thm +
-plotCentroids(cos, colourBy="low_qscore") + thm +
+plotCentroids(cos, colourBy="QC_score") + thm +
+plotCentroids(cos, colourBy="low_qcscore") + thm +
     guides(col=guide_legend(override.aes=list(size=2))) +
     scale_color_manual(values=c("lavender", "blue")) +
     theme(legend.key.size=unit(0, "pt")) 
@@ -596,7 +546,7 @@ which would exclude about `r round(100*mean(cos$low_qscore))`\% of cells.
 
 ```{r cos-ex}
 # fraction of low-quality CosMx cells
-mean(cos$low_qscore)
+mean(cos$low_qcscore)
 ```
 
 ## Conclusion
@@ -621,7 +571,7 @@ i <- setdiff(
     spatialCoordsNames(cos))
 colData(cos) <- cd[i] 
 # add for visualization
-xen$ex <- ex; cos$ex <- cos$low_qscore
+xen$ex <- ex; cos$ex <- cos$low_qcscore
 plotCoords(xen, annotate="ex", point_size=0) + ggtitle("Xenium") +
 plotCoords(cos, annotate="ex", point_size=0) + ggtitle("CosMx") +
     plot_layout(guides="collect") &
