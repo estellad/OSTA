@@ -46,7 +46,7 @@ knitr::include_graphics("../images/pyramidal_structure.png")
 Several publicly available repositories, such as The Cancer Genome Atlas (TCGA) and The Cancer Imaging Archive (TCIA), provide free access to large-scale genomic and imaging datasets. In the following sections, we will explore these resources in more detail.
 
 
-### Immunofluorescence markers
+### Immunofluorescence images
 
 Immunofluorescence (IF) is a microscopy-based technique that leverages the specificity of antibodies conjugated with fluorescent dyes to visualize the distribution and abundance of target proteins within cells or tissue sections. Compared to hematoxylin and eosin (H&E) staining, which provides morphological context, immunofluorescence offers molecular specificity by enabling the simultaneous detection of multiple biomarkers. This makes IF particularly powerful for studying cellular phenotypes, spatial relationships, and microenvironmental organization. [@bisht2022protocols @miller1995immunofluorescence]
 
