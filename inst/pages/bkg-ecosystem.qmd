@@ -83,7 +83,7 @@ now <- as.Date(format(Sys.Date(), "%Y-%m-%d"))
 gg <- lapply(ids, \(id) {
     # get metadata & simplify naming
     nm <- df$Package[.f(id)]
-    ys <- BiocPkgTools:::getPkgYearsInBioc(nm) |>
+    ys <- getPkgYearsInBioc(nm) |>
         mutate(first=first_version_release_date) |>
         mutate(last=last_version_release_date) |>
         mutate(last=case_when(is.na(last)~now, TRUE~last)) |>
@@ -97,8 +97,6 @@ gg <- lapply(ids, \(id) {
     # get cumulative number of packages available each month
     ys |> group_by(date) |> count()
 }) |> bind_rows(.id="biocViews")
-# NOTE: 'getYearsInBioc()' function 
-# will be added in the next release
 ```
 
 ```{r message=FALSE, fig.width=5, fig.height=4}
