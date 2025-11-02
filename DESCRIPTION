@@ -80,6 +80,7 @@ Imports:
     scider,
     scran,
     scuttle,
+    scRNAseq,
     SFEData,
     SingleR,
     sosta,
