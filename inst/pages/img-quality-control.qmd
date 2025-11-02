@@ -87,11 +87,10 @@ pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 cos <- readCosmxSXE(td)
-
+# prepare data for 'SpaceTrooper' 
 cos <- updateCosmxSPE(cos, td, sampleName="CosMx")
 cos <- readAndAddPolygonsToSPE(cos)
 cos$in_tissue <- TRUE
-
 cos
 ```
 
@@ -497,9 +496,7 @@ head(colData(cos)[sco])
 ```{r SpaceTrooper-plot-score, message=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
 # visualize quality scores & highlight flagged cells
-thm <- list(
-    theme_void(), ggtitle(""), 
-    coord_equal())
+thm <- list(theme_void(), ggtitle(""), coord_equal())
 plotCentroids(cos, colourBy="QC_score") + thm +
 plotCentroids(cos, colourBy="low_qcscore") + thm +
     guides(col=guide_legend(override.aes=list(size=2))) +

@@ -4,32 +4,28 @@
 
 ### Introduction
 
-In this demo, we will analyze a 1k-plex CosMx data (Nanostring) of a mouse brain sample.
-Following quality control and preprocessing, we will 
-perform cell type annotation, identification of marker genes, and cell-cell interaction analysis.
+In this demo, we will analyze a 1k-plex CosMx data (Bruker) of a mouse brain sample; see @sec-bkg-example-datasets. Following quality control and preprocessing, we will perform cell type annotation, identification of marker genes, and cell-cell interaction analysis.
 
 ### Dependencies {#sec-img-workflow-cosmx-load-data}
 
 ```{r load-libs, message=FALSE, warning=FALSE}
+library(DESpace)
 library(ggplot2)
+library(OSTA.data)
 library(patchwork)
 library(pheatmap)
 library(scater)
-library(scRNAseq)
-library(SingleR)
 library(scrapper)
-library(OSTA.data)
+library(scRNAseq)
+library(sf)
+library(SingleR)
+library(SpaceTrooper)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
-library(SpaceTrooper)
-library(DESpace)
-library(SpatialFeatureExperiment)
-library(Voyager)
-library(spdep)
 library(spatialFDA)
-library(BiocParallel)
-# set parallelization
-bp <- MulticoreParam(th <- 4)
+library(SpatialFeatureExperiment)
+library(spdep)
+library(Voyager)
 # set seed for random number generation
 # in order to make results reproducible
 set.seed(112358)
@@ -41,14 +37,11 @@ id <- "CosMx1k_MouseBrain2"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-
 cos <- readCosmxSXE(td)
-
-## add metadata and polygons
+# prepare data for 'SpaceTrooper'
 cos <- updateCosmxSPE(cos, td, sampleName="CosMx")
 cos <- readAndAddPolygonsToSPE(cos)
 cos$in_tissue <- TRUE
-
 cos
 ```
 
@@ -68,20 +61,18 @@ plotCellsFovs(cos)
 
  @sec-img-quality-control gives a thorough overview of quality control steps for imaging-based spatial transcriptomics data, including CosMX-specific metrics. Here, we will simply compute `r BiocStyle::Biocpkg("SpaceTrooper")`'s aggregated QC score and keep the cells that pass the threshold.
 
-```{r qc-cosmx}
-cos <- spatialPerCellQC(cos, rmZeros=TRUE,
-       negProbList=c("NegPrb", "Negative", "SystemControl"))
-
+```{r qc-cosmx, message=FALSE}
+lys <- c("NegPrb", "Negative", "SystemControl")
+cos <- spatialPerCellQC(cos, rmZeros=TRUE, negProbList=lys)
 cos <- computeQCScore(cos)
-
 plotCentroids(cos, colourBy="QC_score")
 ```
 
-```{r filter-qc-cosmx}
+```{r filter-qc-cosmx, results="hold"}
 cos <- computeQCScoreFlags(cos, qsThreshold=0.5)
-
-plotCentroids(cos, colourBy="low_qcscore")
-
+plotCentroids(cos, colourBy="low_qcscore") + 
+    theme(legend.key.size=rel(0)) +
+    guides(col=guide_legend(override.aes=list(size=2)))
 cos <- cos[, !cos$low_qcscore]
 ```
 
@@ -90,14 +81,15 @@ cos <- cos[, !cos$low_qcscore]
 For the sake of runtime, we will perform downstream analyses only on
 a small portion of the tissue, defined by the following FOVs:
 
-```{r subset-fovs-cosmx}
-plotZoomFovsMap(cos, fovs=c(72:74, 90:92, 97:99, 114:116))
-
-sub <- cos[, cos$fov %in% c(72:74, 90:92, 97:99, 114:116)]
+```{r subset-fovs-cosmx, results="hold", message=FALSE}
+fs <- c(72:74, 90:92, 97:99, 114:116)
+plotZoomFovsMap(cos, fovs=fs)
+sub <- cos[, cos$fov %in% fs]
 ```
 
 Next, we'll log-normalize counts by area, and perform principal 
 component analysis (PCA) on all `r nrow(cos)` RNA targets:
+[See @sec-ind-normalization for more details on normalization.]{.aside}
 
 ```{r pro}
 # cell area-based normalization
@@ -108,12 +100,13 @@ sub <- runPCA(sub)
 
 Let's visualize the expression of the first two principal components (PCs) in the spatial context.
 
-```{r plt-gs-xy, fig.width=8, fig.height=3}
-sub$PC1 <- reducedDim(sub, "PCA")[, 1]
-sub$PC2 <- reducedDim(sub, "PCA")[, 2]
-
+```{r plt-gs-xy, fig.width=8, fig.height=3, message=FALSE}
+# add PCs as cell metadata
+pcs <- reducedDim(sub, "PCA")
+colData(sub) <- cbind(colData(sub), pcs)
+# visualize PCs 1 & 2 in space
 plotCentroids(sub, colourBy="PC1") +
-  plotCentroids(sub, colourBy="PC2")
+plotCentroids(sub, colourBy="PC2")
 ```
 
 ## Annotation
@@ -129,9 +122,11 @@ sceZ <- logNormCounts(sceZ)
 pred <- SingleR(test=sub, ref=sceZ, labels=sceZ$level1class, de.method="wilcox")
 sub$SingleR_label <- factor(pred$pruned.labels)
 
-pal <- hcl.colors(nlevels(sub$SingleR_label), "Spectral")
+nk <- nlevels(sub$SingleR_label)
+pal <- hcl.colors(nk, "Spectral")
 
-plotPolygons(sub, colourBy="SingleR_label") +
+plotPolygons(sub, 
+    colourBy="SingleR_label") +
     scale_fill_manual(values=pal)
 ```
 
@@ -143,35 +138,41 @@ A different, often preferable, approach consists in using, in addition to the ge
 
 ### Marker genes
 
-Here, we identify cluster-related spatially-variable genes using the `r BiocStyle::Biocpkg("DESpace")` package [@ai2024-DESpace]. In this workflow, we use this as a way to identify marker genes for the cell types annotated above.
+Here, we identify cluster-related spatially-variable genes using the `r BiocStyle::Biocpkg("DESpace")` package [@Cai2024-DESpace]. In this workflow, we use this as a way to identify marker genes for the cell types annotated above.
 
-```{r svg-cosmx}
-results <- svg_test(spe = sub, cluster_col = "SingleR_label")
-head(results$gene_results)
+```{r svg-cosmx, message=FALSE}
+res <- svg_test(spe=sub, cluster_col="SingleR_label")
+head(res$gene_results)
 ```
 
 We focus on the genes with the smallest p-values, and compute the average expression of each gene in each cell type. We can visualize this with a heatmap.
 
-```{r plt-svg, fig.width=8, fig.height=10}
-geneidx <- results$gene_results[results$gene_results$PValue==0,1]
-means <- t(apply(counts(sub)[geneidx,], 1, tapply, sub$SingleR_label, mean))
+```{r plt-svg, fig.width=8, fig.height=3}
+df <- res$gene_results
+gs <- df$gene_id[rank(df$PValue, ties.method="min") == 1]
+mu <- t(apply(counts(sub)[gs, ], 1, tapply, sub$SingleR_label, mean))
 
-pheatmap(means, cluster_rows=TRUE, cluster_cols=TRUE, scale="row",
-         main="Average expression of top SVGs per cell type")
+pheatmap(t(mu), 
+    scale="column", show_colnames=FALSE,
+    cluster_rows=TRUE, cluster_cols=TRUE, 
+    main="Average expression of top SVGs per cell type")
 ```
 
-We can also visualize the spatial distribution of some of these genes, e.g., Mbp that marks oligodendrocytes, and Snap25, Calm1, and Calm2 that mark different subsets of neurons. Note also how some genes show a difference of expression within the pyramidal neuron population, suggesting the presence of subtypes.
+We can also visualize the spatial distribution of some of these genes, e.g., Mbp that marks oligodendrocytes, and Calm1, Calm2, and Snap25 that mark different subsets of neurons. Note also how some genes show a difference of expression within the pyramidal neuron population, suggesting the presence of subtypes.
 
-```{r plt-svg-genes, fig.width=10, fig.height=10}
-sub$Mbp <- logcounts(sub)["Mbp", ]
-sub$Snap25 <- logcounts(sub)["Snap25", ]
-sub$Calm1 <- logcounts(sub)["Calm1", ]
-sub$Calm2 <- logcounts(sub)["Calm2", ]
-
-plotPolygons(sub, colourBy="Mbp") + ggtitle("Mpb") +
-    plotPolygons(sub, colourBy="Snap25") + ggtitle("Snap25") +
-    plotPolygons(sub, colourBy="Calm1") + ggtitle("Calm1") +
-    plotPolygons(sub, colourBy="Calm2") + ggtitle("Calm2")
+```{r plt-svg-genes, fig.width=10, fig.height=7, message=FALSE}
+gs <- c("Mbp", "Calm1", "Calm2", "Snap25")
+ps <- lapply(gs, \(g) {
+    sub[[g]] <- logcounts(sub)[g, ]
+    plotPolygons(sub, colourBy=g) + ggtitle(g)
+}) 
+dy <- range(logcounts(sub)[gs, ])
+wrap_plots(ps, guides="collect") &
+    scale_fill_viridis_c(
+        "expression", 
+        limits=dy, breaks=dy,
+        labels=c("low", "high")) &
+    theme(plot.title=element_text(hjust=0.5))
 ```
 
 ## Neighborhood-based gene expression analyses
@@ -182,49 +183,46 @@ We start by creating a cell neighborhood graph, based on a distance threshold of
 Note that an alternative approach uses the $k$ nearest neighbors (kNN) method to define the neighborhood graph. Here, we prefer to use a distance-based approach, as it better captures the morphological structure of this tissue area.
 :::
 
-```{r cci-graph-cosmx}
+```{r cci-graph-cosmx, warning=FALSE}
+# convert to SFE & remove cells with NA labels
 sfe <- as(sub, "SpatialFeatureExperiment")
-
-## remove cells with NA labels
 sfe <- sfe[, !is.na(sfe$SingleR_label)]
 
 # this is needed for Voyager's plotting functions
 colnames(sfe$polygons)[6] <- "geometry"
-sf::st_geometry(sfe$polygons) <- "geometry"
-
+st_geometry(sfe$polygons) <- "geometry"
 colGeometry(sfe, "cellSeg") <- sfe$polygons
 
+colGraph(sfe, "poly2nb") <- 
+    findSpatialNeighbors(sfe,
+        type="cellSeg", 
+        method="poly2nb", 
+        style="W", snap=50)
 
-colGraph(sfe, "poly2nb") <- findSpatialNeighbors(sfe,
-    type = "cellSeg",
-    method = "poly2nb",
-    style = "W",
-    snap = 50
-  )
-
-plotColGraph(sfe,
-  colGraphName = "poly2nb",
-  colGeometryName = "cellSeg"
-) + theme_void()
+plotColGraph(sfe, 
+    colGraphName="poly2nb", 
+    colGeometryName="cellSeg") + 
+    theme_void()
 ```
 
 Given the neighborhood graph, we can calculate local measures of spatial autocorrelation for specific genes in the dataset.
 
 Here, we focus on Snap25 and Calm1, neuronal marker genes identified above that show interesting spatial expression distributions (see above). First, we compute the local Moran's I coefficient.
 
-```{r cci-moran-snap25}
-features <- c("Snap25", "Calm1")
+```{r cci-moran-snap25, fig.width=8, fig.height=3}
+gs <- c("Snap25", "Calm1")
 sfe <- runUnivariate(sfe,
-                     features = features,
-                     colGraphName = "poly2nb",
-                     type = "localmoran",
-                     colGeometryName = "cellSeg",
-                     zero.policy = TRUE)
+    features=gs,
+    type="localmoran",
+    zero.policy=TRUE,
+    colGraphName="poly2nb",
+    colGeometryName="cellSeg")
 
-plotLocalResult(sfe, "localmoran",
-                features = features, ncol = 2,
-                colGeometryName = "cellSeg",
-                divergent = TRUE, diverge_center = 0)
+plotLocalResult(sfe, 
+    name="localmoran",
+    features=gs, ncol=2,
+    colGeometryName="cellSeg",
+    divergent=TRUE, diverge_center=0)
 ```
 
 From the plots, we can see that Snap25 shows positive spatial autocorrelation in a very localized part of the tissue, while Calm1 shows a more diffuse autocorrelation structure.
@@ -232,35 +230,33 @@ From the plots, we can see that Snap25 shows positive spatial autocorrelation in
 We focus on Snap25 and visualize its autocorrelation structure using a Moran scatter plot, which shows the relationship between the expression of the gene in each cell and the average expression in its neighbors.
 
 ```{r cci-moran-scatter-snap25}
-sfe <- runUnivariate(
-  sfe,
-  features[1],
-  colGraphName = "poly2nb",
-  type = "moran.plot",
-  colGeometryName = "cellSeg",
-  zero.policy = TRUE
-)
+sfe <- runUnivariate(sfe,
+    feature=gs[1],
+    zero.policy=TRUE,
+    type="moran.plot",
+    colGraphName="poly2nb",
+    colGeometryName="cellSeg")
 
 moranPlot(sfe,
-          features[1],
-          graphName = "poly2nb",
-          swap_rownames = "symbol")
+    feature=gs[1],
+    graphName="poly2nb",
+    swap_rownames="symbol")
 ```
 
 We can then classify cells based on the significance of their local Moran's I values, and visualize the resulting clusters in the spatial context.
 
 ```{r cci-moran-scatter-sig}
-localResults(sfe)[["localmoran"]][[1]] <- 
-  localResults(sfe)[["localmoran"]][[1]] |> 
-  dplyr::mutate(locClust = ifelse(`-log10p_adj` > -log10(0.05), as.character(mean), "non-siginificant"))
+res <- localResults(sfe)[["localmoran"]][[1]]
+res$locClust <- with(res, ifelse(
+    `-log10p_adj` > -log10(0.05), 
+    as.character(mean), "non-siginificant"))
+localResults(sfe)[["localmoran"]][[1]] <- res
 
-plotLocalResult(
-  sfe,
-  name = "localmoran",
-  features = features[1],
-  attribute = "locClust",
-  colGeometryName = "cellSeg"
-)
+plotLocalResult(sfe,
+    features=gs[1],
+    name="localmoran",
+    attribute="locClust",
+    colGeometryName="cellSeg")
 ```
 
 In this case, we can see a significant positive autocorrelation in the lower left part of the structure, while the rest of the tissue does not show significant autocorrelation.
@@ -276,9 +272,8 @@ Note that other local spatial autocorrelation measures, such as Geary's C coeffi
 We can also use the neighborhood graph to investigate cell-cell interactions between different cell types annotated above. Here, we use the join count statistic implemented in the `r BiocStyle::CRANpkg("spdep")` package to quantify the tendency of cells of different types to be neighbors.
 
 ```{r cci-cosmx}
-jc <- joincount.multi(sfe$SingleR_label,
-             colGraph(sfe, 'poly2nb'), zero.policy=TRUE)
-head(jc[order(abs(jc[,"z-value"]), decreasing=TRUE),])
+jc <- joincount.multi(sfe$SingleR_label, colGraph(sfe, "poly2nb"), zero.policy=TRUE)
+head(jc[order(abs(jc[, "z-value"]), decreasing=TRUE), ])
 ```
 
 We can see that there is a strong tendency for cells of the same type to be neighbors (high positive z-values). There are also some interesting negative interactions between different cell types: e.g., pyramidal CA1 tend to be away from oligodendrocytes and astrocytes. This highlights the compartimentalized structure of the brain tissue.
@@ -294,20 +289,18 @@ Other methods are available, such as Ripley's K function, and the pair correlati
 :::
 
 
-```{r cci-CA1-l}
-metricRes <- calcMetricPerFov(spe = sub, 
-    selection = "pyramidal CA1",
-    subsetby = "sample_id", fun = "Lest", 
-    marks = "SingleR_label",
-    rSeq = seq(0, 500, length.out = 100),
-    by = "sample_id",
-    ncores = 1)
+```{r cci-CA1-l, fig.width=6, fig.height=4, message=FALSE}
+res <- calcMetricPerFov(
+    spe=sub, fun="Lest",
+    subsetby="sample_id", 
+    marks="SingleR_label",
+    selection="pyramidal CA1",
+    rSeq=seq(0, 500, l=100),
+    by="sample_id", ncores=1)
 
-plotMetricPerFov(metricRes, theo = TRUE,
-    correction = "iso",
-    x = "r",
-    imageId = "sample_id"
-)
+plotMetricPerFov(res, 
+    theo=TRUE, correction="iso", 
+    x="r", imageId="sample_id")
 ```
 
 In this type of plots, the dashed line represents the theoretical value of the metric under complete spatial randomness (CSR). Values above this line indicate clustering, while values below indicate dispersion. Here, we can see that pyramidal CA1 neurons tend to cluster together, as expected.
@@ -318,20 +311,18 @@ Note that the L-function lays below the CSR line for the first 50 microns, which
 
 While in the plot above we focused on a single cell type, we can also investigate the interaction between two different cell types, e.g., pyramidal CA1 neurons and oligodendrocytes, using the cross-L function.
 
-```{r cci-cross-l}
-metricRes <- calcMetricPerFov(spe = sub, 
-    selection = c("pyramidal CA1", "oligodendrocytes"),
-    subsetby = "sample_id", fun = "Lcross", 
-    marks = "SingleR_label",
-    rSeq = seq(0, 500, length.out = 100),
-    by = "sample_id",
-    ncores = 1)
+```{r cci-cross-l, fig.width=6, fig.height=4, message=FALSE}
+res <- calcMetricPerFov(
+    spe=sub, fun="Lcross", 
+    subsetby="sample_id", 
+    marks="SingleR_label",
+    selection=c("pyramidal CA1", "oligodendrocytes"),
+    rSeq=seq(0, 500, l=100),
+    by="sample_id", ncores=1)
 
-plotMetricPerFov(metricRes, theo = TRUE,
-    correction = "iso",
-    x = "r",
-    imageId = "sample_id"
-)
+plotMetricPerFov(res, 
+    theo=TRUE, correction="iso", 
+    x="r", imageId="sample_id")
 ```
 
 In this case, we can see that pyramidal CA1 neurons and oligodendrocytes tend to be spatially segregated, as indicated by the cross-L function being below the CSR line.
