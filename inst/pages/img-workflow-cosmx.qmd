@@ -1,5 +1,7 @@
 # Workflow: CosMX {#sec-img-workflow-cosmx}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -332,3 +334,5 @@ We only briefly discussed cell-cell interactions and spatial exploratory analyse
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

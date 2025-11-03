@@ -1,5 +1,7 @@
 # Image analysis {#sec-ind-image-analysis}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -214,3 +216,5 @@ The `destdir` argument can be used to specify a different directory.
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

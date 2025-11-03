@@ -1,5 +1,7 @@
 # Structure-based analysis {#sec-mult-structure-based}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -317,3 +319,5 @@ Additional packages to calculate anatomical structure-derived features include:
 
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

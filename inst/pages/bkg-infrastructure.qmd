@@ -1,5 +1,7 @@
 # Infrastructure {#sec-bkg-infrastructure}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 Bioconductor provides several data classes for storing and manipulating spatial (transcript)omics datasets. By relying on these consistent data structures, we can easily connect methods and packages developed by different research groups to build comprehensive analysis workflows.
@@ -132,3 +134,5 @@ knitr::include_graphics("../images/SpatialData.png")
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

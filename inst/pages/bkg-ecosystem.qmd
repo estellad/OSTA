@@ -1,5 +1,7 @@
 # Ecosystem {#sec-bkg-ecosystem}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 This chapter provides additional background about the Bioconductor ecosystem
@@ -257,3 +259,5 @@ ggplot(gg, aes(n, j)) +
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

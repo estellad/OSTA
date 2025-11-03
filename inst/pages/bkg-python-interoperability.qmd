@@ -1,5 +1,7 @@
 # Python interoperability {#sec-bkg-python-interoperability}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 Methods discussed in this book are usually available as either R or Python packages. Ideally, users should be able to leverage the full range of available tools for their analyses. Methods should be selected based on scientific merit (ideally demonstrated by neutral benchmarks), and independent of having been implemented in a given programming language (R or Python) or framework (e.g. Bioconductor or `Seurat`).
@@ -304,3 +306,5 @@ R package to install and manage Python environments in R packages and sessions
 
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}
