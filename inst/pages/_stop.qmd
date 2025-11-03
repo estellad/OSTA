@@ -2,8 +2,8 @@
 doc <- knitr::current_input()
 doc <- gsub("\\..*", "", doc)
 # needed when 'cache = TRUE'
-if (!length(runtimes)) runtimes <- 0
-new <- data.frame(doc, runtimes)
+if (!length(.rt)) .rt <- 0
+new <- data.frame(doc, .rt)
 csv <- "_times.csv"
 if (file.exists(csv)) {
     old <- read.csv(csv)

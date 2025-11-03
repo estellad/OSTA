@@ -1,5 +1,5 @@
 ```{r echo=FALSE}
-runtimes <- c()
+.rt <- c()
 knitr::knit_hooks$set(time_it=local({
     now <- NULL
     \(before, options) {
@@ -7,7 +7,7 @@ knitr::knit_hooks$set(time_it=local({
             now <<- Sys.time()
         } else {
             res <- difftime(Sys.time(), now)
-            runtimes <<- c(runtimes, res)
+            .rt <<- c(.rt, res)
         }
     }
 }))
