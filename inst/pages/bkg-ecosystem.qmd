@@ -31,7 +31,7 @@ including their details (e.g., authors) and (monthly) download statistics.
 
 ```{r message=FALSE}
 library(BiocPkgTools)
-#biocExplore()
+biocExplore()
 ```
 
 `biocPkgList()` retrieves the full Bioconductor software package listing
