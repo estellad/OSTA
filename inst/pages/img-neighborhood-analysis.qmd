@@ -1,5 +1,7 @@
 # Neighborhood analysis {#sec-img-neighborhood-analysis}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -377,3 +379,5 @@ More case studies will also be available at https://github.com/ChenLaboratory/sc
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}
