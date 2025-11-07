@@ -26,7 +26,7 @@ consulted to conduct their research** -- be it (R, Python, or other) software,
 benchmarks that informed their methodological decisions, review or perspective 
 pieces, or other. To facilitate this, we provide a list in the section below.
 
-## References {-}
+## Collection {-}
 
 We here make an attempt to collect all biotechnology, dataset, software, review,
 benchmark, or other, references and resources mentioned throughout the book.
