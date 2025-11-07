@@ -47,8 +47,8 @@ spe <- readRDS("img-spe_cl.rds")
 ## Set scoring
 
 `r BiocStyle::Biocpkg("MSigDB")` provides a programmatic interface to the
-[molecular signatures database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb),
-one of the largest collections of molecular signatures and pathways.
+[Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb)
+[@Subramanian2005-MSigDB], one of the largest collections of molecular signatures and pathways.
 
 Here, we query of human hallmark genes sets:
 

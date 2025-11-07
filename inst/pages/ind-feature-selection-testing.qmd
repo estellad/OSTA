@@ -196,7 +196,7 @@ top_nnSVG <- res_nnSVG$gene_name[res_nnSVG$rank < 7.5]
 
 ### `DESpace`
 
-`DESapce` relies on pre-computed spatial domains to summarize the primary spatial structures of the data; see @sec-ind-clustering on clustering.
+`DESpace` relies on pre-computed spatial domains to summarize the primary spatial structures of the data; see @sec-ind-clustering on clustering.
 
 ```{r plt-clu-xy, message=FALSE, fig.width=3.5, fig.height=3}
 #| code-fold: true

@@ -71,7 +71,7 @@ knitr::include_graphics("../images/SpatialExperiment.png")
 
 #### SpatialFeatureExperiment
 
-SPE has been extended through `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` (SFE) [@Moses2023-Voyager], which can additionally accommodate observation- and feature-level graphs (e.g. of cell/spot neighborhoods) and geometries (e.g. segmentation and tissue boundaries, or histological regions annotated by a pathologist). Because these are represented as `r BiocStyle::CRANpkg("sf")` (geometries) and `r BiocStyle::CRANpkg("spdep")` (graphs) objects, SFE directly gives access to a range of geometry operations (e.g. intersecting and buffering) and spatial dependency calculations (e.g. Moran's I and Geary's C).
+SPE has been extended through `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` (SFE) [@Moses2023-Voyager], which can additionally accommodate observation- and feature-level graphs (e.g. of cell/spot neighborhoods) and geometries (e.g. segmentation and tissue boundaries, or histological regions annotated by a pathologist). Because these are represented as `r BiocStyle::CRANpkg("sf")` (geometries) and `r BiocStyle::CRANpkg("spdep")` (graphs) objects [@Pebesma2018-sf; @Edzer2005-sp], SFE directly gives access to a range of geometry operations (e.g. intersecting and buffering) and spatial dependency calculations (e.g. Moran's I and Geary's C).
 
 
 #### MoleculeExperiment

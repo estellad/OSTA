@@ -143,7 +143,7 @@ Binning can also be done to cellular resolution if the platform in question has 
 
 ### stPipe: A Platform Agnostic R-based Solution
 
-`r BiocStyle::Githubpkg("mritchielab/stPipe")` [@Xu2025-stPipe] is a sST data preprocessing tool designed to be platform agnostic, and to unify the preprocessing of sST data from a wide variety of spatial technology solutions such as 10x Visium, BGI Stereo-seq, and Curio Slide-seq.
+`r BiocStyle::Biocpkg("stPipe")` [@Xu2025-stPipe] is a sST data preprocessing tool designed to be platform agnostic, and to unify the preprocessing of sST data from a wide variety of spatial technology solutions such as 10x Visium, BGI Stereo-seq, and Curio Slide-seq.
 
 The stPipe workflow (Fig 4) begins with the function `Run_ST`, which streamlines multiple steps into one cohesive process, including FASTQ
 or BAM file reformatting, read alignment, barcode demultiplexing, and gene counting.
