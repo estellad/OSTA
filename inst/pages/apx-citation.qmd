@@ -284,7 +284,7 @@ benchmark, or other, references and resources mentioned throughout the book.
 | | |
 |-|-|
 | theory | @Cassella2022-subcell-analysis |
-| VisiumHD | @Novoselsky2025-subcell-visiumhd |
+| Visium HD | @Novoselsky2025-subcell-visiumhd |
 | [Bento](https://github.com/YeoLab/bento-tools) | @Mah2024-Bento |
 | `r Biocpkg("MoleculeExperiment")` | @PetersCouto2023-MoleculeExperiment |
 | `r Githubpkg("bioFAM/FISHFactor")` | @Walter2023-FISHFactor |
