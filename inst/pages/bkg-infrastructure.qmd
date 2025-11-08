@@ -96,6 +96,13 @@ In particular, [Seurat](https://satijalab.org/seurat/) [@Hao2023-Seurat] and [Sc
 The `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` [@Manukyan2023-VoltRon] package incorporates a framework that allows spatially-aware alignment between datasets with observations that span across regions of interest (ROIs) and image tiles in addition to cells, spots, and molecules. `Shiny` applications are provided to conduct both automated and manual spatial alignment across adjacent tissue sections where users can interactively manage images and choose landmark points for co-registration. `VoltRon` is also an end-to-end spatial omics analysis package, and support on-disk representations of spatially-resolved datasets using *.zarr* and *.h5* backed `r BiocStyle::Biocpkg("DelayedArray")` objects.
 
 
+#### spatialGE
+
+`r BiocStyle::Githubpkg("FridleyLab/spatialGE")` [@Ospina2022-spatialGE] relies on a custom class (`STlist`) to store data and results from multiple tissue sections.
+The framework includes methods for visualization, spatial autocorrelation, tissue domain/niche detection, spatial gene set enrichment, spatial gene expression gradients, spatially-aware differential gene expression, etc.
+`spatialGE` also provides a point-and-click [web application](https://spatialge.moffitt.org) that allows for use without coding/scripting.
+
+
 #### SpatialData
 
 The [SpatialData](https://spatialdata.scverse.org/) [@Marconato2025-SpatialData] framework (@fig-spatialdata) offers a suite of modules for loading, handling, as well as (static and interactive) visualization of diverse spatial omics data (spanning imaging- and sequencing-based data and different modalities).
