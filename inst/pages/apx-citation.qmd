@@ -88,19 +88,27 @@ benchmark, or other, references and resources mentioned throughout the book.
 |-|-|
 | `r CRANpkg("sf")` | @Pebesma2018-sf |
 | `r CRANpkg("sp")` | @Edzer2005-sp |
+| `r Biocpkg("Rarr")` | @Smith2023-Rarr |
+| `r Githubpkg("keller-mark/pizzarr")` | n/a |
 | `r Biocpkg("alabaster.base")` | @Lun2023-alabaster |
-| [Giotto](https://giottosuite.com) | @Dries2021-Giotto; @Chen2025-Giotto-Suite |
-| `r Biocpkg("iSEE")` | @Albrecht2018-iSEE |
 | `r Biocpkg("MoleculeExperiment")` | @PetersCouto2023-MoleculeExperiment |
-| [*napari*](https://napari.org) | @Sofroniew2025-napari |
-| [Scanpy](https://scanpy.readthedocs.io) | @Wolf2018-Scanpy |
 | `r Biocpkg("SingleCellExperiment")` | @Amezquita2020-OSCA |
-| [Seurat](https://satijalab.org/seurat) | @Hao2023-Seurat |
-| [SpatialData](https://spatialdata.scverse.org) | @Marconato2025-SpatialData |
 | `r Biocpkg("SpatialExperiment")` | @Righelli2022-SpatialExperiment |
 | `r Biocpkg("SpatialFeatureExperiment")` | @Moses2023-Voyager |
+| [Seurat](https://satijalab.org/seurat) | @Hao2023-Seurat |
+| [Scanpy](https://scanpy.readthedocs.io) | @Wolf2018-Scanpy |
 | [Squidpy](http://squidpy.readthedocs.io) | @Palla2022-Squidpy |
+| [Giotto](https://giottosuite.com/) | @Chen2025-Giotto-Suite; @Dries2021-Giotto |
 | `r Githubpkg("BIMSBbioinfo/VoltRon")` | @Manukyan2023-VoltRon |
+| `r Githubpkg("FridleyLab/spatialGE")` | @Ospina2022-spatialGE |
+| [SpatialData](https://spatialdata.scverse.org) | @Marconato2025-SpatialData |
+| Bruker's CosMx | [AtoMx](https://nanostring.com/products/atomx-spatial-informatics-platform) |
+| Vizgen's MERSCOPE | [Visualizer](https://vizgen.com/vizualizer-software) |
+| 10 Genomic's Xenium | [Xenium Explorer](https://www.10xgenomics.com/support/software/xenium-explorer) |
+| 10 Genomic's Visium | [Loupe Browser](https://www.10xgenomics.com/support/software/loupe-browser) |
+| `Seurat`-Loupe conversion | `r Githubpkg("10XGenomics/loupeR")` |
+| `r Biocpkg("iSEE")` | @Albrecht2018-iSEE |
+| [*napari*](https://napari.org) | @Sofroniew2025-napari |
 
 : {.striped tbl-colwidths="[33,66]"}
 

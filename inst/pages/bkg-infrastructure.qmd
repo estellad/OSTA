@@ -28,7 +28,7 @@ Tabular data (e.g. segmentation boundaries, molecule locations) may arrive in th
 
 ### *.zarr*
 
-*.zarr* stores can be used to store N-dimensional arrays as a grid of "chunks", enabling parallelizable accession. For (bio)imaging data, different image scales (or resolutions) can be stored as different layers of a "pyramid", where the base/tip represents the full/lowest resolution. R interfaces to *.zarr* are provided through `r BiocStyle::Biocpkg("Rarr")` (Bioconductor) and `r BiocStyle::CRANpkg("pizzarr")` (CRAN).
+*.zarr* stores can be used to store N-dimensional arrays as a grid of "chunks", enabling parallelizable accession. For (bio)imaging data, different image scales (or resolutions) can be stored as different layers of a "pyramid", where the base/tip represents the full/lowest resolution. R interfaces to *.zarr* are provided through Bioconductor's `r BiocStyle::Biocpkg("Rarr")` package [@Smith2023-Rarr], and `r BiocStyle::Githubpkg("keller-mark/pizzarr")`.
 
 
 ### `alabaster`
