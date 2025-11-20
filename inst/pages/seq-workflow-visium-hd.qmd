@@ -1,5 +1,7 @@
 # Workflow: Visium HD {#sec-seq-workflow-visium-hd}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@deOliveira2025-high-def].
@@ -664,7 +666,6 @@ In this workflow, we demonstrated how to perform a standard analysis pipeline on
 
 - [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
 
-
 ## Cell-level Visium HD analysis
 
 As of June, 2025, Visium HD enables direct output of H&E-segmented cell-level data, in addition to the previous `binned_outputs` at 2, 8, and 16 µm, from [SpaceRanger v4](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd). This update simplifies the additional cell segmentation required when using `bin2cell` or `StarDist`. However, a comparative study of segmentation methods on Visium HD data has yet to be conducted. 
@@ -677,12 +678,14 @@ knitr::include_graphics("../images/VisiumHD_nuclei_segmentation_binning_10x.png"
 
 Compared to binned analysis, Visium HD with cell-level segmentation is more similar to Xenium data, but with full-transcriptome coverage. Most analytical methods are transferable; however, at single-cell resolution, deconvolving each data point into multiple cell types should be adapted using label transfer or unsupervised clustering to assign single-cell type labels. For example, after clustering, we identified three differentially expressed genes:
 
-```{r fig-vhdcell-ge, echo = FALSE, out.width = "50%", fig.cap= "Differential marker gene expressions spatially visualized as polygons"}
+```{r fig-vhdcell-ge, echo = FALSE, out.width = "66%", fig.cap= "Differential marker gene expressions spatially visualized as polygons"}
 knitr::include_graphics("../images/VisiumHD_gene_expression_polygon.png")
 ```
 
-For detailed cell-level Visium HD workflow, please refer to the EuroBioC2025 OSTA workshop [tutorial page](https://estellad.github.io/EuroBioC2025OSTAWorkshop/index.html).
+For detailed cell-level Visium HD workflow, please refer to the [EuroBioC2025 OSTA workshop](https://estellad.github.io/EuroBioC2025OSTAWorkshop/index.html).
 
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}
