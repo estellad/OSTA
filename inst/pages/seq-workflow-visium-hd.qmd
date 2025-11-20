@@ -27,7 +27,6 @@ library(SpatialExperiment)
 library(SpotSweeper)
 library(Statial)
 library(tidyr)
-library(tidyverse)
 library(VisiumIO)
 ```
 
@@ -676,7 +675,7 @@ The morphology-driven, nucleus-based segmentation produces polygons representing
 knitr::include_graphics("../images/VisiumHD_nuclei_segmentation_binning_10x.png")
 ```
 
-You can read in the data 
+We can read in the segmented output:
 
 ```{r vhdcellsegread}
 id <- "VisiumHD_HumanColon_Oliveira"
@@ -691,8 +690,32 @@ vhdcell <- TENxVisiumHD(
 rownames(vhdcell) <- make.unique(rowData(vhdcell)$Symbol)
 vhdcell
 ```
-```{r vhdcellplot}
 
+To orient the polygons in the same direction as the previous plots, we will need to manually flip the y-axis of cell segmentation masks.   
+```{r vhdcellflip}
+polygons <- VisiumIO::flip_sf_Y(sf = metadata(vhdcellsub)$cellseg, 
+                                type = "POLYGON",
+                                img_height = nrow(imgRaster(vhdcell)),
+                                scalef = imgData(vhdcellsub)$scaleFactor)
+
+```
+
+Subset the Visium HD data to region of interest as previously in the bin-level:
+```{r}
+bbox <- st_bbox(c(xmin = 4214.937, xmax = 4465.761, 
+                    ymin = 2979.286, ymax = 3211.817))
+bbox <- st_as_sfc(bbox)
+vhdpo <- metadata(vhdcell)$cellseg
+vhdposub <- vhdpo[st_intersects(vhdpo, bbox, sparse = FALSE), ]
+
+vhdcellsub <- 
+```
+
+Visualization gene expression in the polygons
+```{r vhdcellplot}
+ggplot() + 
+  geom_sf() + 
+  theme_void()
 ```
 
 Compared to binned analysis, Visium HD with cell-level segmentation is more similar to Xenium data, but with full-transcriptome coverage. Most analytical methods are transferable; however, at single-cell resolution, deconvolving each data point into multiple cell types should be adapted using label transfer or unsupervised clustering to assign single-cell type labels. For example, after clustering, we identified three differentially expressed genes:
