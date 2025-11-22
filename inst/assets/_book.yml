@@ -56,6 +56,7 @@ book:
     - pages/apx-acknowledgments.qmd
     - pages/apx-related-resources.qmd
     - pages/apx-session-info.qmd
+    - pages/apx-citation.qmd
   #cover-image: assets/cover.png
   favicon: assets/favicon.png
   sidebar: 
