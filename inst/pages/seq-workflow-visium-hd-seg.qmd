@@ -195,7 +195,7 @@ sfe$nuc <- sapply(sfe$map, \(.) mean(.$in_nucleus))
 sfe$nuc_um2 <- sfe$um2*sfe$nuc
 ```
 
-We can also investigate the number of different cells that would be contained in 8um and 16um bins, respectively. Here, we can observe that 8/16um bins comprise an average of about 2/4 cells, only 25\% of bins comprise more than 3/6 cells, and at most 9/20 cells are contained in any bin.
+We can also investigate the number of different cells that would be contained in 8um and 16um bins, respectively. Here, we can observe that 8/16um bins map to an average of about 2/4 cells, only 25\% of bins map to more than 3/6 cells, and at most 9/20 cells are mapped to any bin.
 
 ```{r bin-vs-cell}
 bin <- c("square_008um", "square_016um")
