@@ -20,7 +20,8 @@ book:
         - pages/seq-deconvolution.qmd
         - pages/seq-workflow-dlpfc.qmd
         - pages/seq-workflow-visium-crc.qmd
-        - pages/seq-workflow-visium-hd.qmd
+        - pages/seq-workflow-visium-hd-bin.qmd
+        - pages/seq-workflow-visium-hd-seg.qmd
     - part: "Imaging-based platforms"
       chapters:
         - pages/img-introduction.qmd
