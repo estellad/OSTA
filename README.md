@@ -8,7 +8,7 @@
 ## Overview
 
 This repository contains source files for the "Orchestrating Spatial Transcriptomics Analysis with Bioconductor" book.
-The online version of the book is available at: https://bioconductor.org/books/OSCA/
+The online version of the book is available at https://bioconductor.org/books/OSCA/
 
 ***
 
