@@ -1,5 +1,7 @@
 # Deconvolution {#sec-seq-deconvolution}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 Sequencing-based ST data can contain zero to multiple cells per spot, which might be fully or only partially covered by cells, depending on the spatial resolution of the platform and the tissue cell density (see also @sec-seq-introduction and the schematic Figure below). This aspect of the data implies that there may be a mixture of cell types in a spot and thus a mixture of transcriptional programs.
@@ -45,14 +47,14 @@ In this example of Visium breast cancer data [@Janesick2023-high-res], we perfor
 id <- "Visium_HumanBreast_Janesick"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
-unzip(pa, exdir = td)
+unzip(pa, exdir=td)
 
 # read into 'SpatialExperiment'
 vis <- TENxVisium(
-    spacerangerOut = td, 
-    processing = "filtered", 
-    format = "h5", 
-    images = "lowres") |> 
+    spacerangerOut=file.path(td, "outs"), 
+    processing="filtered", 
+    format="h5", 
+    images="lowres") |> 
     import()
 
 # retrieve spot annotations & add as metadata
@@ -68,47 +70,48 @@ vis
 ```{r plt-hne, fig.width = 9, fig.height = 3.5}
 #| code-fold: true
 xy <- spatialCoords(vis) * scaleFactors(vis)
-xs <- range(xy[, 1])
 ys <- nrow(imgRaster(vis)) - range(xy[, 2])
+xs <- range(xy[, 1])
 box <- geom_rect(
-    xmin = xs[1], xmax = xs[2], ymin = ys[1], ymax = ys[2], 
-    col = "black", fill = NA, linetype = 2, linewidth = 2/3)
-plotVisium(vis, spots = FALSE, point_size = 1) + box + 
-    plotVisium(vis, point_size = 1, zoom = TRUE) + 
-    plot_layout(nrow = 1) & facet_null()
+    xmin=xs[1], xmax=xs[2], ymin=ys[1], ymax=ys[2], 
+    col="black", fill=NA, linetype=2, linewidth=2/3)
+plotVisium(vis, spots=FALSE, point_size=1) + box + 
+    plotVisium(vis, point_size=1, zoom=TRUE) + 
+    plot_layout(nrow=1) & facet_null()
 ```
 
 Deconvolution is performed after quality control, as detailed in @sec-seq-quality-control, and is usually performed on unnormalized and untransformed (i.e. raw) counts. Here, we quickly check some typically spot-level metrics.
 
 ```{r qcvis}
-sub <- list(mt = grep("^MT-", rownames(vis)))
-vis <- addPerCellQCMetrics(vis, subsets = sub)
+sub <- list(mt=grep("^MT-", rownames(vis)))
+vis <- addPerCellQCMetrics(vis, subsets=sub)
 ```
 
-```{r plt-xy-qc, message = FALSE, fig.width = 6, fig.height = 2.5}
+```{r plt-xy-qc, message = FALSE, fig.width = 9, fig.height = 2.5}
 #| code-fold: true
 vis$log_sum <- log1p(vis$sum)
-plotCoords(vis, annotate = "log_sum") + ggtitle("log library size") + 
-    plotCoords(vis, annotate = "subsets_mt_percent") + ggtitle("% mitochondrial") + 
-    plot_layout(nrow = 1) & theme(
-      legend.key.width = unit(0.5, "lines"), 
-      legend.key.height = unit(1, "lines")) & 
-    scale_color_gradientn(colors = pals::jet())
-```
-
-
-```{r plt-mito-libsize, fig.width = 6, fig.height = 4}
-#| code-fold: true
-ggplot(data.frame(colData(vis))) + 
-  geom_point(aes(x=sum, y=subsets_mt_percent)) + 
-  scale_x_log10() + 
-  scale_y_sqrt()
+plotCoords(vis, 
+    annotate="log_sum") + 
+    ggtitle("log library size") + 
+plotCoords(vis, 
+    annotate="subsets_mt_percent") + 
+    ggtitle("% mitochondrial") + 
+ggplot(
+    data.frame(colData(vis)), 
+    aes(x=sum, y=subsets_mt_percent)) + 
+    geom_point() + geom_density_2d() +
+    scale_x_log10() + scale_y_sqrt() +
+    theme(aspect.ratio=2/3) +
+plot_layout(nrow=1) & theme(
+    legend.key.width=unit(0.5, "lines"), 
+    legend.key.height=unit(1, "lines")) & 
+    scale_color_gradientn(colors=pals::jet())
 ```
 
 A few spots have low library sizes, and can be removed.
+
 ```{r vis-filter, message = FALSE}
-#| code-fold: true
-vis <- vis[,vis$sum > 1000]
+vis <- vis[, vis$sum > 1000]
 ```
 
 We first visualize the spot-level cell type annotation provided by 10x Genomics.
@@ -116,9 +119,9 @@ We first visualize the spot-level cell type annotation provided by 10x Genomics.
 ```{r visanno, message = FALSE, fig.width = 5.5, fig.height = 3.5}
 #| code-fold: true
 plotCoords(vis, 
-           annotate = "anno", point_size = 1, 
-           pal = unname(pals::trubetskoy())) + 
-    theme(legend.key.size = unit(0, "lines"))
+    annotate="anno", point_size=1, 
+    pal=unname(pals::trubetskoy())) + 
+    theme(legend.key.size=unit(0, "lines"))
 ```
 
 Now, we load the single-cell (Chromium) reference data for the Visium dataset. To streamline the demonstration, we consolidate some of the cell type annotations provided by 10x Genomics (i.e. `Annotation`) into more generalized categories (i.e. `Annogrp`).
@@ -128,19 +131,19 @@ Now, we load the single-cell (Chromium) reference data for the Visium dataset. T
 id <- "Chromium_HumanBreast_Janesick"
 pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
-unzip(pa, exdir = td)
+unzip(pa, exdir=td)
 
 # read into 'SingleCellExperiment'
-fs <- list.files(td, full.names = TRUE)
-h5 <- grep("h5$", fs, value = TRUE)
-sce <- read10xCounts(h5, col.names = TRUE)
+fs <- list.files(td, full.names=TRUE)
+h5 <- grep("h5$", fs, value=TRUE)
+sce <- read10xCounts(h5, col.names=TRUE)
 
 # use gene symbols as feature names
 rownames(sce) <- make.unique(rowData(sce)$Symbol)
 
 # retrieve cell type labels
-csv <- grep("csv$", fs, value = TRUE)
-cd <- read.csv(csv, row.names = 1)
+csv <- grep("csv$", fs, value=TRUE)
+cd <- read.csv(csv, row.names=1)
 
 # ignore mixtures
 lab <- cd$Annotation
@@ -148,10 +151,9 @@ lab[grepl("Hyb", lab)] <- NA
 
 # simplify annotations
 pat <- c(
-    "B Cell" = "B", "T Cell" = "T", "Mac" = "macro", 
-    "Mast" = "mast", "DCs" = "dendritic", 
-    "Peri" = "perivas", "End" = "endo", "Str" = "stromal", 
-    "Inv" = "tumor", "Myo" = "myoepi")
+    "B Cell"="B", "T Cell"="T", "Mac"="macro", "Mast"="mast", 
+    "DCs"="dendritic", "Peri"="perivas", "End"="endo", 
+    "Str"="stromal", "Inv"="tumor", "Myo"="myoepi")
 for (. in names(pat)) 
     lab[grep(., lab)] <- pat[.]
 lab <- gsub("\\s", "", lab)
@@ -175,8 +177,8 @@ Next, we perform deconvolution with `r BiocStyle::Biocpkg("spacexr")` (also know
 By default, `runRctd()`'s `rctd_mode = "doublet"` specifies at most two subpopulations coexist in a data unit (i.e. within a spot); here, we set `rctd_mode = "full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
 ```{r dec, message = FALSE, warning = FALSE}
-rctd_data <- createRctd(vis, sce, cell_type_col = "Annogrp")
-(res <- runRctd(rctd_data, max_cores = 4, rctd_mode = "full"))
+rctd_data <- createRctd(vis, sce, cell_type_col="Annogrp")
+(res <- runRctd(rctd_data, max_cores=4, rctd_mode="full"))
 ```
 
 Weights inferred by `RCTD` should be normalized such that proportions of cell types sum to 1 for each spot:
@@ -187,7 +189,7 @@ ws <- assay(res)
 ws <- sweep(ws, 2, colSums(ws), `/`)
 
 ws_rctd <- data.frame(t(as.matrix(ws)))
-ws_rctd[1:5, 1:5] |> round(2)
+round(ws_rctd[1:5, 1:5], 2)
 
 # add proportion estimates to colData
 colData(vis)[names(ws_rctd)] <- ws_rctd[colnames(vis), ]
@@ -201,7 +203,8 @@ Another method that can be used is `CARD`. First, we rename the columns of spati
 <!-- First, we realized delayed count matrices and rename spatial coordinate columns to make the input data compatible with CARD [Note: RCTD handles the conversion internally with spacexr::check_counts()]{.aside} -->
 
 ```{r}
-# realize the delayed matrices, as CARD do not support delayed matrix handling yet
+# realize delayed matrices, as CARD does 
+# not yet support delayed matrix handling
 counts(sce) <- as(counts(sce), "sparseMatrix")
 counts(vis) <- as(counts(vis), "sparseMatrix")
 colnames(spatialCoords(vis)) <- c("x", "y")
@@ -212,23 +215,22 @@ Next, we perform the `CARD` deconvolution. Here, we demonstrate `CARD`'s interop
 ```{r card-dec, message = FALSE, warning = FALSE}
 set.seed(2025)
 CARD_obj <- CARD_deconvolution(
-    spe = vis,
-    sce = sce,
-    sc_count = NULL,
-    sc_meta = NULL,
-    spatial_count = NULL,
-    spatial_location = NULL,
-    ct_varname = "Annogrp",
-    ct_select = NULL,       # decon with all sce$Annogrp cell types
-    sample_varname = NULL,  # use all sce as one ref sample 
-    mincountgene = 100,
-    mincountspot = 5
-)
+    spe=vis,
+    sce=sce,
+    sc_count=NULL,
+    sc_meta=NULL,
+    spatial_count=NULL,
+    spatial_location=NULL,
+    ct_varname="Annogrp",
+    ct_select=NULL,      # use all 'sce$Annogrp' cell types
+    sample_varname=NULL, # use all 'sce' as one 'ref' sample 
+    mincountgene=100,
+    mincountspot=5)
 ws_card <- CARD_obj$Proportion_CARD
+
 # order cell type names alphabetically, as for RCTD
 ws_card <- data.frame(ws_card[, colnames(ws_rctd)])
-
-ws_card[1:5, 1:5] |> round(2)
+round(ws_card[1:5, 1:5], 2)
 ```
 
 
@@ -244,39 +246,46 @@ First, we define a couple accessory functions.
     df <- cbind(ws, xy)
     ggplot(df, aes(x, y, col=.data[[col]])) + 
         coord_equal() + theme_void() + 
-        geom_point(size = point_size)
+        geom_point(size=point_size)
 }
 
-.plt_decon <- \(ws, vis){
-    lapply(names(ws), \(.) 
-      .plt_xy(ws, vis, col = ., point_size = 0.3)) |> 
-      wrap_plots(nrow = 3) & theme(
-      legend.key.width = unit(0.5, "lines"),
-      legend.key.height = unit(1, "lines")) &
-      scale_color_gradientn(colors = pals::jet())
+.plt_decon <- \(ws, vis) {
+    ps <- lapply(names(ws), \(.) .plt_xy(ws, vis, col=., point_size=0.3))
+    ps |> wrap_plots(nrow=3) & theme(
+        legend.key.width=unit(0.5, "lines"),
+        legend.key.height=unit(1, "lines")) &
+        scale_color_gradientn(colors=pals::jet())
 }
 ```
 
-We can visualize deconvolution weights in x-y space, i.e. coloring by the proportion of a given cell type estimated to fall within a given spot:
+We can visualize deconvolution weights in x-y space, i.e., coloring by 
+the proportion of a given cell type estimated to fall within a given spot:
 
-```{r plt-dec-xy-rctd, message = FALSE, fig.width = 8, fig.height = 5}
+::: {.panel-tabset}
+
+### RCDT
+```{r plt-dec-xy-rctd, message = FALSE, fig.width = 12, fig.height = 7}
 #| code-fold: true
-.plt_decon(ws = ws_rctd, vis)
+.plt_decon(ws=ws_rctd, vis)
 ```
 
-```{r plt-dec-xy-card, message = FALSE, fig.width = 8, fig.height = 5}
+### CARD
+```{r plt-dec-xy-card, message = FALSE, fig.width = 12, fig.height = 7}
 #| code-fold: true
-.plt_decon(ws = ws_card, vis)
+.plt_decon(ws=ws_card, vis)
 ```
-            
+     
+:::
+
 The deconvolution results can also be viewed as a heatmap, where rows = cells and columns = clusters:
 
 ```{r heatmap, fig.width = 3.5, fig.height = 3}
 #| layout-ncol: 2
 #| code-fold: true
-plot_heat_ws <- function(ws, string){
-    p <- pheatmap(ws, show_rownames = FALSE, show_colnames = TRUE, main=string,
-                  cellwidth = 12, treeheight_row = 5, treeheight_col = 5)
+plot_heat_ws <- \(ws, string){
+    p <- pheatmap(ws, 
+        show_rownames=FALSE, show_colnames=TRUE, main=string,
+        cellwidth=12, treeheight_row=5, treeheight_col=5)
     return(p)
 }
 plot_heat_ws(ws_rctd, string="RCTD") 
@@ -306,11 +315,12 @@ We can visualize these three annotations spatially:
 
 ```{r plt-clu-xy, message = FALSE, fig.width = 9, fig.height = 2.5}
 #| code-fold: true
-lapply(c("anno", "RCTD", "RCTD_no_stroma"), 
-       \(.) plotCoords(vis, annotate=.)) |>
-    wrap_plots(nrow = 1) &
-    theme(legend.key.size = unit(0, "lines")) &
-    scale_color_manual(values = unname(pals::trubetskoy()))
+lapply(
+    c("anno", "RCTD", "RCTD_no_stroma"), 
+    \(.) plotCoords(vis, annotate=.)) |>
+    wrap_plots(nrow=1) &
+    theme(legend.key.size=unit(0, "lines")) &
+    scale_color_manual(values=unname(pals::trubetskoy()))
 ```
 
 Note the strong stromal signals and macrophages being the second most common cell type for stromal cells.
@@ -321,16 +331,21 @@ To help characterize subpopulations from deconvolution, we can view their distri
 cd <- data.frame(colData(vis))
 df <- as.data.frame(with(cd, table(RCTD, anno)))
 fd <- as.data.frame(with(cd, table(RCTD_no_stroma, anno)))
-ggplot(df, aes(Freq, RCTD, fill = anno)) + ggtitle("RCTD") +
-    ggplot(fd, aes(Freq, RCTD_no_stroma, fill = anno)) + ggtitle("RCTD_no_stroma") +
-    plot_layout(nrow = 1, guides = "collect") &
-    labs(x = "Proportion", y = NULL) &
-    coord_cartesian(expand = FALSE) &
-    geom_col(width = 1, col = "white", position = "fill") &
-    scale_fill_manual(values = unname(pals::trubetskoy())) &
-    theme_minimal() & theme(aspect.ratio = 1,
-                            legend.key.size = unit(2/3, "lines"),
-                            plot.title = element_text(hjust=0.5))
+ggplot(df, 
+    aes(Freq, RCTD, fill=anno)) + 
+    ggtitle("RCTD") +
+ggplot(fd, 
+    aes(Freq, RCTD_no_stroma, fill=anno)) + 
+    ggtitle("RCTD_no_stroma") +
+plot_layout(nrow=1, guides="collect") &
+    labs(x="Proportion", y=NULL) &
+    coord_cartesian(expand=FALSE) &
+    geom_col(width=1, col="white", position="fill") &
+    scale_fill_manual(values=unname(pals::trubetskoy())) &
+    theme_minimal() & theme(
+        aspect.ratio=1,
+        legend.key.size=unit(2/3, "lines"),
+        plot.title=element_text(hjust=0.5))
 ```
 
 Next, we can investigate the agreement between the provided annotation against the two deconvolution majority vote labels.
@@ -339,8 +354,8 @@ Next, we can investigate the agreement between the provided annotation against t
 #| layout-ncol: 2
 #| code-fold: true
 hm <- \(mat, string) pheatmap(
-    mat, show_rownames = TRUE, show_colnames = TRUE, main=string,
-    cellwidth = 10, cellheight = 10, treeheight_row = 5, treeheight_col = 5)
+    mat, show_rownames=TRUE, show_colnames=TRUE, main=string,
+    cellwidth=10, cellheight=10, treeheight_row=5, treeheight_col=5)
 hm(prop.table(table(vis$anno, vis$RCTD), 2), string="RCTD")
 hm(prop.table(table(vis$anno, vis$RCTD_no_stroma), 2), string="RCTD_no_stroma")
 ```
@@ -353,14 +368,14 @@ On the left panel, among among all the spots annotated by `RCTD` as T cells, nea
 Next, we prepare the principal components (PCs) needed to perform PC regression:
 
 ```{r pca}
+# log-library size normalization
 vis <- logNormCounts(vis)
-# Feature selection 
+# feature selection 
 dec <- modelGeneVar(vis)
-hvg <- getTopHVGs(dec, prop = 0.1)
-
-# Dimension reduction 
+hvg <- getTopHVGs(dec, prop=0.1)
+# dimension reduction 
 set.seed(1234)
-vis <- runPCA(vis, ncomponents = 20, subset_row = hvg)
+vis <- runPCA(vis, ncomponents=20, subset_row=hvg)
 ```
 
 We fit the deconvolution result of each cell type against the first 10 PCs to obtain 10 regressions.
@@ -373,8 +388,8 @@ pcs <- pcs[idx, seq_len(10)]
 pcr <- lapply(ids, \(id) {
     fit <- summary(lm(pcs ~ ws[[id]]))
     r2 <- sapply(fit, \(.) .$adj.r.squared)
-    data.frame(id, pc = seq_along(r2), r2)
-}) |> do.call(what = rbind)
+    data.frame(id, pc=seq_along(r2), r2)
+}) |> do.call(what=rbind)
 ```
 
 Here we plot the coefficient of determination of the first 10 PCs for each cell type.
@@ -384,45 +399,53 @@ Here we plot the coefficient of determination of the first 10 PCs for each cell 
 pcr$id <- factor(pcr$id, ids)
 pal <- pals::trubetskoy()
 ggplot(pcr, aes(pc, r2, col=id)) +
-    geom_line(show.legend = FALSE) + geom_point() +
-    scale_color_manual("predictor", values = unname(pal)) +
-    scale_x_continuous(breaks = c(1, seq(5, 20, 5))) +
-    scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
-    labs(x = "principal component", y = "coeff. of determination") +
-    guides(col = guide_legend(override.aes = list(size=2))) +
-    coord_cartesian(xlim = c(1, 10)) +
+    geom_line(show.legend=FALSE) + geom_point() +
+    scale_color_manual("predictor", values=unname(pal)) +
+    scale_x_continuous(breaks=c(1, seq(5, 20, 5))) +
+    scale_y_continuous(limits=c(0, 1), breaks=seq(0, 1, 0.2)) +
+    labs(x="principal component", y="coeff. of determination") +
+    guides(col=guide_legend(override.aes=list(size=2))) +
+    coord_cartesian(xlim=c(1, 10)) +
     theme_minimal() + theme(
-      panel.grid.minor = element_blank(),
-      legend.key.size = unit(0, "lines"))
+      panel.grid.minor=element_blank(),
+      legend.key.size=unit(0, "lines"))
 ```
 
-Let's inspect the key drivers of (expression) variability in terms of PCs. Considering deconvolution results from above, we can see that:
+Let's inspect the key drivers of (expression) variability in terms of PCs. 
+Considering deconvolution results from above, we can see that, e.g.:
 
--   PC1 distinguishes stromal, tumor, macrophage from the rest of the tissue;
--   PC2 clearly separates myoepi;
--   PC3 captures T cells region;
--   PC5 separates endothelial.
+-   PC1 distinguishes stromal, tumor, macrophage from the rest of the tissue
+-   PC3, PC4 and PC5 separate DCIS1, T and endothelial cells, respectively
 
-
-```{r plt-pcs-xy, message = FALSE, fig.width = 5.5, fig.height = 4}
+```{r plt-pcs-xy, message = FALSE, fig.width = 8, fig.height = 5}
 #| code-fold: true
+# retrieve top-10 PCs
 pcs <- reducedDim(vis, "PCA")
 pcs <- pcs[rownames(ws), seq_len(10)]
-lapply(c("myoepi", "T", "endo", colnames(pcs)[c(2, 3, 5)]), 
-       \(.) .plt_xy(cbind(ws, pcs), vis, col = ., point_size = 0.3) +
-         scale_color_gradientn(., colors = pals::jet())) |>
-    wrap_plots(nrow = 2) & theme(
-      plot.title = element_blank(),
-      legend.key.width = unit(0.5, "lines"),
-      legend.key.height = unit(1, "lines"))
+# specify subpopulations & PCs to visualize
+var <- c("DCIS1", "T", "endo")
+var <- c(var, colnames(pcs)[3:5])
+# visualize deconvolution weights alongside PCs
+lapply(var, \(.) {
+    .plt_xy(
+        cbind(ws, pcs), vis, col=., point_size=0.3) +
+        scale_color_gradientn(., colors=pals::jet())
+}) |>
+    wrap_plots(nrow=2) & theme(
+        plot.title=element_blank(),
+        legend.key.width=unit(0.5, "lines"),
+        legend.key.height=unit(1, "lines"))
 ```
 
 Note that the direction of each PC is irrelevant from how much variation it explains.
 :::
 
-In conclusion, deconvolution-based cell type proportion estimates are able to recapitulate PCs and, in turn, expression variability.
-[Apart from being a tool for spot deconvolution, `RCTD` can be used as a label transferring tool to annotate imaging-based ST data, such as for Xenium and MERSCOPE.
-In such scenarios, the default `doublet_mode = "doublet"` should be used and a certainty score would be returned to indicate doublets with two predicted cell types.]{.aside}
+In conclusion, deconvolution-based cell type proportion estimates 
+are able to recapitulate PCs and, in turn, expression variability.
+[Apart from being a tool for spot deconvolution, `RCTD` can be used as a label 
+transfer tool to annotate imaging-based ST data, such as for Xenium and MERSCOPE.
+For this, the default `doublet_mode = "doublet"` should be used, and a certainty 
+score would be returned to indicate doublets with two predicted cell types.]{.aside}
 
 
 ## Appendix
@@ -439,3 +462,5 @@ Benchmarking studies of deconvolution methods often require generating synthetic
 
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

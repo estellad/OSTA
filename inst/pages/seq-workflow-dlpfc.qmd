@@ -1,5 +1,7 @@
 # Workflow: Visium DLPFC {#sec-seq-workflow-dlpfc}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -367,14 +369,11 @@ Since the gene information is missing, we will add [gene annotation data from Ge
 
 ```{r spatialLIBD_gene_annotation}
 # download Gencode v32 GTF file and cache it
+nms <- paste0(
+  "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/",
+  "release_32/gencode.v32.annotation.gtf.gz")
 bfc <- BiocFileCache::BiocFileCache()
-gtf_cache <- BiocFileCache::bfcrpath(
-    bfc,
-    paste0(
-        "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/",
-        "release_32/gencode.v32.annotation.gtf.gz"
-    )
-)
+gtf_cache <- BiocFileCache::bfcrpath(bfc, nms)
 
 # show GTF cache location
 gtf_cache
@@ -581,3 +580,5 @@ Thank you for reading this far! In this section we showed you:
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

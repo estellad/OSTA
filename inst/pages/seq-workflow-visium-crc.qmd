@@ -1,5 +1,7 @@
 # Workflow: Visium CRC {#sec-seq-workflow-visium-crc}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -47,7 +49,7 @@ unzip(pa, exdir=td)
 ```{r spe}
 # read into 'SpatialExperiment'
 obj <- TENxVisium(
-    spacerangerOut=td, 
+    spacerangerOut=file.path(td, "outs"), 
     format="h5", 
     images="lowres")
 (spe <- import(obj))
@@ -384,3 +386,5 @@ pheatmap(cm,
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

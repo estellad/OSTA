@@ -1,5 +1,7 @@
 # Workflow: Visium HD {#sec-seq-workflow-visium-hd}
 
+{{< include _start.qmd >}}
+
 ## Introduction
 
 Visium HD is a next-generation spatial transcriptomics technology developed by 10x Genomics, designed to provide single-cell resolution spatial gene expression data across entire tissue sections. Commercially available since 2024, Visium HD advanced the platform's resolution from 55 µm spots to bins of subcellular resolution (2 µm). In this workflow, we will demonstrate common analysis steps with a Visium HD dataset on colorectal cancer [@deOliveira2025-high-def].
@@ -670,3 +672,5 @@ In this workflow, we demonstrated how to perform a standard analysis pipeline on
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

@@ -5,16 +5,24 @@
 [![biocbook](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/biocbook.yml?label=Book%20build)](https://github.com/lmweber/OSTA/actions/workflows/biocbook.yml)  
 [![depbuild](https://img.shields.io/github/actions/workflow/status/lmweber/OSTA/depbuild.yml?label=Dependencies%20build)](https://github.com/lmweber/OSTA/actions/workflows/depbuild.yml)
 
-
 ## Overview
 
 This repository contains source files for the "Orchestrating Spatial Transcriptomics Analysis with Bioconductor" book.
+The online version of the book is available at https://bioconductor.org/books/OSCA/
 
+***
 
-## Link to book
+HL Crowell\*°, Y Dong\*, I Billato, P Cai, M Emons, S Gunz, B Guo, 
+M Li, A Mahmoud, A Manukyan, H Pagès, P Panwar, S Rao, CJ Sargeant, L Shepherd Kern, 
+M Ramos, J Sun, M Totty, VJ Carey, Y Chen, L Collado-Torres, S Ghazanfar, KD Hansen, 
+K Martinowich, KR Maynard, E Patrick, D Righelli, D Risso, S Tiberi, L Waldron, 
+R Gottardo†°, MD Robinson†°, SC Hicks†°, LM Weber†°.
+Orchestrating spatial transcriptomics analysis with Bioconductor. *bioRxiv* (2025). 
+[doi:10.1101/2025.11.20.688607](http://doi.org/10.1101/2025.11.20.688607)
 
-The development version of the book is available at: https://lmweber.org/OSTA/
+(\* co-first. † co-senior. ° correspondence.)
 
+***
 
 ## For developers
 
@@ -44,16 +52,3 @@ quarto::quarto_render(cache = TRUE)
 ```
 
 To compile a complete fresh local build, delete all existing build files by deleting the following directories and files: `inst/.quarto/`, `inst/docs/`, `inst/index_cache/`, any files and directories except `.qmd` files and `images/` directory in `inst/pages/` (e.g. directory names ending with `_cache/` or `_files/`, `.md` files, and `.rds` files). You may also need to empty the `BiocFileCache` cache directory if any data files stored in the OSF data repository have changed.
-
-
-### Instructions
-
-In each analysis / method chapter, we aim to include the following:
-- brief background and overview
-- mention any relevant benchmark papers
-- demonstrate 1-2 key methods available in Bioconductor using code examples
-- (optional) mention any other important methods in text (but keep concise)
-
-Workflow chapters are longer and are intended to demonstrate a comprehensive workflow for a given data type / technological platform.
-
-Please keep any added file sizes (e.g. images) as small as possible, and/or commit only code files.

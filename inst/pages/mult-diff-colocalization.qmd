@@ -1,5 +1,7 @@
 # Differential colocalization {#sec-mult-diff-colocalization}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -72,7 +74,7 @@ spe$patient_stage <- factor(spe$patient_stage, stages)
 spe$cell_type <- factor(spe$cell_type)
 ```
 
-```{r, spicyR, message=FALSE, warning=FALSE}
+```{r, spicyR, message=FALSE, warning=FALSE, eval=FALSE}
 # note: runtime ~5 min
 spicyTestPair <- spicy(
     cells=spe, 
@@ -88,7 +90,7 @@ head(out)
 
 The results can be represented as a bubble plot using the `signifPlot` function.
 
-```{r, spicyR-heatmap, warning=FALSE, message=FALSE, fig.width=8, fig.height=6}
+```{r, spicyR-heatmap, warning=FALSE, message=FALSE, fig.width=8, fig.height=6, eval=FALSE}
 signifPlot(spicyTestPair)
 ```
 
@@ -99,7 +101,7 @@ compared to non-diabetic patients, indicated by the positive coefficient.
 
 We can use `spicyBoxPlot` to examine a cell type-cell type relationship closely.
 
-```{r, spicyR-boxplot, warning=FALSE, fig.width=5, fig.asp=1}
+```{r, spicyR-boxplot, warning=FALSE, fig.width=5, fig.asp=1, eval=FALSE}
 spicyBoxPlot(spicyTestPair, from="Tc", to="beta")
 ```
 
@@ -107,7 +109,7 @@ We can investigate individual images to ensure our results reflect biologically
 meaningful relationships. We can extract the individual co-localization metrics 
 from the `spicyTest` object using the `bind` function.
 
-```{r spicyR-metadata}
+```{r spicyR-metadata, eval=FALSE}
 # extract co-localization metrics
 cd <- colData(spe) |>
     as.data.frame() |> 
@@ -132,11 +134,15 @@ which is reflected in the co-localization metric.
 We can see that beta and Tc cells are far more co-localized, 
 with Tc cells even infiltrating the pancreatic islets in some cases.
 
-```{r spicyR-plotImage, fig.width=10, fig.height=4.5}
+```{r spicyR-plotImage, fig.width=10, fig.height=4.5, eval=FALSE}
 spe$cellType <- spe$cell_type # bug? setting 'cellType' doesn't work
-plotImage(spe, imageToPlot="L29", from="Tc", to="beta", imageID="image_name") +
-plotImage(spe, imageToPlot="O02", from="Tc", to="beta", imageID="image_name") +
-    plot_layout(nrow=1) &
+lapply(c("L29", "O02"), \(i) {
+    plotImage(spe, 
+        imageToPlot=i, 
+        imageID="image_name",
+        from="Tc", to="beta") 
+}) |>
+    wrap_plots(nrow=1) &
     coord_equal()
 ```
 
@@ -148,63 +154,142 @@ https://www.bioconductor.org/packages/devel/bioc/vignettes/spicyR/inst/doc/spicy
 ## spatialFDA
 
 The `r BiocStyle::Biocpkg("spatialFDA")` package computes spatial summaries 
-as functions (e.g., Ripley's K function) and compares them using tools from 
+as functions (e.g., Ripley's $K$ function) and compares them using tools from 
 functional data analysis (FDA). We will consider the colocalization (spacing) 
 of alpha cells in the islet and cytoxic T-cells, which are important in the 
 destruction of islet cells in T1D [@Damond2019-IMC-diabetes].
 
-This example is adapted from the [spatialFDA vignette](
-https://bioconductor.org/packages/devel/bioc/vignettes/spatialFDA/inst/doc/DiabetesIsletExample.html).
+::: {.aside}
+This subchapter is adapted from the [spatialFDA vignette](
+https://bioconductor.org/packages/devel/bioc/vignettes/
+spatialFDA/inst/doc/DiabetesIsletExampleBrief.html).
+:::
 
-```{r, spatialFDA-calc, results="hide"}
-metricRes <- calcMetricPerFov(
-    spe=spe, 
-    selection=c("alpha", "Tc"), 
-    subsetby="image_name", 
-    fun="Gcross", 
-    marks="cell_type", 
-    rSeq=seq(0, 50, l=50), 
-    by=c("patient_stage", "patient_id", "image_name"), 
-    ncores=1)
+The first important question is in what range we want to consider interactions. 
+We provide a generalisation of a guideline for the maximum radius provided by
+@Baddeley2015-book-point-patterns, which suggests to *not* consider any radii 
+beyond $1/2$ of the bounding-circle radius of an image, as else effects at the
+border of a FOV become too extreme. 
+
+The histogram of all bounding-circle radii across all images and $1/2$ 
+of the smallest bin of this histogram as a heuristic are shown below. 
+
+```{r, rMaxHeuristic, results="hide", message = FALSE, warning = FALSE, fig.width=8, fig.height=4}
+rMaxHeuristic(spe, subsetby="image_number", marks="cell_type")
 ```
 
-First, we will plot the functional box plot of the square-root transformed spatial statistics functions [@Sun2011-boxplots].
+We will consider a radius of $50 \mu m$ to 
+a) be below the heurstic of $91 \mu m$ defined above, and 
+b) consider shorter range interactions in our data. 
+With a cell diameter of $\sim 10 \mu m$, the `rMax` of 
+$50 \mu m$ results in interactions across 5 cell pairs. 
 
-```{r, spatialFDA-plot, warning=FALSE, message=FALSE, fig.width=4, fig.height=4}
+Apart from the radius, we have to define some other parameters as well. 
+Important are: 
+
+- `selection` defines which cell types to consider (`NULL` to compare all)
+- `fun` specifies the spatial function 
+- `marks` specifies cell type annotation in the `colData`
+- `correction` specifies which border correction to compare in the functional model
+- `transformation` specifies whether to apply a variance-stabilising transformation
+
+The parameters `sample_id, image_id, condition` are important for the statistical inference. 
+All other parameters can be specified to achieve better results but there are defaults specified as well. 
+
+```{r, spatialFDA-calc, warning=FALSE, results="hide"}
+# relevel to have non-diabetic as the reference category
+spe$patient_stage <- relevel(factor(spe$patient_stage), "Non-diabetic")
+
+# run the spatial statistics inference
+resLs <- crossSpatialInference(
+    spe, 
+    selection=c("alpha", "Tc", "Th"),
+    fun="Gcross", 
+    marks="cell_type",
+    rSeq=seq(0, 50, l=50), 
+    correction="rs",
+    transformation="Fisher",
+    eps=1e-3,
+    delta="minNnDist",
+    family=mgcv::scat(link="log"),
+    sample_id="patient_id",
+    image_id="image_name", 
+    condition="patient_stage",
+    algorithm="bam")
+```
+
+The convenience function `crossSpatialInference` first calculates the spatial 
+statistics functions, and then compares these with a functional additive mixed 
+model across all cell types in the `selection` 
+[@Baddeley2015-book-point-patterns; @Baddeley2005-spatstat; 
+@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. 
+
+The result is a list of lists containing the results across all cell types:
+
+```{r spatialFDA-resLs1}
+# list with one element per cell type
+names(resLs)
+```
+
+Results for each cell type pair include the transformed functions (`metricRes`), 
+the untransformed functions (`metricResRaw`), the design matrix used to fit the 
+model (`designmat`), the actual functional model (`mdl`) and some QC metrics of 
+the statistical inference (`curveFittingQC`):
+
+```{r spatialFDA-resLs2}
+# list of results for first cell type
+names(resLs[[1]])
+```
+
+We can plot the overall picture of the interactions by performing an $F$-test 
+on all functional models and plotting both the $p$-value of the tests as well 
+as the mean coefficient over the domain $r$.
+
+```{r, spatialFDA-bubbleplot, results="hide", fig.width=8, fig.height=4}
+coefs <- c(
+    "Onset"="conditionOnset(x)", 
+    "Long-Duration"="conditionLong_duration(x)")
+plotCrossHeatmap(resLs, 
+    coefficientsToPlot=coefs, QCThreshold=0, QCMetric="medianMinIntensity") + 
+    guides(shape="none") + facet_wrap(~factor(coefficient, coefs, names(coefs)))
+```
+
+This plot highlights an increased co-localisation of T-cell types with 
+pancreatic $\alpha$ cells in Onset diabetes but not in Long-duration diabetes. 
+This is an interesting overall finding and we will focus on the cell type pair 
+$\alpha$-cytotoxic T cells in more detail below.
+
+First, we will plot the functional box plot of the 
+transformed spatial statistics functions [@Sun2011-boxplots].
+Here, the black line indicates the median curve, the purple region 
+is the 50% central region, and the red lines indicate outliers.
+
+```{r, spatialFDA-plot, warning=FALSE, fig.width=4, fig.height=4}
 #| layout-ncol: 3
+# extract the metric dataframe
+res <- resLs$alpha_Tc
+metricRes <- res$metricRes
+
 # make unique identifiers
 metricRes$ID <- with(metricRes, paste(sep="x", 
     patient_stage, patient_id, image_name))
-
-# removing field of views that have as a curve only zeros;
-# these are cases where there are no cells of one type
-metricRes <- metricRes |>
-    group_by(ID) |>
-    filter(sum(rs) >= 1)
-
-# sqrt transform response
-metricRes$rs <- sqrt(metricRes$rs)
 
 # functional boxplot of spatial statistics curves
 collector <- plotFbPlot(metricRes, "r", "rs", "patient_stage")
 ```
 
-The black line indicates the median curve, the purple region 
-is the 50% central region, and the red lines indicate outliers.
-
 From these plots, we note that the functions from 'Onset' 
 patients seem to qualitatively have a higher median curve 
 than those from 'Non-diabetic' or 'Long-duration' patients.
 
-Another exploratory technique is functional PCA (FPCA). FPCA is similar to 
-standard PCA in that it decomposes the functional data into the main modes of 
-variation. Here, we decompose into eigenfunctions [@Goldsmith2024-refund-package].
+Another exploratory technique is functional PCA (FPCA). 
+FPCA is similar to standard PCA in that it decomposes 
+the functional data into the main modes of variation. 
+Here, we decompose the functional data into eigenfunctions 
+and can plot the first two principal components as a biplot 
+[@Goldsmith2024-refund-package].
 
 ```{r, spatialFDA-fPCA, fig.width=8, fig.height=3}
-# filter out all rows that have 
-# a constant zero part (r ≤ 10)
-metricRes <- filter(metricRes, r > 10)
-
 # prepare 'data.frame' from 'calcMetricRes' 
 # to be in the correct format for FDA
 dat <- prepData(metricRes, "r", "rs")
@@ -228,25 +313,14 @@ plotFpca(dat=dat, res=pca, colourby="condition") + labs(color="condition")
 From the FPCA, we note that the variability in curves 
 from 'Onset' patients is larger than the other two groups.
 
-Next, we will show how FDA techniques can be used to make inferences from the functional spatial summaries. We use a generalized additive mixed model with a functional response [@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. In such models, some parameters are functional and some are constants (see below).
+Next, we will show how FDA can be used to make inferences from functional spatial 
+summaries. We use a generalized additive mixed model with a functional response 
+[@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. 
+In such models, some parameters are functional and some are constants (see below).
 
-```{r, spatialFDA-fGAM, message=FALSE, warning=FALSE, results="hide", fig.width=6}
-# create design matrix
-mm <- model.matrix(~ condition, data=dat)
-head(mm)
-
-# fit the model
-mdl <- functionalGam(
-    data=dat, 
-    x=unique(metricRes$r), 
-    designmat=mm, 
-    weights=dat$npoints, 
-    formula=formula(Y ~ 1 + conditionLong_duration + 
-            conditionOnset + s(patient_id, bs="re")), 
-    family=mgcv::scat(link="log"), 
-    algorithm="gam")
-summary(mdl)
-
+```{r, spatialFDA-fGAM, message=FALSE, fig.width=6, fig.height=5}
+summary(mdl <- res$mdl)
+mm <- res$designmat
 lapply(colnames(mm), \(x) {
     i <- mdl$coefficients[[1]] 
     plotMdl(mdl, predictor=x, shift=i)
@@ -254,17 +328,25 @@ lapply(colnames(mm), \(x) {
 ```
 
 With the functional GAM, we see not only the effect (e.g., increased 
-colocalization of alpha and cytotoxic T cells in 'Onset' patients compared
+colocalization of $\alpha$ and cytotoxic T cells in 'Onset' patients compared
 to 'Non-diabetic' patients) but also the strength of the effect at each scale.
 
 The Q-Q plot indicates a reasonable model fit, although not perfect.
 
 ```{r, spatialFDA-qq, fig.width=5}
-qqnorm(resid(mdl), pch=16)
-qqline(resid(mdl), col="red")
+res <- mdl$residuals
+qqnorm(res, pch=16)
+qqline(res, col="red")
 ```
 
+In summary, we have seen that there is increased co-localisation of T-cell types
+to the pancreatic islets early in the disease and that this recruitment is absent
+later in the disease. This increased co-localisation in onset diabetes is happening
+at shorter scales around $\alpha$ cells indicating that effects close to the 
+pancreatic islets are more affected than those further away.
 
 ## Appendix
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}
