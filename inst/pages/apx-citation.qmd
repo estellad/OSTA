@@ -219,7 +219,24 @@ benchmark, or other, references and resources mentioned throughout the book.
 
 | | |
 |-|-|
-`r Biocpkg("spacexr")` | @Cable2022-RCTD |
+`r Biocpkg("CARDspa")` | @Ma2022-CARD
+`r Githubpkg("BayraktarLab/cell2location")` | @Kleshchevnikov2022-cell2location
+`r Githubpkg("Su-informatics-lab/DSTG")` | @Song2021-DSTG
+`r Githubpkg("tudaga/NMFreg_tutorial")` | 
+`r Githubpkg("rajewsky-lab/novosparc")` | @Nitzan2019-novoSpaRc
+`r Githubpkg("drieslab/Giotto")`'s `SpatialDWLS` | @Chen2025-Giotto-Suite
+`r Githubpkg("scverse/scvi-tools")`'s `DestVI` | @Lopez2022-DestVI
+`r Githubpkg("leihouyeung/SD2")` | @Li2022-SD2
+`r Biocpkg("spacexr")`'s `RCDT` | @Cable2022-RCTD |
+`r Githubpkg("zcang/SpaOTsc")` | @Cang2020-SpaOTsc
+`r Biocpkg("SpatialDecon")` | @Danaher2022-SpatialDecon
+`r Githubpkg("ma-compbio/SpiceMIx")` | @Chidester2023-SpiceMix
+`r Biocpkg("SPOTlight")` | @ElosuaBayes2021-SPOTlight
+`r Githubpkg("SpatialTranscriptomicsResearch/std-poisson")` | @Berglund2018-std-poisson
+`r Githubpkg("JEFworks-Lab/STdeconvolve")` | @Miller2022-STdeconvolve
+`r Githubpkg("almaan/stereoscope")` | @Andersson2020-stereoscope
+`r Githubpkg("DongqingSun96/STRIDE")` | @Sun2022-STRIDE
+`r Githubpkg("broadinstitute/Tangram")` | @Biancalani2021-Tangram
 | benchmarks | @Sang-aram2023-Spotless; @Li2023-benchmark-deconvolution; @Gaspard-Boulinc2025-deconvolution |
 
 : {.striped tbl-colwidths="[33,66]"}
