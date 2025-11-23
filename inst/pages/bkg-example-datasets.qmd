@@ -22,12 +22,14 @@ In can happen that we change, add, or remove data from the OSF repositorying und
 ```{r bfc, eval=FALSE}
 library(BiocFileCache)
 bfc <- BiocFileCache()
-# dataset identifier pattern
-pat <- "Xen.*Oliveira"    
-# query cached files by 'pat'
-que <- bfcquery(bfc, pat) 
-# clear matching resource(s)
+# specify dataset identifier
+id <- "Xenium_HumanColon_Oliveira"    
+# query cached files for 'id'
+que <- bfcquery(bfc, id) 
+# clear matching resource
 bfcremove(bfc, que$rid)   
+# retrieve current dataset
+OSTA.data_load(id)
 ```
 ::::
 :::
