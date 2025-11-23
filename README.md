@@ -12,15 +12,15 @@ The online version of the book is available at: https://bioconductor.org/books/O
 
 ***
 
-HL Crowell\*$^✉$, Y Dong\*, I Billato, P Cai, M Emons, S Gunz, B Guo, 
+HL Crowell\*✉, Y Dong\*, I Billato, P Cai, M Emons, S Gunz, B Guo, 
 M Li, A Mahmoud, A Manukyan, H Pagès, P Panwar, S Rao, CJ Sargeant, L Shepherd Kern, 
 M Ramos, J Sun, M Totty, VJ Carey, Y Chen, L Collado-Torres, S Ghazanfar, KD Hansen, 
 K Martinowich, KR Maynard, E Patrick, D Righelli, D Risso, S Tiberi, L Waldron, 
-R Gottardo$^{†✉}^$, MD Robinson$^{†✉}^$, SC Hicks$^{†✉}^$, LM Weber$^{†✉}^$.
+R Gottardo†✉, MD Robinson†✉, SC Hicks†✉, LM Weber†✉.
 Orchestrating spatial transcriptomics analysis with Bioconductor. *bioRxiv* (2025). 
 [doi:10.1101/2025.11.20.688607](http://doi.org/10.1101/2025.11.20.688607)
 
-(\*co-first. ^†^co-senior. ^✉^correspondence.)
+(\* co-first. † co-senior. ✉ correspondence.)
 
 ***
 
