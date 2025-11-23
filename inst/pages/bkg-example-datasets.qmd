@@ -15,6 +15,25 @@ This chapter provides an overview of the example datasets used in the code examp
 
 These datasets have been deposited in an Open Storage Framework (OSF) repository [here](https://osf.io/5n4q3), and can be easily queried and downloaded using functions from the `r BiocStyle::CRANpkg("osfr")` CRAN package. For convenience, we have implemented the `r BiocStyle::Biocpkg("OSTA.data")` Bioconductor package to:
 
+::: {.column-margin}
+:::: {.callout-note collapse="false" title="cache invalidation"}
+In can happen that we change, add, or remove data from the OSF repositorying underlying `OSTA.data`. Should you ever run into any issues that might be related to this, we suggest removing affected cache resource(s) as follows, and retrieving these data anew.
+
+```{r bfc, eval=FALSE}
+library(BiocFileCache)
+bfc <- BiocFileCache()
+# specify dataset identifier
+id <- "Xenium_HumanColon_Oliveira"    
+# query cached files for 'id'
+que <- bfcquery(bfc, id) 
+# clear matching resource
+bfcremove(bfc, que$rid)   
+# retrieve current dataset
+OSTA.data_load(id)
+```
+::::
+:::
+
 - list and retrieve datasets available through our OSF node
 - cache data as a *.zip* archive using `r BiocStyle::Biocpkg("BiocFileCache")`
 - expose logical scalars `pol`ygons and `mol`ecules to skip these data

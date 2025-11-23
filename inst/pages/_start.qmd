@@ -6,7 +6,7 @@ knitr::knit_hooks$set(time_it=local({
         if (before) {
             now <<- Sys.time()
         } else {
-            res <- difftime(Sys.time(), now)
+            res <- difftime(Sys.time(), now, units="secs")
             .rt <<- c(.rt, res)
         }
     }
