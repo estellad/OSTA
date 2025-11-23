@@ -210,7 +210,9 @@ sapply(ncs, summary)
 
 ### Non-spatial
 
-Get cell-level QC metrics for visualization with `r BiocStyle::Biocpkg("scuttle")` (see @sec-seq-quality-control).
+We can caluclate standard cell-level quality control metrics using 
+`r BiocStyle::Biocpkg("scuttle")`'s `addPerCellQCMetrics()` function,
+specifying mitochondrial features as `subsets` of particular interest.
 
 ```{r qc-scuttle}
 sub <- list(mt=grep("^MT-", rownames(sfe)))
@@ -238,7 +240,10 @@ plot_layout(nrow=1) &
 
 ### Spatially-aware
 
-`r BiocStyle::Biocpkg("Spotsweeper")` [@Totty2025-SpotSweeper] determines outliers based on low log-library size, few uniquely detected features, or a high mitochondrial fraction compared to their surrounding neighborhood (see @sec-seq-quality-control).
+`r BiocStyle::Biocpkg("Spotsweeper")` [@Totty2025-SpotSweeper] determines 
+outliers based on low log-library size, few uniquely detected features, or 
+a high mitochondrial fraction compared to their surrounding neighborhood, 
+which we recommend (see @sec-seq-quality-control).
 
 ```{r qc-SpotSweeper}
 # determine spatial outliers for different metrics
