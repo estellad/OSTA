@@ -1,5 +1,7 @@
 # Quality control {#sec-img-quality-control}
 
+{{< include _start.qmd >}}
+
 ## Preamble
 
 ### Introduction
@@ -602,3 +604,5 @@ and, a theoretical piece on *background* signal -- i.e., non-RNA target binding 
 (see [here](https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space/posts/background)).
 
 ### References {.unnumbered}
+
+{{< include _stop.qmd >}}

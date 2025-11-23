@@ -43,6 +43,7 @@ library(OSTA.data)
 OSTA.data_list()
 ```
 
+
 ### STexampleData
 
 In addition, several datasets are available from the `r BiocStyle::Biocpkg("STexampleData")` Bioconductor package as pre-formatted `SpatialExperiment` and `SingleCellExperiment` formats. These data objects are stored on Bioconductor's `r BiocStyle::Biocpkg("ExperimentHub")` resource, and can be loaded in R by querying `ExperimentHub` or using loader functions provided in the `STexampleData` package.
