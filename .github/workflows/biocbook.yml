@@ -135,7 +135,7 @@ jobs:
           path: ${{ env.bundle_path }}
 
   deploy:
-    if: github.ref == 'refs/heads/devel'  # deploy only if pushed to 'devel' branch
+    if: github.ref == 'refs/heads/sandbox'  # deploy only if pushed to 'sandbox' branch
     needs: build
 
     permissions:
