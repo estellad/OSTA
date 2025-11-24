@@ -1,9 +1,5 @@
 # Workflow: Visium HD (segmented) {#sec-seq-workflow-visium-hd-seg}
 
-```{r include=FALSE}
-knitr::opts_chunk$set(cache=TRUE)
-```
-
 {{< include _start.qmd >}}
 
 ## Preamble
@@ -31,7 +27,6 @@ library(Voyager)
 library(ggplot2)
 library(ggspavis)
 library(VisiumIO)
-library(tidytext)
 library(OSTA.data)
 library(patchwork)
 library(SpotSweeper)
@@ -44,7 +39,7 @@ set.seed(777)
 ```
 
 ```{r}
-# utility for cropping according to bounding box
+# utility for cropping by bounding box
 .crop <- \(spe, box) {
     box <- as.list(box)
     xy <- spatialCoords(spe)
@@ -177,7 +172,7 @@ par(mar=c(0,0,0,0))
 box <- c(
     xmin=56e3, xmax=58e3,
     ymin=15e3, ymax=16e3)
-# plot cell masks
+# plot exemplary cell masks
 geo <- colGeometry(crop(sfe, box))
 plot(st_geometry(geo), col=rep(colors(), 2))
 ```
