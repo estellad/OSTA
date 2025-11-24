@@ -32,11 +32,8 @@ library(pheatmap)
 
 Load sample 151673 from the DLPFC dataset. This sample is available as a `SpatialExperiment` object from the `r BiocStyle::Biocpkg("STexampleData")` package.
 
-```{r, message=FALSE}
-# load data
+```{r, load-data, message=FALSE}
 spe <- Visium_humanDLPFC()
-
-class(spe)
 dim(spe)
 ```
 
@@ -45,8 +42,8 @@ dim(spe)
 
 As an initial check, plot the spatial coordinates (spots) in x-y dimensions, to check that the object has loaded correctly. We use plotting functions from the `r BiocStyle::Biocpkg("ggspavis")` package.
 
-```{r, fig.height=3.5}
-# plot spatial coordinates (spots)
+```{r, plt-xy, fig.height=3}
+#| code-fold: true
 plotCoords(spe)
 ```
 
@@ -55,85 +52,88 @@ plotCoords(spe)
 
 We calculate quality control (QC) metrics using the `r BiocStyle::Biocpkg("scater")` package [@McCarthy2017-scater], and apply simple global thresholding-based QC methods to identify any low-quality spots, as described in @sec-seq-quality-control-global. More details, including more advanced QC approaches, are described in @sec-seq-quality-control.
 
-```{r}
+```{r in-tissue}
 # subset to keep only spots over tissue
 spe <- spe[, spe$in_tissue == 1]
 dim(spe)
 ```
 
-```{r}
+```{r is-mito}
 # identify mitochondrial genes
-is_mito <- grepl("(^MT-)|(^mt-)", rowData(spe)$gene_name)
+nms <- rowData(spe)$gene_name
+is_mito <- grepl("(^MT-)|(^mt-)", nms)
 table(is_mito)
-rowData(spe)$gene_name[is_mito]
+nms[is_mito]
 ```
 
 Calculate QC metrics using `r BiocStyle::Biocpkg("scater")` [@McCarthy2017-scater].
 
-```{r}
+```{r qc}
 # calculate per-spot QC metrics and store in colData
-spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
-head(colData(spe), 3)
+spe <- addPerCellQC(spe, subsets=list(mito=is_mito))
+names(colData(spe))
 ```
 
 Select global filtering thresholds for the QC metrics by examining distributions using histograms.
 
-```{r, fig.height=3.5, fig.width=9}
-par(mfrow = c(1, 4))
-hist(spe$sum, xlab = "sum", main = "UMIs per spot")
-hist(spe$detected, xlab = "detected", main = "Genes per spot")
-hist(spe$subsets_mito_percent, xlab = "pct mito", main = "Percent mito UMIs")
-hist(spe$cell_count, xlab = "no. cells", main = "No. cells per spot")
+```{r, plt-qc, fig.height=3.5, fig.width=9}
+#| code-fold: true
+par(mfrow=c(1, 4))
+hist(spe$sum, xlab="sum", main="UMIs per spot")
+hist(spe$detected, xlab="detected", main="Genes per spot")
+hist(spe$subsets_mito_percent, xlab="pct mito", main="Percent mito UMIs")
+hist(spe$cell_count, xlab="no. cells", main="No. cells per spot")
 ```
 
-```{r}
+```{r qc-thresholds}
 # select global QC thresholds
 spe$qc_lib_size <- spe$sum < 600
 spe$qc_detected <- spe$detected < 400
 spe$qc_mito <- spe$subsets_mito_percent > 28
 
-table(spe$qc_lib_size)
-table(spe$qc_detected)
-table(spe$qc_mito)
+# tabulate flagged cells
+cd <- colData(spe)
+qc <- grep("^qc", names(cd))
+sapply(cd[qc], table)
 ```
 
 Plot the spatial distributions of the potentially identified low-quality spots, to ensure that they are not concentrated within biologically meaningful regions (which could suggest that the selected thresholds were too stringent).
 
-```{r, fig.height=3.5, fig.width=10.5}
+```{r, plt-ex, fig.height=3.5, fig.width=10}
+#| code-fold: true
 # plot spatial distributions of discarded spots
 p1 <- plotObsQC(spe, 
-    plot_type = "spot", 
-    annotate = "qc_lib_size") + 
+    plot_type="spot", 
+    annotate="qc_lib_size") + 
     ggtitle("Library size (< threshold)")
 p2 <- plotObsQC(spe, 
-    plot_type = "spot", 
-    annotate = "qc_detected") +
+    plot_type="spot", 
+    annotate="qc_detected") +
     ggtitle("Detected genes (< threshold)")
 p3 <- plotObsQC(spe, 
-    plot_type = "spot", 
-    annotate = "qc_mito") + 
+    plot_type="spot", 
+    annotate="qc_mito") + 
     ggtitle("Mito proportion (> threshold)")
 
-# arrange plots using patchwork package
-p1 | p2 | p3
+wrap_plots(p1, p2, p3, nrow=1, guides="collect") & labs(col="discard")
 ```
 
 Select spots to discard by combining the sets of identified low-quality spots according to each metric.
 
 ```{r, fig.width=7, fig.height=3}
 # number of identifed spots for each metric
-apply(cbind(spe$qc_lib_size, spe$qc_detected, spe$qc_mito), 2, sum)
-
+ex <- cbind(spe$qc_lib_size, spe$qc_detected, spe$qc_mito)
+apply(ex, 2, sum)
 # combined set of identified spots
-spe$discard <- spe$qc_lib_size | spe$qc_detected | spe$qc_mito
+spe$discard <- rowAnys(ex)
 table(spe$discard)
 ```
 
 Plot the spatial distribution of the combined set of identified low-quality spots to discard, to again confirm that they do not correspond to any clearly biologically meaningful regions, which could indicate that we are removing biologically informative spots. Specifically, in this dataset, we want to ensure that the discarded spots do not correspond to a single cortical layer.
 
-```{r, fig.height=3.5}
+```{r, fig.height=3}
 # check spatial pattern of discarded spots
-plotObsQC(spe, plot_type = "spot", annotate = "discard")
+plotObsQC(spe, plot_type="spot", annotate="discard")
 ```
 
 Filter out the low-quality spots.
@@ -152,13 +152,11 @@ Calculate log-transformed normalized counts (logcounts) using library size norma
 ```{r, fig.height=3.5}
 # calculate library size factors
 spe <- computeLibraryFactors(spe)
+summary(sf <- sizeFactors(spe))
+hist(sf, breaks=20, main="Histogram of size factors")
 
-summary(sizeFactors(spe))
-hist(sizeFactors(spe), breaks = 20, main = "Histogram of size factors")
-
-# calculate logcounts
+# calculate 'logcounts'
 spe <- logNormCounts(spe)
-
 assayNames(spe)
 ```
 
@@ -176,15 +174,13 @@ dim(spe)
 ```
 
 ```{r hvgs, message=FALSE, fig.width=6, fig.height=5}
-# fit mean-variance relationship, decomposing variance into 
-# technical and biological components
+# fit mean-variance relationship, decomposing 
+# variance into technical & biological components
 dec <- modelGeneVar(spe)
 
 # select top HVGs
-top_hvgs <- getTopHVGs(dec, prop = 0.1)
-
-# number of HVGs selected
-length(top_hvgs)
+hvg <- getTopHVGs(dec, prop=0.1)
+length(hvg)
 ```
 
 
@@ -197,17 +193,15 @@ We use the computationally efficient implementation of PCA from the `r BiocStyle
 See @sec-seq-intermediate-processing and @sec-ind-dimensionality-reduction for more details.
 
 ```{r}
-# using scater package
+# using 'scater' package
 set.seed(123)
-spe <- runPCA(spe, subset_row = top_hvgs)
-spe <- runUMAP(spe, dimred = "PCA")
-
-reducedDimNames(spe)
-dim(reducedDim(spe, "PCA"))
-dim(reducedDim(spe, "UMAP"))
-
-# update column names for plotting
+spe <- runPCA(spe, subset_row=hvg)
+spe <- runUMAP(spe, dimred="PCA")
 colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
+
+# embeddings are matrices with
+# rows = cells, columns = dims.
+sapply(reducedDims(spe), dim)
 ```
 
 
@@ -224,32 +218,27 @@ For more details on clustering, see @sec-ind-clustering.
 ```{r}
 # graph-based clustering
 set.seed(123)
-k <- 10
-g <- buildSNNGraph(spe, k = k, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k=10, use.dimred="PCA")
 g_walk <- igraph::cluster_walktrap(g)
-clus <- g_walk$membership
-table(clus)
+table(kid <- g_walk$membership)
 
 # store cluster labels in column 'label' in colData
-colLabels(spe) <- factor(clus)
+colLabels(spe) <- factor(kid)
 ```
 
 Visualize the cluster labels by plotting in x-y space, alongside the manually annotated reference labels (`ground_truth`) available for this dataset.
 
-```{r, fig.height=3.5}
-# plot cluster labels in x-y space
-plotCoords(spe, annotate = "label", pal = "libd_layer_colors")
-
-# plot manually annotated reference labels
-plotCoords(spe, annotate = "ground_truth", pal = "libd_layer_colors")
+```{r, fig.height=3, fig.width=8}
+# plot cluster labels & annotated reference labels in space
+plotCoords(spe, annotate="label", pal="libd_layer_colors") +
+plotCoords(spe, annotate="ground_truth", pal="libd_layer_colors")
 ```
 
 We can also plot the cluster labels in the top 2 UMAP dimensions.
 
-```{r, fig.width=5, fig.height=4.25}
+```{r, fig.width=4.5, fig.height=4}
 # plot clusters labels in UMAP dimensions
-plotDimRed(spe, plot_type = "UMAP", annotate = "label", 
-           pal = "libd_layer_colors")
+plotDimRed(spe, plot_type="UMAP", annotate="label", pal="libd_layer_colors")
 ```
 
 
@@ -265,8 +254,7 @@ See @sec-seq-intermediate-processing or @sec-ind-clustering for more details.
 
 ```{r}
 # using scran package
-mgs <- findMarkers(spe, groups = spe$label, 
-                   test = "binom", direction = "up")
+mgs <- findMarkers(spe, groups=spe$label, test="binom", direction="up")
 top <- lapply(mgs, \(df) rownames(df)[df$Top <= 2])
 length(top <- unique(unlist(top)))
 ```
@@ -275,15 +263,15 @@ Visualize the marker genes using a heatmap.
 
 ```{r, fig.width=9, fig.height=3}
 pbs <- aggregateAcrossCells(spe, 
-  ids = spe$label, subset.row = top, 
-  use.assay.type = "logcounts", statistics = "mean")
+    ids=spe$label, subset.row=top,
+    use.assay.type="logcounts", statistics="mean")
 
 # use gene symbols as feature names
 mtx <- t(assay(pbs))
 colnames(mtx) <- rowData(pbs)$gene_name
 
 # plot using pheatmap package
-pheatmap(mat = mtx, scale = "column")
+pheatmap(mat=mtx, scale="column")
 ```
 
 
@@ -291,8 +279,7 @@ pheatmap(mat = mtx, scale = "column")
 
 The examples above demonstrated a streamlined analysis workflow for the Visium DLPFC dataset [@Maynard2021-DLPFC]. In this section, we will use the `r BiocStyle::Biocpkg("spatialLIBD")` package [@Pardo2022-spatialLIBD] to continue analyzing this dataset by creating an interactive `Shiny` website to visualize the data.
 
-
-### Why use spatialLIBD?
+::: {.callout-note collapse="true" title="Why use spatialLIBD?"}
 
 The `spatialLIBD` package has a function, `spatialLIBD::run_app(spe)`, which will create an interactive website using a `SpatialExperiment` object (`spe`). The interactive website it creates has several features that were initially designed for the DLPFC dataset [@Maynard2021-DLPFC] and later made flexible for any dataset [@Pardo2022-spatialLIBD]. These features include panels to visualize Visium spots:
 
@@ -314,24 +301,14 @@ knitr::include_graphics("https://raw.githubusercontent.com/lmweber/OSTA-resource
 You can try out a `spatialLIBD`-powered website yourself by opening [it on your browser](http://spatial.libd.org/spatialLIBD).
 [Check https://github.com/LieberInstitute/spatialLIBD#shiny-website-mirrors in case you need to use a mirror. `shiny`-powered websites work best on browsers such as Google Chrome and Mozilla Firefox, among others.]{.aside}
 
-
-### Want to learn more about spatialLIBD?
-
-For more details about `spatialLIBD`, please check the [spatialLIBD Bioconductor landing page](https://bioconductor.org/packages/spatialLIBD) or the [pkgdown documentation website](https://lieberinstitute.github.io/spatialLIBD/). In particular, we have two vignettes:
-
-* [Introduction to spatialLIBD](https://research.libd.org/spatialLIBD/articles/spatialLIBD.html)
-* [Using spatialLIBD with 10x Genomics public datasets](https://research.libd.org/spatialLIBD/articles/TenX_data_download.html)
-
-You can also read more about `spatialLIBD` in the associated publication @Pardo2022-spatialLIBD.
-
-If you prefer to watch videos, recorded presentations related to the dataset [@Maynard2021-DLPFC] and `spatialLIBD` [@Pardo2022-spatialLIBD] are also available [here](https://github.com/LieberInstitute/spatialLIBD/blob/master/inst/app/www/documentation_spe.md#slides-and-videos).
+:::
 
 
 ### Code prerequisites
 
 For this demo, we will re-use the `spe` object (in `r BiocStyle::Biocpkg("SpatialExperiment")` format) created in the example DLPFC workflow above. If you are starting from here, you can re-build the object by running the code in section @sec-seq-workflow-dlpfc-workflow above.
 
-We also load some additional dependency packages, in addition to the dependencies already loaded in @sec-seq-workflow-dlpfc-workflow above.
+We also load some additional dependency packages.
 
 ```{r, message=FALSE, warning=FALSE}
 library(BiocFileCache)  # for downloading and storing data
@@ -411,20 +388,19 @@ rowRanges(spe) <- gtf[match_genes]
 rowData(spe) <- cbind(rowData(spe), interesting)
 
 # inspect the gene annotation data we added
-rowRanges(spe)
+head(rowRanges(spe))
 ```
 
 Now that we have the gene annotation information, we can use it to add a few more pieces to our `spe` object that `spatialLIBD` will use. For example, we want to enable users to search genes by either their gene symbol or their Ensembl ID. We would also like to visualize the amount and percent of the mitochondrial gene expression.
 
 ```{r spatialLIBD_gene_search}
 # add information used by spatialLIBD
-rowData(spe)$gene_search <- paste0(
-    rowData(spe)$gene_name, "; ", rowData(spe)$gene_id
-)
+rowData(spe)$gene_search <- with(rowData(spe), 
+    paste(gene_name, gene_id, sep="; "))
 
 # compute chrM expression and chrM expression ratio
 is_mito <- which(seqnames(spe) == "chrM")
-spe$expr_chrM <- colSums(counts(spe)[is_mito, , drop = FALSE])
+spe$expr_chrM <- colSums(counts(spe)[is_mito, , drop=FALSE])
 spe$expr_chrM_ratio <- spe$expr_chrM / spe$sum_umi
 ```
 
@@ -445,7 +421,7 @@ length(no_expr)
 
 # compute percent of genes with no counts
 length(no_expr) / nrow(spe) * 100
-spe <- spe[-no_expr, , drop = FALSE]
+spe <- spe[-no_expr, , drop=FALSE]
 
 # remove spots without counts
 summary(spe$sum_umi)
@@ -457,7 +433,7 @@ if (any(spe$sum_umi == 0)) {
     print(length(spots_no_counts))
     # percent of spots with no counts
     print(length(spots_no_counts) / ncol(spe) * 100)
-    spe <- spe[, -spots_no_counts, drop = FALSE]
+    spe <- spe[, -spots_no_counts, drop=FALSE]
 }
 ```
 
@@ -475,36 +451,26 @@ In order to visualize the data, we can then use `spatialLIBD::vis_gene()`. This 
 
 ```{r spatialLIBD_vis_gene, warning = FALSE, fig.width = 5}
 # sum of UMI
-spatialLIBD::vis_gene(
-    spe = spe,
-    sampleid = "sample_151673",
-    geneid = "sum_umi"
-)
+spatialLIBD::vis_gene(spe, sampleid="sample_151673", geneid="sum_umi")
 
 # PCP4 (layer 5 marker gene)
-spatialLIBD::vis_gene(
-    spe = spe,
-    sampleid = "sample_151673",
-    geneid = rowData(spe)$gene_search[which(rowData(spe)$gene_name == "PCP4")]
-)
+gid <- rowData(spe)$gene_search[which(rowData(spe)$gene_name == "PCP4")]
+spatialLIBD::vis_gene(spe, sampleid="sample_151673", geneid=gid)
 ```
 
 Now, let's proceed to [visualize the data interactively](https://research.libd.org/spatialLIBD/articles/TenX_data_download.html#run-the-interactive-website-1) with a `spatialLIBD`-powered website. We have a number of variables to choose from. We will specify which are the continuous and discrete variables in our `spatialLIBD::run_app()` call.
 
 ```{r spatialLIBD_interactive}
-# explore all the variables we can use
-colData(spe)
-
 # run our shiny app
 if (interactive()) {
     spatialLIBD::run_app(
         spe,
-        sce_layer = NULL,
-        modeling_results = NULL,
-        sig_genes = NULL,
-        title = "OSTA spatialLIBD workflow example",
-        spe_discrete_vars = c("ground_truth", "label", "ManualAnnotation"),
-        spe_continuous_vars = c(
+        sce_layer=NULL,
+        modeling_results=NULL,
+        sig_genes=NULL,
+        title="OSTA spatialLIBD workflow example",
+        spe_discrete_vars=c("ground_truth", "label", "ManualAnnotation"),
+        spe_continuous_vars=c(
             "cell_count",
             "sum_umi",
             "sum_gene",
@@ -518,7 +484,7 @@ if (interactive()) {
             "total",
             "sizeFactor"
         ),
-        default_cluster = "label"
+        default_cluster="label"
     )
 }
 ```
@@ -527,19 +493,18 @@ if (interactive()) {
 knitr::include_graphics("https://raw.githubusercontent.com/lmweber/OSTA-resources/main/images/spatialLIBD_demo_result.png")
 ```
 
-
-### Sharing your website
+::: {.callout-note collapse="true" title="Sharing your website"}
 
 Now that you have created a `spatialLIBD`-powered website, you might be interested in sharing it. To do so, it will be useful to save a small `spe` object using `saveRDS()`, containing the data to share. The smaller the object, the better in terms of performance. For example, you may want to remove lowly expressed genes to save space. You can check the object size in R with `object.size()`.
 
 ```{r spatialLIBD_object_size}
 # object size
-format(object.size(spe), units = "MB")
+format(object.size(spe), units="MB")
 ```
 
 If your data is small enough, you might want to share your website by hosting on [shinyapps.io](https://www.shinyapps.io/) by Posit (the company that develops RStudio), which you can try for free. Once you have created your account, you need to create an `app.R` file like the one we have [on the `spatialLIBD_demo` directory](https://github.com/lmweber/OSTA-resources/tree/main/spatialLIBD_demo).
 
-```{r spatialLIBD_app_file, echo = FALSE}
+```{r spatialLIBD_app_file, echo=FALSE}
 cat(paste0(readLines("https://raw.githubusercontent.com/lmweber/OSTA-resources/main/spatialLIBD_demo/app.R"), "\n"))
 ```
 
@@ -565,6 +530,7 @@ If you follow this workflow, you will end up with a website [just like this one]
 
 The `Max Worker Processes` determines how many R sessions are open per instance. Then `Max Connections` specifies the number of connections to each R session. The `Instance Size` determines the memory available. In this case, 8000 / 300 is approximately 27, but we decided to be conservative and set the total number of users per instance to 15. This is why it can be important to reduce the size of your `spe` object before sharing the website. Alternatively, you can rent an AWS Instance and deploy your app there, which is how http://spatial.libd.org/spatialLIBD is hosted along with these [error configuration files](https://github.com/LieberInstitute/spatialLIBD/tree/master/dev/shiny-server-files).
 
+:::
 
 ### Wrapping up
 
@@ -578,6 +544,15 @@ Thank you for reading this far! In this section we showed you:
 
 
 ## Appendix
+
+For more details about `spatialLIBD`, please check the [spatialLIBD Bioconductor landing page](https://bioconductor.org/packages/spatialLIBD) or the [pkgdown documentation website](https://lieberinstitute.github.io/spatialLIBD/). In particular, we have two vignettes:
+
+* [Introduction to spatialLIBD](https://research.libd.org/spatialLIBD/articles/spatialLIBD.html)
+* [Using spatialLIBD with 10x Genomics public datasets](https://research.libd.org/spatialLIBD/articles/TenX_data_download.html)
+
+You can also read more about `spatialLIBD` in the associated publication @Pardo2022-spatialLIBD. 
+
+If you prefer to watch videos, recorded presentations related to the dataset [@Maynard2021-DLPFC] and `spatialLIBD` [@Pardo2022-spatialLIBD] are also available [here](https://github.com/LieberInstitute/spatialLIBD/blob/master/inst/app/www/documentation_spe.md#slides-and-videos).
 
 ### References {.unnumbered}
 
