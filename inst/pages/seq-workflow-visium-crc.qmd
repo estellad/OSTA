@@ -1,7 +1,4 @@
 # Workflow: Visium CRC {#sec-seq-workflow-visium-crc}
-```{r}
-knitr::opts_chunk$set(cache=TRUE)
-```
 
 {{< include _start.qmd >}}
 
@@ -357,7 +354,7 @@ lapply(top, \(.) {
 To ease interpretability, we can stratify `AUCell` scores by spot labels; 
 these may stem from an unsupervised or deconvolution-based approach:
 
-```{r plt-auc-hm, echo=-1, fig.width=4, fig.height=5}
+```{r plt-auc-hm, echo=-1, fig.width=4, fig.height=4}
 #| layout-ncol: 2
 #| code-fold: true
 par(mar=c(0,0,0,0))
@@ -381,7 +378,7 @@ For the latter, we may instead correlate set scores with proportion estimates
 cm <- cor(as.matrix(ws), t(assay(auc[top, ])))
 ```
 
-```{r plt-cor, echo=-1, fig.width=5, fig.height=6}
+```{r plt-cor, echo=-1, fig.width=4, fig.height=4}
 #| code-fold: true
 #| fig-align: center
 par(mar=c(0,0,0,0))
