@@ -2,6 +2,10 @@
 
 {{< include _start.qmd >}}
 
+```{r}
+knitr::opts_chunk$set(eval=FALSE)
+```
+
 ## Introduction
 
 Sequencing-based ST data can contain zero to multiple cells per spot, which might be fully or only partially covered by cells, depending on the spatial resolution of the platform and the tissue cell density (see also @sec-seq-introduction and the schematic Figure below). This aspect of the data implies that there may be a mixture of cell types in a spot and thus a mixture of transcriptional programs.
@@ -12,15 +16,24 @@ knitr::include_graphics("../images/seq-deconvolution.png")
 
 To help understand these mixtures, at least 20 deconvolution techniques have been proposed for spot-level ST data. Some methods require borrowing insights from a scRNA-seq reference dataset, while others can be reference-free. Based on their underlying algorithms, @Li2023-benchmark-deconvolution have grouped methods into five categories:
 
-- **probabilistic-based**: use Bayesian inference, likelihood estimation, or probabilistic modeling to estimate cell type compositions while incorporating uncertainty. Available tools include `r BiocStyle::Biocpkg("spacexr")` (i.e. `RCTD`), `r BiocStyle::Githubpkg("YMa-lab/CARD")`, `r BiocStyle::Biocpkg("SpatialDecon")`, and `r BiocStyle::Githubpkg("JEFworks-Lab/STdeconvolve")` in R, and `r BiocStyle::Githubpkg("SpatialTranscriptomicsResearch/std-poisson")`, `r BiocStyle::Githubpkg("almaan/stereoscope")`, `r BiocStyle::Githubpkg("scverse/scvi-tools")` (i.e. `DestVI`), `r BiocStyle::Githubpkg("DongqingSun96/STRIDE")`, and `r BiocStyle::Githubpkg("BayraktarLab/cell2location")` in Python.
-- **non-negative matrix factorization (NMF)-based**: decompose gene expression data into latent components representing different cell types. Available tools include `r BiocStyle::Githubpkg("RubD/Giotto")` (i.e. `SpatialDWLS`) and `r BiocStyle::Biocpkg("SPOTlight")` in R, and [NMFReg](https://github.com/tudaga/NMFreg_tutorial) in Python.
-- **graph-based**: use graph neural networks or graph-based optimization to model spatial relationships. Available tools include `r BiocStyle::Githubpkg("leihouyeung/SD2")` in R, and `r BiocStyle::Githubpkg("Su-informatics-lab/DSTG")` and `r BiocStyle::Githubpkg("ma-compbio/SpiceMIx")` in Python.
-- **optimal transport (OT)-based**: infer spatial gene expression distributions by mapping scRNA-seq and ST data. Available tools include `r BiocStyle::Githubpkg("zcang/SpaOTsc")` and `r BiocStyle::Githubpkg("rajewsky-lab/novosparc")` in Python.
-- **deep learning-based**: align and integrate single-cell and spatial transcriptomics data with neural networks. For example, `r BiocStyle::Githubpkg("broadinstitute/Tangram")` in Python.
+- **probabilistic-based**: use Bayesian inference, likelihood estimation, or probabilistic modeling to estimate cell type compositions while incorporating uncertainty. Available tools include 
+  - `r BiocStyle::Biocpkg("CARDspa")` [@Ma2022-CARD]
+  -  `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCDT]
+  - `r BiocStyle::Biocpkg("SpatialDecon")` [@Danaher2022-SpatialDecon]
+  - `r BiocStyle::Githubpkg("JEFworks-Lab/STdeconvolve")` [@Miller2022-STdeconvolve] in R, and 
+  - `r BiocStyle::Githubpkg("BayraktarLab/cell2location")` [@Kleshchevnikov2022-cell2location]
+  - `r BiocStyle::Githubpkg("scverse/scvi-tools")`'s `DestVI` [@Lopez2022-DestVI]
+  - `r BiocStyle::Githubpkg("SpatialTranscriptomicsResearch/std-poisson")` [@Berglund2018-std-poisson]
+  - `r BiocStyle::Githubpkg("almaan/stereoscope")` [@Andersson2020-stereoscope]
+  - `r BiocStyle::Githubpkg("DongqingSun96/STRIDE")` [@Sun2022-STRIDE]  in Python.
+- **non-negative matrix factorization (NMF)-based**: decompose gene expression data into latent components representing different cell types. Available tools include `r BiocStyle::Githubpkg("drieslab/Giotto")`'s `SpatialDWLS` [@Chen2025-Giotto-Suite] and `r BiocStyle::Biocpkg("SPOTlight")` [@ElosuaBayes2021-SPOTlight] in R, and `r BiocStyle::Githubpkg("tudaga/NMFreg_tutorial")` in Python.
+- **graph-based**: use graph neural networks or graph-based optimization to model spatial relationships. Available tools include `r BiocStyle::Githubpkg("leihouyeung/SD2")` [@Li2022-SD2] in R, and `r BiocStyle::Githubpkg("Su-informatics-lab/DSTG")` [@Song2021-DSTG] and `r BiocStyle::Githubpkg("ma-compbio/SpiceMIx")` [@Chidester2023-SpiceMix] in Python.
+- **optimal transport (OT)-based**: infer spatial gene expression distributions by mapping scRNA-seq and ST data. Available tools include `r BiocStyle::Githubpkg("zcang/SpaOTsc")` [@Cang2020-SpaOTsc] and `r BiocStyle::Githubpkg("rajewsky-lab/novosparc")` [@Nitzan2019-novoSpaRc] in Python.
+- **deep learning-based**: align and integrate single-cell and spatial transcriptomics data with neural networks. For example, `r BiocStyle::Githubpkg("broadinstitute/Tangram")` [@Biancalani2021-Tangram] in Python.
 
 Among these, `std-poisson`, `STdeconvolve`, and `SpiceMix` are reference-free methods. Methods that incorporate spatial location information are `CARD`, `DSTG`, `SD2`, `Tangram`, `cell2location`, `DestVI`, `std-poisson`, and `SpiceMix`.
 
-In this section, we will demonstrate deconvolution of cell types per spot, using `RCTD` on Visium and VisiumHD datasets.
+In this section, we will demonstrate deconvolution of cell types per spot, using `RCTD` on Visium and Visium HD datasets.
 
 ## Dependencies {#sec-seq-deconvolution-load-data}
 
