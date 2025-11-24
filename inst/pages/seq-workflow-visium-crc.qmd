@@ -296,7 +296,7 @@ lapply(c("detected", "log_sum", "subsets_mt_percent"), \(.)
 
 ```{r MSigDB}
 # retrieve hallmark gene sets from 'MSigDB'
-db <- msigdbr(species="Homo sapiens", category="H")
+db <- msigdbr(species="Homo sapiens", collection="H")
 # get list of gene symbols, one element per set
 gs <- split(db$ensembl_gene, db$gs_name)
 # simplify set identifiers (drop prefix, use lower case)
