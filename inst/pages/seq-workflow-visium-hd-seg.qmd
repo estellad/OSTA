@@ -287,7 +287,7 @@ We will use these to map likely cell identities onto our Visium HD cells.
 
 We here use a single-cell label transfer approach to annotade cells. However, **although each observation is intended to represent a single cell, there are still cases where this is not the case** (e.g., as a result of partial volume effects at boundaries, segmentation errors, tightly packed regions, or local diffusion of transcripts.
 
-Once could hence deconvolute cells instead (see @sec-seq-deconvolution), for example, using RCDT (implemented in the `BiocStyle::Biocpkg("spacexr")` package) **in doublet mode** to flag these cases and provide a principled estimate of the most likely composition. In practice, we expect most units to be classified as singlets, with a minority of doublets that warrant closer inspection or additional filtering.
+Once could hence deconvolute cells instead (see @sec-seq-deconvolution), for example, using `BiocStyle::Biocpkg("spacexr")`'s `RCDT` [@Cable2022-RCDT] **in doublet mode** to flag these cases and provide a principled estimate of the most likely composition. In practice, we expect most units to be classified as singlets, with a minority of doublets that warrant closer inspection or additional filtering.
 
 :::
 
@@ -416,8 +416,8 @@ ws <- c(nlevels(df$Level0), nlevels(df$Level1))
 ggplot(fd, aes(reorder(Level0, value), value, col=name)) +
 ggplot(fd, aes(reorder(Level1, value), value, col=name)) + 
 plot_layout(nrow=1, widths=ws, guides="collect") &
-    scale_x_reordered() & labs(col="area (um2)") &
     geom_boxplot(key_glyph="point", outlier.size=0) &
+    labs(col="area (um2)") & 
     theme_bw() & theme(
         axis.title=element_blank(),
         legend.key.size=ggplot2::unit(0, "pt"),
