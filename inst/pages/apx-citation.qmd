@@ -456,4 +456,24 @@ Leiden | @Traag2019-Louvain-to-Leiden |
 
 :::
 
+- @sec-crs-spatial-registration: Registration
+- @sec-crs-imputation: Imputation
+- @sec-crs-workflow-xenvis: Workflow: Xenium + Visium
+
+::: {.tbl}
+
+| | |
+|-|-|
+| theory | @Argelaguet2021 |
+| silhouette | @Rautenstrauch2025 |
+| benchmarks | @Tran2020; @ChazarraGil2021; @Luecken2022 |
+| `r Biocpkg("harmony")` | @Korsunsky2019-Harmony |
+| `r Biocpkg("CellMixS")` | @Lutge2021-CellMixS |
+| `r CRANpkg("rliger")` | @Welch2019-LIGER |
+| [scvi-tool](https://scvi-tools.org/)'s *Trangram* | @Biancalani2021-Tangram |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
 ## References {-}
