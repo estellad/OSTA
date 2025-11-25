@@ -11,6 +11,7 @@ As was previously discussed, most commonly employed imaging-based ST assays can 
 ### Dependencies
 
 ```{r deps, message=FALSE, warning=FALSE}
+library(dplyr)
 library(DropletUtils)
 library(ggspavis)
 library(harmony)
@@ -66,9 +67,26 @@ dim(sce)
 
 ### Integration
 
+::: {.callout-note collapse="true" title="principles of single-cell data integration"}
+
+Considering an omics assay as a matrix of measurement values where rows/columns correspond to features/observations, there are three possible scenarios for integration [@Argelaguet2021]. 
+Specifically, methods applicable to each type of integration strategy depend on the choice of *anchors* used or, otherwise put, the dimension along which to integrate.
+
+Firstly, experiments may involve multiple (biological or technical) replicates, requiring **horizontal** integration across cells that share a common feature space. 
+Secondly, multi-modal assays can simultaneously extract di↵erent types of features from a given cell. 
+Integration must then be **vertical**, i.e., across features measured from the same cells. Thirdly, technological limitations may require measuring different modalities from separate groups of cells, in which case **diagonal** integration across both di↵erent cells and features is necessary 
+
+Single-cell transcriptomics data analyses are most commonly faced with horizontal integration. 
+Methods for this task have been benchmarked extensively [@Tran2020; @ChazarraGil2021; @Luecken2022].
+While these span diverse types of approaches, they often share conceptually similar steps. 
+For example, model-based methods explicitly fit the transcriptional effects of batch assignment, while graph-based methods separately link points within and between batches.
+`harmony` [@Korsunsky2019-Harmony], which we demonstrate here, first represents batches in PCA space, and uses maximum diversity clustering followed by linear mixture modeling to compute a corrected embedding.
+
+:::
+
 To accomplish data transfer across cells of either two assays (scRNA-seq and imaging-based ST), we first need to find cells that are similar between the two datasets. To this end, we use the common genes of both assays to integrate both datasets into a joint embedding space. Here, the objective is to find the nearest scRNA-seq cell neighbors of each Xenium cell in the joint embedding space, assuming that these cells will have similar transcriptional profiles. 
 
-We can integrate them on a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")`. 
+We can integrate them on a transcriptional level; here, using `r BiocStyle::Biocpkg("harmony")` [@Korsunsky2019-Harmony]. 
 To this end, we first consolidate the scRNA-seq and Xenium data into one object:
 
 ```{r obj}
@@ -89,7 +107,7 @@ obj$Annotation <- sce$Annotation[lab]
 
 We now filter out cells with too few counts, and then perform PC-based `harmony` integration:
 
-```{r int, message=FALSE}
+```{r int, message=FALSE, warning=FALSE}
 # minimal filtering
 obj <- obj[, colSums(counts(obj)) > 20]
 # log-library size normalization 
@@ -127,6 +145,67 @@ plot_layout(nrow=1, guides="collect") &
         legend.key.size=unit(0, "pt"),
         plot.title=element_text(hjust=0.5))
 ```
+
+::: {.callout-note collapse="true" title="quantifying batch effects and their removal"}
+
+UMAPs like above are perhaps pretty, but not quantiative. We strongly encourage
+more quantitative metrics to quantify batch effects prior and post correction,
+e.g., entropy, principal component regression, local inverse simpson index,
+silhouette width (problematic according to @Rautenstrauch2025), or similat.
+A number of such metrics have been proposed in benchmarks (see previous box),
+and many are implemeted in `r BiocStyle::Biocpkg("CellMixS")` [@Lutge2021-CellMixS].
+
+Here, we will perform principal component regression (PCR) to quantify 
+the variance explained by cluster/batch (before and after correction); 
+after corresion, we want most variation to be attributable to clusters.
+
+```{r pcr}
+# helper to perform PCR 
+# xs = 'colData' to use as predictor(s)
+# dr = 'reducedDim' slot to use as response
+.pcr <- \(obj, xs, dr) {
+    pcs <- reducedDim(obj, dr)
+    lapply(xs, \(x) {
+        fit <- summary(lm(pcs ~ obj[[x]]))
+        r2 <- sapply(fit, \(.) .$adj.r.squared)
+        data.frame(x, pc=seq_along(r2), r2)
+    }) |> do.call(what=rbind)  
+}
+
+# analysis
+xs <- c("sample_id", "Annotation")
+pcs <- list(before=".PCA", after="PCA")
+pcr <- lapply(pcs, \(dr) .pcr(obj, xs, dr))
+
+# wrangling
+df <- bind_rows(pcr, .id="id")
+df$id <- factor(df$id, names(pcs))
+rownames(df) <- NULL
+head(df)
+```
+
+Visualizing coefficients of determination (R-squared), we can observe that
+batch effects were not that strong to begin with, and are virtually absent after
+correction; meanwhile, clusters explain similar amounts of variation before/after.
+This is interesting as the UMAPs visualized above would have suggested otherwise.
+
+```{r plt-pcr, fig.width=8, fig.height=3}
+#| code-fold: true
+# plot R2 before vs. after
+ggplot(df, aes(pc, r2, col=x)) + 
+    facet_wrap(~id) +
+    geom_line(show.legend=FALSE) + geom_point() +
+    scale_x_continuous(breaks=c(1, seq(5, 20, 5))) +
+    scale_y_continuous(limits=c(NA, 1), breaks=seq(0, 1, 0.2)) +
+    labs(x="principal component", y="coeff. of determination") +
+    guides(col=guide_legend("predictor", override.aes=list(size=2))) +
+    coord_cartesian(xlim=c(1, 20)) +
+    theme_bw() + theme(
+        panel.grid.minor=element_blank(),
+        legend.key.size=unit(0, "lines"))
+```
+
+:::
 
 ### Selection
 

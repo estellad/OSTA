@@ -111,7 +111,7 @@ compared to non-diabetic patients, indicated by the positive coefficient.
 
 We can use `spicyBoxPlot` to examine a cell type-cell type relationship closely.
 
-```{r, spicyR-boxplot, fig.width=5, fig.asp=1}
+```{r, spicyR-boxplot, warning=FALSE, fig.width=5, fig.asp=1}
 spicyBoxPlot(spicyTestPair, from="Tc", to="beta") + ylim(c(-50, 50))
 ```
 
@@ -209,7 +209,7 @@ Important are:
 The parameters `sample_id, image_id, condition` are important for the statistical inference. 
 All other parameters can be specified to achieve better results but there are defaults specified as well. 
 
-```{r, spatialFDA-calc, warning=FALSE, results="hide"}
+```{r, spatialFDA-calc, warning=FALSE}
 # relevel to have non-diabetic as the reference category
 spe$patient_stage <- relevel(factor(spe$patient_stage), "Non-diabetic")
 
@@ -228,7 +228,8 @@ resLs <- crossSpatialInference(
     sample_id="patient_id",
     image_id="image_name", 
     condition="patient_stage",
-    algorithm="bam")
+    algorithm="bam",
+    verbose=FALSE)
 ```
 
 The convenience function `crossSpatialInference` first calculates the spatial 
@@ -331,7 +332,7 @@ summaries. We use a generalized additive mixed model with a functional response
 [@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. 
 In such models, some parameters are functional and some are constants (see below).
 
-```{r, spatialFDA-fGAM, message=FALSE, fig.width=6, fig.height=5}
+```{r, spatialFDA-fGAM, results="hide", fig.width=6, fig.height=5}
 summary(mdl <- res$mdl)
 mm <- res$designmat
 lapply(colnames(mm), \(x) {
