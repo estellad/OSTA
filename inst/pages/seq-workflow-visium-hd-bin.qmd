@@ -72,7 +72,7 @@ colData(vhd8)[names(df)] <- df
 lab <- grep("Label", names(cd <- colData(vhd8)), value=TRUE)
 pal <- hcl.colors(length(unique(unlist(cd[lab]))), "Spectral")
 lapply(lab, \(.) {
-  plotCoords(vhd8, annotate=., point_size=0.2, point_shape = 15) + ggtitle(.)
+  plotCoords(vhd8, annotate=., point_size=0.2, point_shape=15) + ggtitle(.)
 }) |>
   wrap_plots(nrow=1, guides="collect") &
   scale_color_manual(NULL, values=pal) &
@@ -109,15 +109,19 @@ Based on a [discussion](https://github.com/10XGenomics/HumanColonCancer_VisiumHD
 
 ```{r vhd16-empvis, fig.width=8, fig.height=2.5, message=FALSE, warning=FALSE}
 #| code-fold: true
-p1 <- plotVisium(vhd16, annotate="libsize", point_shape = 22,
-           zoom = TRUE, show_axes = TRUE, point_size = 1.3) + 
-    xlim(c(422, 442)) + ylim(c(318, 330)) + ggtitle("16 µm - original")
+p1 <- plotVisium(vhd16, 
+    annotate="libsize", point_shape=22,
+    zoom=TRUE, show_axes=TRUE, point_size=1.3) + 
+    xlim(c(422, 442)) + ylim(c(318, 330)) + 
+    ggtitle("16 µm - original")
 
 vhd16 <- vhd16[, vhd16$libsize > 400]
 
-p2 <- plotVisium(vhd16, annotate="libsize", point_shape = 22,
-           zoom = TRUE, show_axes = TRUE, point_size = 1.3) + 
-    xlim(c(422, 442)) + ylim(c(318, 330)) + ggtitle("16 µm - post > 400 UMI QC")
+p2 <- plotVisium(vhd16, 
+    annotate="libsize", point_shape=22,
+    zoom=TRUE, show_axes=TRUE, point_size=1.3) + 
+    xlim(c(422, 442)) + ylim(c(318, 330)) + 
+    ggtitle("16 µm - post > 400 UMI QC")
 
 p1 | p2
 ```
@@ -182,12 +186,8 @@ plotVisium(vhd16, point_size=1.6, zoom=TRUE, point_shape=22) + .lim(vhd8r) +
     ggtitle("16 µm bins in black box") + 
 plot_layout(nrow=1, widths=c(1.5, 1, 1)) & facet_null() &
     theme(plot.title=element_text(hjust=0.5, vjust=0.5))
-```
 
-Subset the 16 µm object to bins in the black box:
-
-```{r vhd16-sub, message=FALSE}
-#| code-fold: true
+# helper for subsetting
 .sub <- function(spe, rng, roi="box") {
     xs <- rng[[roi]][c(1, 2)]
     ys <- nrow(imgRaster(spe)) - rng[[roi]][c(3,4)]
@@ -195,6 +195,11 @@ Subset the 16 µm object to bins in the black box:
     spe[, xy[, 1] > xs[1] & xy[, 1] < xs[2] & 
           xy[, 2] > ys[1] & xy[, 2] < ys[2] ]
 }
+```
+
+Subset the 16 µm object to bins in the black box:
+
+```{r vhd16-sub, message=FALSE}
 .vhd16 <- .sub(spe=vhd16, rng=vhd8r)
 dim(.vhd16)
 ```
@@ -225,7 +230,7 @@ mt <- grepl("^MT-", rownames(.vhd16))
 table(.vhd16$discard)
 ```
 
-```{r plt-xy-qc, echo=FALSE, message=FALSE, fig.width=6, fig.height=2.5}
+```{r plt-xy-qc, message=FALSE, fig.width=6, fig.height=2.5}
 #| code-fold: true
 plotCoords(.vhd16, annotate="sum_log", point_size=0.2, point_shape=15) + 
   ggtitle("log-library size") +
@@ -415,6 +420,7 @@ round(100*mean(vhd8$DeconClass == "singlet"), 2)
 Let us check the top-5 common doublet pairs according to the `"doublet_certain"` class:
 
 ```{r vhd8-doublets}
+#| code-fold: true
 dbl <- vhd8$DeconClass == "doublet_certain"
 lab <- c(".DeconLabel1", ".DeconLabel2")
 df <- data.frame(colData(vhd8)[dbl, lab])
@@ -665,6 +671,7 @@ In this workflow, we demonstrated how to perform a standard analysis pipeline on
 - [Analysis pipeline](https://www.10xgenomics.com/analysis-guides/segmentation-visium-hd) by 10x Genomics (April 2024). The analysis consists of three steps: run `StarDist` nuclei segmentation in Python, sum gene expression into nuclei based on segmentation mask, and downstream analysis with `scanpy` and `anndata`.
 
 - [Pipeline](https://github.com/Sanofi-Public/enact-pipeline) on cell typing for Visium HD in Python by Sanofi.
+
 
 ## Appendix
 
