@@ -87,15 +87,17 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 # re-use environment from Python interoperability chapter
 # using reticulate functions
 env <- "env-ccc"
-conda_clone(env, clone = "py-interop")
-use_condaenv(env, required = TRUE)
+conda_clone(env, clone="py-interop")
+use_condaenv(env, required=TRUE)
 
 # install additional Python packages from PyPI
-conda_install(
-  envname = env, 
-  packages = c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4"), 
-  pip = TRUE
-)
+pkgs <- c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4")
+conda_install(envname=env, packages=pkgs, pip=TRUE)
+```
+
+```{r}
+reticulate::conda_binary("~/software/mambaforge/bin/conda")
+reticulate::use_condaenv("commot")
 ```
 
 
@@ -196,7 +198,7 @@ this can be parallelized, e.g., across fields of view (FOVs) or tissue sections.
 [tutorial](https://commot.readthedocs.io/en/latest/notebooks/
 visium-mouse_brain.html#Spatial-communication-inference).]{.aside}
 
-```{r ccc}
+```{r ccc, message=FALSE}
 # convert 'SpatialExperiment' (R) to 
 # 'AnnData' (Python) using 'zellkonverter'
 ad <- SCE2AnnData(sub, X_name="logcounts")
