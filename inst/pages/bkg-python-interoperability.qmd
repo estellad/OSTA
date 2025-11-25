@@ -44,15 +44,12 @@ In order to build this book chapter programmatically, we install a new Python in
 
 ```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
 # set environment variables to accept terms of service
-Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS = "yes")
-Sys.setenv(CI = "true")
+Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes")
+Sys.setenv(CI="true")
 
 # install Miniconda (or update if already installed)
-if (dir.exists(miniconda_path())) {
-  miniconda_update()
-} else {
-  install_miniconda()
-}
+flag <- dir.exists(miniconda_path())
+if (flag) miniconda_update() else install_miniconda()
 ```
 
 
@@ -65,9 +62,10 @@ If you are using an existing Python installation on your system (instead of inst
 ```{r conda-create, warning=FALSE, message=FALSE, results="hide"}
 # create conda environment
 env <- "py-interop"
-conda_create(env, packages = "python=3.11")  # include 'conda = ...' argument to 
-                                             # use an existing Python installation
-use_condaenv(env, required = TRUE)
+# specify 'conda=...' in 'conda_create()'
+# to use an existing Python installation
+conda_create(env, packages="python=3.11")  
+use_condaenv(env, required=TRUE)
 ```
 
 ```{r conda-list}
@@ -78,13 +76,12 @@ conda_list()$name
 The following dependencies are needed in some of the following chapters, and need to be installed from `conda-forge`. This can also be skipped if you are only running the examples in this chapter. We install these dependencies here so that we can re-use this Conda environment again in later chapters.
 
 ```{r deps-conda-forge, warning=FALSE, message=FALSE, results="hide"}
-# install dependencies that need to be installed from conda-forge 
-# instead of PyPI
+# install dependencies that need to be 
+# installed from conda-forge (not PyPI)
 conda_install(
-  envname = env, 
-  packages = c("libcxx", "llvm-openmp", "llvmlite", "numba"), 
-  channel = c("conda-forge", "nodefaults")
-)
+    envname=env, 
+    channel=c("conda-forge", "nodefaults"),
+    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba"))
 ```
 
 The following dependencies are necessary for the examples in this chapter. These are installed from PyPI.
@@ -92,10 +89,9 @@ The following dependencies are necessary for the examples in this chapter. These
 ```{r deps-pypi, warning=FALSE, message=FALSE, results="hide"}
 # install Python packages from PyPI
 conda_install(
-  envname = env, 
-  packages = c("Dask==2024.12.1", "zarr==2.18.7", "squidpy==1.6.2"), 
-  pip = TRUE
-)
+    pip=TRUE
+    envname=env, 
+    packages=c("Dask==2024.12.1", "zarr==2.18.7", "squidpy==1.6.2"))
 ```
 
 The following option sets Python code chunks to run via `reticulate`, allowing this chapter to be compiled programmatically.
@@ -113,11 +109,9 @@ knitr::opts_chunk$set(python.reticulate = TRUE)
 After configuring the Python environment, R commands can now be run using `reticulate` as follows. For more details on the syntax used, see the [reticulate](https://rstudio.github.io/reticulate/) documentation. [Note that running code in this way comes with a small overhead of starting up a Python session in the background. But this is typically small compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (hundreds of thousands of cells or more).]{.aside}
 
 ```{r load-sce}
+h5ad <- system.file("extdata", "krumsiek11.h5ad", package="zellkonverter")
 anndata <- import("anndata")
-
-example_h5ad <- system.file("extdata", "krumsiek11.h5ad", 
-                            package = "zellkonverter")
-(ad <- anndata$read_h5ad(example_h5ad))
+(ad <- anndata$read_h5ad(h5ad))
 ```
 
 #### Continuing in R
@@ -130,7 +124,7 @@ unique(ad$obs$cell_type)
 
 `reticulate` also supports a few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we use `zellkonverter` to convert from `AnnData` to `SingleCellExperiment`:
 
-```{r anndata2sce, warning=FALSE}
+```{r anndata2sce, message=FALSE}
 (sce <- AnnData2SCE(ad))
 ```
 
@@ -139,7 +133,7 @@ unique(ad$obs$cell_type)
 We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
 
 ```{r sce2anndata}
-(ad <- SCE2AnnData(sce, X_name = "X"))
+(ad <- SCE2AnnData(sce, X_name="X"))
 ```
 
 
@@ -157,30 +151,29 @@ pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir = td)
 obj <- TENxVisium(
-  spacerangerOut = file.path(td, "outs"), 
-  format = "h5", 
-  images = "lowres")
+    spacerangerOut=file.path(td, "outs"), 
+    format="h5", 
+    images="lowres")
 (spe <- VisiumIO::import(obj))
 ```
 
 We also need to parse the original scaling information (i.e. scale factor) for spots and images available in the standard Visium output. We will use this later during conversion.
 
 ```{r scalefactors, message=FALSE, results="hide"}
-scalefactors <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
+sfs <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
 ```
 
 We again use the `SCE2AnnData` function from `zellkonverter` from the previous example, and convert the `SingleCellExperiment`-relevant components of the `SpatialExperiment` object to an `AnnData` object.
 
 ```{r spe2anndata, message=FALSE}
-(ad <- SCE2AnnData(spe, X_name = "counts"))
+(ad <- SCE2AnnData(spe, X_name="counts"))
 ```
 
 We can now populate the `uns` and `obsm` components of the `AnnData` object with spatial coordinates and images. We start with the coordinates.
 
 ```{r coords}
-coords <- spatialCoords(spe)
-colnames(coords) <- c("x", "y")
-obsm <- list(spatial = coords)
+spatialCoordsNames(spe) <- c("x", "y")
+obsm <- list(spatial=spatialCoords(spe))
 ```
 
 Now let's create the `uns` component. The list of `uns` should be composed of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for the scaling information.
@@ -192,16 +185,12 @@ imgdata <- imgData(spe)
 # get image
 img <- imgRaster(spe)
 img <- apply(img, c(1, 2), \(x) col2rgb(x))
-img <- aperm(img, perm = c(2, 3, 1))
+img <- aperm(img, perm=c(2, 3, 1))
 img <- img / 255
 
 # create uns
-uns <- list(
-  spatial = setNames(list(NULL), imgdata$sample_id)
-)
-uns[["spatial"]][[imgdata$sample_id]] <- 
-  list(images = list(lowres = img), 
-       scalefactors = scalefactors)
+uns <- list(images=list(lowres=img), scalefactors=sfs)
+uns <- list(spatial=setNames(list(uns), imgdata$sample_id))
 ```
 
 Now let's insert the components to the `AnnData` object, and write back to an `.h5ad` file.
@@ -258,11 +247,10 @@ In this example, we use `r BiocStyle::Biocpkg("basilisk")` to create an environm
 ```{r env, warning=FALSE, message=FALSE, results="hide", eval=FALSE}
 # set up environment using basilisk
 env_basilisk <- BasiliskEnvironment(
-  envname = "env-basilisk", 
-  pkgname = "base", 
-  packages = c("python=3.11", "Dask=2024.12.1"), 
-  pip = c("zarr==2.18.7", "squidpy==1.6.2")
-)
+    pkgname="base", 
+    envname="env-basilisk", 
+    pip=c("zarr==2.18.7", "squidpy==1.6.2"),
+    packages=c("python=3.11", "Dask=2024.12.1")) 
 
 # use virtual environment
 use_virtualenv(obtainEnvironmentPath(env_basilisk))
@@ -274,11 +262,9 @@ use_virtualenv(obtainEnvironmentPath(env_basilisk))
 Now that we have set up the Python environment using `basilisk`, we can run R commands using `reticulate` in the same way as in the previous example. For example, using the same code as above:
 
 ```{r load-sce-basilisk, eval=FALSE}
+h5ad <- system.file("extdata", "krumsiek11.h5ad", package="zellkonverter")
 anndata <- import("anndata")
-
-example_h5ad <- system.file("extdata", "krumsiek11.h5ad", 
-                            package = "zellkonverter")
-(ad <- anndata$read_h5ad(example_h5ad))
+(ad <- anndata$read_h5ad(h5ad))
 ```
 
 To continue the example, please follow the code from the previous section above, starting from @sec-bkg-python-interop-sce.
