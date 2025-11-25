@@ -249,18 +249,19 @@ ROIs can then be used for downstream analysis such as cell type co-localization,
 All functions operate on `SpatialExperiment` objects, allowing seemless integration. 
 Using the Xenium breast carcinoma dataset, we demonstrate a standard `r BiocStyle::Biocpkg("scider")` workflow. 
 
-```{r scider-load-package-and-data}
+```{r scider-load-package-and-data, message=FALSE}
 #| message: false
-
+# dependencies
 library(scider)
 library(OSTA.data)
 library(SpatialExperimentIO)
-
-pa <- OSTA.data_load("Xenium_HumanBreast1_Janesick")
-td <- tempfile()
-dir.create(td)
-unzip(pa, exdir = td)
-spe <- readXeniumSXE(td)
+# retrieve data from OSF repo &
+# read into 'SpatialExperiment'
+id <- "Xenium_HumanBreast1_Janesick"
+pa <- OSTA.data_load(id, mol=FALSE)
+dir.create(td <- tempfile())
+unzip(pa, exdir=td)
+spe <- readXeniumSXE(td, addTx=FALSE)
 ```
 
 In this example, we define ROIs based on the celluar density of tumor cells, that is, DCIS_1, DCIS_2 and invasive tumor cells are considered as the COI. 

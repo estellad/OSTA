@@ -49,10 +49,10 @@ obj <- TENxVisium(
 (vis <- import(obj))
 # Xenium
 id <- "Xenium_HumanBreast1_Janesick"
-pa <- OSTA.data_load(id)
+pa <- OSTA.data_load(id, mol=FALSE)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-(xen <- readXeniumSXE(td))
+(xen <- readXeniumSXE(td, addTx=FALSE))
 # also retrieve cell subpopulation labels
 df <- read.csv(file.path(td, "annotation.csv"))
 xen$anno <- df$Annotation[match(xen$cell_id, df$Barcode)]
