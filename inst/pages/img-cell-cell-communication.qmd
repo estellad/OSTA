@@ -95,11 +95,6 @@ pkgs <- c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4")
 conda_install(envname=env, packages=pkgs, pip=TRUE)
 ```
 
-```{r}
-reticulate::conda_binary("~/software/mambaforge/bin/conda")
-reticulate::use_condaenv("commot")
-```
-
 
 <!--
 
