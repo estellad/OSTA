@@ -344,14 +344,33 @@ spe$sum_gene <- colSums(counts(spe) > 0)
 
 Since the gene information is missing, we will add [gene annotation data from Gencode](https://research.libd.org/spatialLIBD/articles/TenX_data_download.html#add-gene-annotation-information-1). Alternatively, ideally you would add this information from the same gene annotation used for originally running Space Ranger.
 
-```{r spatialLIBD_gene_annotation}
+::: {.aside}
+It can happen that `bfcrpath()` fails to connect with the Gencode database.
+If this is the case, we disable consecutive code evaluations for the purpose 
+of this book's stability. Outputs typically reappear with the next build.
+:::
+
+```{r spatialLIBD_gene_annotation, eval=FALSE}
 # download Gencode v32 GTF file and cache it
 nms <- paste0(
   "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/",
   "release_32/gencode.v32.annotation.gtf.gz")
-bfc <- BiocFileCache::BiocFileCache()
-gtf_cache <- BiocFileCache::bfcrpath(bfc, nms)
+bfc <- BiocFileCache()
+gtf_cache <- bfcrpath(bfc, nms)
+```
 
+```{r spatialLIBD_gene_annotation-hide, echo=FALSE}
+nms <- paste0(
+  "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/",
+  "release_32/gencode.v32.annotation.gtf.gz")
+bfc <- BiocFileCache()
+try <- tryCatch(
+    error=function(e) e,
+    gtf_cache <- bfcrpath(bfc, nms))
+knitr::opts_chunk$set(eval=!inherits(try, "error"))
+```
+
+```{r spatialLIBD_gene_annotation-cont}
 # show GTF cache location
 gtf_cache
 
