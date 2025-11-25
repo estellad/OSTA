@@ -1,6 +1,8 @@
 # Acknowledgments {#sec-apx-acknowledgments}
 
-The authors thank **Aaron T. L. Lun** for feedback, advice, as well as his substantial contributions to the Bioconductor ecosystem; **Abby Spangler**, **Madhavi Tippani**, and **Brenda Pardo** for initial work and discussions on Visium data analysis workflows and preprocessing procedures carried out at the Lieber Institute for Brain Development; and members of the **Bioconductor Core Team and community** for computational assistance and advice. In addition, the authors thank readers from the Bioconductor and wider research communities for feedback, suggestions, and contributions.
+For authors and citation details, see @sec-apx-citation.
+
+The authors also thank **Aaron T. L. Lun** for feedback, advice, as well as his substantial contributions to the Bioconductor ecosystem; **Abby Spangler**, **Madhavi Tippani**, and **Brenda Pardo** for initial work and discussions on Visium data analysis workflows and preprocessing procedures carried out at the Lieber Institute for Brain Development; and members of the **Bioconductor Core Team and community** for computational assistance and advice. In addition, the authors thank readers from the Bioconductor and wider research communities for feedback, suggestions, and contributions.
 
 <!--
 ## Authors and contributors
