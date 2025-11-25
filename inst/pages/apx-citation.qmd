@@ -1,0 +1,479 @@
+# Citation {#sec-apx-citation}
+
+<!-- table styling -->
+<style>
+  .tbl {
+    width: 100%;
+    display: block;
+    overflow: auto;
+    max-height: 40em;
+    line-height: 0.5em;
+    margin-bottom: 1em;
+    white-space: nowrap;
+    table-layout: fixed;
+  }
+</style>
+
+```{r include=FALSE}
+library(BiocStyle)
+```
+
+## Guidelines {-}
+
+OSTA builds on work and information pieced together by numerous researchers.
+As such, **we suggest readers cite the pieces of work they have either used or
+consulted to conduct their research** -- be it (R, Python, or other) software,
+benchmarks that informed their methodological decisions, review or perspective 
+pieces, or other. To facilitate this, we provide a list in the section below.
+
+## Collection {-}
+
+We here make an attempt to collect all biotechnology, dataset, software, review,
+benchmark, or other, references and resources mentioned throughout the book.
+[If you spot any obvious omissions or mistakes, please let us know!]{.aside}
+
+- @sec-bkg-introduction, @sec-seq-introduction & @sec-img-introduction: Introduction
+
+::: {.tbl}
+
+| | |
+|-|-|
+| Bioconductor | @Gentleman2004-Bioconductor; @Huber2015-Bioconductor; @Carey2025-Bioconductor |
+| [OSCA](https://bioconductor.org/books/OSCA) | @Amezquita2020-OSCA |
+| benchmark | @Hartman2024-comparative |
+| CosMx | @He2022-CosMx |
+| Curio Seeker | [Curio Bioscience](https://curiobioscience.com/product) |
+| MERFISH | @Chen2015-MERFISH |
+| MERSCOPE | [Vizgen](https://vizgen.com/products) |
+| Slide-seqV2 | @Stickels2021-Slide-seqV2 |
+| ST | @Stahl2016-ST |
+| Stereo-seq | [STOmics](https://en.stomics.tech/why-stereo-seq/index.html) |
+| Visium | [10x Genomics](https://www.10xgenomics.com/products/spatial-gene-expression) |
+| Visium HD | [10x Genomics](https://www.10xgenomics.com/products/visium-hd-spatial-gene-expression) |
+| Xenium | [10x Genomics](https://www.10xgenomics.com/platforms/xenium) |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-spatial-omics: Spatial omics
+
+::: {.tbl}
+
+| | |
+|-|-|
+| 3D ST | @Vickovic2022-three-dimensional |
+| Open-ST | @Schott2024-Open-ST; @Schott2025-protocol |
+| scMAGS | @Baran2023-marker | 
+| CITE-seq | @Liu2023-spatial-CITE-seq |
+| spatial omics | @Moffitt2022-emerging; @Bressan2023-dawn |
+| spatial analyses | @Palla2022-components | 
+| spatial proteomics | @Semba2024-multiplexed; @Lundberg2019-proteomics |
+| spatial epigenomics | @Zhang2023-spatial-epigenome | 
+| spatial transcriptomics | @Rao2021-exploring; @Moses2022-museum; @Cheng2023-comprehensive; @Tian2023-vistas | 
+| single-cell spatial proteomics | @Paul2021-imaging; @Mund2022-unbiased | 
+| single-cell & spatial transcriptomics | @Gulati2024-profiling | 
+| probe selection & panel design | @Kuemmerle2024-probe-set; @Zhang2024-panel |
+| mass spectrometry imaging | @Zhang2024-MSI; @Palomino2024-mass | 
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-infrastructure: Infrastructure
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r CRANpkg("sf")` | @Pebesma2018-sf |
+| `r CRANpkg("sp")` | @Edzer2005-sp |
+| `r Biocpkg("Rarr")` | @Smith2023-Rarr |
+| `r Githubpkg("keller-mark/pizzarr")` | n/a |
+| `r Biocpkg("alabaster.base")` | @Lun2023-alabaster |
+| `r Biocpkg("MoleculeExperiment")` | @PetersCouto2023-MoleculeExperiment |
+| `r Biocpkg("SingleCellExperiment")` | @Amezquita2020-OSCA |
+| `r Biocpkg("SpatialExperiment")` | @Righelli2022-SpatialExperiment |
+| `r Biocpkg("SpatialFeatureExperiment")` | @Moses2023-Voyager |
+| [Seurat](https://satijalab.org/seurat) | @Hao2023-Seurat |
+| [Scanpy](https://scanpy.readthedocs.io) | @Wolf2018-Scanpy |
+| [Squidpy](http://squidpy.readthedocs.io) | @Palla2022-Squidpy |
+| [Giotto](https://giottosuite.com/) | @Chen2025-Giotto-Suite; @Dries2021-Giotto |
+| `r Githubpkg("BIMSBbioinfo/VoltRon")` | @Manukyan2023-VoltRon |
+| `r Githubpkg("FridleyLab/spatialGE")` | @Ospina2022-spatialGE |
+| [SpatialData](https://spatialdata.scverse.org) | @Marconato2025-SpatialData |
+| Bruker's CosMx | [AtoMx](https://nanostring.com/products/atomx-spatial-informatics-platform) |
+| Vizgen's MERSCOPE | [Visualizer](https://vizgen.com/vizualizer-software) |
+| 10 Genomic's Xenium | [Xenium Explorer](https://www.10xgenomics.com/support/software/xenium-explorer) |
+| 10 Genomic's Visium | [Loupe Browser](https://www.10xgenomics.com/support/software/loupe-browser) |
+| `Seurat`-Loupe conversion | `r Githubpkg("10XGenomics/loupeR")` |
+| `r Biocpkg("iSEE")` | @Albrecht2018-iSEE |
+| [*napari*](https://napari.org) | @Sofroniew2025-napari |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-ecosystem: Ecosystem
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Biocpkg("BiocPkgTools")` | @Su2018-BiocPkgTools |
+| `r Biocpkg("BiocViews")` | @Carey2006-BiocViews |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-importing-data: Importing
+
+::: {.tbl}
+
+| | |
+|-|-|
+| 10x Genomics' Visium processing | [Space Ranger](https://www.10xgenomics.com/support/software/space-ranger) |
+| 10x Genomics' Xenium processing | [Xenium Ranger](https://www.10xgenomics.com/support/software/xenium-ranger) |
+| Bruker's CosMx processing | [AtoMx](https://nanostring.com/products/atomx-spatial-informatics-platform) |
+| Bruker's CosMx tutorials | [scratch space](https://nanostring-biostats.github.io/CosMx-Analysis-Scratch-Space) |
+| `r Biocpkg("SpatialExperimentIO")` | |
+| `r Biocpkg("SpatialFeatureExperiment")` | @Moses2023-Voyager |
+| `r Biocpkg("VisiumIO")` | |
+| `r Biocpkg("XeniumIO")` | |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-example-datasets: Datasets
+
+::: {.tbl}
+
+| | |
+|-|-|
+| human breast cancer (Visium, Xenium) | @Janesick2023-high-res |
+| colorectal carcinoma (Visium/HD, Xenium) | @deOliveira2025-high-def |
+| mouse brain (1k-plex CosMx) | [Bruker](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/cosmx-smi-mouse-brain-ffpe-dataset) |
+| human brain (6k-plex CosMx) | [Bruker](https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-frontal-cortex-ffpe-dataset) |
+| human brain (Visium) | @Maynard2021-DLPFC |
+| type I diabetes (IMC) | @Damond2019-IMC-diabetes |
+| axolotl brain (Stereo-seq) | @Wei2022-Stereo-seq-axolotl |
+| `r Biocpkg("spatialLIBD")` | @Pardo2022-spatialLIBD |
+| `r Biocpkg("STexampleData")` | @Righelli2022-SpatialExperiment |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-bkg-python-interoperability: Interoperability
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Githubpkg("scverse/anndata")`` | @Virshup2024-anndata | 
+| `r Githubpkg("scverse/anndataR")` | @Deconinck2025-anndataR |
+| `r Biocpkg("basilisk")` | @Lun2022-basilisk |
+| [reticulate](https://rstudio.github.io/reticulate/) | @Ushey2017-reticulate |
+| `r Biocpkg("zellkonverter")` | @Zappia2020-zellkonverter |
+| technical publishing systems | [R Markdown](https://rmarkdown.rstudio.com/), [Quarto](https://quarto.org/) |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-seq-reads-to-counts: Reads to counts
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Biocpkg("Rsubread")` | @Liao2019-Rsubread |
+| `r Biocpkg("stPipe")` | @Xu2025-stPipe |
+| 10x Genomics' Visium | [SpaceRanger](https://www.10xgenomics.com/support/software/space-ranger) |
+| STOmics' Stereo-seq | [SAW](https://en.stomics.tech/products/stomics-software/stomics-offline-software/list.html); @Gong2024-SAW |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-seq-quality-control & @sec-img-quality-control: Quality control
+
+::: {.tbl}
+
+| | |
+|-|-|
+| theory | @Bhuva2024-library-size | 
+| `r Biocpkg("scater")` | @McCarthy2017-scater |
+| `r Biocpkg("SpotSweeper")` | @Totty2025-SpotSweeper |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-seq-intermediate-processing & @sec-img-intermediate-processing: Intermediate processing
+- @sec-seq-deconvolution: Deconvolution
+
+::: {.tbl}
+
+| | |
+|-|-|
+`r Biocpkg("CARDspa")` | @Ma2022-CARD
+`r Githubpkg("BayraktarLab/cell2location")` | @Kleshchevnikov2022-cell2location
+`r Githubpkg("Su-informatics-lab/DSTG")` | @Song2021-DSTG
+`r Githubpkg("tudaga/NMFreg_tutorial")` | 
+`r Githubpkg("rajewsky-lab/novosparc")` | @Nitzan2019-novoSpaRc
+`r Githubpkg("drieslab/Giotto")`'s `SpatialDWLS` | @Chen2025-Giotto-Suite
+`r Githubpkg("scverse/scvi-tools")`'s `DestVI` | @Lopez2022-DestVI
+`r Githubpkg("leihouyeung/SD2")` | @Li2022-SD2
+`r Biocpkg("spacexr")`'s `RCDT` | @Cable2022-RCTD |
+`r Githubpkg("zcang/SpaOTsc")` | @Cang2020-SpaOTsc
+`r Biocpkg("SpatialDecon")` | @Danaher2022-SpatialDecon
+`r Githubpkg("ma-compbio/SpiceMIx")` | @Chidester2023-SpiceMix
+`r Biocpkg("SPOTlight")` | @ElosuaBayes2021-SPOTlight
+`r Githubpkg("SpatialTranscriptomicsResearch/std-poisson")` | @Berglund2018-std-poisson
+`r Githubpkg("JEFworks-Lab/STdeconvolve")` | @Miller2022-STdeconvolve
+`r Githubpkg("almaan/stereoscope")` | @Andersson2020-stereoscope
+`r Githubpkg("DongqingSun96/STRIDE")` | @Sun2022-STRIDE
+`r Githubpkg("broadinstitute/Tangram")` | @Biancalani2021-Tangram
+| benchmarks | @Sang-aram2023-Spotless; @Li2023-benchmark-deconvolution; @Gaspard-Boulinc2025-deconvolution |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-seq-workflow-dlpfc: Workflow: Visium DLPFC
+- @sec-seq-workflow-visium-crc: Workflow: Visium CRC
+- @sec-seq-workflow-visium-hd: Workflow: Visium HD
+- @sec-img-segmentation: Segmentation
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Githubpkg("kharchenkolab/Baysor")` | @Petukhov2022-Baysor |
+| `r Githubpkg("MouseLand/cellpose")` | @Stringer2021-Cellpose |
+| `r Githubpkg("Nanostring-Biostats/FastReseg")` | @Wu2024-FastReseg |
+| `r Githubpkg("dcjones/proseg")` | @Jones2025-Proseg |
+| `r Githubpkg("pnucolab/ssam")` | @Park2021-SSAM |
+| `r Githubpkg("EliHei2/segger_dev")` | @Heidari2025-segger |
+| spatial bleeding | @Mitchel2025-segmentation-errors |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-img-neighborhood-analysis: Neighborhood analysis
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r BiocStyle::Biocpkg("hoodscanR")` | @Liu2025-hoodscanR |
+| `r BiocStyle::Biocpkg("imcRtools")` | @Windhager2023-imcRtools |
+| `r BiocStyle::Biocpkg("scider")` | @Li2025-scider |
+| `r BiocStyle::Biocpkg("limma")` | @Baldoni2025-diffSplice |
+| `r BiocStyle::Biocpkg("edgeR")` | @Chen2025-edgeR-v4 |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-img-cell-cell-communication: Cell-cell communication
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r BiocStyle::Biocpkg("CCPlotR")` | @Ennis2023-CCPlotR |
+| [CellChatDB](http://www.cellchat.org/) | @Jin2021-CellChat |
+| `r Githubpkg("ventolab/CellphoneDB")` | @Efremova2020-CellPhoneDB |
+| `r Githubpkg("zcang/COMMOT")` | @Cang2023-COMMOT |
+| `r Githubpkg("drieslab/Giotto")` | @Chen2025-Giotto-Suite |
+| `r Biocpkg("mistyR")` | @Tanevski2022-MISTy |
+| `r Githubpkg("zcang/SpaOTsc")` | @Cang2020-SpaOTsc |
+| `r Githubpkg("StatBiomed/SpatialDM")` | @Li2023-SpatialDM |
+| theory | @OylerYaniv2017 |
+| review | @Armingol2020 |
+| benchmark | @Liu2022 |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-img-sub-cellular: Sub-cellular analysis
+
+::: {.tbl}
+
+| | |
+|-|-|
+| theory | @Cassella2022-subcell-analysis |
+| Visium HD | @Novoselsky2025-subcell-visiumhd |
+| [Bento](https://github.com/YeoLab/bento-tools) | @Mah2024-Bento |
+| `r Biocpkg("MoleculeExperiment")` | @PetersCouto2023-MoleculeExperiment |
+| `r Githubpkg("bioFAM/FISHFactor")` | @Walter2023-FISHFactor |
+| `r Githubpkg("wanglab-broad/ClusterMap")` | @He2021-ClusterMap |
+| `r Githubpkg("bhavaygg/CellSP")` | @Aggarwal2025-CellSP |
+| `r Githubpkg("KrishnaswamyLab/MAGIC")` | @vanDijk2018-MAGIC |
+| `r Githubpkg("broadinstitute/Tangram")` | @Biancalani2021-Tangram |
+| `r Githubpkg("bhavaygg/InSTAnT")` | @Kumar2024-Instant |
+| `r Githubpkg("salzman-lab/SPRAWL")` | @Bierman2024-SPRAWL |
+| [SpaGNN](https://github.com/coskunlab/spaGNN) | @Fang2023-SpaGNN |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-img-workflow-xenium: Workflow: Xenium
+- @sec-img-workflow-cosmx: Workflow: CosMx
+- @sec-ind-normalization: Normalization
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Biocpkg("scater")` | @McCarthy2017-scater |
+| `r Biocpkg("SpaNorm")` | @Salim2025-SpaNorm |
+| theory | @Bhuva2024-library-size; @Atta2024-gene-count |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-ind-dimensionality-reduction: Dim. reduction
+- @sec-ind-clustering: Clustering
+
+::: {.tbl}
+
+| | |
+|-|-|
+`r Biocpkg("BANKSY")` | @Singhal2024-BANKSY |
+`r Biocpkg("BayesSpace")` | @Zhao2021-BayesSpace |
+`r Githubpkg("CellCharter")` | @Varrone2024-CellCharter | 
+Leiden | @Traag2019-Louvain-to-Leiden |
+`r CRANpkg("PRECAST")` | @Liu2023-PRECAST | 
+`r Githubpkg("Tang-Lab-super/PROST")` | @Liang2024-PROST |
+`r Githubpkg("SpaceFlow")` | @Ren2022-SpaceFlow |
+`r Githubpkg("zhanglabtools/STAGATE")` | @Dong2022-STAGATE |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-ind-feature-selection-testing: Feature selection & testing
+
+::: {.tbl}
+
+| | |
+|-|-|
+| [*C-SIDE*](https://github.com/dmcable/spacexr) | @Cable2022-C-SIDE |
+| `r Biocpkg("CTSV")` | @Yu2022-CTSV |
+| `r Biocpkg("DESpace")` | @Cai2024-DESpace |
+| `r Biocpkg("nnSVG")` | @Weber2023-nnSVG |
+| `r Biocpkg("scran")` | @Lun2016-scran |
+| `r Githubpkg("xzhoulab/SPARK")` | @Sun2020-SPARK; @Zhu2021-SPARK-X |
+| `r Biocpkg("spatialDE")` | @Svensson2018-SpatialDE |
+| `r Githubpkg("shanyu-stat/spVC")` | @Yu2024-spVC |
+| reviews | @Adhikari2024-advances-SVGs; @Yan2024-categorization-SVGs |
+| benchmarks | @Li2023-benchmarking-SVGs; @Chen2024-evaluating-SVGs |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-ind-feature-set-signatures: Feature-set signatures
+
+::: {.tbl}
+
+| | |
+|-|-|
+| `r Biocpkg("msigdb")` | n/a |
+| `r CRANpkg("msigdbr")` | n/a |
+| `r Biocpkg("AUCell")` | @Aibar2017-SCENIC |
+| [Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb) | @Subramanian2005-MSigDB |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-ind-spatial-statistics: Spatial statistics
+
+::: {.tbl}
+
+| | |
+|-|-|
+| [*pasta*](https://robinsonlabuzh.github.io/pasta/00-home.html) | @Emons2025-pasta |
+| `r CRANpkg('spatstat')` | @Baddeley2005-spatstat |
+| 1st law of geography | @Tobler1970-urban-growth |
+| spatial analysis | @Dale2014-book-spatial-analysis |
+| spatial data science | @Pebesma2023-book-spatial-data-science |
+| point pattern analysis | @Baddeley2015-book-point-patterns |
+| Lee's *L* | @Lee2001-bivariate |
+| Ripley's *K* | @Ripley1976-second-order |
+| LISA metric | @Anselin1995-LISA; @Anselin2019-extending |
+| joint count statistics | @Getis2009-spatial-weights |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-ind-image-analysis: Image analysis
+
+::: {.tbl}
+
+| | |
+|-|-|
+| [*napari*](https://napari.org) | @Sofroniew2025-napari |
+| [*QuPath*](https://qupath.github.io) | @bankhead2017qupath |
+| [Prov-GigaPath](https://github.com/prov-gigapath/prov-gigapath) | @xu2024gigapath |
+| [The Cancer Genome Atlas (TCGA)](https://cancer.gov/ccg/research/genome-sequencing/tcga) | @tomczak2015review |
+| [The Cancer Imaging Archive (TCIA)](https://www.cancerimagingarchive.net) | n/a |
+| `r Biocpkg("imageTCGA")` | n/a |
+| `r Githubpkg("billila/TCIAAPI")` | n/a |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-mult-diff-spatial-patterns: Differential spatial patterns
+- @sec-mult-diff-colocalization: Differential colocalization
+- @sec-mult-structure-based: Structure-based analysis
+
+::: {.tbl}
+
+| | |
+|-|-|
+| [*C-SIDE*](https://github.com/dmcable/spacexr) | @Cable2022-C-SIDE |
+| `r Biocpkg("DESpace")` | @Cai2024-DESpace |
+| `r CRANpkg("lme4")` | @Bates2015-lme4 |
+| `r CRANpkg("lmerTest")` | @Kuznetsova2017-lmerTest |
+| `r Biocpkg("sosta")` | @Gunz2025-sosta |
+| `r Biocpkg("spatialFDA")` | n/a |
+| `r Biocpkg("spicyR")` | @Canete2022-spicyR |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+- @sec-crs-spatial-registration: Registration
+- @sec-crs-imputation: Imputation
+- @sec-crs-workflow-xenvis: Workflow: Xenium + Visium
+
+::: {.tbl}
+
+| | |
+|-|-|
+| theory | @Argelaguet2021 |
+| silhouette | @Rautenstrauch2025 |
+| benchmarks | @Tran2020; @ChazarraGil2021; @Luecken2022 |
+| `r Biocpkg("harmony")` | @Korsunsky2019-Harmony |
+| `r Biocpkg("CellMixS")` | @Lutge2021-CellMixS |
+| `r CRANpkg("rliger")` | @Welch2019-LIGER |
+| [scvi-tool](https://scvi-tools.org/)'s *Trangram* | @Biancalani2021-Tangram |
+
+: {.striped tbl-colwidths="[33,66]"}
+
+:::
+
+## References {-}

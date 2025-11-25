@@ -28,7 +28,7 @@ Tabular data (e.g. segmentation boundaries, molecule locations) may arrive in th
 
 ### *.zarr*
 
-*.zarr* stores can be used to store N-dimensional arrays as a grid of "chunks", enabling parallelizable accession. For (bio)imaging data, different image scales (or resolutions) can be stored as different layers of a "pyramid", where the base/tip represents the full/lowest resolution. R interfaces to *.zarr* are provided through `r BiocStyle::Biocpkg("Rarr")` (Bioconductor) and `r BiocStyle::CRANpkg("pizzarr")` (CRAN).
+*.zarr* stores can be used to store N-dimensional arrays as a grid of "chunks", enabling parallelizable accession. For (bio)imaging data, different image scales (or resolutions) can be stored as different layers of a "pyramid", where the base/tip represents the full/lowest resolution. R interfaces to *.zarr* are provided through Bioconductor's `r BiocStyle::Biocpkg("Rarr")` package [@Smith2023-Rarr], and `r BiocStyle::Githubpkg("keller-mark/pizzarr")`.
 
 
 ### `alabaster`
@@ -71,7 +71,7 @@ knitr::include_graphics("../images/SpatialExperiment.png")
 
 #### SpatialFeatureExperiment
 
-SPE has been extended through `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` (SFE) [@Moses2023-Voyager], which can additionally accommodate observation- and feature-level graphs (e.g. of cell/spot neighborhoods) and geometries (e.g. segmentation and tissue boundaries, or histological regions annotated by a pathologist). Because these are represented as `r BiocStyle::CRANpkg("sf")` (geometries) and `r BiocStyle::CRANpkg("spdep")` (graphs) objects, SFE directly gives access to a range of geometry operations (e.g. intersecting and buffering) and spatial dependency calculations (e.g. Moran's I and Geary's C).
+SPE has been extended through `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` (SFE) [@Moses2023-Voyager], which can additionally accommodate observation- and feature-level graphs (e.g. of cell/spot neighborhoods) and geometries (e.g. segmentation and tissue boundaries, or histological regions annotated by a pathologist). Because these are represented as `r BiocStyle::CRANpkg("sf")` (geometries) and `r BiocStyle::CRANpkg("spdep")` (graphs) objects [@Pebesma2018-sf; @Edzer2005-sp], SFE directly gives access to a range of geometry operations (e.g. intersecting and buffering) and spatial dependency calculations (e.g. Moran's I and Geary's C).
 
 
 #### MoleculeExperiment
@@ -94,6 +94,13 @@ In particular, [Seurat](https://satijalab.org/seurat/) [@Hao2023-Seurat] and [Sc
 #### VoltRon
 
 The `r BiocStyle::Githubpkg("BIMSBbioinfo/VoltRon")` [@Manukyan2023-VoltRon] package incorporates a framework that allows spatially-aware alignment between datasets with observations that span across regions of interest (ROIs) and image tiles in addition to cells, spots, and molecules. `Shiny` applications are provided to conduct both automated and manual spatial alignment across adjacent tissue sections where users can interactively manage images and choose landmark points for co-registration. `VoltRon` is also an end-to-end spatial omics analysis package, and support on-disk representations of spatially-resolved datasets using *.zarr* and *.h5* backed `r BiocStyle::Biocpkg("DelayedArray")` objects.
+
+
+#### spatialGE
+
+`r BiocStyle::Githubpkg("FridleyLab/spatialGE")` [@Ospina2022-spatialGE] relies on a custom class (`STlist`) to store data and results from multiple tissue sections.
+The framework includes methods for visualization, spatial autocorrelation, tissue domain/niche detection, spatial gene set enrichment, spatial gene expression gradients, spatially-aware differential gene expression, etc.
+`spatialGE` also provides a point-and-click [web application](https://spatialge.moffitt.org) that allows for use without coding/scripting.
 
 
 #### SpatialData

@@ -29,11 +29,11 @@ In this demo, we will use the Xenium data generated from a human breast cancer b
 ```{r load-data, message=FALSE, warning=FALSE}
 # retrieve dataset from OSF repo
 id <- "Xenium_HumanBreast1_Janesick"
-pa <- OSTA.data_load(id)
+pa <- OSTA.data_load(id, mol=FALSE)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
 # read into 'SpatialExperiment'
-xen <- readXeniumSXE(td)
+xen <- readXeniumSXE(td, addTx=FALSE)
 xen$sample_id <- "Xenium"
 xen
 ```

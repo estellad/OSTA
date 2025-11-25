@@ -74,23 +74,33 @@ spe$patient_stage <- factor(spe$patient_stage, stages)
 spe$cell_type <- factor(spe$cell_type)
 ```
 
-```{r, spicyR, message=FALSE, warning=FALSE, eval=FALSE}
-# note: runtime ~5 min
+To save on runtime, we here skip over some larger `cell_type`s.
+By default, `from/to=NULL` will test all pairwise combinations.
+
+```{r, spicyR, message=FALSE, warning=FALSE}
+# filter out some larger 'cell_type's
+# (for runtime reasons in this demo)
+ids <- setdiff(
+    levels(spe$cell_type), c("endothelial",
+    "alpha", "acinar", "ductal", "unknown"))
+.spe <- spe[, spe$cell_type %in% ids]
+
+# perform spatial tests
 spicyTestPair <- spicy(
-    cells=spe, 
+    cells=.spe, 
     condition="patient_stage", 
     imageID="image_name", 
     cellType="cell_type",
     window="square", 
     cores=4)
+
 # extract most significant pairs
-out <- topPairs(spicyTestPair, n=27)
-head(out)
+head(topPairs(spicyTestPair))
 ```
 
 The results can be represented as a bubble plot using the `signifPlot` function.
 
-```{r, spicyR-heatmap, warning=FALSE, message=FALSE, fig.width=8, fig.height=6, eval=FALSE}
+```{r, spicyR-heatmap, fig.width=8, fig.height=6}
 signifPlot(spicyTestPair)
 ```
 
@@ -101,8 +111,8 @@ compared to non-diabetic patients, indicated by the positive coefficient.
 
 We can use `spicyBoxPlot` to examine a cell type-cell type relationship closely.
 
-```{r, spicyR-boxplot, warning=FALSE, fig.width=5, fig.asp=1, eval=FALSE}
-spicyBoxPlot(spicyTestPair, from="Tc", to="beta")
+```{r, spicyR-boxplot, warning=FALSE, fig.width=5, fig.asp=1}
+spicyBoxPlot(spicyTestPair, from="Tc", to="beta") + ylim(c(-50, 50))
 ```
 
 We can investigate individual images to ensure our results reflect biologically 
@@ -111,7 +121,7 @@ from the `spicyTest` object using the `bind` function.
 
 ```{r spicyR-metadata, eval=FALSE}
 # extract co-localization metrics
-cd <- colData(spe) |>
+cd <- colData(.spe) |>
     as.data.frame() |> 
     distinct(patient_id, patient_stage, image_name) |>
     dplyr::rename(imageID=image_name)
@@ -134,11 +144,14 @@ which is reflected in the co-localization metric.
 We can see that beta and Tc cells are far more co-localized, 
 with Tc cells even infiltrating the pancreatic islets in some cases.
 
-```{r spicyR-plotImage, fig.width=10, fig.height=4.5, eval=FALSE}
-spe$cellType <- spe$cell_type # bug? setting 'cellType' doesn't work
+```{r spicyR-plotImage, fig.width=10, fig.height=4.5}
+# this is needed due to a bug in 'spicyR' 
+# (setting 'cellType' doesn't work)
+.spe$cellType <- .spe$cell_type
 lapply(c("L29", "O02"), \(i) {
-    plotImage(spe, 
+    plotImage(.spe, 
         imageToPlot=i, 
+        #cellType="cell_type",
         imageID="image_name",
         from="Tc", to="beta") 
 }) |>
@@ -196,7 +209,7 @@ Important are:
 The parameters `sample_id, image_id, condition` are important for the statistical inference. 
 All other parameters can be specified to achieve better results but there are defaults specified as well. 
 
-```{r, spatialFDA-calc, warning=FALSE, results="hide"}
+```{r, spatialFDA-calc, warning=FALSE}
 # relevel to have non-diabetic as the reference category
 spe$patient_stage <- relevel(factor(spe$patient_stage), "Non-diabetic")
 
@@ -215,7 +228,8 @@ resLs <- crossSpatialInference(
     sample_id="patient_id",
     image_id="image_name", 
     condition="patient_stage",
-    algorithm="bam")
+    algorithm="bam",
+    verbose=FALSE)
 ```
 
 The convenience function `crossSpatialInference` first calculates the spatial 
@@ -318,7 +332,7 @@ summaries. We use a generalized additive mixed model with a functional response
 [@Scheipl2015-additive; @Scheipl2016-generalized; @Goldsmith2024-refund-package]. 
 In such models, some parameters are functional and some are constants (see below).
 
-```{r, spatialFDA-fGAM, message=FALSE, fig.width=6, fig.height=5}
+```{r, spatialFDA-fGAM, results="hide", fig.width=6, fig.height=5}
 summary(mdl <- res$mdl)
 mm <- res$designmat
 lapply(colnames(mm), \(x) {
