@@ -47,14 +47,14 @@ spe <- readRDS("img-spe_cl.rds")
 ## Set scoring
 
 `r BiocStyle::Biocpkg("MSigDB")` provides a programmatic interface to the
-[molecular signatures database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb),
-one of the largest collections of molecular signatures and pathways.
+[Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb)
+[@Subramanian2005-MSigDB], one of the largest collections of molecular signatures and pathways.
 
 Here, we query of human hallmark genes sets:
 
 ```{r MSigDB}
 # retrieve hallmark gene sets from 'MSigDB'
-db <- msigdbr(species="Homo sapiens", category="H")
+db <- msigdbr(species="Homo sapiens", collection="H")
 gs <- split(db$ensembl_gene, db$gs_name)
 # simplify gene set identifiers
 names(gs) <- tolower(gsub("HALLMARK_", "", names(gs)))
@@ -118,18 +118,11 @@ displayed above), while apoptosis is ubiquitous (detected in >90% of cells).
 
 ```{r plt-xy, message=FALSE, fig.width=11, fig.height=3}
 #| code-fold: true
-spe$in_tissue <- 1
 lapply(c("hypoxia", "apoptosis", "myogenesis"), \(.) {
     q <- quantile(x <- spe[[.]], c(0.01, 0.99))
     x <- (x-q[1])/diff(q) # 01-quantile scaling
     x[x < 0] <- 0; x[x > 1] <- 1; spe[[.]] <- x
-    # TODO: fix, cuz 'ggspaviz' is messing sth up...
-    xy <- spatialCoordsNames(spe)
-    xy <- match(xy, names(colData(spe)), nomatch=0)
-    if (any(xy != 0)) colData(spe) <- colData(spe)[-xy]
-    plt <- plotCoords(spe, annotate=.) 
-    plt$layers[[1]]$aes_params$stroke <- 0
-    plt$layers[[1]]$aes_params$size <- 0.2
+    plt <- plotCoords(spe, annotate=., point_size = 0.01) 
     plt
 }) |> 
     wrap_plots(nrow=1, guides="collect") & 

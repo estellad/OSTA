@@ -40,10 +40,10 @@ set.seed(112358)
 ```{r load-spe}
 # retrieve dataset from OSF repository
 id <- "Xenium_HumanColon_Oliveira"
-pa <- OSTA.data_load(id)
+pa <- OSTA.data_load(id, mol=FALSE)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-(spe <- readXeniumSXE(td))
+(spe <- readXeniumSXE(td, addTx=FALSE))
 ```
 
 ```{r utils}
@@ -150,7 +150,7 @@ component analysis (PCA) on all `r nrow(spe)` RNA targets:
 # cell area-based normalization
 logcounts(sub) <- sweep(assay(sub), 2, sub$cell_area, `/`)
 # principal component analysis
-sub <- runPCA(sub) #, BPPARAM=bp)
+sub <- runPCA(sub)
 ```
 
 Let's visualize the expression of some genes in space; e.g., PIGR, IGHG3 and 

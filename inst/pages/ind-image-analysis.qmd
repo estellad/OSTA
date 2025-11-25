@@ -76,7 +76,7 @@ Modern open-source software platforms such as QuPath and Napari provide powerful
 
 - **QuPath** [@bankhead2017qupath] offers user-friendly workflows for cell segmentation, marker quantification, and batch processing of large slide collections. It supports both brightfield and fluorescence imaging and can be extended through Groovy or Python scripting.
 
-- **Napari** [@chiu2022napari], a fast, interactive, multi-dimensional image viewer for Python, is particularly suited for high-dimensional fluorescence data. It allows plugin-based integration with analysis frameworks such as scikit-image, cellpose, and stardist, facilitating interactive and reproducible image analysis pipelines.
+- **Napari** [@Sofroniew2025-napari], a fast, interactive, multi-dimensional image viewer for Python, is particularly suited for high-dimensional fluorescence data. It allows plugin-based integration with analysis frameworks such as scikit-image, cellpose, and stardist, facilitating interactive and reproducible image analysis pipelines.
 
 Together, these platforms enable the reproducible and scalable quantification of protein expression and spatial context in tissue samples, bridging the gap between classical histology and molecular imaging. The integration of IF data with transcriptomic or morphological features extracted from H&E slides holds great promise for advancing spatially resolved, multimodal studies in cancer biology.
 
