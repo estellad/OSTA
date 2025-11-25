@@ -33,10 +33,10 @@ The analyses demonstrated here will use 313-plex Xenium data (10x Genomics) of a
 
 ```{r load-spe, message=FALSE, warning=FALSE}
 id <- "Xenium_HumanBreast1_Janesick"
-pa <- OSTA.data_load(id)
+pa <- OSTA.data_load(id, mol=FALSE)
 dir.create(td <- tempfile())
 unzip(pa, exdir=td)
-spe <- readXeniumSXE(td)
+spe <- readXeniumSXE(td, addTx=FALSE)
 spe$sample_id <- "Xenium"
 dim(spe)
 ```
