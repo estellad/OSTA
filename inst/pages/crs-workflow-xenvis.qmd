@@ -166,7 +166,7 @@ xem <- addPerCellQCMetrics(xem, subsets=sub)
 
 Let's visually compare the total counts per (pseudo-)spot between Visium and Xenium:
 
-```{r plt-sum, fig.width=7, fig.height=3}
+```{r plt-sum, warning=FALSE, fig.width=7, fig.height=3}
 plotVisium(vis, 
     annotate="subsets_gs_sum",
     zoom=TRUE, facets=NULL) +
@@ -174,8 +174,7 @@ plotVisium(vis,
 plotVisium(xem, 
     annotate="subsets_gs_sum",
     zoom=TRUE, facets=NULL) +
-    ggtitle("Xenium") +
-plot_layout(nrow=1) 
+    ggtitle("Xenium")
 ```
 
 We can also use a scatter plot - where points = (pseudo-)spots - 

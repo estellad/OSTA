@@ -227,17 +227,6 @@ lapply(tail(names(sort(table(spe$Banksy))), 12), \(k) {
     theme(plot.title=element_text(hjust=0.5), legend.position="none")
 ```
 
-<!--
-### (Collapse) Effect of configurations on the results
-
-* Cross-methods ARI validation
-
-### (Collapse) Scalability of clusteirng methods on the results
-
-* Using local machine to show the runtime availablility 
-* Refer to benchmarking studies for potential scability issue
--->
-
 ::: {.callout-note title="PC regression" collapse="true"}
 
 ### PC regression
@@ -260,7 +249,7 @@ Here, `Leiden` (transcription-only) and `Banksy` (spatially-aware) clusterings p
 Had we set a higher value for $\lambda$ when running `Banksy`, results would diverge more; vice versa, using spatial PCs for regression would have `Leiden` clusters perform worse.
 Also, note that we would expect results to converge for $\lambda=0$.
 
-```{r plt-pcr, fig.width=5, fig.height=2.5}
+```{r plt-pcr, warning=FALSE, fig.width=5, fig.height=2.5}
 #| code-fold: true
 pcr$id <- factor(pcr$id, ids)
 pal <- c("red", "magenta", "gold", "cyan", "blue", "black")

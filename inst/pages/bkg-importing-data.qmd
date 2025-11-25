@@ -122,7 +122,7 @@ Reader functions from several Bioconductor packages can be used to import data f
 
 ### Examples
 
-Examples showing how to read in raw data into R using functions from the Bioconductor packages listed above are included in the workflow chapters in this book (e.g. @sec-seq-workflow-visium-crc, @sec-seq-workflow-visium-hd, @sec-img-workflow-xenium, and @sec-crs-workflow-xenvis). The datasets are described in more detail in @sec-bkg-example-datasets.
+Examples showing how to read in raw data into R using functions from the Bioconductor packages listed above are included in the workflow chapters in this book (e.g. @sec-seq-workflow-visium-crc, @sec-seq-workflow-visium-hd-seg, @sec-img-workflow-xenium, and @sec-crs-workflow-xenvis). The datasets are described in more detail in @sec-bkg-example-datasets.
 
 In addition, the `r BiocStyle::Biocpkg("STexampleData")` package provides access to pre-formatted datasets from several platforms in `SpatialExperiment` and `SingleCellExperiment` formats, which are used in several examples in this book.
 

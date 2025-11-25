@@ -20,7 +20,20 @@ library(BiocStyle)
 
 ## Guidelines {-}
 
-OSTA builds on work and information pieced together by numerous researchers.
+If OSTA has been useful to your research, please **consider citing**:
+
+> 
+HL Crowell\*°, Y Dong\*, I Billato, P Cai, M Emons, S Gunz, B Guo, M Li, A Mahmoud, 
+A Manukyan, H Pagès, P Panwar, S Rao, CJ Sargeant, L Shepherd Kern, M Ramos, J Sun, 
+M Totty, VJ Carey, Y Chen, L Collado-Torres, S Ghazanfar, KD Hansen, K Martinowich, 
+KR Maynard, E Patrick, D Righelli, D Risso, S Tiberi, L Waldron, 
+R Gottardo†°, MD Robinson†°, SC Hicks†°, LM Weber†°.
+Orchestrating spatial transcriptomics analysis with Bioconductor. *bioRxiv* (2025). 
+DOI: [10.1101/2025.11.20.688607](http://doi.org/10.1101/2025.11.20.688607)
+
+(\* co-first. † co-senior. ° correspondence.)
+
+Notably, OSTA pieces together work and information from numerous researchers.
 As such, **we suggest readers cite the pieces of work they have either used or
 consulted to conduct their research** -- be it (R, Python, or other) software,
 benchmarks that informed their methodological decisions, review or perspective 
@@ -245,7 +258,8 @@ benchmark, or other, references and resources mentioned throughout the book.
 
 - @sec-seq-workflow-dlpfc: Workflow: Visium DLPFC
 - @sec-seq-workflow-visium-crc: Workflow: Visium CRC
-- @sec-seq-workflow-visium-hd: Workflow: Visium HD
+- @sec-seq-workflow-visium-hd-bin: Workflow: Visium HD
+- @sec-seq-workflow-visium-hd-seg: Workflow: Visium HD
 - @sec-img-segmentation: Segmentation
 
 ::: {.tbl}

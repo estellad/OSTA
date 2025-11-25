@@ -182,7 +182,7 @@ dim(sce)
 ## RCTD
 
 Next, we perform deconvolution with `r BiocStyle::Biocpkg("spacexr")` (also known as RCTD)[@Cable2022-RCTD].
-[Note that RCTD can also be adapted to Visium HD data with `rctd_mode = "doublet"`, as demonstrated by [@deOliveira2025-high-def] and @sec-seq-workflow-visium-hd.]{.aside}
+[Note that RCTD can also be adapted to Visium HD data with `rctd_mode = "doublet"`, as demonstrated by [@deOliveira2025-high-def] and @sec-seq-workflow-visium-hd-seg.]{.aside}
 By default, `runRctd()`'s `rctd_mode = "doublet"` specifies at most two subpopulations coexist in a data unit (i.e. within a spot); here, we set `rctd_mode = "full"` in order to allow for an arbitrary number of subpopulations to be fit instead.
 
 ```{r dec, message = FALSE, warning = FALSE}
