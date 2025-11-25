@@ -245,7 +245,8 @@ benchmark, or other, references and resources mentioned throughout the book.
 
 - @sec-seq-workflow-dlpfc: Workflow: Visium DLPFC
 - @sec-seq-workflow-visium-crc: Workflow: Visium CRC
-- @sec-seq-workflow-visium-hd: Workflow: Visium HD
+- @sec-seq-workflow-visium-hd-bin: Workflow: Visium HD
+- @sec-seq-workflow-visium-hd-seg: Workflow: Visium HD
 - @sec-img-segmentation: Segmentation
 
 ::: {.tbl}
