@@ -1,5 +1,8 @@
 # Acknowledgments {#sec-apx-acknowledgments}
 
+The authors thank **Aaron T. L. Lun** for feedback, advice, as well as his substantial contributions to the Bioconductor ecosystem; **Abby Spangler**, **Madhavi Tippani**, and **Brenda Pardo** for initial work and discussions on Visium data analysis workflows and preprocessing procedures carried out at the Lieber Institute for Brain Development; and members of the **Bioconductor Core Team and community** for computational assistance and advice. In addition, the authors thank readers from the Bioconductor and wider research communities for feedback, suggestions, and contributions.
+
+<!--
 ## Authors and contributors
 
 The following individuals have contributed to developing the contents of this book (in alphabetical order):
@@ -29,7 +32,6 @@ The following individuals have contributed to developing the contents of this bo
 🇺🇸 [Michael Totty](https://github.com/MicTott), Johns Hopkins University, Baltimore, MD, United States  
 🇺🇸 [Lukas M. Weber](https://lmweber.org/), Boston University, Boston, MA, United States
 
-
 ## Bioconductor
 
 We are grateful to members of the [Bioconductor Core Team](https://www.bioconductor.org/about/core-team/) for assistance with the creation and maintenance of the book and its infrastructure, specifically (in alphabetical order):
@@ -39,23 +41,14 @@ We are grateful to members of the [Bioconductor Core Team](https://www.bioconduc
 🇺🇸 [Alexandru Mahmoud](https://www.bioconductor.org/about/core-team/), Harvard Medical School, Boston, MA, United States
 
 We are also grateful to the [Bioconductor](https://bioconductor.org/) community for ongoing feedback, discussion, and additional development assistance.
+-->
 
+- This book is built using [**BiocBook**](https://bioconductor.org/packages/release/BiocBook), developed by [Jacques Serizay](https://jserizay.com/) for building Quarto books with Bioconductor. More details on BiocBook can be found in this [demo](https://bioconductor.org/books/release/BiocBookDemo/).
 
-## BiocBook
+- This book is inspired by the **Orchestrating Single-Cell Analysis with Bioconductor (OSCA)** book [@Amezquita2020-OSCA] on analysis workflows for single-cell data using R and Bioconductor, available [here](https://bioconductor.org/books/release/OSCA/).
 
-This book is built using the [BiocBook](https://github.com/js2264/BiocBook) package, developed by [Jacques Serizay](https://jserizay.com/) for building Quarto books with Bioconductor. More details on BiocBook can be found in the [BiocBook book](https://jserizay.com/BiocBookDemo/devel/).
+- Details on data preprocessing procedures for **10x Genomics Visium** data can be found in our related online book [Visium data preprocessing](https://lmweber.org/Visium-data-preprocessing/).
 
-
-## Additional acknowledgements and resources
-
-- This book is inspired by the [Orchestrating Single-Cell Analysis with Bioconductor (OSCA)](https://bioconductor.org/books/release/OSCA/) book [@Amezquita2020-OSCA] on analysis workflows for single-cell data using R and Bioconductor.
-
-- Details on data preprocessing procedures for 10x Genomics Visium data can be found in our related online book [Visium data preprocessing](https://lmweber.org/Visium-data-preprocessing/).
-
-
-## Feedback and suggestions
-
-Feedback and suggestions may be provided as [GitHub](https://github.com/lmweber/OSTA) issues for discussion with the maintainers.
-
+- **Feedback and suggestions** may be provided as [GitHub](https://github.com/lmweber/OSTA) issues for discussion with the maintainers.
 
 ## References {.unnumbered}
