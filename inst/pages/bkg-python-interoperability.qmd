@@ -89,7 +89,7 @@ The following dependencies are necessary for the examples in this chapter. These
 ```{r deps-pypi, warning=FALSE, message=FALSE, results="hide"}
 # install Python packages from PyPI
 conda_install(
-    pip=TRUE
+    pip=TRUE, 
     envname=env, 
     packages=c("Dask==2024.12.1", "zarr==2.18.7", "squidpy==1.6.2"))
 ```
