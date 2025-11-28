@@ -96,7 +96,8 @@ The following dependencies are needed in some of the following chapters, and nee
 conda_install(
     envname=env, 
     channel=c("conda-forge", "nodefaults"),
-    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba"))
+    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba", 
+               "proj>=9.4", "pyproj>=3.7"))
 ```
 
 The following dependencies are necessary for the examples in this chapter. These are installed from PyPI.
