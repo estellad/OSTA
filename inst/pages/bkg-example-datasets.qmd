@@ -60,7 +60,7 @@ library(STexampleData)
 
 ### BiocFileCache
 
-Data files downloaded with the packages above are stored and managed in a temporary directory using [BiocFileCache](http://bioconductor.org/packages/BiocFileCache). Sometimes, these temporary files may need to be deleted manually, for example if there has been a recent change to files stored in the OSF repository. The code example below shows how to remove the temporary files for one of these datasets. Alternatively, you can also find the temporary directory on your system with `BiocFileCache::BiocFileCache()` and delete files individually.
+Data files downloaded with the packages above are stored and managed in a temporary directory using `r BiocStyle::Biocpkg("BiocFileCache")`. Sometimes, these temporary files may need to be deleted manually, for example if there has been a recent change to files stored in the OSF repository. The code example below shows how to remove the temporary files for one of these datasets. Alternatively, you can also find the temporary directory on your system with `BiocFileCache::BiocFileCache()` and delete files individually.
 
 ```{r clean-biocfilecache, message=FALSE, warning=FALSE}
 # locate and delete files in BiocFileCache directory
