@@ -220,6 +220,7 @@ benchmark, or other, references and resources mentioned throughout the book.
 | theory | @Bhuva2024-library-size | 
 | `r Biocpkg("scater")` | @McCarthy2017-scater |
 | `r Biocpkg("SpotSweeper")` | @Totty2025-SpotSweeper |
+| `r Biocpkg("SpaceTrooper")` | @Banzi2025-SpaceTrooper |
 
 : {.striped tbl-colwidths="[33,66]"}
 
