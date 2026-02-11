@@ -187,4 +187,4 @@ resJc <- resJc[order(resJc[, "z-value"], decreasing=TRUE), ]
 head(resJc, 20)
 ```
 
-We note that the non-spatial cluster labels are of course most likely found next to each other. Apart from this obvious result, the first top non-self interaction is $5:3$. Looking at the plot of the spatial distributions of the clusters these are two clusters in the ductal carcinoma regions of the tissue, the inner (blue) and the outer (green) lining. 
+We note that the non-spatial cluster labels are of course most likely found next to each other. Apart from this obvious result, the first top non-self interaction is $5:3$. Looking at the plot of the spatial distributions of the clusters these are two clusters in the ductal carcinoma regions of the tissue, the carcinoma core and the border. 
