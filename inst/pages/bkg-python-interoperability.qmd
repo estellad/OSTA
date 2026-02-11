@@ -40,13 +40,32 @@ To set up the Conda environment, we also need to specify which Python installati
 
 _Note: skip this section if you are using an existing Python installation instead._
 
-In order to build this book chapter programmatically, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda. Note that we also need to set some environment variables in R using `Sys.setenv()` to accept the terms of service prompt programmatically, which can also be skipped if you are installing Miniconda interactively.
+In order to build this book chapter programmatically, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda. Note that we also need to set some conda settings using environment variables to run this code programmatically, which can also be skipped if you are installing Miniconda interactively.
 
-```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
-# set environment variables to accept terms of service
+```{r conda-settings, warning=FALSE, message=FALSE, results="hide"}
+# use Miniforge (conda-forge only) instead of Anaconda's Miniconda
+Sys.setenv(
+  RETICULATE_MINICONDA_URL = 
+    "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"
+)
+
+# set conda channels using temporary .condarc file
+condarc_txt <- "
+channels:
+  - conda-forge
+  - bioconda
+channel_priority: strict
+"
+condarc_tmp <- tempfile("condarc-")
+writeLines(trimws(condarc_txt, which="left"), condarc_tmp)
+Sys.setenv(CONDARC=condarc_tmp)
+
+# conda settings for terms of service
 Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes")
 Sys.setenv(CI="true")
+```
 
+```{r install-miniconda, warning=FALSE, message=FALSE, results="hide"}
 # install Miniconda (or update if already installed)
 flag <- dir.exists(miniconda_path())
 if (flag) miniconda_update() else install_miniconda()
@@ -81,7 +100,8 @@ The following dependencies are needed in some of the following chapters, and nee
 conda_install(
     envname=env, 
     channel=c("conda-forge", "nodefaults"),
-    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba"))
+    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba", 
+               "proj>=9.4", "pyproj>=3.7"))
 ```
 
 The following dependencies are necessary for the examples in this chapter. These are installed from PyPI.

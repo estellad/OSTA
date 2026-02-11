@@ -179,11 +179,11 @@ plot(st_geometry(geo), col=rep(colors(), 2))
 
 ### Bin mapping
 
-We can estimate cell areas based on the number of 2um bins covered by each mask, e.g., 10 bins (2um$^2$ each) would correspond to an area of 20um$^2$. Based on this, we can also approximate the area of each cell's nucleus using the `in_nucleus` flag provided in the bin-to-cell mapping information.
+We can estimate cell areas based on the number of 2um bins covered by each mask, e.g., 10 bins (4um$^2$ each) would correspond to an area of 40um$^2$. Based on this, we can also approximate the area of each cell's nucleus using the `in_nucleus` flag provided in the bin-to-cell mapping information.
 
 ```{r um2}
-# get cell areas = 2x number of 2um bins
-sfe$um2 <- 2*sapply(sfe$map, nrow)
+# get cell areas = 4x number of 2um bins
+sfe$um2 <- 4*sapply(sfe$map, nrow)
 # get fraction of 2um bins that are nuclear
 sfe$nuc <- sapply(sfe$map, \(.) mean(.$in_nucleus))
 # get nucleus areas = cell area x nuclear fraction

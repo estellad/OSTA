@@ -135,7 +135,10 @@ jobs:
           path: ${{ env.bundle_path }}
 
   deploy:
-    if: github.ref == 'refs/heads/sandbox'  # deploy only if pushed to 'sandbox' branch
+    # Only deploy for sandbox, regardless of whether this was a push or a workflow_run
+    if: >
+      (github.event_name != 'workflow_run' && github.ref == 'refs/heads/sandbox')
+      || (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'sandbox')
     needs: build
 
     permissions:

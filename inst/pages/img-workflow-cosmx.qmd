@@ -1,4 +1,4 @@
-# Workflow: CosMX {#sec-img-workflow-cosmx}
+# Workflow: CosMx {#sec-img-workflow-cosmx}
 
 {{< include _start.qmd >}}
 

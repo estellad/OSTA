@@ -21,8 +21,8 @@ more intricate quality control metrics using the `SpaceTroper` package.
 Throughout this chapter, we will switch between both Xenium (`xen` object) 
 and CosMx (`cos` objext) datasets to showcase quality control (QC) metrics 
 that are standard for scRNA-seq data (using `r BiocStyle::Biocpkg("scuttle")`), 
-and ones that are more specific to some imaging-based ST data types (using 
-`r BiocStyle::Biocpkg("SpaceTrooper")`).
+and ones that are more specific to some imaging-based ST data types
+(using `r BiocStyle::Biocpkg("SpaceTrooper")` [@Banzi2025-SpaceTrooper]).
 Lastly, we will save the post-QC Xenium dataset for use in later chapters.
 
 ### Dependencies
