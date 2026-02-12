@@ -25,7 +25,7 @@ library(OSTA.data)
 library(jsonlite)
 library(reticulate)
 library(basilisk)
-library(zellkonverter)
+library(anndataR)
 ```
 
 
@@ -79,6 +79,14 @@ Next, we create a Conda environment and install some key dependencies.
 If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
 
 ```{r conda-create, warning=FALSE, message=FALSE, results="hide"}
+yml <- "/users/helucro/projects/lmweber/OSTA/inst/extdata/environment.yml"
+#yml <- system.file("extdata", "environment.yml", package="OSTA")
+conda_create(env <- "OSTA", environment=yml)
+use_condaenv(env, required=TRUE)
+```
+
+<!--
+```{r conda-create-, warning=FALSE, message=FALSE, results="hide"}
 # create conda environment
 env <- "py-interop"
 # specify 'conda=...' in 'conda_create()'
@@ -86,12 +94,14 @@ env <- "py-interop"
 conda_create(env, packages="python=3.11")  
 use_condaenv(env, required=TRUE)
 ```
+-->
 
 ```{r conda-list}
 # list conda environments
 conda_list()$name
 ```
 
+<!--
 The following dependencies are needed in some of the following chapters, and need to be installed from `conda-forge`. This can also be skipped if you are only running the examples in this chapter. We install these dependencies here so that we can re-use this Conda environment again in later chapters.
 
 ```{r deps-conda-forge, warning=FALSE, message=FALSE, results="hide"}
@@ -100,8 +110,9 @@ The following dependencies are needed in some of the following chapters, and nee
 conda_install(
     envname=env, 
     channel=c("conda-forge", "nodefaults"),
-    packages=c("libcxx", "llvm-openmp", "llvmlite", "numba", 
-               "proj>=9.4", "pyproj>=3.7"))
+    packages=c(
+      "libcxx", "llvm-openmp", "llvmlite", 
+      "numba", "proj>=9.4", "pyproj>=3.7"))
 ```
 
 The following dependencies are necessary for the examples in this chapter. These are installed from PyPI.
@@ -113,12 +124,13 @@ conda_install(
     envname=env, 
     packages=c("Dask==2024.12.1", "zarr==2.18.7", "squidpy==1.6.2"))
 ```
+-->
 
 The following option sets Python code chunks to run via `reticulate`, allowing this chapter to be compiled programmatically.
 
 ```{r python-reticulate}
 # set to run {python} code chunks via reticulate
-knitr::opts_chunk$set(python.reticulate = TRUE)
+knitr::opts_chunk$set(python.reticulate=TRUE)
 ```
 
 
@@ -128,32 +140,34 @@ knitr::opts_chunk$set(python.reticulate = TRUE)
 
 After configuring the Python environment, R commands can now be run using `reticulate` as follows. For more details on the syntax used, see the [reticulate](https://rstudio.github.io/reticulate/) documentation. [Note that running code in this way comes with a small overhead of starting up a Python session in the background. But this is typically small compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (hundreds of thousands of cells or more).]{.aside}
 
-```{r load-sce}
-h5ad <- system.file("extdata", "krumsiek11.h5ad", package="zellkonverter")
-anndata <- import("anndata")
-(ad <- anndata$read_h5ad(h5ad))
+```{python load-ad, warning=FALSE}
+import scanpy
+id = "V1_Mouse_Brain_Sagittal_Posterior"
+ad = scanpy.datasets.visium_sge(sample_id=id)
+ad.var_names_make_unique()
+ad
 ```
 
 #### Continuing in R
 
 We can access any of the variables above in R. For basic outputs, this works out of the box:
 
-```{r uniq-celltype}
-unique(ad$obs$cell_type)
+```{r show-ad}
+range(py$ad$obs$array_row)
 ```
 
-`reticulate` also supports a few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we use `zellkonverter` to convert from `AnnData` to `SingleCellExperiment`:
+`reticulate` also supports a few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we use `anndataR` to convert from `AnnData` to `SingleCellExperiment`:
 
-```{r anndata2sce, message=FALSE}
-(sce <- AnnData2SCE(ad))
+```{r ad2sce, message=FALSE, warning=FALSE}
+(sce <- py$ad$as_SingleCellExperiment(x_mapping="counts"))
 ```
 
 #### Back to Python
 
 We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
 
-```{r sce2anndata}
-(ad <- SCE2AnnData(sce, X_name="X"))
+```{r sce2ad}
+(ad <- as_AnnData(sce, x_mapping="counts"))
 ```
 
 
@@ -179,19 +193,21 @@ obj <- TENxVisium(
 
 We also need to parse the original scaling information (i.e. scale factor) for spots and images available in the standard Visium output. We will use this later during conversion.
 
-```{r scalefactors, message=FALSE, results="hide"}
+```{r sfs, message=FALSE, results="hide"}
 sfs <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
 ```
 
-We again use the `SCE2AnnData` function from `zellkonverter` from the previous example, and convert the `SingleCellExperiment`-relevant components of the `SpatialExperiment` object to an `AnnData` object.
+We again use the `as_AnnData` function from `anndataR` from the previous example, and convert the `SingleCellExperiment`-relevant components of the `SpatialExperiment` object to an `AnnData` object.
 
-```{r spe2anndata, message=FALSE}
-(ad <- SCE2AnnData(spe, X_name="counts"))
+```{r spe2ad, message=FALSE}
+mtx <- as(assay(spe), "dgCMatrix")
+assay(spe) <- mtx
+(ad <- as_AnnData(spe))
 ```
 
 We can now populate the `uns` and `obsm` components of the `AnnData` object with spatial coordinates and images. We start with the coordinates.
 
-```{r coords}
+```{r xy}
 spatialCoordsNames(spe) <- c("x", "y")
 obsm <- list(spatial=spatialCoords(spe))
 ```
@@ -215,7 +231,7 @@ uns <- list(spatial=setNames(list(uns), imgdata$sample_id))
 
 Now let's insert the components to the `AnnData` object, and write back to an `.h5ad` file.
 
-```{r writeh5ad}
+```{r write-h5ad, message=FALSE}
 ad$obs$library_id <- imgdata$sample_id
 ad$obsm <- obsm
 ad$uns <- uns
@@ -224,29 +240,28 @@ ad$write_h5ad("spe.h5ad")
 
 #### Calling Python
 
-Now that we have converted the `SpatialExperiment` object to `AnnData` format, we can run Python code using the `AnnData` object. Here, for example, we visualize the Visium data using the `squidpy` module.
+Now that we have converted the `SpatialExperiment` object to `AnnData` format, 
+we can run Python code per usual (e.g., continue analysis using `squidpy`).
+As a proof of concept, we here visualize an exemplary gene's counts in spatially:
 
-```{python modules}
-#| output: false
-import squidpy as sq
-import anndata as ad
+```{python plot-ad, fig.width=4.5, fig.height=4.5}
+import anndata
+ad = anndata.read_h5ad("spe.h5ad")
+ad.var_names = ad.var['Symbol'].astype(str)
+xy = ad.obsm['spatial']
+
+import tkinter
+import matplotlib
 import matplotlib.pyplot as plt
-```
+matplotlib.use('TkAgg')
 
-Read in `spe.h5ad` and visualize features or gene expression (e.g. ERBB2):
+g = "ERBB2"
+z = ad[:,g].layers["counts"].toarray()
 
-```{python spatial-scatter}
-#| include: true
-#| warning: false
-#| message: false
-#| error: false
-#| output: true
-adata = ad.read_h5ad("spe.h5ad")
-adata.var_names = adata.var['Symbol'].astype(str)
-sq.pl.spatial_scatter(adata, 
-                      color = ["ERBB2"], 
-                      img_res_key = "lowres")
-# plt.show() # needed to display plot if running code interactively
+foo = plt.scatter(xy[:,0], xy[:,1], c=z, s=4, cmap="turbo")
+plt.gca().set_aspect("equal")
+plt.title(g)
+plt.show()
 ```
 
 ```{r, include=FALSE}
@@ -259,7 +274,7 @@ file.remove("spe.h5ad")
 
 Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation or a new installation of Miniconda, as demonstrated above. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is also especially useful for package development by advanced users. However, setup may be more challenging in some cases.
 
-
+<!--
 ### Configuring Python
 
 In this example, we use `r BiocStyle::Biocpkg("basilisk")` to create an environment containing a Python installation and all necessary dependencies for this chapter, and then use the resulting environment with `reticulate`, as above.
@@ -288,7 +303,7 @@ anndata <- import("anndata")
 ```
 
 To continue the example, please follow the code from the previous section above, starting from @sec-bkg-python-interop-sce.
-
+-->
 
 ## Appendix
 

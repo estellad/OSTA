@@ -82,6 +82,12 @@ https://commot.readthedocs.io/en/latest/installation.html)
 for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
+```{r env}
+# re-use environment from Python interoperability chapter
+use_condaenv("OSTA", required=TRUE)
+```
+
+<!--
 
 ```{r env-ccc, message=FALSE, warning=FALSE}
 # re-use environment from Python interoperability chapter
@@ -94,9 +100,6 @@ use_condaenv(env, required=TRUE)
 pkgs <- c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4")
 conda_install(envname=env, packages=pkgs, pip=TRUE)
 ```
-
-
-<!--
 
 We first setup a corresponding Python environment using `basilisk`:
 
