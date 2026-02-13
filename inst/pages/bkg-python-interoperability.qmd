@@ -79,8 +79,8 @@ Next, we create a Conda environment and install some key dependencies.
 If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
 
 ```{r conda-create, warning=FALSE, message=FALSE, results="hide"}
-yml <- "/users/helucro/projects/lmweber/OSTA/inst/extdata/environment.yml"
-#yml <- system.file("extdata", "environment.yml", package="OSTA")
+#yml <- "/users/helucro/projects/lmweber/OSTA/inst/extdata/environment.yml"
+yml <- system.file("extdata", "environment.yml", package="OSTA")
 conda_create(env <- "OSTA", environment=yml)
 use_condaenv(env, required=TRUE)
 ```
