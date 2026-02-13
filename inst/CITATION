@@ -1,0 +1,17 @@
+bibentry(
+  title   = "{Orchestrating spatial transcriptomics analysis with Bioconductor}",
+  author  = "Crowell, Helena L and Dong, Yixing and Billato, Ilaria and Cai,
+             Peiying and Emons, Martin and Gunz, Samuel and Guo, Boyi and Li,
+             Mengbo and Mahmoud, Alexandru and Manukyan, Artür and Pagès, Hervé
+             and Panwar, Pratibha and Rao, Shreya and Sargeant, Callum J and
+             Shepherd Kern, Lori and Ramos, Marcel and Sun, Jieran and Totty,
+             Michael and Carey, Vincent J and Chen, Yunshun and Collado-Torres,
+             Leonardo and Ghazanfar, Shila and Hansen, Kasper D and Martinowich,
+             Keri and Maynard, Kristen R and Patrick, Ellis and Righelli, Dario
+             and Risso, Davide and Tiberi, Simone and Waldron, Levi and
+             Gottardo, Raphael and Robinson, Mark D and Hicks, Stephanie C and
+             Weber, Lukas M",
+  doi     = "10.1101/2025.11.20.688607",
+  journal = "bioRxiv",
+  bibtype = "article",
+  year    =  2025)
