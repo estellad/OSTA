@@ -42,7 +42,7 @@ library(dplyr)
 library(tidyr)
 library(scater)
 library(scuttle)
-library(CCPlotR)
+#library(CCPlotR)
 library(ggplot2)
 library(ggspavis)
 library(patchwork)
@@ -398,7 +398,7 @@ interactions between clusters. However, because this is only a toy example
 (few genes and cells), we will refrain from any biological interpretation.
 
 ```{r CCPlotR-viz, fig.width=5, fig.height=5}
-cc_circos(df, n_top_ints=100)
+#cc_circos(df, n_top_ints=100)
 ```
 
 <!-- Conclusion -->

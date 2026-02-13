@@ -247,18 +247,18 @@ As a proof of concept, we here visualize an exemplary gene's counts in spatially
 ```{python plot-ad, fig.width=4.5, fig.height=4.5}
 import anndata
 ad = anndata.read_h5ad("spe.h5ad")
-ad.var_names = ad.var['Symbol'].astype(str)
-xy = ad.obsm['spatial']
+ad.var_names = ad.var["Symbol"].astype(str)
+xy = ad.obsm["spatial"]
 
 import tkinter
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use('TkAgg')
+matplotlib.use("TkAgg")
 
 g = "ERBB2"
 z = ad[:,g].layers["counts"].toarray()
 
-foo = plt.scatter(xy[:,0], xy[:,1], c=z, s=4, cmap="turbo")
+foo = plt.scatter(xy[:,0], xy[:,1], c=z, s=5, cmap="turbo")
 plt.gca().set_aspect("equal")
 plt.title(g)
 plt.show()
