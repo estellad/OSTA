@@ -1,2 +1,11 @@
+changes in version 1.1.8
++ move 'CCPlotR' to 'Suggests:' and condition 
+  call in img-cell-cell-comm on its availability
++ simplify Python setup to one Conda env setup in bkg-py-interop,
+  omitting 'squidpy' and 'zellkonverter' in favor of 'anndataR'
+
+changes in version 1.1.0
++ Bioconductor release 3.23
+
 changes in version 0.99.0 (2025-06-30)
 + initial submission to Bioconductor
