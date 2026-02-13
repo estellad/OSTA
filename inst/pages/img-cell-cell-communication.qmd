@@ -42,7 +42,6 @@ library(dplyr)
 library(tidyr)
 library(scater)
 library(scuttle)
-#library(CCPlotR)
 library(ggplot2)
 library(ggspavis)
 library(patchwork)
@@ -72,8 +71,6 @@ Since `COMMOT` is available as a Python package, we can access it from R using
 ### Python setup
 
 We first set up a Python environment. Here, we do this by re-using the Conda environment created in @sec-bkg-python-interoperability, in order to speed up the book build time. Alternatively, a new environment could also be set up instead (see @sec-bkg-python-interoperability).
-
-We also install the `commot` package and additional dependencies from PyPI.
 
 ::: {.aside}
 Alternatively, one could set up a `conda` environment (or similar) 
@@ -397,8 +394,9 @@ a circos plot where the width of the links represents the total number of
 interactions between clusters. However, because this is only a toy example
 (few genes and cells), we will refrain from any biological interpretation.
 
-```{r CCPlotR-viz, fig.width=5, fig.height=5}
-#cc_circos(df, n_top_ints=100)
+```{r CCPlotR-viz, message=FALSE, warning=FALSE, fig.width=5, fig.height=5}
+if (require("CCPlotR", quietly=TRUE))
+    cc_circos(df, n_top_ints=100)
 ```
 
 <!-- Conclusion -->
