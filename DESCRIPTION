@@ -41,7 +41,7 @@ Imports:
     BayesSpace,
     BiocFileCache,
     BiocParallel,
-    CARDspa
+    CARDspa,
     DESpace,
     doMC,
     dplyr,
