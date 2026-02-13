@@ -96,7 +96,6 @@ Imports:
     spdep,
     spicyR,
     SpotSweeper,
-    Statial,
     STexampleData,
     tidyr,
     VisiumIO,
