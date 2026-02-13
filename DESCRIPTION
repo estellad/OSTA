@@ -42,7 +42,7 @@ Imports:
     BiocFileCache,
     BiocParallel,
     CARDspa,
-    #CCPlotR,
+
     DESpace,
     doMC,
     dplyr,
@@ -97,7 +97,7 @@ Imports:
     spicyR,
     SpotSweeper,
     STexampleData, 
-    #Statial,
+
     tidyr,
     VisiumIO,
     Voyager,
