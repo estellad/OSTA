@@ -41,8 +41,7 @@ Imports:
     BayesSpace,
     BiocFileCache,
     BiocParallel,
-    CARDspa,
-
+    CARDspa
     DESpace,
     doMC,
     dplyr,
@@ -96,8 +95,7 @@ Imports:
     spdep,
     spicyR,
     SpotSweeper,
-    STexampleData, 
-
+    STexampleData,
     tidyr,
     VisiumIO,
     Voyager,
