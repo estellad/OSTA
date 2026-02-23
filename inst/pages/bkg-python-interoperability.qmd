@@ -87,12 +87,16 @@ txt <- file.path(dir, "extdata", "requirements.txt")
 if (!file.exists(txt)) stop()
 ```
 
-```{r venv-set}
-env <- "OSTA"
-virtualenv_install(
-    envname=env,
-    requirements=txt,
+```{r venv-set1}
+virtualenv_create(
+    envname=env <- "OSTA", 
     python_version="3.8.18")
+```
+
+```{r venv-set2}
+virtualenv_install(
+    envname=env, 
+    requirements=txt)
 ```
 
 ```{r venv-use}
