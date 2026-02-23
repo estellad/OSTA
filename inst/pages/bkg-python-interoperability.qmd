@@ -90,13 +90,14 @@ if (!file.exists(txt)) stop()
 ```{r venv-set1}
 virtualenv_create(
     envname=env <- "OSTA", 
-    python_version="3.8.18")
+    python=pyv <- "3.8.18")
 ```
 
 ```{r venv-set2}
 virtualenv_install(
     envname=env, 
-    requirements=txt)
+    requirements=txt,
+    python_version=pyv)
 ```
 
 ```{r venv-use}
