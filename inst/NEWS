@@ -3,6 +3,9 @@ changes in version 1.1.8
   call in img-cell-cell-comm on its availability
 + simplify Python setup to one Conda env setup in bkg-py-interop,
   omitting 'squidpy' and 'zellkonverter' in favor of 'anndataR'
++ updated Mitchel et al. ref. and added par. on 'cellAdmix';
+  added par. on and ref. to 'SPLIT' method (spatial bleeding)
++ fixed RCDT/RCTD typos throught the book
 
 changes in version 1.1.0
 + Bioconductor release 3.23
