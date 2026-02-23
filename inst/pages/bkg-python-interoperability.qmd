@@ -81,7 +81,8 @@ If you are using an existing Python installation on your system (instead of inst
 
 ```{r venv}
 #txt <- normalizePath("~/projects/OSTA/inst/extdata/requirements.txt")
-txt <- system.file("extdata", "requirements.txt", package="OSTA")
+#txt <- system.file("extdata", "requirements.txt", package="OSTA")
+txt <- file.path("inst", "extdata", "requirements.txt")
 env <- "OSTA"
 virtualenv_install(
     envname=env,
