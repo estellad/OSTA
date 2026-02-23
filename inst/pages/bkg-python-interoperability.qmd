@@ -82,10 +82,9 @@ First, we create a virtual environment, installing Python dependencies
 required in this chapter, as well as @sec-img-cell-cell-communication.
 
 ```{r venv}
-#txt <- system.file("extdata", "requirements.txt", package="OSTA")
-txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
-virtualenv_create(env <- "OSTA", python="3.8.18") 
-virtualenv_install(env, requirements=txt)
+#txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
+txt <- system.file("extdata", "requirements.txt", package="OSTA")
+virtualenv_create(env <- "OSTA", python="3.8.18", requirements=txt)
 use_virtualenv(env, required=TRUE)
 #virtualenv_install(envname=env, requirements=txt) 
 ```
