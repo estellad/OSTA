@@ -33,25 +33,24 @@ For each cell, segmentation results are then obtained in one of three ways (in o
 knitr::include_graphics("../images/img-seg_Xenium.jpeg")
 ```
 
-
 ## Spatial bleeding
 
 The phenomenon of spatial bleeding has been nicely characterized by @Mitchel2026-cellAdmix:
 
 - Bleeding is **most frequent above/below and close to the periphery** of cells, i.e., in all physical dimensions.
-- Because bleeding occurs between proximal cells, **observed mixtures reflect biology** (i.e., certain cell types may attract or avoid one another -- in general, or different context such as healthy and diseases tissue regions).
+- Because bleeding occurs between proximal cells, **observed mixtures reflect biology** (i.e., certain cell types may attract or avoid one another -- in general, an especially in different spatial contexts such as healthy vs. diseased tissue regions).
 - Furthermore, **bleeding affects differential expression** (DE), such that genes reported as up-/down-regulated may reflect compositional differences in microenvironment.[Example: genes that are DE between fibroblasts located within stromal vs. tumor regions are dominated by markers of epithelia, which represent the malignant cell type]{.aside}
+- Even 'perfect' 2D segmentation (in *xy*) would not eliminate these issues, as tissue sections represent slices through a three-dimensional system where cells may overlap (along *z*).
 
 By now, a few methods have been proposed to rectify segmentation boundaries and/or per-cell counts post hoc, e.g.:
 
 - `r BiocStyle::Githubpkg("kharchenkolab/cellAdmix")` [@Mitchel2026-cellAdmix] (R) relies on scRNA-seq reference-based matrix factorization of local molecular neighborhoods to identify and correct for molecular admixtures, reassigning transcripts to their source and removing them from proximal cells where they don't belong.
 
-- `r BiocStyle::Githubpkg("bdsc-tds/SPLIT")` [@Bilous2025-SPLIT] (R) relies on snRNA-seq reference-based deconvolution -- using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] -- to *purify* mixed transcriptomic signals. Briefly, imaging-based ST *cells* are seen as weighted combinations of reference cell types (cf., *spots* in sequencing-based ST), and deconvolution weights are used to proportionally assign transcripts to their most likely source cell type(s).
+- `r BiocStyle::Githubpkg("bdsc-tds/SPLIT")` [@Bilous2025-SPLIT] (R) relies on snRNA-seq reference-based deconvolution -- using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] -- to *purify* mixed transcriptomic signals. Briefly, deconvolution weights and reference profiles are used to proportionally adjust gene counts, prioritizing the most likely source cell type(s) and discarding or reassigning minority transcripts likely to represent contamination.
 
 - `r BiocStyle::Githubpkg("Nanostring-Biostats/FastReseg")` [@Wu2024-FastReseg] (R) detects and corrects segmentation errors based on transcript locations by (i) scoring cells in terms of segmentation inaccuracies, (ii) scoring transcripts within erroneous cells in terms of misassignments, and (iii) reassigning mislocated transcripts.
 
 - `r BiocStyle::Githubpkg("EliHei2/segger_dev")` [@Heidari2025-segger] (Python) relies on graph neural networks (GNNs), where nodes represent nuclei and transcripts, and edges connect proximal instances, thereby letting the model learn from the co-occurrence of nucleic and cytoplasmic molecules.
-
 
 ## Segmentation-free
 
@@ -59,7 +58,6 @@ By now, a few methods have been proposed to rectify segmentation boundaries and/
 These are resolved to pixels, and stacked to create a gene expression vector field.
 [In other words, RNA target locations across the tissue are converted into a multi-channel image where each channel corresponds to one feature.]{.aside} 
 The resulting representation may be used to cluster and annotate pixels, identify tissue domains (i.e., regions of homogeneous 'cell' type composition).
-
 
 ```{r fig-SSAM, echo = FALSE, out.width = "80%", fig.cap = "Schematic of the SSAM framework. Source: [Figure 1 of Park et al. 2021](https://www.nature.com/articles/s41467-021-23807-4#Fig1)"}
 knitr::include_graphics("../images/img-seg_SSAM.jpeg")
