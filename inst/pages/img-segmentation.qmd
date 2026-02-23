@@ -36,7 +36,7 @@ knitr::include_graphics("../images/img-seg_Xenium.jpeg")
 
 ## Spatial bleeding
 
-The phenomenon of spatial bleeding has been nicely characterized by @Mitchel2025-segmentation-errors:
+The phenomenon of spatial bleeding has been nicely characterized by Mitchel2026:
 
 - Bleeding is **most frequent above/below and close to the periphery** of cells, i.e., in all physical dimensions.
 - Because bleeding occurs between proximal cells, **observed mixtures reflect biology** (i.e., certain cell types may attract or avoid one another -- in general, or different context such as healthy and diseases tissue regions).
@@ -44,9 +44,12 @@ The phenomenon of spatial bleeding has been nicely characterized by @Mitchel2025
 
 By now, a few methods have been proposed to rectify segmentation boundaries and/or per-cell counts post hoc, e.g.:
 
+`r BiocStyle::Githubpkg("bdsc-tds/SPLIT")` [@Bilous2025-SPLIT] is an R package that relies on snRNA-seq reference-based deconvolution -- using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] -- to *purify* mixed transcriptomic signals. Briefly, imaging-based ST *cells* are seen as weighted combinations of reference cell types (cf., *spots* in sequencing-based ST), and deconvolution weights are used to proportionally assign transcripts to their most likely source cell type(s).
+
 `r BiocStyle::Githubpkg("Nanostring-Biostats/FastReseg")` [@Wu2024-FastReseg] is an R package to detect and correct segmentation errors based on transcript locations by (i) scoring cells in terms of segmentation inaccuracies, (ii) scoring transcripts within erroneous cells in terms of misassignments, and (iii) reassigning mislocated transcripts.
 
 `r BiocStyle::Githubpkg("EliHei2/segger_dev")` [@Heidari2025-segger] relies on graph neural networks (GNNs), where nodes represent nuclei and transcripts, and edges connect proximal instances, thereby letting the model learn from the co-occurrence of nucleic and cytoplasmic molecules.
+
 
 ## Segmentation-free
 

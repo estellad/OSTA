@@ -269,11 +269,12 @@ benchmark, or other, references and resources mentioned throughout the book.
 |-|-|
 | `r Githubpkg("kharchenkolab/Baysor")` | @Petukhov2022-Baysor |
 | `r Githubpkg("MouseLand/cellpose")` | @Stringer2021-Cellpose |
-| `r Githubpkg("Nanostring-Biostats/FastReseg")` | @Wu2024-FastReseg |
 | `r Githubpkg("dcjones/proseg")` | @Jones2025-Proseg |
 | `r Githubpkg("pnucolab/ssam")` | @Park2021-SSAM |
+| `r Githubpkg("bdsc-tds/SPLIT")` | @Bilous2025-SPLIT |
 | `r Githubpkg("EliHei2/segger_dev")` | @Heidari2025-segger |
-| spatial bleeding | @Mitchel2025-segmentation-errors |
+| `r Githubpkg("Nanostring-Biostats/FastReseg")` | @Wu2024-FastReseg |
+| spatial bleeding | Mitchel2026 |
 
 : {.striped tbl-colwidths="[33,66]"}
 
