@@ -14,7 +14,6 @@ Different data structures, although standardized within a given framework, make 
 
 In this chapter, we demonstrate examples showing how to set up Python environments and interact with `anndata` objects in R, using either a Conda environment or virtual environment, together with [reticulate](https://rstudio.github.io/reticulate/), `r BiocStyle::Biocpkg("basilisk")`, and/or `r BiocStyle::Biocpkg("zellkonverter")`.
 
-
 ## Dependencies
 
 ```{r libraries, message=FALSE, warning=FALSE}
@@ -83,8 +82,8 @@ First, we create a virtual environment, installing Python dependencies
 required in this chapter, as well as @sec-img-cell-cell-communication.
 
 ```{r venv}
-txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
-virtualenv_create(envname=env <- "OSTA", requirements=txt, python="3.8.18") 
+txt <- system.file("extdata", "requirements.txt", package="OSTA")
+virtualenv_create(envname=env <- "OSTA", python="3.8.18", requirements=txt) 
 use_virtualenv(env, required=TRUE)
 ```
 
@@ -205,7 +204,6 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 (ad <- as_AnnData(sce, x_mapping="counts"))
 ```
 
-
 ### SpatialExperiment
 
 Since the `SpatialExperiment` class extends `SingleCellExperiment` (see @sec-bkg-infrastructure), 
@@ -229,10 +227,14 @@ obj <- TENxVisium(
 (spe <- VisiumIO::import(obj))
 ```
 
-We also need to parse the original scaling information (i.e. scale factor) for spots and images available in the standard Visium output. We will use this later during conversion.
+We also need to parse the original scaling information (i.e. scale factor) 
+for spots and images available in the standard Visium output. 
+We will use this later during conversion.
 
 ```{r sfs, message=FALSE, results="hide"}
-sfs <- jsonlite::read_json(file.path(td, "outs/spatial/scalefactors_json.json"))
+fnm <- "scalefactors_json.json"
+fnm <- file.path(td, "outs", "spatial", fnm)
+sfs <- read_json(fnm)
 ```
 
 We again use the `as_AnnData` function from `anndataR` from the previous example, and convert the `SingleCellExperiment`-relevant components of the `SpatialExperiment` object to an `AnnData` object.
@@ -243,14 +245,15 @@ assay(spe) <- mtx
 (ad <- as_AnnData(spe))
 ```
 
-We can now populate the `uns` and `obsm` components of the `AnnData` object with spatial coordinates and images. We start with the coordinates.
+We can now populate the `uns` and `obsm` components of the `AnnData` object 
+with spatial coordinates and images. We start with the coordinates.
 
 ```{r xy}
 spatialCoordsNames(spe) <- c("x", "y")
 obsm <- list(spatial=spatialCoords(spe))
 ```
 
-Now let's create the `uns` component. The list of `uns` should be composed of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for the scaling information.
+Now, let's create the `uns` component. The list of `uns` should be composed of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for the scaling information.
 
 ```{r uns}
 # get image metadata
@@ -267,7 +270,8 @@ uns <- list(images=list(lowres=img), scalefactors=sfs)
 uns <- list(spatial=setNames(list(uns), imgdata$sample_id))
 ```
 
-Now let's insert the components to the `AnnData` object, and write back to an `.h5ad` file.
+Now let's insert the components to the `AnnData` object, 
+and write back to an `.h5ad` file.
 
 ```{r write-h5ad, message=FALSE}
 ad$obs$library_id <- imgdata$sample_id
@@ -307,10 +311,20 @@ plt.show()
 file.remove("spe.h5ad")
 ```
 
+## Using `basilisk`
 
-## basilisk
+Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is especially useful for package development by advanced users. However, setup may be more challenging in some cases. A minimal example is provided here for completeness:
 
-Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation or a new installation of Miniconda, as demonstrated above. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is also especially useful for package development by advanced users. However, setup may be more challenging in some cases.
+```{r basilisk, eval=FALSE}
+# set up environment using 'basilisk'
+env <- BasiliskEnvironment(
+    pkgname="base", 
+    envname="basilisk", 
+    pip="numpy==2.4.0",
+    packages="python=3.12")
+# activate virtual environment
+use_virtualenv(obtainEnvironmentPath(env))
+```
 
 <!--
 ### Configuring Python
@@ -328,7 +342,6 @@ env_basilisk <- BasiliskEnvironment(
 # use virtual environment
 use_virtualenv(obtainEnvironmentPath(env_basilisk))
 ```
-
 
 ### SingleCellExperiment
 
@@ -362,7 +375,6 @@ between R and Python objects, and manage virtual and Conda environments
 
 - `r BiocStyle::Biocpkg("basilisk")` [@Lun2022-basilisk]: 
 R package to install and manage Python environments in R packages and sessions
-
 
 ### References {.unnumbered}
 
