@@ -241,7 +241,7 @@ benchmark, or other, references and resources mentioned throughout the book.
 `r Githubpkg("drieslab/Giotto")`'s `SpatialDWLS` | @Chen2025-Giotto-Suite
 `r Githubpkg("scverse/scvi-tools")`'s `DestVI` | @Lopez2022-DestVI
 `r Githubpkg("leihouyeung/SD2")` | @Li2022-SD2
-`r Biocpkg("spacexr")`'s `RCDT` | @Cable2022-RCTD |
+`r Biocpkg("spacexr")`'s `RCTD` | @Cable2022-RCTD |
 `r Githubpkg("zcang/SpaOTsc")` | @Cang2020-SpaOTsc
 `r Biocpkg("SpatialDecon")` | @Danaher2022-SpatialDecon
 `r Githubpkg("ma-compbio/SpiceMIx")` | @Chidester2023-SpiceMix
