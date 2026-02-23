@@ -84,11 +84,9 @@ conda_create(env <- "OSTA", environment=yml)
 use_condaenv(env, required=TRUE)
 ```
 
-```{r install-openssl}
-conda_install(
-    envname=env,
-    channel="conda-forge",
-    packages="openssl=3.1.4")
+```{r ld-lib-path}
+lib <- file.path(miniconda_path(), "lib")
+system(paste0("export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:", lib))
 ```
 
 <!--
