@@ -70,9 +70,6 @@ Sys.setenv(CI="true")
 flag <- dir.exists(miniconda_path())
 if (flag) miniconda_update() else install_miniconda()
 ```
-```{r}
-Sys.setenv(LD_LIBRARY_PATH=file.path(miniconda_path(), "bin", "openssl"))
-```
 
 ### Set up Conda environment
 
@@ -85,6 +82,13 @@ If you are using an existing Python installation on your system (instead of inst
 yml <- system.file("extdata", "environment.yml", package="OSTA")
 conda_create(env <- "OSTA", environment=yml)
 use_condaenv(env, required=TRUE)
+```
+
+```{r install-openssl}
+conda_install(
+    envname=env,
+    channel="conda-forge",
+    packages="openssl=3.1.4")
 ```
 
 <!--
