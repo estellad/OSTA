@@ -81,7 +81,7 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 
 ```{r env}
 # re-use environment from Python interoperability chapter
-use_condaenv("OSTA", required=TRUE)
+use_virtualenv("OSTA", required=TRUE)
 ```
 
 <!--
