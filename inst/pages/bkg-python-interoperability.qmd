@@ -12,19 +12,19 @@ Different data structures, although standardized within a given framework, make 
 
 [[Quarto](https://quarto.org/) is the successor to [R Markdown](https://rmarkdown.rstudio.com/) (by Posit, formerly known as RStudio). Similar to *.Rmd* files, *.qmd* files can include scientific content (e.g. cross-referencing, LaTeX-based equations), and can be published in multiple output formats (HTML, PDF, etc.). This book is built using Quarto.]{.aside} On a higher level, tools that enable interoperability between programming languages have become available. For example, [reticulate](https://rstudio.github.io/reticulate/) provides an R interface to Python, including support to translate between objects from both languages; `r BiocStyle::Biocpkg("basilisk")` facilitates Python environment management within the Bioconductor ecosystem, and can also be interfaced with `reticulate`; and Quarto can generate dynamic reports from code in different languages.
 
-In this chapter, we demonstrate examples showing how to set up Python environments and interact with `anndata` objects in R, using either a Conda environment or virtual environment, together with [reticulate](https://rstudio.github.io/reticulate/), `r BiocStyle::Biocpkg("basilisk")`, and/or `r BiocStyle::Biocpkg("zellkonverter")`.
+In this chapter, we demonstrate examples showing how to set up Python environments and interact with `anndata` objects in R, using either a virtual or Conda environment, together with [reticulate](https://rstudio.github.io/reticulate/) or `r BiocStyle::Biocpkg("basilisk")` and `r BiocStyle::Biocpkg("anndataR")`.
 
 ## Dependencies
 
 ```{r libraries, message=FALSE, warning=FALSE}
 #| code-fold: false
-library(SpatialExperiment)
+library(anndataR)
+library(basilisk)
+library(jsonlite)
 library(VisiumIO)
 library(OSTA.data)
-library(jsonlite)
 library(reticulate)
-library(basilisk)
-library(anndataR)
+library(SpatialExperiment)
 ```
 
 ## Python environment and reticulate
@@ -84,7 +84,8 @@ required in this chapter, as well as @sec-img-cell-cell-communication.
 ```{r venv}
 #txt <- system.file("extdata", "requirements.txt", package="OSTA")
 txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
-virtualenv_create(envname=env <- "OSTA", python=pyv <- "3.8.18", requirements=txt) 
+virtualenv_create(env <- "OSTA", python="3.8.18") 
+virtualenv_install(env, requirements=txt)
 use_virtualenv(env, required=TRUE)
 #virtualenv_install(envname=env, requirements=txt) 
 ```
