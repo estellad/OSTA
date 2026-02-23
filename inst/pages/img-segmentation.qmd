@@ -44,13 +44,13 @@ The phenomenon of spatial bleeding has been nicely characterized by @Mitchel2026
 
 By now, a few methods have been proposed to rectify segmentation boundaries and/or per-cell counts post hoc, e.g.:
 
-`r BiocStyle::Githubpkg("kharchenkolab/cellAdmix")` [@Mitchel2026-cellAdmix] (R) relies on scRNA-seq reference-based matrix factorization of local molecular neighborhoods to identify and correct for molecular admixtures, reassigning transcripts to their source and removing them from proximal cells where they don't belong.
+- `r BiocStyle::Githubpkg("kharchenkolab/cellAdmix")` [@Mitchel2026-cellAdmix] (R) relies on scRNA-seq reference-based matrix factorization of local molecular neighborhoods to identify and correct for molecular admixtures, reassigning transcripts to their source and removing them from proximal cells where they don't belong.
 
-`r BiocStyle::Githubpkg("bdsc-tds/SPLIT")` [@Bilous2025-SPLIT] (R) relies on snRNA-seq reference-based deconvolution -- using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] -- to *purify* mixed transcriptomic signals. Briefly, imaging-based ST *cells* are seen as weighted combinations of reference cell types (cf., *spots* in sequencing-based ST), and deconvolution weights are used to proportionally assign transcripts to their most likely source cell type(s).
+- `r BiocStyle::Githubpkg("bdsc-tds/SPLIT")` [@Bilous2025-SPLIT] (R) relies on snRNA-seq reference-based deconvolution -- using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] -- to *purify* mixed transcriptomic signals. Briefly, imaging-based ST *cells* are seen as weighted combinations of reference cell types (cf., *spots* in sequencing-based ST), and deconvolution weights are used to proportionally assign transcripts to their most likely source cell type(s).
 
-`r BiocStyle::Githubpkg("Nanostring-Biostats/FastReseg")` [@Wu2024-FastReseg] (R) detects and corrects segmentation errors based on transcript locations by (i) scoring cells in terms of segmentation inaccuracies, (ii) scoring transcripts within erroneous cells in terms of misassignments, and (iii) reassigning mislocated transcripts.
+- `r BiocStyle::Githubpkg("Nanostring-Biostats/FastReseg")` [@Wu2024-FastReseg] (R) detects and corrects segmentation errors based on transcript locations by (i) scoring cells in terms of segmentation inaccuracies, (ii) scoring transcripts within erroneous cells in terms of misassignments, and (iii) reassigning mislocated transcripts.
 
-`r BiocStyle::Githubpkg("EliHei2/segger_dev")` [@Heidari2025-segger] (Python) relies on graph neural networks (GNNs), where nodes represent nuclei and transcripts, and edges connect proximal instances, thereby letting the model learn from the co-occurrence of nucleic and cytoplasmic molecules.
+- `r BiocStyle::Githubpkg("EliHei2/segger_dev")` [@Heidari2025-segger] (Python) relies on graph neural networks (GNNs), where nodes represent nuclei and transcripts, and edges connect proximal instances, thereby letting the model learn from the co-occurrence of nucleic and cytoplasmic molecules.
 
 
 ## Segmentation-free
