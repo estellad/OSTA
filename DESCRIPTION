@@ -111,6 +111,7 @@ Suggests:
     glue, 
     knitr,
     markdown,
+    otelsdk,
     quarto,
     scrapper,
     sessioninfo, 
