@@ -28,13 +28,18 @@ library(basilisk)
 library(anndataR)
 ```
 
+## Python environment and reticulate
 
-## Conda environment and reticulate
+We here set up a virtual environment using [reticulate](https://rstudio.github.io/reticulate/) to interact with Python `anndata` objects in R. 
 
-In the first example, we set up a Conda environment and use [reticulate](https://rstudio.github.io/reticulate/) to interact with Python `anndata` objects in R. This is the simplest option, and is the recommended starting point for most users. Note that we are using functions from the `reticulate` package in the code below.
+However, if you are following this example on a laptop or another system, 
+it may be easier to specify an existing Python installation to use instead. 
+This will avoid cluttering your system with additional Python installations; 
+see the below section to, e.g., activate an existing Conda environment.
+
+<!--
 
 To set up the Conda environment, we also need to specify which Python installation to use. In order to run this example programmatically to compile this book chapter, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main). However, if you are following this example on a laptop or another system, it is easier to specify an existing Python installation to use. This will help avoid cluttering your system with additional Python installations. This option is noted in the code comments below.
-
 
 ### Install Miniconda
 
@@ -42,7 +47,6 @@ _Note: skip this section if you are using an existing Python installation instea
 
 In order to build this book chapter programmatically, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda. Note that we also need to set some conda settings using environment variables to run this code programmatically, which can also be skipped if you are installing Miniconda interactively.
 
-<!--
 ```{r conda-settings, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
 # use Miniforge (conda-forge only) instead of Anaconda's Miniconda
 Sys.setenv(
@@ -73,26 +77,34 @@ if (flag) miniconda_update() else install_miniconda()
 ```
 -->
 
-### Set up Conda environment
+### Set up virtual environment
 
-Next, we create a Conda environment and install some key dependencies.
+First, we create a virtual environment, installing Python dependencies
+required in this chapter, as well as @sec-img-cell-cell-communication.
 
-If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
-
-```{r venv-txt}
-#txt <- system.file("extdata", "requirements.txt", package="OSTA")
+```{r venv}
 txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
-```
-
-```{r venv-set}
-virtualenv_create(envname=env <- "OSTA", python="3.8.18", requirements=txt)
-```
-
-```{r venv-use}
+virtualenv_create(envname=env <- "OSTA", requirements=txt, python="3.8.18") 
 use_virtualenv(env, required=TRUE)
 ```
 
+### Using Conda environment
+
+Alternatively, an existing Conda environment -- including the corresponding 
+Python installation and software dependencies -- could be used as follows:
+
+```{r conda, eval=FALSE}
+# path to Conda binary
+bin <- ".../bin/conda" 
+options(reticulate.conda_binary=bin)
+# activate environment
+use_condaenv("<name>")
+```
+
 <!--
+
+If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
+
 ```{r conda-create, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
 #yml <- "/users/helucro/projects/lmweber/OSTA/inst/extdata/environment.yml"
 yml <- system.file("extdata", "environment.yml", package="OSTA")
@@ -154,7 +166,12 @@ knitr::opts_chunk$set(python.reticulate=TRUE)
 
 #### Calling Python
 
-After configuring the Python environment, R commands can now be run using `reticulate` as follows. For more details on the syntax used, see the [reticulate](https://rstudio.github.io/reticulate/) documentation. [Note that running code in this way comes with a small overhead of starting up a Python session in the background. But this is typically small compared to the runtime required to run computation-heavy methods, or when analyzing large-scale single-cell and spatial data (hundreds of thousands of cells or more).]{.aside}
+After configuring Python, R commands can now be run using `reticulate`; 
+for more details on syntax, see [here](https://rstudio.github.io/reticulate/). 
+[Note that running code in this way comes with a small overhead of starting up 
+a Python session in the background. But this is typically small compared to the 
+runtime required to run computation-heavy methods, or when analyzing large-scale
+single-cell and spatial data (hundreds of thousands of cells or more).]{.aside}
 
 ```{python load-ad, warning=FALSE}
 import scanpy
@@ -166,13 +183,15 @@ ad
 
 #### Continuing in R
 
-We can access any of the variables above in R. For basic outputs, this works out of the box:
+We can access any of the variables above in R.
+For basic outputs, this works out of the box:
 
 ```{r show-ad}
 range(py$ad$obs$array_row)
 ```
 
-`reticulate` also supports a few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). In the example demonstrated here, we use `anndataR` to convert from `AnnData` to `SingleCellExperiment`:
+`reticulate` also supports a few direct [type conversions](https://rstudio.github.io/reticulate/#type-conversions) (e.g. dictionary $\leftrightarrow$ named list). 
+In the example demonstrated here, we use `anndataR` to convert from `AnnData` to `SingleCellExperiment`:
 
 ```{r ad2sce, message=FALSE, warning=FALSE}
 (sce <- py$ad$as_SingleCellExperiment(x_mapping="counts"))
@@ -189,7 +208,10 @@ We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's 
 
 ### SpatialExperiment
 
-Since the `SpatialExperiment` class extends `SingleCellExperiment` (see @sec-bkg-infrastructure), conversion operations that we discussed above are also applicable to `SpatialExperiment`. However, to accomplish a full conversion from the `AnnData` object, we need to manually insert the spatial information using `reticulate` directly.
+Since the `SpatialExperiment` class extends `SingleCellExperiment` (see @sec-bkg-infrastructure), 
+conversion operations discussed above are also applicable to `SpatialExperiment`. 
+However, to accomplish a full conversion from the `AnnData` object, 
+we need to manually insert the spatial information using `reticulate` directly.
 
 #### Starting with R
 
