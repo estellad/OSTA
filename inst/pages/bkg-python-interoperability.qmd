@@ -79,15 +79,23 @@ Next, we create a Conda environment and install some key dependencies.
 
 If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
 
-```{r venv}
+```{r venv-txt}
 #txt <- normalizePath("~/projects/OSTA/inst/extdata/requirements.txt")
 #txt <- system.file("extdata", "requirements.txt", package="OSTA")
-txt <- file.path(dirname(getwd()), "extdata", "requirements.txt")
+dir <- dirname(getwd())
+txt <- file.path(dir, "extdata", "requirements.txt")
+if (!file.exists(txt)) stop()
+```
+
+```{r venv-set}
 env <- "OSTA"
 virtualenv_install(
     envname=env,
     requirements=txt,
     python_version="3.8.18")
+```
+
+```{r venv-use}
 use_virtualenv(env, required=TRUE)
 ```
 
