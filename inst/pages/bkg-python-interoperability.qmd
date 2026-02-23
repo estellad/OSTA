@@ -70,7 +70,9 @@ Sys.setenv(CI="true")
 flag <- dir.exists(miniconda_path())
 if (flag) miniconda_update() else install_miniconda()
 ```
-
+```{r}
+Sys.setenv(LD_LIBRARY_PATH=file.path(miniconda_path(), "bin", "openssl"))
+```
 
 ### Set up Conda environment
 
