@@ -89,7 +89,7 @@ virtualenv_create(
     env <- "OSTA",
     python="3.8.18",
     requirements=txt,
-    packages="setuptools==75.8.0")
+    packages="setuptools==68.2.2")
 use_virtualenv(env, required=TRUE)
 ```
 
