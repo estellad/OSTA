@@ -85,7 +85,7 @@ required in this chapter, as well as @sec-img-cell-cell-communication.
 txt <- system.file("extdata", "requirements.txt", package="OSTA")
 virtualenv_create(
     env <- "OSTA", 
-    python="3.8.18")
+    python="3.8.18",
     requirements=txt,
     packages="setuptools==75.8.0")
 use_virtualenv(env, required=TRUE)
