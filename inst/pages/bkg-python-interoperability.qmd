@@ -87,7 +87,7 @@ virtualenv_create(
     env <- "OSTA", 
     python="3.8.18")
     requirements=txt,
-    packages="setuptools==56.0.0")
+    packages="setuptools==75.8.0")
 use_virtualenv(env, required=TRUE)
 ```
 
@@ -159,12 +159,11 @@ conda_install(
 
 The following option sets Python code chunks to run via `reticulate`, allowing this chapter to be compiled programmatically.
 
--->
-
 ```{r python-reticulate, eval=FALSE}
 # set to run {python} code chunks via reticulate
 knitr::opts_chunk$set(python.reticulate=TRUE)
 ```
+-->
 
 ### SingleCellExperiment {#sec-bkg-python-interop-sce}
 
