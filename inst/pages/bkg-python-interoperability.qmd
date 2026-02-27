@@ -311,8 +311,8 @@ xy = ad.obsm["spatial"]
 
 import tkinter
 import matplotlib
-import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
 
 g = "ERBB2"
 z = ad[:,g].layers["counts"].toarray()
