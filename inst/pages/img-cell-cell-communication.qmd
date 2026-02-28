@@ -86,7 +86,7 @@ use_virtualenv("OSTA", required=TRUE)
 
 <!--
 
-```{r env-ccc, message=FALSE, warning=FALSE}
+```{r env-ccc, message=FALSE, warning=FALSE, eval=FALSE}
 # re-use environment from Python interoperability chapter
 # using reticulate functions
 env <- "env-ccc"
@@ -100,7 +100,7 @@ conda_install(envname=env, packages=pkgs, pip=TRUE)
 
 We first setup a corresponding Python environment using `basilisk`:
 
-```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
+```{r env-loc, message=FALSE, warning=FALSE, eval=FALSE}
 # # this is faster for local run:
 # bin <- "~/software/mambaforge/bin/conda"
 # options(reticulate.conda_binary=bin)
