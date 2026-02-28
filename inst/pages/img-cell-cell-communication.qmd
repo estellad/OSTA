@@ -44,10 +44,10 @@ library(scater)
 library(scuttle)
 library(ggplot2)
 library(ggspavis)
+library(anndataR)
 library(patchwork)
 library(reticulate)
 library(BiocParallel)
-library(zellkonverter)
 library(SpatialExperiment)
 # load data from previous chapter
 # (past quality control & clustered)
@@ -185,8 +185,8 @@ cs <-
 dim(sub <- sub[, cs]) 
 ```
 
-We now perform run CCC inference, using `r BiocStyle::Biocpkg("zellkonverter")`'s 
-`SCE2AnnData` function to convert our `spe` in R to an `AnnData` object in Python.
+We now perform run CCC inference, using `r BiocStyle::Biocpkg("anndataR")`'s 
+`as_AnnData` function to convert our `spe` in R to an `AnnData` object in Python.
 Note that in real settings (e.g., lots of interactions across lots of cells), 
 this can be parallelized, e.g., across fields of view (FOVs) or tissue sections.
 [For documentation on parameter meaning and choices, see the
@@ -195,8 +195,8 @@ visium-mouse_brain.html#Spatial-communication-inference).]{.aside}
 
 ```{r ccc, message=FALSE}
 # convert 'SpatialExperiment' (R) to 
-# 'AnnData' (Python) using 'zellkonverter'
-ad <- SCE2AnnData(sub, X_name="logcounts")
+# 'AnnData' (Python) using 'anndataR'
+ad <- as_AnnData(sub, "logcounts")
 # run CCC inference using 'COMMOT'
 ct <- import("commot")
 ct$tl$spatial_communication(ad,
