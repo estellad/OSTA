@@ -84,47 +84,6 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 use_virtualenv("OSTA", required=TRUE)
 ```
 
-```{r}
-bin <- "~/software/mambaforge/bin/conda" 
-options(reticulate.conda_binary=bin)
-use_condaenv("commot")
-```
-
-<!--
-
-```{r env-ccc, message=FALSE, warning=FALSE, eval=FALSE}
-# re-use environment from Python interoperability chapter
-# using reticulate functions
-env <- "env-ccc"
-conda_clone(env, clone="py-interop")
-use_condaenv(env, required=TRUE)
-
-# install additional Python packages from PyPI
-pkgs <- c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4")
-conda_install(envname=env, packages=pkgs, pip=TRUE)
-```
-
-We first setup a corresponding Python environment using `basilisk`:
-
-```{r env-loc, message=FALSE, warning=FALSE, eval=FALSE}
-# # this is faster for local run:
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-# use_condaenv("commot")
-```
-
-```{r env-, message=FALSE, warning=FALSE, eval=FALSE}
-# env <- BasiliskEnvironment(
-#     envname="ccc",
-#     pkgname="base",
-#     pip="commot==0.0.3",
-#     packages="python=3.11")
-# use_virtualenv(obtainEnvironmentPath(env))
-```
-
--->
-
-
 ### LR retrieval
 
 First, we retrieve ligand-receptor interactions (and a lot more!) from
