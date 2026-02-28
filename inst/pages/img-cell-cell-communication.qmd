@@ -107,7 +107,7 @@ We first setup a corresponding Python environment using `basilisk`:
 # use_condaenv("commot")
 ```
 
-```{r env, message=FALSE, warning=FALSE, eval=FALSE}
+```{r env-, message=FALSE, warning=FALSE, eval=FALSE}
 # env <- BasiliskEnvironment(
 #     envname="ccc",
 #     pkgname="base",

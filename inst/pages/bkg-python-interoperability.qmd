@@ -46,34 +46,6 @@ _Note: skip this section if you are using an existing Python installation instea
 
 In order to build this book chapter programmatically, we install a new Python installation with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main), which is a free, lightweight installation of Python, Conda, and a small number of packages, provided by Anaconda. Note that we also need to set some conda settings using environment variables to run this code programmatically, which can also be skipped if you are installing Miniconda interactively.
 
-```{r conda-settings, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-# use Miniforge (conda-forge only) instead of Anaconda's Miniconda
-Sys.setenv(
-  RETICULATE_MINICONDA_URL = 
-    "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"
-)
-
-# set conda channels using temporary .condarc file
-condarc_txt <- "
-channels:
-  - conda-forge
-  - bioconda
-channel_priority: strict
-"
-condarc_tmp <- tempfile("condarc-")
-writeLines(trimws(condarc_txt, which="left"), condarc_tmp)
-Sys.setenv(CONDARC=condarc_tmp)
-
-# conda settings for terms of service
-Sys.setenv(CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes")
-Sys.setenv(CI="true")
-```
-
-```{r install-miniconda, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-# install Miniconda (or update if already installed)
-flag <- dir.exists(miniconda_path())
-if (flag) miniconda_update() else install_miniconda()
-```
 -->
 
 ### Set up virtual environment
@@ -89,18 +61,7 @@ virtualenv_create(envname=env <- "OSTA", python=ver, requirements=txt)
 use_virtualenv(env, required=TRUE)
 ```
 
-```{r}
-# txt <- system.file("extdata", "requirements.txt", package="OSTA")
-# virtualenv_starter(ver <- "3.8.18")
-# virtualenv_create(
-#     env <- "OSTA", 
-#     python=ver,
-#     requirements=txt,
-#     packages="setuptools==75.8.0")
-# use_virtualenv(env, required=TRUE)
-```
-
-### Using Conda environment
+### Using Conda
 
 Alternatively, an existing Conda environment -- including the corresponding 
 Python installation and software dependencies -- could be used as follows:
@@ -113,68 +74,24 @@ options(reticulate.conda_binary=bin)
 use_condaenv("<name>")
 ```
 
-<!--
+### Using `basilisk`
 
-If you are using an existing Python installation on your system (instead of installing Miniconda), this can be specified with the argument `conda = ...` -- i.e. specify the path to the `conda` binary from the existing Python installation to use.
+Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is especially useful for package development by advanced users. However, setup may be more challenging in some cases. A minimal example is provided here for completeness:
 
-```{r conda-create, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-#yml <- "/users/helucro/projects/lmweber/OSTA/inst/extdata/environment.yml"
-yml <- system.file("extdata", "environment.yml", package="OSTA")
-conda_create(env <- "OSTA", environment=yml)
-use_condaenv(env, required=TRUE)
+```{r basilisk, eval=FALSE}
+# set up environment using 'basilisk'
+env <- BasiliskEnvironment(
+    pkgname="base", 
+    envname="basilisk", 
+    pip="numpy==2.4.0",
+    packages="python=3.12")
+# activate virtual environment
+use_virtualenv(obtainEnvironmentPath(env))
 ```
 
-```{r ld-lib-path, eval=FALSE}
-lib <- file.path(miniconda_path(), "lib")
-system(paste0("export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:", lib))
-```
+## Interfacing between languages
 
-```{r conda-create-, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-# create conda environment
-env <- "py-interop"
-# specify 'conda=...' in 'conda_create()'
-# to use an existing Python installation
-conda_create(env, packages="python=3.11")  
-use_condaenv(env, required=TRUE)
-```
-
-```{r conda-list, eval=FALSE}
-# list conda environments
-conda_list()$name
-```
-
-The following dependencies are needed in some of the following chapters, and need to be installed from `conda-forge`. This can also be skipped if you are only running the examples in this chapter. We install these dependencies here so that we can re-use this Conda environment again in later chapters.
-
-```{r deps-conda-forge, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-# install dependencies that need to be 
-# installed from conda-forge (not PyPI)
-conda_install(
-    envname=env, 
-    channel=c("conda-forge", "nodefaults"),
-    packages=c(
-      "libcxx", "llvm-openmp", "llvmlite", 
-      "numba", "proj>=9.4", "pyproj>=3.7"))
-```
-
-The following dependencies are necessary for the examples in this chapter. These are installed from PyPI.
-
-```{r deps-pypi, eval=FALSE, warning=FALSE, message=FALSE, results="hide"}
-# install Python packages from PyPI
-conda_install(
-    pip=TRUE, 
-    envname=env, 
-    packages=c("Dask==2024.12.1", "zarr==2.18.7", "squidpy==1.6.2"))
-```
-
-The following option sets Python code chunks to run via `reticulate`, allowing this chapter to be compiled programmatically.
-
-```{r python-reticulate, eval=FALSE}
-# set to run {python} code chunks via reticulate
-knitr::opts_chunk$set(python.reticulate=TRUE)
-```
--->
-
-### SingleCellExperiment {#sec-bkg-python-interop-sce}
+### SingleCellExperiment
 
 #### Calling Python
 
@@ -211,7 +128,7 @@ In the example demonstrated here, we use `anndataR` to convert from `AnnData` to
 
 #### Back to Python
 
-We can also do the reverse, i.e. go from R's `SingleCellExperiment` to Python's `AnnData`:
+We can also do the reverse, i.e., go from R's `SingleCellExperiment` to Python's `AnnData`:
 
 ```{r sce2ad}
 (ad <- as_AnnData(sce, x_mapping="counts"))
@@ -224,7 +141,7 @@ conversion operations discussed above are also applicable to `SpatialExperiment`
 However, to accomplish a full conversion from the `AnnData` object, 
 we need to manually insert the spatial information using `reticulate` directly.
 
-#### Starting with R
+#### Starting in R
 
 For this use case with `SpatialExperiment`, we will use the dataset from @Janesick2023-high-res, which includes Visium measurements on human breast cancer tissue.
 
@@ -240,7 +157,7 @@ obj <- TENxVisium(
 (spe <- VisiumIO::import(obj))
 ```
 
-We also need to parse the original scaling information (i.e. scale factor) 
+We also need to parse the original scaling information (i.e., scale factor) 
 for spots and images available in the standard Visium output. 
 We will use this later during conversion.
 
@@ -297,7 +214,7 @@ ad$write_h5ad("spe.h5ad")
 
 Now that we have converted the `SpatialExperiment` object to `AnnData` format, 
 we can run Python code per usual (e.g., continue analysis using `squidpy`).
-As a proof of concept, we here visualize an exemplary gene's counts in spatially:
+As a proof of concept, we here visualize an exemplary gene's counts spatially:
 
 ```{python plot-ad, fig.width=4.5, fig.height=4.5}
 import anndata
@@ -319,51 +236,6 @@ plt.title("ERBB2")
 # clean up by removing the `spe.h5ad` file
 file.remove("spe.h5ad")
 ```
-
-## Using `basilisk`
-
-Alternatively, we can use `r BiocStyle::Biocpkg("basilisk")` to install and manage Python environments. This is an alternative to setting up a Conda environment with an existing Python installation. Using `basilisk` provides a self-contained environment, which helps avoid problems due to interactions with other environments on your system, and provides a higher level of reproducibility. This is especially useful for package development by advanced users. However, setup may be more challenging in some cases. A minimal example is provided here for completeness:
-
-```{r basilisk, eval=FALSE}
-# set up environment using 'basilisk'
-env <- BasiliskEnvironment(
-    pkgname="base", 
-    envname="basilisk", 
-    pip="numpy==2.4.0",
-    packages="python=3.12")
-# activate virtual environment
-use_virtualenv(obtainEnvironmentPath(env))
-```
-
-<!--
-### Configuring Python
-
-In this example, we use `r BiocStyle::Biocpkg("basilisk")` to create an environment containing a Python installation and all necessary dependencies for this chapter, and then use the resulting environment with `reticulate`, as above.
-
-```{r env, warning=FALSE, message=FALSE, results="hide", eval=FALSE}
-# set up environment using basilisk
-env_basilisk <- BasiliskEnvironment(
-    pkgname="base", 
-    envname="env-basilisk", 
-    pip=c("zarr==2.18.7", "squidpy==1.6.2"),
-    packages=c("python=3.11", "Dask=2024.12.1")) 
-
-# use virtual environment
-use_virtualenv(obtainEnvironmentPath(env_basilisk))
-```
-
-### SingleCellExperiment
-
-Now that we have set up the Python environment using `basilisk`, we can run R commands using `reticulate` in the same way as in the previous example. For example, using the same code as above:
-
-```{r load-sce-basilisk, eval=FALSE}
-h5ad <- system.file("extdata", "krumsiek11.h5ad", package="zellkonverter")
-anndata <- import("anndata")
-(ad <- anndata$read_h5ad(h5ad))
-```
-
-To continue the example, please follow the code from the previous section above, starting from @sec-bkg-python-interop-sce.
--->
 
 ## Appendix
 
