@@ -1,10 +1,11 @@
 changes in version 1.1.8
 + move 'CCPlotR' to 'Suggests:' and condition 
   call in img-cell-cell-comm on its availability
-+ simplify Python setup to one Conda env setup in bkg-py-interop,
++ simplify Python setup to one virtual env setup in bkg-py-interop,
   omitting 'squidpy' and 'zellkonverter' in favor of 'anndataR'
 + updated Mitchel et al. ref. and added par. on 'cellAdmix';
   added par. on and ref. to 'SPLIT' method (spatial bleeding)
++ 'SpaceTrooper' fix: renaming "CountArea" to "SignalDensity"
 + fixed RCDT/RCTD typos throught the book
 
 changes in version 1.1.0
