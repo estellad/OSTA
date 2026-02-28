@@ -84,6 +84,12 @@ for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 use_virtualenv("OSTA", required=TRUE)
 ```
 
+```{r}
+bin <- "~/software/mambaforge/bin/conda" 
+options(reticulate.conda_binary=bin)
+use_condaenv("commot")
+```
+
 <!--
 
 ```{r env-ccc, message=FALSE, warning=FALSE, eval=FALSE}
@@ -196,7 +202,9 @@ visium-mouse_brain.html#Spatial-communication-inference).]{.aside}
 ```{r ccc, message=FALSE}
 # convert 'SpatialExperiment' (R) to 
 # 'AnnData' (Python) using 'anndataR'
-ad <- as_AnnData(sub, "logcounts")
+ad <- as_AnnData(sub, 
+    x_mapping="logcounts", 
+    output_class="ReticulateAnnData")
 # run CCC inference using 'COMMOT'
 ct <- import("commot")
 ct$tl$spatial_communication(ad,
@@ -210,8 +218,8 @@ ct$tl$spatial_communication(ad,
 # extract 'data.frame's containing
 # sender & receiver CCC estimates
 ccc <- list(
-    s=ad$obsm["commot-CellChatDB-sum-sender"],
-    r=ad$obsm["commot-CellChatDB-sum-receiver"])
+    s=ad$obsm$`commot-CellChatDB-sum-sender`,
+    r=ad$obsm$`commot-CellChatDB-sum-receiver`)
 # add CCC inference results as cell metadata
 for (df in ccc) colData(sub)[names(df)] <- df
 ```
