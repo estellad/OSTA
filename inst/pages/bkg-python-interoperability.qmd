@@ -56,7 +56,6 @@ required in this chapter, as well as @sec-img-cell-cell-communication.
 ```{r venv}
 install_python(version=ver <- "3.8.18")
 txt <- system.file("extdata", "requirements.txt", package="OSTA")
-#virtualenv_starter(ver <- "3.8.18")
 virtualenv_create(envname=env <- "OSTA", python=ver, requirements=txt)
 use_virtualenv(env, required=TRUE)
 ```
@@ -227,7 +226,7 @@ ad.var_names = ad.var["Symbol"].astype(str)
 xy = ad.obsm["spatial"]
 z = ad[:,"ERBB2"].layers["counts"].toarray()
 
-foo = plt.scatter(xy[:,0], xy[:,1], c=z, s=5, cmap="turbo")
+plt.scatter(xy[:,0], xy[:,1], c=z, s=5, cmap="turbo")
 plt.gca().set_aspect("equal")
 plt.title("ERBB2")
 ```
