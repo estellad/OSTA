@@ -96,7 +96,6 @@ Imports:
     spdep,
     spicyR,
     SpotSweeper,
-    Statial,
     STexampleData,
     tidyr,
     VisiumIO,
@@ -115,6 +114,7 @@ Suggests:
     quarto,
     scrapper,
     sessioninfo, 
+    Statial,
     xml2 
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
