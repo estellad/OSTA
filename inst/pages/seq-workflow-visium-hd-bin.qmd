@@ -27,7 +27,6 @@ library(sf)
 library(spacexr)
 library(SpatialExperiment)
 library(SpotSweeper)
-library(Statial)
 library(tidyr)
 library(VisiumIO)
 ```
@@ -577,6 +576,13 @@ From the above heatmap, cluster 5 and 7 are mostly immune cells; cluster 9 maps 
 ## Neighborhood analysis
 
 Here, we want to quantify the abundance between *T cells*, *B cells*, or *Myeloid* bins to *Fibroblast* or *Tumor* bins in 8 µm zoomed region. We use `getAbundances()` from `r BiocStyle::Biocpkg("Statial")` [@Ameen2024-Kontextual] to calculate, for each bin, the abundance of other cell types within a radius of 200 px; the resulting (bins $\times$ types) matrix is stored as `reducedDim` slot `"abundances"`.
+
+```{r Statial-run, message=FALSE, warning=FALSE}
+# check for availability of 'Statial';
+# disable coming chunks if unavailable
+run <- require("Statial", quietly=TRUE)
+if (!run) knitr::opts_chunk$set(eval=FALSE)
+```
 
 ```{r Statial}
 .vhd8 <- .vhd8[, !is.na(.vhd8$.DeconLabel1)]
