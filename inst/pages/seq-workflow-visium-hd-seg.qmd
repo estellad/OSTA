@@ -74,30 +74,27 @@ spe <- TENxVisiumHD(
 # make gene symbols unique
 gs <- rowData(spe)$Symbol
 rownames(spe) <- make.unique(gs)
-```
 
-`SpaceRanger` also provides information on the mapping between binned outputs (2, 8, 16um) and segmented cells. These are provided in a separate *.parquet* file, which we can read using `r BiocStyle::CRANpkg("arrow")`'s `read_parquet()` function, and store as `colData`.
-
-```{r add-mapping, message=FALSE, warning=FALSE}
-# add bin-to-cell mapping information
-map <- list.files(td, "mapping", full.names=TRUE)
-head(map <- read_parquet(map))
-map_by_cell <- split(map, map$cell_id)
-idx <- match(colnames(spe), names(map_by_cell))
-spe$map <- map_by_cell[idx]
+# needed for 'ggspavis'
 spe$in_tissue <- TRUE
 ```
 
-Quick inspection shows us the percentage of 2um bins that were segmented, 
+`SpaceRanger` also provides information on the mapping between binned outputs 
+(2, 8, 16um) and segmented cells. These are stored as cell metadata slot `map`:
+
+```{r add-mapping, message=FALSE, warning=FALSE}
+# view bin-to-cell mapping information
+head(spe$map[[1]])
+```
+
+Quick inspection shows us the number of 2um bins that were segmented, 
 either as part of nuclei or whole cells:
 
 ```{r}
-#| code-fold: true
-# percentage of segmented 2um bins
-frac <- with(map, c(
-    nuclear=mean(in_nucleus), 
-    cellular=mean(in_cell)))
-round(100*frac, digits=2)
+# number of segmented 2um bins
+summary(sapply(spe$map, nrow))
+# fraction of 2um bins assigned to nucleus
+summary(sapply(spe$map, \(.) mean(.$in_nucleus)))
 ```
 
 For runtime reasons, we will from the tissue 
@@ -149,14 +146,13 @@ plotCoords(spe, annotate="roi", point_size=0) + theme(legend.position="none")
 Next, we will convert the above SPE into a `r BiocStyle::Biocpkg("SpatialFeatureExperiment")` [@Moses2023-Voyager] that allows us to also store cell segmentation masks as a `colGeometry`.
 
 ```{r sfe}
-ids <- gsub("cellid_(.*)-1", "\\1", colnames(spe))
-spe$cell_id <- as.numeric(ids)
-
-seg <- metadata(spe)$cellseg
-idx <- match(spe$cell_id, seg$cell_id)
-seg <- seg[idx, ]; rownames(seg) <- colnames(spe)
-
+# convert from SPE to SFE
 sfe <- toSpatialFeatureExperiment(spe)
+# add cell segmentation boundaries
+seg <- metadata(spe)$cellseg
+i <- colnames(spe)
+j <- match(i, seg$cell_id)
+seg <- seg[j, ]; rownames(seg) <- i
 colGeometries(sfe) <- list(cellseg=seg)
 ```
 
@@ -170,7 +166,7 @@ We can visualize such geometries using `plot(st_geometry(x))` where `x` is the `
 par(mar=c(0,0,0,0))
 # specify bounding box
 box <- c(
-    xmin=56e3, xmax=58e3,
+    xmin=56e3, xmax=58e3, 
     ymin=15e3, ymax=16e3)
 # plot exemplary cell masks
 geo <- colGeometry(crop(sfe, box))
