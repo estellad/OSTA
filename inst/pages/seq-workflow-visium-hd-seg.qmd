@@ -186,16 +186,27 @@ sfe$nuc <- sapply(sfe$map, \(.) mean(.$in_nucleus))
 sfe$nuc_um2 <- sfe$um2*sfe$nuc
 ```
 
-We can also investigate the number of different cells that would be contained in 8um and 16um bins, respectively. Here, we can observe that 8/16um bins map to an average of about 2/4 cells, only 25\% of bins map to more than 3/6 cells, and at most 9/20 cells are mapped to any bin.
+We can also investigate the number of different cells
+that are contained in 8um and 16um bins, respectively:
 
 ```{r bin-vs-cell}
-bin <- c("square_008um", "square_016um")
-ncs <- lapply(bin, \(.) {
-    idx <- split(seq(nrow(map)), map[[.]])
-    sapply(idx, \(.) length(unique(map$cell_id[.])))
+names(bin) <- bin <- c("square_008um", "square_016um")
+ncs <- lapply(bin, \(um) {
+    ns <- lapply(spe$map, \(df) unique(df[[um]]))
+    as.vector(table(unlist(ns)))
 })
 sapply(ncs, summary)
 ```
+
+```{r echo=FALSE}
+max <- sapply(ncs, max)
+med <- sapply(ncs, median)
+q75 <- sapply(ncs, quantile, 0.75)
+```
+
+Here, we can observe that 8/16um bins map to a median of `r med[1]`/`r med[2]` 
+cells, only 25\% of bins map to more than `r q75[1]`/`r q75[2]` cells, and at 
+most `r max[1]`/`r max[2]` cells are mapped to any bin.
 
 ## Quality control
 
