@@ -287,7 +287,7 @@ We will use these to map likely cell identities onto our Visium HD cells.
 
 We here use a single-cell label transfer approach to annotade cells. However, **although each observation is intended to represent a single cell, there are still cases where this is not the case** (e.g., as a result of partial volume effects at boundaries, segmentation errors, tightly packed regions, or local diffusion of transcripts.
 
-Once could hence deconvolute cells instead (see @sec-seq-deconvolution), for example, using `r BiocStyle::Biocpkg("spacexr")`'s `RCDT` [@Cable2022-RCDT] **in doublet mode** to flag these cases and provide a principled estimate of the most likely composition. In practice, we expect most units to be classified as singlets, with a minority of doublets that warrant closer inspection or additional filtering.
+Once could hence deconvolute cells instead (see @sec-seq-deconvolution), for example, using `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD] **in doublet mode** to flag these cases and provide a principled estimate of the most likely composition. In practice, we expect most units to be classified as singlets, with a minority of doublets that warrant closer inspection or additional filtering.
 
 :::
 

@@ -212,10 +212,10 @@ sqe <- calcMetrics(sqe, pm_cols=colnames(grp))
 df <- data.frame(colData(sqe), k=spe$k, spatialCoords(spe))
 vs <- c("perplexity", "entropy")
 fd <- df |>
-    mutate(across(all_of(vs), scale)) |>
     pivot_longer(all_of(vs)) |>
-    # threshold at 2 SDs for clearer visualization
-    mutate(value=case_when(abs(value) > 2 ~ sign(value)*2, TRUE ~ value))
+    group_by(name) |> mutate_at("value", scale) 
+# threshold at 2 SDs for clearer visualization
+fd$value[i] <- 2*sign(fd$value[i <- abs(fd$value) > 2])
 ggplot(fd, aes(x_centroid, y_centroid, col=value)) +
     facet_grid(~name) + geom_point(shape=16, size=0) + 
     theme_xy + theme(legend.key.size=unit(0.5, "lines")) +
@@ -273,15 +273,15 @@ Firstly, we need to add cell type annotations to `colData`, where cell type anno
 #| fig-cap: "Spatial plot of the Xenium breast carcinoma sample, replicate 1."
 
 anno <- read.csv(file.path(td, "annotation.csv"))
-colData(spe)[['cell_type']] <- anno$Annotation[match(spe$cell_id, anno$Barcode)]
+spe$cell_type <- anno$Annotation[match(spe$cell_id, anno$Barcode)]
 
-scider::plotSpatial(spe, group = "cell_type", pt.alpha = 1)
+scider::plotSpatial(spe, group="cell_type", pt.alpha=1)
 ```
 
 We first estimate the spatial density of each cell type using the `gridDensity()` function. 
 
 ```{r scider-cal-density}
-spe <- gridDensity(spe, grid.length.x = 50, bandwidth = 25)
+spe <- gridDensity(spe, grid.length.x=50, bandwidth=25)
 metadata(spe)$grid_density[1:4, 1:8]
 ```
 
@@ -294,7 +294,7 @@ For example, here we visualize the density of COI cells:
 #| fig-cap: "Heatmap of the spatial density of COI cells."
 
 coi <- c("DCIS_1", "DCIS_2", "Invasive_Tumor")
-scider::plotDensity(spe, coi = coi, probs = 0.5) +
+scider::plotDensity(spe, coi=coi, probs=0.5) +
   ggtitle("Spatial density of tumour cells")
 ```
 
@@ -307,8 +307,8 @@ Only grids with $\geq 1$ expected COI cell (estimated COI density $\geq 1$) are 
 #| fig-cap: "ROIs detected based on COI density."
 #| message: false
 
-spe <- findROI(spe, coi = coi, min.density = 1)
-scider::plotROI(spe, roi = coi) + 
+spe <- findROI(spe, coi=coi, min.density=1)
+scider::plotROI(spe, roi=coi) + 
   ggtitle("Tumour cell-based ROIs")
 ```
 
@@ -341,8 +341,8 @@ Additionally, contour levels can be calculated from the estimated COI density, w
 #| fig-cap: "Spatial plot of contour lines calculated from the spatial density of tumor cells."
 #| message: false
 
-spe <- getContour(spe, coi = coi, bins = 10)
-scider::plotContour(spe, coi = coi, line.width = 0.5)
+spe <- getContour(spe, coi=coi, bins=10)
+scider::plotContour(spe, coi=coi, line.width=0.5)
 ```
 
 We can then assign each cell to its corresponding contour level according to their spatial coordinates, and visualize the cell type composition at each COI contour level using the `plotCellCompo()` function. 
@@ -353,8 +353,8 @@ We can then assign each cell to its corresponding contour level according to the
 #| fig-cap: "Cell type composition at each contour level of COI cells across all ROIs."
 #| message: false
 
-spe <- allocateCells(spe, contour = coi, to.roi = TRUE)
-scider::plotCellCompo(spe, contour = coi, self.included = FALSE)
+spe <- allocateCells(spe, contour=coi, to.roi=TRUE)
+scider::plotCellCompo(spe, contour=coi, self.included=FALSE)
 ```
 
 For example, we see a decreasing proportion of stromal cells, and an increasing proportion of unlabeled cells as tumor cell density increases. 
@@ -367,7 +367,7 @@ It is also useful to investigate how cell type composition changes to COI densit
 #| fig-cap: "Cell type composition at each contour level of COI cells within each ROI."
 #| message: false
 
-scider::plotCellCompo(spe, contour = coi, self.included = FALSE, roi = coi)
+scider::plotCellCompo(spe, contour=coi, self.included=FALSE, roi=coi)
 ```
 
 ROIs can also be used to perform other types of downstream analysis, such as gene expression clustering, DE analysis and pathway analysis by pseudo-bulking cells located within each ROI, using the `spe2PB()` function. 
