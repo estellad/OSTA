@@ -1,8 +1,9 @@
 changes in version 1.1.8
-+ move 'CCPlotR' to 'Suggests:' and condition 
-  call in img-cell-cell-comm on its availability
++ move 'CCPlotR' & 'Statial' to 'Suggests:',
+  and condition usage on availability
 + simplify Python setup to one virtual env setup in bkg-py-interop,
   omitting 'squidpy' and 'zellkonverter' in favor of 'anndataR'
++ various seq-visium-hd-seg fixes per 'VisiumIO' updates
 + updated Mitchel et al. ref. and added par. on 'cellAdmix';
   added par. on and ref. to 'SPLIT' method (spatial bleeding)
 + 'SpaceTrooper' fix: renaming "CountArea" to "SignalDensity"
