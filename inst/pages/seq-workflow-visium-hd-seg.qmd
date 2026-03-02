@@ -365,7 +365,7 @@ lab <- rep.int(names(lab), sapply(lab, length))
 table(sfe$Level0 <- factor(lab[idx]))
 ```
 
-We can visualize low-resolution and compartment-level annotations over out ROI.
+We can visualize low-resolution and compartment-level annotations over our ROI.
 
 ```{r plt-lab-roi, message=FALSE, fig.width=9, fig.height=3.5}
 #| code-fold: true
