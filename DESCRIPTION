@@ -6,7 +6,7 @@ Description: This package contains source files for the "Orchestrating Spatial
     analysis workflows for spatial transcriptomics data using Bioconductor in 
     R. The book contains chapters describing individual analysis steps as well 
     as extended workflows, each with examples including R code and datasets.
-Version: 1.1.7
+Version: 1.1.8
 Date: 2025-11-28
 Authors@R: 
     c(person("Helena L.", "Crowell", 
@@ -35,6 +35,7 @@ biocViews:
 Depends: 
     R (>= 4.5)
 Imports:
+    anndataR,
     AUCell,
     Banksy,
     basilisk,
@@ -42,7 +43,6 @@ Imports:
     BiocFileCache,
     BiocParallel,
     CARDspa,
-    CCPlotR,
     DESpace,
     doMC,
     dplyr,
@@ -96,18 +96,17 @@ Imports:
     spdep,
     spicyR,
     SpotSweeper,
-    STexampleData, 
-    Statial,
+    STexampleData,
     tidyr,
     VisiumIO,
     Voyager,
-    zellkonverter,
     zoo
 Suggests: 
     BiocManager, 
     BiocPkgTools,
     BiocStyle, 
-    BiocVersion, 
+    BiocVersion,
+    CCPlotR,
     downlit,
     glue, 
     knitr,
@@ -115,6 +114,7 @@ Suggests:
     quarto,
     scrapper,
     sessioninfo, 
+    Statial,
     xml2 
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

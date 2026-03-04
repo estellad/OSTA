@@ -21,8 +21,8 @@ more intricate quality control metrics using the `SpaceTroper` package.
 Throughout this chapter, we will switch between both Xenium (`xen` object) 
 and CosMx (`cos` objext) datasets to showcase quality control (QC) metrics 
 that are standard for scRNA-seq data (using `r BiocStyle::Biocpkg("scuttle")`), 
-and ones that are more specific to some imaging-based ST data types (using 
-`r BiocStyle::Biocpkg("SpaceTrooper")`).
+and ones that are more specific to some imaging-based ST data types
+(using `r BiocStyle::Biocpkg("SpaceTrooper")` [@Banzi2025-SpaceTrooper]).
 Lastly, we will save the post-QC Xenium dataset for use in later chapters.
 
 ### Dependencies
@@ -215,7 +215,7 @@ gc()
 In particular, the following metrics have been added to the `colData`:
 
 - `Area_um`: area in microns
-- `CountArea`: count density = number of transcripts per area
+- `SignalDensity`: count density = number of transcripts per area
 - `log2AspectRatio`: log2 of the aspect ratio (x-/y-axis) of each cell
 - `ctrl_total_ratio`: proportion of negative probe counts over total counts
 
@@ -292,7 +292,7 @@ In some cases, a peculiar count-area distribution might be indicative of
 segmentation problems. Undersegmentation (i.e., when groups of cells are 
 merged together) might lead to fewer counts than expected for a given 
 area (e.g., when they are far apart and empty space is being segmented).
-[An useful metric to explore this issue is the `log2CountArea`, 
+[An useful metric to explore this issue is the `log2SignalDensity`, 
 which estimates the transcript density for each cell.]{.aside}
 
 ## CosMx-specific QC {#sec-img-quality-control-cos}
@@ -308,9 +308,9 @@ object resulting from a CosMx data import will include the FOV of each cell,
 but it is sometimes tricky to understand (or remember) the relative position 
 of each FOV within the slide. 
 
-`r BiocStyle::Biocpkg("SpaceTrooper")`'s `plotZoomFovsMap` function provides an easy way to map FOVs 
-within the slide, allowing to zoom in on a subset of FOVs, while visualizing 
-the global structure of the tissue.
+`r BiocStyle::Biocpkg("SpaceTrooper")`'s `plotZoomFovsMap` function provides an 
+easy way to map FOVs within the slide, allowing to zoom in on a subset of FOVs, 
+while visualizing the global structure of the tissue.
 
 ```{r plot-cos-fov, warning=FALSE, fig.width=10, fig.height=5}
 plotZoomFovsMap(cos, 
@@ -347,7 +347,7 @@ A simple spot-check is the following type of visualization, but more thorough in
 ```{r cos-plot-qc, warning=FALSE, fig.width=10, fig.height=5}
 #| code-fold: true
 df <- data.frame(colData(cos))
-ys <- c("detected", "total", "Area_um", "log2CountArea")
+ys <- c("detected", "total", "Area_um", "log2SignalDensity")
 ys <- c(grepv("Mean", names(df)), ys)
 fd <- pivot_longer(df, ys) |>
     mutate(value=case_when(
@@ -471,10 +471,10 @@ for total counts and `r sum(cos$Area_um_outlier_mc != "NO")` outliers for area.
 Finally, we can compute an aggregated quality score, which combines a cell's 
 transcript density, aspect ratio and (for CosMx) distance from FOV borders.
 
-Specifically, `r BiocStyle::Biocpkg("SpaceTrooper")`'s `computeQCScore` function will compute a combined quality score based on count density (`log2CountArea`), cell aspect ratio (`log2AspectRatio`), only for cells closer than a specified distance from FOV borders, and control-to-total count ratio (`log2Ctrl_total_ratio`). The count density is computed as the ratio between the per cell total gene counts divided by the cell area; the aspect ratio represents FOV border effect typical of CosMx datasets; the control-to-total ratio is the ratio between counts for control probes and total counts per cell and represents aspecific signal.
+Specifically, `r BiocStyle::Biocpkg("SpaceTrooper")`'s `computeQCScore` function will compute a combined quality score based on count density (`log2SignalDensity`), cell aspect ratio (`log2AspectRatio`), only for cells closer than a specified distance from FOV borders, and control-to-total count ratio (`log2Ctrl_total_ratio`). The count density is computed as the ratio between the per cell total gene counts divided by the cell area; the aspect ratio represents FOV border effect typical of CosMx datasets; the control-to-total ratio is the ratio between counts for control probes and total counts per cell and represents aspecific signal.
 
 ::: {.aside}
-The quality score is computed using a ridge logistic regression model, which predicts a score between 0 and 1, where higher scores indicate better quality cells, using the following model forumla: `~(log2CountArea + Area_um + log2Ctrl_total_ratio + I(abs(log2AspectRatio) * as.numeric(dist_border<50)))^2`, where the `^2` notation indicates all pairwise interactions among the included variables. See `?computeQCScore` for details.
+The quality score is computed using a ridge logistic regression model, which predicts a score between 0 and 1, where higher scores indicate better quality cells, using the following model forumla: `~(log2SignalDensity + Area_um + log2Ctrl_total_ratio + I(abs(log2AspectRatio) * as.numeric(dist_border<50)))^2`, where the `^2` notation indicates all pairwise interactions among the included variables. See `?computeQCScore` for details.
 :::
 
 Here, `computeQCScore()` will add a (numeric) `QC_score`, 

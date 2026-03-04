@@ -220,6 +220,7 @@ benchmark, or other, references and resources mentioned throughout the book.
 | theory | @Bhuva2024-library-size | 
 | `r Biocpkg("scater")` | @McCarthy2017-scater |
 | `r Biocpkg("SpotSweeper")` | @Totty2025-SpotSweeper |
+| `r Biocpkg("SpaceTrooper")` | @Banzi2025-SpaceTrooper |
 
 : {.striped tbl-colwidths="[33,66]"}
 
@@ -240,7 +241,7 @@ benchmark, or other, references and resources mentioned throughout the book.
 `r Githubpkg("drieslab/Giotto")`'s `SpatialDWLS` | @Chen2025-Giotto-Suite
 `r Githubpkg("scverse/scvi-tools")`'s `DestVI` | @Lopez2022-DestVI
 `r Githubpkg("leihouyeung/SD2")` | @Li2022-SD2
-`r Biocpkg("spacexr")`'s `RCDT` | @Cable2022-RCTD |
+`r Biocpkg("spacexr")`'s `RCTD` | @Cable2022-RCTD |
 `r Githubpkg("zcang/SpaOTsc")` | @Cang2020-SpaOTsc
 `r Biocpkg("SpatialDecon")` | @Danaher2022-SpatialDecon
 `r Githubpkg("ma-compbio/SpiceMIx")` | @Chidester2023-SpiceMix
@@ -268,11 +269,12 @@ benchmark, or other, references and resources mentioned throughout the book.
 |-|-|
 | `r Githubpkg("kharchenkolab/Baysor")` | @Petukhov2022-Baysor |
 | `r Githubpkg("MouseLand/cellpose")` | @Stringer2021-Cellpose |
-| `r Githubpkg("Nanostring-Biostats/FastReseg")` | @Wu2024-FastReseg |
 | `r Githubpkg("dcjones/proseg")` | @Jones2025-Proseg |
 | `r Githubpkg("pnucolab/ssam")` | @Park2021-SSAM |
+| `r Githubpkg("bdsc-tds/SPLIT")` | @Bilous2025-SPLIT |
+| `r Githubpkg("kharchenkolab/cellAdmix")` | @Mitchel2026-cellAdmix |
 | `r Githubpkg("EliHei2/segger_dev")` | @Heidari2025-segger |
-| spatial bleeding | @Mitchel2025-segmentation-errors |
+| `r Githubpkg("Nanostring-Biostats/FastReseg")` | @Wu2024-FastReseg |
 
 : {.striped tbl-colwidths="[33,66]"}
 

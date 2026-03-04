@@ -148,7 +148,8 @@ component analysis (PCA) on all `r nrow(spe)` RNA targets:
 
 ```{r pro}
 # cell area-based normalization
-logcounts(sub) <- sweep(assay(sub), 2, sub$cell_area, `/`)
+sf <- (. <- sub$cell_area) / median(.)
+sub <- logNormCounts(sub, size.factors=sf)
 # principal component analysis
 sub <- runPCA(sub)
 ```

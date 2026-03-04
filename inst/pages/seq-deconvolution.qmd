@@ -14,7 +14,7 @@ To help understand these mixtures, at least 20 deconvolution techniques have bee
 
 - **probabilistic-based**: use Bayesian inference, likelihood estimation, or probabilistic modeling to estimate cell type compositions while incorporating uncertainty. Available tools include 
   - `r BiocStyle::Biocpkg("CARDspa")` [@Ma2022-CARD]
-  -  `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCDT]
+  -  `r BiocStyle::Biocpkg("spacexr")`'s `RCTD` [@Cable2022-RCTD]
   - `r BiocStyle::Biocpkg("SpatialDecon")` [@Danaher2022-SpatialDecon]
   - `r BiocStyle::Githubpkg("JEFworks-Lab/STdeconvolve")` [@Miller2022-STdeconvolve] in R, and 
   - `r BiocStyle::Githubpkg("BayraktarLab/cell2location")` [@Kleshchevnikov2022-cell2location]
@@ -272,7 +272,7 @@ the proportion of a given cell type estimated to fall within a given spot:
 
 ::: {.panel-tabset}
 
-### RCDT
+### RCTD
 ```{r plt-dec-xy-rctd, message = FALSE, fig.width = 12, fig.height = 7}
 #| code-fold: true
 .plt_decon(ws=ws_rctd, vis)

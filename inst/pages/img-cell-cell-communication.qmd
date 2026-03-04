@@ -42,13 +42,12 @@ library(dplyr)
 library(tidyr)
 library(scater)
 library(scuttle)
-library(CCPlotR)
 library(ggplot2)
 library(ggspavis)
+library(anndataR)
 library(patchwork)
 library(reticulate)
 library(BiocParallel)
-library(zellkonverter)
 library(SpatialExperiment)
 # load data from previous chapter
 # (past quality control & clustered)
@@ -73,8 +72,6 @@ Since `COMMOT` is available as a Python package, we can access it from R using
 
 We first set up a Python environment. Here, we do this by re-using the Conda environment created in @sec-bkg-python-interoperability, in order to speed up the book build time. Alternatively, a new environment could also be set up instead (see @sec-bkg-python-interoperability).
 
-We also install the `commot` package and additional dependencies from PyPI.
-
 ::: {.aside}
 Alternatively, one could set up a `conda` environment (or similar) 
 outside of R, following the authors' [installation instructions](
@@ -82,42 +79,10 @@ https://commot.readthedocs.io/en/latest/installation.html)
 for `COMMOT`, and activate it with `reticulate::use_condaenv()`.
 :::
 
-
-```{r env-ccc, message=FALSE, warning=FALSE}
+```{r env}
 # re-use environment from Python interoperability chapter
-# using reticulate functions
-env <- "env-ccc"
-conda_clone(env, clone="py-interop")
-use_condaenv(env, required=TRUE)
-
-# install additional Python packages from PyPI
-pkgs <- c("commot==0.0.3", "anndata==0.12.2", "pandas==2.3.2", "numpy==1.26.4")
-conda_install(envname=env, packages=pkgs, pip=TRUE)
+use_virtualenv("OSTA", required=TRUE)
 ```
-
-
-<!--
-
-We first setup a corresponding Python environment using `basilisk`:
-
-```{r env-loc, message=FALSE, warning=FALSE, eval=TRUE}
-# # this is faster for local run:
-# bin <- "~/software/mambaforge/bin/conda"
-# options(reticulate.conda_binary=bin)
-# use_condaenv("commot")
-```
-
-```{r env, message=FALSE, warning=FALSE, eval=FALSE}
-# env <- BasiliskEnvironment(
-#     envname="ccc",
-#     pkgname="base",
-#     pip="commot==0.0.3",
-#     packages="python=3.11")
-# use_virtualenv(obtainEnvironmentPath(env))
-```
-
--->
-
 
 ### LR retrieval
 
@@ -185,8 +150,8 @@ cs <-
 dim(sub <- sub[, cs]) 
 ```
 
-We now perform run CCC inference, using `r BiocStyle::Biocpkg("zellkonverter")`'s 
-`SCE2AnnData` function to convert our `spe` in R to an `AnnData` object in Python.
+We now perform run CCC inference, using `r BiocStyle::Biocpkg("anndataR")`'s 
+`as_AnnData` function to convert our `spe` in R to an `AnnData` object in Python.
 Note that in real settings (e.g., lots of interactions across lots of cells), 
 this can be parallelized, e.g., across fields of view (FOVs) or tissue sections.
 [For documentation on parameter meaning and choices, see the
@@ -195,8 +160,10 @@ visium-mouse_brain.html#Spatial-communication-inference).]{.aside}
 
 ```{r ccc, message=FALSE}
 # convert 'SpatialExperiment' (R) to 
-# 'AnnData' (Python) using 'zellkonverter'
-ad <- SCE2AnnData(sub, X_name="logcounts")
+# 'AnnData' (Python) using 'anndataR'
+ad <- as_AnnData(sub, 
+    x_mapping="logcounts", 
+    output_class="ReticulateAnnData")
 # run CCC inference using 'COMMOT'
 ct <- import("commot")
 ct$tl$spatial_communication(ad,
@@ -210,8 +177,8 @@ ct$tl$spatial_communication(ad,
 # extract 'data.frame's containing
 # sender & receiver CCC estimates
 ccc <- list(
-    s=ad$obsm["commot-CellChatDB-sum-sender"],
-    r=ad$obsm["commot-CellChatDB-sum-receiver"])
+    s=ad$obsm$`commot-CellChatDB-sum-sender`,
+    r=ad$obsm$`commot-CellChatDB-sum-receiver`)
 # add CCC inference results as cell metadata
 for (df in ccc) colData(sub)[names(df)] <- df
 ```
@@ -394,8 +361,9 @@ a circos plot where the width of the links represents the total number of
 interactions between clusters. However, because this is only a toy example
 (few genes and cells), we will refrain from any biological interpretation.
 
-```{r CCPlotR-viz, fig.width=5, fig.height=5}
-cc_circos(df, n_top_ints=100)
+```{r CCPlotR-viz, message=FALSE, warning=FALSE, fig.width=5, fig.height=5}
+if (require("CCPlotR", quietly=TRUE))
+    cc_circos(df, n_top_ints=100)
 ```
 
 <!-- Conclusion -->
