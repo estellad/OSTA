@@ -24,7 +24,7 @@ library(scran)
 library(scater)
 library(SpatialExperiment)
 library(SpatialExperimentIO)
-bp <- MulticoreParam(th <- 4)
+bp <- MulticoreParam(th <- 2)
 ```
 
 ## Data import
